@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "584277922343",
+    "firebase_url": "https://goforluch.firebaseio.com",
+    "project_id": "goforluch",
+    "storage_bucket": "goforluch.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584277922343:android:05ffaf856f018406",
+        "android_client_info": {
+          "package_name": "com.example.android.goforlunch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "584277922343-djihglli93r1pbj41eqjf4j992454vhh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.android.goforlunch",
+            "certificate_hash": "d930316ef078a1490e0cfa5812ec4d53c146825c"
+          }
+        },
+        {
+          "client_id": "584277922343-do6fdq431lgfup73lv2cicc161gj5d4q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWY-ZQKeSr0Lwqv-cUp3EXHVQc2RudLsk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "584277922343-do6fdq431lgfup73lv2cicc161gj5d4q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
