@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,16 +8,16 @@
     tools:context="com.example.android.goforlunch.MainActivity">
 
     <FrameLayout
-        android:id="@+id/fragment_container"
+        android:id="@+id/fragment_container_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/bottom_navigation"
+        android:layout_above="@+id/bottom_navigation_id"
         android:layout_alignParentTop="true">
     </FrameLayout>
 
     <!-- By default, the background color of the Navigation View is transparent -->
     <android.support.design.widget.BottomNavigationView
-        android:id="@+id/bottom_navigation"
+        android:id="@+id/bottom_navigation_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -24,6 +25,5 @@
         app:menu="@menu/navigation_bottom_menu"
         android:background="?android:attr/windowBackground"
         />
-
 
 </RelativeLayout>

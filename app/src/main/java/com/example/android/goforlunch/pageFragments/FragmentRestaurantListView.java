@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -114,16 +116,14 @@ public class FragmentRestaurantListView extends Fragment {
 
             case android.R.id.home: {
                 Log.d(TAG, "onOptionsItemSelected: home clicked");
-                break;
-
+                return true;
             }
 
             case R.id.list_search_button_id: {
                 Log.d(TAG, "onOptionsItemSelected: search button clicked");
                 toolbar.setVisibility(View.GONE);
                 Anim.crossFadeShortAnimation(toolbar2);
-                break;
-
+                return true;
             }
         }
 

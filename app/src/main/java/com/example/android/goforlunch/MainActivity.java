@@ -24,12 +24,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView navigationView = findViewById(R.id.bottom_navigation);
+        BottomNavigationView navigationView = findViewById(R.id.bottom_navigation_id);
         navigationView.setOnNavigationItemSelectedListener(navListener);
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, FragmentRestaurantMapView.newInstance())
+                .replace(R.id.fragment_container_id, FragmentRestaurantMapView.newInstance())
                 .commit();
 
     }
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, selectedFragment)
+                            .replace(R.id.fragment_container_id, selectedFragment)
                             .commit();
 
                     //true means that we want to select the clicked item
