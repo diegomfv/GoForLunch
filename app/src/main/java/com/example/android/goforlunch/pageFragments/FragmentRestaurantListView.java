@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +17,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapter;
+
+import java.util.List;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -24,13 +29,21 @@ public class FragmentRestaurantListView extends Fragment {
 
     private static final String TAG = "PageFragmentRestaurantL";
 
-    //Variables to store views related to the articles upload
+    //Widgets
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
-
-    //Variables that reference the views
     private TextView mContentView;
+
+    //Animation duration
     private int mShortAnimationDuration;
+
+    //List of elements
+    private List<RestaurantObject> listOfRestaurantObjects;
+
+    //RecyclerView
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -59,10 +72,18 @@ public class FragmentRestaurantListView extends Fragment {
         if (((AppCompatActivity)getActivity()) != null) {
             actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
+
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_id);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mAdapter = new RVAdapter(getContext(), listOfRestaurantObjects);
+        mRecyclerView.setAdapter(mAdapter);
 
         mContentView = view.findViewById(R.id.tv_list_view);
 

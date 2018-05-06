@@ -59,7 +59,7 @@ public class FragmentCoworkersView extends Fragment {
         if (((AppCompatActivity)getActivity()) != null) {
             actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }

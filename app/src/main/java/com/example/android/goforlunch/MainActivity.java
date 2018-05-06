@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.nav_view_list:
                             selectedFragment = FragmentRestaurantListView.newInstance();
                             break;
-                        case R.id.nav_view_workmates:
+                        case R.id.nav_view_coworkers:
                             selectedFragment = FragmentCoworkersView.newInstance();
                             break;
                     }

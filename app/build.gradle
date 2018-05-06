@@ -9,6 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -23,15 +24,33 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
 
+    implementation 'com.android.support:support-vector-drawable:27.1.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    //Design Support Library
-    compile 'com.android.support:design:27.1.1'
+    //Glide
+    implementation 'com.github.bumptech.glide:glide:4.6.1'
 
-    //Firebase
-    compile 'com.google.firebase:firebase-core:15.0.0'
+    //RecyclerView
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+
+    //Design Support Library
+    implementation 'com.android.support:design:27.1.1'
+
+    //Google maps
+    implementation 'com.google.android.gms:play-services-maps:15.0.0'
+
+    //Google Places
+    implementation 'com.google.android.gms:play-services-places:15.0.0'
+
+    //Firebase: enables all services
+    implementation 'com.google.firebase:firebase-core:15.0.0'
+
+    //Firebase Realtime Database
+    implementation 'com.google.firebase:firebase-database:15.0.0'
+
 }
 
+//Firebase plugin
 apply plugin: 'com.google.gms.google-services'

@@ -5,8 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,7 +32,6 @@ public class FragmentRestaurantMapView extends Fragment {
     //Variables that reference the views
     private TextView mContentView;
     private int mShortAnimationDuration;
-
 
     /******************************
      * STATIC METHOD FOR **********
@@ -61,7 +60,7 @@ public class FragmentRestaurantMapView extends Fragment {
         if (((AppCompatActivity)getActivity()) != null) {
             actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
@@ -81,6 +80,8 @@ public class FragmentRestaurantMapView extends Fragment {
     }
 
 
+    /** Method for animation
+     * */
     private void crossFade() {
 
         // Set the content view to 0% opacity but visible, so that it is visible
