@@ -13,9 +13,22 @@
         android:background="@color/colorPrimary"
         android:elevation="3dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:title="Available workmates"
+        app:title="Available Workmates"
         app:titleTextColor="@android:color/white"
         app:layout_collapseMode="pin" />
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar2"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="3dp"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="Available Workmates"
+        app:titleTextColor="@android:color/white"
+        app:layout_collapseMode="pin"
+        android:visibility="invisible"/>
+
 
     <TextView
         android:id="@+id/tv_coworker"

@@ -11,12 +11,15 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.pojo.RestaurantObject;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapter;
 
 import java.util.List;
@@ -32,7 +35,9 @@ public class FragmentRestaurantListView extends Fragment {
     //Widgets
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
-    private TextView mContentView;
+    private Toolbar toolbar;
+    private RelativeLayout toolbar2;
+    private ActionBar actionBar;
 
     //Animation duration
     private int mShortAnimationDuration;
@@ -63,12 +68,17 @@ public class FragmentRestaurantListView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        /** Activates the toolbar menu for the fragment
+         * */
+        setHasOptionsMenu(true);
+
+        toolbar = (Toolbar) view.findViewById(R.id.list_main_toolbar_id);
+        toolbar2 = (RelativeLayout) view.findViewById(R.id.list_toolbar_search_id);
+
         if (((AppCompatActivity)getActivity()) != null) {
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         }
 
-        final ActionBar actionBar;
         if (((AppCompatActivity)getActivity()) != null) {
             actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
             if (actionBar != null) {
@@ -77,39 +87,56 @@ public class FragmentRestaurantListView extends Fragment {
             }
         }
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_id);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.list_recycler_view_id);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+        mRecyclerView.setVisibility(View.GONE);
+
         mAdapter = new RVAdapter(getContext(), listOfRestaurantObjects);
         mRecyclerView.setAdapter(mAdapter);
-
-        mContentView = view.findViewById(R.id.tv_list_view);
-
-        // Initially hide the content view.
-        mContentView.setVisibility(View.GONE);
 
         // Retrieve and cache the system's default "short" animation time.
         mShortAnimationDuration = getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 
-        crossFade();
+        crossFade(mRecyclerView);
 
         return view;
     }
 
 
-    private void crossFade() {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case android.R.id.home: {
+                Log.i(TAG, "onOptionsItemSelected: home clicked");
+                toolbar.setVisibility(View.GONE);
+
+                // Retrieve and cache the system's default "short" animation time.
+                mShortAnimationDuration = getResources().getInteger(
+                        android.R.integer.config_shortAnimTime);
+
+                crossFade(toolbar2);
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void crossFade(View view) {
 
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
-        mContentView.setAlpha(0f);
-        mContentView.setVisibility(View.VISIBLE);
+        view.setAlpha(0f);
+        view.setVisibility(View.VISIBLE);
 
         // Animate the content view to 100% opacity, and clear any animation
         // listener set on the view.
-        mContentView.animate()
+        view.animate()
                 .alpha(1f)
                 .setDuration(mShortAnimationDuration)
                 .setListener(null);
