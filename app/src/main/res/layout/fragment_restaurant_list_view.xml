@@ -15,14 +15,15 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:title="I'm Hungry"
         app:titleTextColor="@android:color/white"
-        app:layout_collapseMode="pin" />
+        app:layout_collapseMode="pin"
+        />
 
     <RelativeLayout
         android:id="@+id/list_toolbar_search_id"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
-        android:visibility="visible"
+        android:visibility="gone"
         android:elevation="4dp">
 
         <android.support.v7.widget.CardView
@@ -34,7 +35,7 @@
             app:cardCornerRadius="5dp">
 
             <ImageView
-                android:id="@+id/list_search_button_id"
+                android:id="@+id/list_search_icon_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_search"
@@ -61,7 +62,8 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_recycler_view_id"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
     </android.support.v7.widget.RecyclerView>
 

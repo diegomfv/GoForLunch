@@ -6,16 +6,20 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.anim.Anim;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -25,13 +29,12 @@ public class FragmentRestaurantMapView extends Fragment {
 
     private static final String TAG = "PageFragmentRestaurantM";
 
-    //Variables to store views related to the articles upload
+    //Widgets
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
-
-    //Variables that reference the views
-    private TextView mContentView;
-    private int mShortAnimationDuration;
+    private Toolbar toolbar;
+    private RelativeLayout toolbar2;
+    private ActionBar actionBar;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -51,12 +54,17 @@ public class FragmentRestaurantMapView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        /** Activates the toolbar menu for the fragment
+         * */
+        setHasOptionsMenu(true);
+
+        toolbar = (Toolbar) view.findViewById(R.id.map_main_toolbar_id);
+        toolbar2 = (RelativeLayout) view.findViewById(R.id.map_toolbar_search_id);
+
         if (((AppCompatActivity)getActivity()) != null) {
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         }
 
-        final ActionBar actionBar;
         if (((AppCompatActivity)getActivity()) != null) {
             actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
             if (actionBar != null) {
@@ -65,37 +73,36 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
 
-        mContentView = view.findViewById(R.id.tv_map_view);
-
-        // Initially hide the content view.
-        mContentView.setVisibility(View.GONE);
-
-        // Retrieve and cache the system's default "short" animation time.
-        mShortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-
-        crossFade();
-
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
-    /** Method for animation
-     * */
-    private void crossFade() {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        mContentView.setAlpha(0f);
-        mContentView.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        mContentView.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-
+        getActivity().getMenuInflater().inflate(R.menu.map_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case android.R.id.home: {
+                Log.d(TAG, "onOptionsItemSelected: home clicked");
+                break;
+
+            }
+
+            case R.id.map_search_button_id: {
+                Log.d(TAG, "onOptionsItemSelected: search button clicked");
+                toolbar.setVisibility(View.GONE);
+                Anim.crossFadeShortAnimation(toolbar2);
+                break;
+
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }

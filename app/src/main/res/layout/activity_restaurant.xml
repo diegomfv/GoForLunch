@@ -1,17 +1,105 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:weightSum="10">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/ra_image_id"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="4"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="10">
+
+        <FrameLayout
+            android:id="@+id/restaurant_image_id"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3.5">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/rest_thumbnail"
+                android:scaleType="centerCrop"/>
+
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/restaurant_info_id"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.75"
+            android:background="@color/colorPrimaryLight">
+
+            <TextView
+                android:id="@+id/restaurant_title_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:hint="Le Zinc"/>
+
+            <TextView
+                android:id="@+id/restaurant_address_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/restaurant_title_id"
+                android:layout_alignLeft="@+id/restaurant_title_id"
+                android:layout_marginTop="5dp"
+                android:textSize="12sp"
+                android:hint="French Restaurant - 12 Rue du Faubourg Poissonnieère"/>
+
+            <RatingBar
+                android:id="@+id/cv_rating_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:isIndicator="true"
+                android:focusable="false"
+                android:numStars="3"
+                android:rating="2."
+                android:scaleX=".5"
+                android:scaleY=".5"
+                android:layout_below="@+id/restaurant_title_id"
+                android:layout_marginLeft="-25dp"
+                android:layout_marginTop="16dp"
+                android:progressTint="@android:color/background_light"
+                android:secondaryProgressTint="@android:color/background_light"
+                />
+
+        </RelativeLayout>
+
+        <android.support.design.widget.BottomNavigationView
+            android:id="@+id/restaurant_selector_id"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:elevation="8dp"
+            app:menu="@menu/restaurant_menu"
+            app:itemTextColor="@color/colorPrimary"
+            app:itemIconTint="@color/colorPrimary"
+            android:background="@drawable/bottom_border"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/restaurant_recycler_view_id"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3.75">
+        </android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/android_floating_action_button_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:clickable="true"
+        android:src="@drawable/ic_check"
+        app:backgroundTint="@android:color/white"
+        app:elevation="4dp"
+        app:layout_anchor="@id/restaurant_image_id"
+        app:layout_anchorGravity="bottom|right|end" />
 
 
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

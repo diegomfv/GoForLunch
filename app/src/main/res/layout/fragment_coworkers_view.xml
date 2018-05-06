@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/map_toolbar_id"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
@@ -17,24 +17,12 @@
         app:titleTextColor="@android:color/white"
         app:layout_collapseMode="pin" />
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar2"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/coworkers_recycler_view_id"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:elevation="3dp"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:title="Available Workmates"
-        app:titleTextColor="@android:color/white"
-        app:layout_collapseMode="pin"
-        android:visibility="invisible"/>
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-
-    <TextView
-        android:id="@+id/tv_coworker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="COWORKER"
-        android:textSize="40sp"/>
+    </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

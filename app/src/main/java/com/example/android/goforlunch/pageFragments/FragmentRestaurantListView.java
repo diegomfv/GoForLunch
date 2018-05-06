@@ -11,6 +11,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +21,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.anim.Anim;
 import com.example.android.goforlunch.pojo.RestaurantObject;
-import com.example.android.goforlunch.recyclerviewadapter.RVAdapter;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 
 import java.util.List;
 
@@ -38,9 +41,6 @@ public class FragmentRestaurantListView extends Fragment {
     private Toolbar toolbar;
     private RelativeLayout toolbar2;
     private ActionBar actionBar;
-
-    //Animation duration
-    private int mShortAnimationDuration;
 
     //List of elements
     private List<RestaurantObject> listOfRestaurantObjects;
@@ -92,20 +92,20 @@ public class FragmentRestaurantListView extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mRecyclerView.setVisibility(View.GONE);
-
-        mAdapter = new RVAdapter(getContext(), listOfRestaurantObjects);
+        mAdapter = new RVAdapterList(getContext(), listOfRestaurantObjects);
         mRecyclerView.setAdapter(mAdapter);
 
-        // Retrieve and cache the system's default "short" animation time.
-        mShortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-
-        crossFade(mRecyclerView);
+        Anim.crossFadeShortAnimation(mRecyclerView);
 
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        getActivity().getMenuInflater().inflate(R.menu.list_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -113,37 +113,21 @@ public class FragmentRestaurantListView extends Fragment {
         switch (item.getItemId()) {
 
             case android.R.id.home: {
-                Log.i(TAG, "onOptionsItemSelected: home clicked");
+                Log.d(TAG, "onOptionsItemSelected: home clicked");
+                break;
+
+            }
+
+            case R.id.list_search_button_id: {
+                Log.d(TAG, "onOptionsItemSelected: search button clicked");
                 toolbar.setVisibility(View.GONE);
+                Anim.crossFadeShortAnimation(toolbar2);
+                break;
 
-                // Retrieve and cache the system's default "short" animation time.
-                mShortAnimationDuration = getResources().getInteger(
-                        android.R.integer.config_shortAnimTime);
-
-                crossFade(toolbar2);
             }
         }
 
         return super.onOptionsItemSelected(item);
     }
-
-    private void crossFade(View view) {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        view.setAlpha(0f);
-        view.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        view.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-
-    }
-
-
 
 }

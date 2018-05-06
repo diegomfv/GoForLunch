@@ -4,6 +4,12 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+
+import com.example.android.goforlunch.anim.Anim;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -11,11 +17,41 @@ import android.support.v7.app.AppCompatActivity;
 
 public class RestaurantActivity extends AppCompatActivity {
 
+    //RecyclerView
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
+    //Anim duration
+    private int mShortAnimationDuration;
+    private int mMediumAnimationDuration;
+    private int mLongAnimationDuration;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant);
+
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.restaurant_recycler_view_id);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(RestaurantActivity.this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mAdapter = new RVAdapterRestaurant(RestaurantActivity.this);
+        mRecyclerView.setAdapter(mAdapter);
+
+        // Retrieve and cache the system's default "short, medium and long" animation time.
+        mShortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+
+        mMediumAnimationDuration = getResources().getInteger(
+                android.R.integer.config_mediumAnimTime);
+
+        mLongAnimationDuration = getResources().getInteger(
+                android.R.integer.config_longAnimTime);
+
+        Anim.crossFadeShortAnimation(mRecyclerView);
+
     }
 }

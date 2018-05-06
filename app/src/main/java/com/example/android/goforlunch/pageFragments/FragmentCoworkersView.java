@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +17,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.anim.Anim;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -28,9 +33,10 @@ public class FragmentCoworkersView extends Fragment {
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
 
-    //Variables that reference the views
-    private TextView mContentView;
-    private int mShortAnimationDuration;
+    //RecyclerView
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -50,7 +56,7 @@ public class FragmentCoworkersView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
         if (((AppCompatActivity)getActivity()) != null) {
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         }
@@ -64,36 +70,17 @@ public class FragmentCoworkersView extends Fragment {
             }
         }
 
-        mContentView = view.findViewById(R.id.tv_coworker);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.coworkers_recycler_view_id);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
-        // Initially hide the content view.
-        mContentView.setVisibility(View.GONE);
+        mAdapter = new RVAdapterCoworkers(getContext());
+        mRecyclerView.setAdapter(mAdapter);
 
-        // Retrieve and cache the system's default "short" animation time.
-        mShortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-
-        crossFade();
+        Anim.crossFadeShortAnimation(mRecyclerView);
 
         return view;
-    }
-
-
-    private void crossFade() {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        mContentView.setAlpha(0f);
-        mContentView.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        mContentView.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-
     }
 
 }

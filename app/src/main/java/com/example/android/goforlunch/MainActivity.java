@@ -43,13 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
                     switch (item.getItemId()) {
 
-                        case R.id.nav_view_map:
+                        case R.id.nav_view_map_id:
                             selectedFragment = FragmentRestaurantMapView.newInstance();
                             break;
-                        case R.id.nav_view_list:
+                        case R.id.nav_view_list_id:
                             selectedFragment = FragmentRestaurantListView.newInstance();
                             break;
-                        case R.id.nav_view_coworkers:
+                        case R.id.nav_view_coworkers_id:
                             selectedFragment = FragmentCoworkersView.newInstance();
                             break;
                     }

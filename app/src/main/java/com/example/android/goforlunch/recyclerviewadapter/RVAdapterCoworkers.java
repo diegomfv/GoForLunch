@@ -3,27 +3,30 @@ package com.example.android.goforlunch.recyclerviewadapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.pojo.RestaurantObject;
-
-import java.util.List;
+import com.example.android.goforlunch.anim.Anim;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
  */
 
-public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ViewHolder> {
+public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.ViewHolder> {
+
+    private static final String TAG = "RVAdapterCoworkers";
+
+    private int mShortAnimationDuration;
 
     private Context mContext;
-    private List<RestaurantObject> listOfObjects;
 
-    public RVAdapter(Context context, List<RestaurantObject> listOfObjects) {
+    public RVAdapterCoworkers(Context context) {
         this.mContext = context;
-        this.listOfObjects = listOfObjects;
+        this.mShortAnimationDuration = context.getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
 
     }
 
@@ -35,11 +38,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ViewHolder> {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
 
         View view = layoutInflater.inflate(
-                R.layout.list_item,
+                R.layout.list_item_coworkers,
                 parent,
                 false);
 
-        RVAdapter.ViewHolder viewHolder = new RVAdapter.ViewHolder(view);
+        RVAdapterCoworkers.ViewHolder viewHolder = new RVAdapterCoworkers.ViewHolder(view);
 
         return viewHolder;
     }
@@ -47,19 +50,28 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+        Log.d(TAG, "onBindViewHolder: position# " + position);
+
+        Anim.crossFadeShortAnimation(holder.itemView);
+
     }
 
     @Override
     public int getItemCount() {
-        return 5;
+        return 10;
     }
+
+
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public ViewHolder(View itemView) {
             super(itemView);
-        }
 
+        }
     }
+
+
+    // ------------------------- METHODS -------------------------------
 
 }

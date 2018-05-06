@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/list_cardview_id"
     android:layout_width="match_parent"
     android:layout_height="90dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="10dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp"
@@ -32,7 +34,7 @@
             android:id="@+id/cv_timetable_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Open until 2.30om"
+            android:hint="Open until 2.30am"
             android:layout_below="@id/cv_addressandtype_id"
             android:layout_margin="5dp"/>
 
@@ -58,14 +60,18 @@
             android:id="@+id/cv_rating_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:isIndicator="true"
+            android:focusable="false"
             android:numStars="3"
-            android:rating="2.5"
+            android:rating="2."
             android:scaleX=".5"
             android:scaleY=".5"
             android:layout_alignParentBottom="true"
             android:layout_toLeftOf="@id/cv_image_restaurant_id"
             android:layout_marginRight="-40dp"
             android:layout_marginBottom="-12dp"
+            android:progressTint="@color/colorPrimaryLight"
+            android:secondaryProgressTint="@color/colorPrimaryLight"
             />
 
         <ImageView
@@ -74,18 +80,15 @@
             android:layout_height="20dp"
             android:src="@drawable/ic_person"
             android:layout_toLeftOf="@id/cv_coworkersjoining_id"
-            android:layout_alignBottom="@id/cv_coworkersjoining_id"/>
+            android:layout_alignBottom="@id/cv_coworkersjoining_id" />
 
         <ImageView
             android:id="@+id/cv_image_restaurant_id"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:background="@drawable/ic_map"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_alignParentRight="true"
-            android:layout_margin="1dp"/>
-
-
-
+            android:layout_margin="8dp"
+            android:src="@drawable/rest_thumbnail"/>
 
     </RelativeLayout>
 
