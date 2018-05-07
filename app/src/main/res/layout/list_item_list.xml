@@ -20,7 +20,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="Le Zinc"
-            android:layout_margin="5dp"/>
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"/>
 
         <TextView
             android:id="@+id/cv_addressandtype_id"
@@ -28,15 +31,18 @@
             android:layout_height="wrap_content"
             android:hint="French - 42 rue de Sicilie"
             android:layout_below="@id/cv_title_id"
-            android:layout_margin="5dp" />
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp" />
 
         <TextView
             android:id="@+id/cv_timetable_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="Open until 2.30am"
-            android:layout_below="@id/cv_addressandtype_id"
-            android:layout_margin="5dp"/>
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="7dp"/>
 
         <TextView
             android:id="@+id/cv_distance_id"
@@ -80,7 +86,7 @@
             android:layout_height="20dp"
             android:src="@drawable/ic_person"
             android:layout_toLeftOf="@id/cv_coworkersjoining_id"
-            android:layout_alignBottom="@id/cv_coworkersjoining_id" />
+            android:layout_alignTop="@id/cv_coworkersjoining_id" />
 
         <ImageView
             android:id="@+id/cv_image_restaurant_id"

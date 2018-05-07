@@ -11,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.RestaurantActivity;
-import com.example.android.goforlunch.anim.Anim;
+import com.example.android.goforlunch.activities.RestaurantActivity;
+import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.pojo.RestaurantObject;
 
 import java.util.List;

@@ -1,17 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="192dp"
-    android:background="?attr/colorPrimaryDark"
-    android:padding="16dp"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark"
-    android:orientation="vertical"
-    android:gravity="bottom">
+    android:background="@drawable/drawer_header"
+    android:padding="16dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/nav_drawer_image_id"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        app:civ_border_width="0.5dp"
+        app:civ_border_color="#FF000000"
+        android:src="@drawable/homer_simpson"
+        android:layout_margin="5dp"
+        android:layout_alignParentBottom="true"/>
 
     <TextView
+        android:id="@+id/nav_drawer_title_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="My header title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+        android:text="GoForLunch!"
+        android:textColor="@android:color/white"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"/>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/nav_drawer_name_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="John SMITH"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:layout_toRightOf="@+id/nav_drawer_image_id"
+        android:layout_above="@+id/nav_drawer_mail_id"/>
+
+    <TextView
+        android:id="@+id/nav_drawer_mail_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="jsmith.1337@gmail.com"
+        android:textColor="@android:color/white"
+        android:layout_toRightOf="@+id/nav_drawer_image_id"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="25dp"/>
+
+
+</RelativeLayout>
+

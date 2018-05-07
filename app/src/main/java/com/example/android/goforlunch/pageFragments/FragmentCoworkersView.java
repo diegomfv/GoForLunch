@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,15 +12,16 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.anim.Anim;
+import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
-import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -32,6 +34,8 @@ public class FragmentCoworkersView extends Fragment {
     //Variables to store views related to the articles upload
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
+    private Toolbar toolbar;
+    private ActionBar actionBar;
 
     //RecyclerView
     private RecyclerView mRecyclerView;
@@ -54,14 +58,17 @@ public class FragmentCoworkersView extends Fragment {
 
         Log.i(TAG, "onCreateView: Map");
 
+        /** Activates the toolbar menu for the fragment
+         * */
+        setHasOptionsMenu(true);
+
         View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
+        toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
         if (((AppCompatActivity)getActivity()) != null) {
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         }
 
-        final ActionBar actionBar;
         if (((AppCompatActivity)getActivity()) != null) {
             actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
             if (actionBar != null) {
@@ -82,5 +89,26 @@ public class FragmentCoworkersView extends Fragment {
 
         return view;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case android.R.id.home: {
+                Log.d(TAG, "onOptionsItemSelected: home clicked");
+                if (((MainActivity)getActivity()) != null) {
+                    ((MainActivity)getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
+                }
+                return true;
+            }
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+
 
 }

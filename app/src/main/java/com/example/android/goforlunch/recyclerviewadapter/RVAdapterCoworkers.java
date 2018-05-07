@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.anim.Anim;
+import com.example.android.goforlunch.helpermethods.Anim;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.

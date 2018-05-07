@@ -1,14 +1,12 @@
-package com.example.android.goforlunch;
+package com.example.android.goforlunch.activities;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.example.android.goforlunch.anim.Anim;
-import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
+import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 
 /**

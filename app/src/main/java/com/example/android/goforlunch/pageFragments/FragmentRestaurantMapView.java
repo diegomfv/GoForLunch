@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,8 +19,9 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.anim.Anim;
+import com.example.android.goforlunch.helpermethods.Anim;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -90,16 +92,17 @@ public class FragmentRestaurantMapView extends Fragment {
 
             case android.R.id.home: {
                 Log.d(TAG, "onOptionsItemSelected: home clicked");
-                break;
-
+                if (((MainActivity)getActivity()) != null) {
+                    ((MainActivity)getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
+                }
+                return true;
             }
 
             case R.id.map_search_button_id: {
                 Log.d(TAG, "onOptionsItemSelected: search button clicked");
                 toolbar.setVisibility(View.GONE);
                 Anim.crossFadeShortAnimation(toolbar2);
-                break;
-
+                return true;
             }
         }
         return super.onOptionsItemSelected(item);

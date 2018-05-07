@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,8 +21,9 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.anim.Anim;
+import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.pojo.RestaurantObject;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 
@@ -116,6 +116,9 @@ public class FragmentRestaurantListView extends Fragment {
 
             case android.R.id.home: {
                 Log.d(TAG, "onOptionsItemSelected: home clicked");
+                if (((MainActivity)getActivity()) != null) {
+                    ((MainActivity)getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
+                }
                 return true;
             }
 

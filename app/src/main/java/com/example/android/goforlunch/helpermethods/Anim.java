@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.anim;
+package com.example.android.goforlunch.helpermethods;
 
 import android.view.View;
 
