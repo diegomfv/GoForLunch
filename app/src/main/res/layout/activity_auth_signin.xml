@@ -4,28 +4,30 @@
     android:orientation="vertical">
 
     <FrameLayout
-        android:id="@+id/login_status_bar_id"
+        android:id="@+id/signin_status_bar_id"
         android:layout_width="match_parent"
         android:layout_height="25dp"
-        android:background="@color/colorPrimaryDark"
-        android:layout_alignParentTop="true">
+        android:background="@color/colorPrimaryDark">
     </FrameLayout>
 
     <ImageView
-        android:id="@+id/login_image_id"
+        android:id="@+id/signin_image_id"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="40dp"
+        android:layout_marginBottom="40dp"
         android:src="@drawable/ic_lunch"
         android:layout_gravity="center_horizontal">
     </ImageView>
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/login_email_layout_id"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+        android:id="@+id/signin_email_layout_id"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_gravity="center_horizontal"
+        >
 
         <android.support.design.widget.TextInputEditText
             android:layout_width="match_parent"
@@ -35,11 +37,12 @@
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/login_password_layout_id"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+        android:id="@+id/signin_password_layout_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_gravity="center_horizontal"
         >
 
     <android.support.design.widget.TextInputEditText
@@ -49,6 +52,13 @@
 
     </android.support.design.widget.TextInputLayout>
 
+    <Button
+        android:id="@+id/signin_button_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:text="SIGN IN"/>
 
 
 </LinearLayout>
