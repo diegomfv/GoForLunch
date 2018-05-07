@@ -17,4 +17,12 @@
         app:layout_collapseMode="pin"
         />
 
+    <fragment
+        android:id="@+id/activity_settings"
+        android:name="com.example.android.goforlunch.pageFragments.SettingsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </fragment>
+
 </LinearLayout>
