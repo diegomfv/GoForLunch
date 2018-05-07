@@ -1,6 +1,7 @@
 package com.example.android.goforlunch.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -100,25 +102,27 @@ public class MainActivity extends AppCompatActivity {
 
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
-                            ToastHelper.toastShort(MainActivity.this, "Lunch Pressed");
-                            mDrawerLayout.closeDrawer(GravityCompat.START);
+
+                            startActivity(new Intent(MainActivity.this, RestaurantActivity.class));
+
                             return true;
                         }
 
                         case R.id.nav_settings: {
                             Log.d(TAG, "onNavigationItemSelected: settings pressed");
-                            ToastHelper.toastShort(MainActivity.this, "Settings Pressed");
-                            mDrawerLayout.closeDrawer(GravityCompat.START);
 
-                            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                            startActivity(intent);
+                            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
 
                             return true;
                         }
 
                         case R.id.nav_logout: {
                             Log.d(TAG, "onNavigationItemSelected: log out pressed");
-                            ToastHelper.toastShort(MainActivity.this, "Log out Pressed");
+
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                            boolean notif = sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false);
+
+                            ToastHelper.toastShort(MainActivity.this, String.valueOf(notif));
                             mDrawerLayout.closeDrawer(GravityCompat.START);
                             return true;
                         }
@@ -126,8 +130,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     item.setChecked(true);
-
-
 
                     return true;
                 }

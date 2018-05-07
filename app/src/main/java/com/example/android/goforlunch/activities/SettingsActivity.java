@@ -6,7 +6,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.RelativeLayout;
 
 import com.example.android.goforlunch.R;
 
@@ -27,7 +26,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.settings_toolbar_id);
 
-        this.setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar);
 
         actionBar = this.getSupportActionBar();
         if (actionBar != null) {
