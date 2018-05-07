@@ -10,7 +10,7 @@ import com.example.android.goforlunch.R;
  * Created by Diego Fajardo on 07/05/2018.
  */
 
-class AuthResetPassworkActivity extends AppCompatActivity {
+public class AuthResetPassworkActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

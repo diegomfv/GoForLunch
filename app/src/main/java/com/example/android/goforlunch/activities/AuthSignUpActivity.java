@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
@@ -43,8 +44,8 @@ public class AuthSignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth_signup);
 
-        inputEmail = (TextInputEditText) findViewById(R.id.signup_email_layout_id);
-        inputPassword = (TextInputEditText) findViewById(R.id.signup_password_layout_id);
+        inputEmail = (TextInputEditText) findViewById(R.id.signup_email_id);
+        inputPassword = (TextInputEditText) findViewById(R.id.signup_password_id);
 
         buttonResetPassword = (Button) findViewById(R.id.signup_reset_button_id);
         buttonSignUp = (Button) findViewById(R.id.signup_register_button_id);
@@ -106,10 +107,17 @@ public class AuthSignUpActivity extends AppCompatActivity {
                                 // If sign in fails, display a message to the user. If sign in succeeds
                                 // the auth state listener will be notified and logic to handle the
                                 // signed in user can be handled in the listener.
-
                                 if (!task.isSuccessful()) {
                                     Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                    //We get the exception and display why it was not succesful
+                                    FirebaseAuthException e = (FirebaseAuthException )task.getException();
+                                    if (e != null) {
+                                        Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                    }
+
                                     ToastHelper.toastShort(AuthSignUpActivity.this, "Something went wrong");
+
                                 } else {
                                     startActivity(new Intent(AuthSignUpActivity.this, MainActivity.class));
                                 }
