@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.android.goforlunch">
+
+    <uses-permission android:name="android.permission.INTERNET">
+
+    </uses-permission>
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/go_for_lunch_icon"
@@ -10,11 +15,6 @@
         android:theme="@style/AppTheme">
         <activity android:name=".activities.MainActivity"
             android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".activities.RestaurantActivity"
             android:label="Restaurant Activity"
@@ -22,6 +22,13 @@
         <activity android:name=".activities.SettingsActivity"
             android:label="Settings Activity"
             android:parentActivityName=".activities.MainActivity"/>
+        <activity android:name=".activities.FirebaseActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.LogInActivity" />
     </application>
 
 </manifest>

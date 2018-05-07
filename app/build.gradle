@@ -54,10 +54,16 @@ dependencies {
     implementation 'com.google.android.gms:play-services-places:15.0.0'
 
     //Firebase: enables all services
-    implementation 'com.google.firebase:firebase-core:15.0.0'
+    implementation 'com.google.firebase:firebase-core:15.0.2'
+
+    //Firebase: firestore
+    implementation 'com.google.firebase:firebase-crash:15.0.2'
 
     //Firebase Realtime Database
     implementation 'com.google.firebase:firebase-database:15.0.0'
+
+
+    implementation 'com.google.firebase:firebase-auth:15.1.0'
 
 }
 

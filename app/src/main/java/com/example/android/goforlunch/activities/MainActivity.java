@@ -11,7 +11,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -123,7 +122,9 @@ public class MainActivity extends AppCompatActivity {
                             boolean notif = sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false);
 
                             ToastHelper.toastShort(MainActivity.this, String.valueOf(notif));
-                            mDrawerLayout.closeDrawer(GravityCompat.START);
+
+                            startActivity(new Intent(MainActivity.this, FirebaseActivity.class));
+
                             return true;
                         }
 
