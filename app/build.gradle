@@ -44,6 +44,9 @@ dependencies {
     //Design Support Library
     implementation 'com.android.support:design:27.1.1'
 
+    //Support Preference Fragment
+    implementation 'com.android.support:preference-v7:27.1.1'
+
     //Google maps
     implementation 'com.google.android.gms:play-services-maps:15.0.0'
 

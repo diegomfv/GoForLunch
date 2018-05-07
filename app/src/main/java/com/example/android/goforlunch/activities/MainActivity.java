@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -24,9 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
-
-    //Toolbar variable
-    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +109,10 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: settings pressed");
                             ToastHelper.toastShort(MainActivity.this, "Settings Pressed");
                             mDrawerLayout.closeDrawer(GravityCompat.START);
+
+                            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                            startActivity(intent);
+
                             return true;
                         }
 
