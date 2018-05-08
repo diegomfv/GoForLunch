@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.activities;
+package com.example.android.goforlunch.activities.auth;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

@@ -22,20 +22,13 @@
         android:layout_gravity="center_horizontal">
     </ImageView>
 
-    <android.support.v7.widget.CardView
+    <ProgressBar
+        android:id="@+id/signup_progressbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:cardCornerRadius="40dp"
-        app:cardBackgroundColor="@android:color/white">
+        android:visibility="invisible"
+        android:layout_gravity="center_horizontal" />
 
-        <ProgressBar
-            android:id="@+id/signup_progressbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"/>
-
-    </android.support.v7.widget.CardView>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
@@ -49,7 +42,12 @@
             android:id="@+id/signup_email_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="email"/>
+            android:hint="email"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:textColorHighlight="@android:color/white"
+            android:textColorLink="@android:color/white"
+            android:shadowColor="@android:color/white" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -75,7 +73,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
-        android:text="REGISTER"/>
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:text="REGISTER"
+        android:textColor="@color/colorAccentDark" />
 
     <Button
         android:id="@+id/signup_reset_button_id"
@@ -83,7 +84,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:text="FORGOT YOUR PASSWORD"/>
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:text="FORGOT YOUR PASSWORD"
+        android:textColor="@color/colorAccentDark"/>
 
     <Button
         android:id="@+id/signup_registered_button_id"
@@ -91,7 +95,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:text="ALREADY REGISTERED, SIGN ME IN"/>
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:text="ALREADY REGISTERED, SIGN ME IN"
+        android:textColor="@color/colorAccentDark"/>
 
 
 </LinearLayout>

@@ -35,15 +35,17 @@
         android:text="John SMITH"
         android:textColor="@android:color/white"
         android:textStyle="bold"
-        android:layout_toRightOf="@+id/nav_drawer_image_id"
-        android:layout_above="@+id/nav_drawer_mail_id"/>
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/nav_drawer_image_id"
+        android:layout_above="@+id/nav_drawer_email_id"/>
 
     <TextView
-        android:id="@+id/nav_drawer_mail_id"
+        android:id="@+id/nav_drawer_email_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="jsmith.1337@gmail.com"
         android:textColor="@android:color/white"
+        android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/nav_drawer_image_id"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="25dp"/>

@@ -13,16 +13,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthSignInActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+
+    private FirebaseAuth auth;
+
+    String name = "anonymous";
+    String email = "anon@anon.com";
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
@@ -32,6 +41,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        auth = FirebaseAuth.getInstance();
+
+        if (auth.getCurrentUser() != null) {
+            email = auth.getCurrentUser().getEmail();
+
+            Log.d(TAG, "onCreate: email: " + email);
+        }
+
         BottomNavigationView navigationView = findViewById(R.id.bottom_navigation_id);
         navigationView.setOnNavigationItemSelectedListener(botNavListener);
 
@@ -40,10 +57,26 @@ public class MainActivity extends AppCompatActivity {
         mNavigationView = (NavigationView) findViewById(R.id.nav_view_id);
         mNavigationView.setNavigationItemSelectedListener(navViewListener);
 
+        View headerView = mNavigationView.getHeaderView(0);
+        TextView navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
+        TextView navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
+
+        navUserName.setText(name);
+        navUserEmail.setText(email);
+
+
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container_id, FragmentRestaurantMapView.newInstance())
                 .commit();
+
+        /** Use header view to change name displayed in naavigation drawer
+         *NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+         View headerView = navigationView.getHeaderView(0);
+         TextView navUsername = (TextView) headerView.findViewById(R.id.navUsername);
+         navUsername.setText("Your Text Here");
+         * */
 
     }
 

@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.activities;
+package com.example.android.goforlunch.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;

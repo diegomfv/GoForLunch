@@ -14,14 +14,21 @@
         android:id="@+id/signin_image_id"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
         android:src="@drawable/ic_lunch"
         android:layout_gravity="center_horizontal">
     </ImageView>
 
+    <ProgressBar
+        android:id="@+id/signin_progressbar_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        android:layout_marginBottom="10dp"/>
+
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/signin_email_layout_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="40dp"
@@ -30,6 +37,7 @@
         >
 
         <android.support.design.widget.TextInputEditText
+            android:id="@+id/signin_textinput_email_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="email"/>
@@ -46,6 +54,7 @@
         >
 
     <android.support.design.widget.TextInputEditText
+        android:id="@+id/signin_textinput_password_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="password"/>
@@ -57,8 +66,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:textColor="@color/colorAccentDark"
         android:text="SIGN IN"/>
 
+    <Button
+        android:id="@+id/signin_reset_button_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:textColor="@color/colorAccentDark"
+        android:text="RESET PASSWORD"/>
+
+    <Button
+        android:id="@+id/signin_signup_button_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:textColor="@color/colorAccentDark"
+        android:text="SIGN UP"/>
 
 </LinearLayout>

@@ -25,13 +25,15 @@
         <activity android:name=".activities.FirebaseActivity">
 
         </activity>
-        <activity android:name=".activities.AuthSignUpActivity">
+        <activity android:name=".activities.auth.AuthSignUpActivity">
+        </activity>
+        <activity android:name=".activities.auth.AuthResetPassworkActivity" />
+        <activity android:name=".activities.auth.AuthSignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.AuthResetPassworkActivity" />
     </application>
 
 </manifest>
