@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.pageFragments;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +23,9 @@ import android.widget.TextView;
 import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -30,7 +34,13 @@ import com.google.android.gms.maps.SupportMapFragment;
  * Created by Diego Fajardo on 27/04/2018.
  */
 
+/** Fragment that displays the Google Map
+ * **/
 public class FragmentRestaurantMapView extends Fragment implements OnMapReadyCallback {
+
+    /**************************
+     * MAP CREATION CALLBACK **
+     * ***********************/
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -38,7 +48,19 @@ public class FragmentRestaurantMapView extends Fragment implements OnMapReadyCal
 
     }
 
+    /**************************
+     * LOG ********************
+     * ***********************/
+
     private static final String TAG = "PageFragmentRestaurantM";
+
+    /**************************
+     * VARIABLES **************
+     * ***********************/
+
+    //ERROR that we are going to handle if the user doesn't have the correct version of the
+    //Google Play Services
+    private static final int ERROR_DIALOG_REQUEST = 9001;
 
     //Widgets
     private TextView mErrorMessageDisplay;
@@ -46,7 +68,6 @@ public class FragmentRestaurantMapView extends Fragment implements OnMapReadyCal
     private Toolbar toolbar;
     private RelativeLayout toolbar2;
     private ActionBar actionBar;
-
 
     //Map
     private GoogleMap mMap;
@@ -88,12 +109,26 @@ public class FragmentRestaurantMapView extends Fragment implements OnMapReadyCal
             }
         }
 
+        /** First, we check that the user has the correct Google Play Services Version. If the user
+         * does, we start the map
+         * **/
+        if (isServicesOK()) {
+            init();
+        }
+
+
+
+
         //SupportMapFragment mapFragment = (SupportMapFragment) ((AppCompatActivity)getActivity()).getSupportFragmentManager()
 
 
 
         return view;
     }
+
+    /**************************
+     * MENU METHODS ***********
+     * ***********************/
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -125,5 +160,47 @@ public class FragmentRestaurantMapView extends Fragment implements OnMapReadyCal
         return super.onOptionsItemSelected(item);
     }
 
+    /**************************
+     * METHODS ****************
+     * ***********************/
+
+    /** Initialises the Google Map
+     * */
+    private void init () {
+
+    }
+
+    /** Checks if the user has the correct Google Play Services Version
+     */
+    public boolean isServicesOK () {
+        Log.d(TAG, "isServicesOK: checking google services version");
+
+        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity());
+
+        if (available == ConnectionResult.SUCCESS) {
+            //Everything is fine and the user can make map requests
+            Log.d(TAG, "isServicesOK: Google Play Services is working");
+            return true
+
+        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+            //There is an error but we can resolve it
+            Log.d(TAG, "isServicesOK: an error occurred but we can fix it");
+            Dialog dialog = GoogleApiAvailability.getInstance()
+                    .getErrorDialog(getActivity(), available, ERROR_DIALOG_REQUEST);
+            dialog.show();
+
+        } else {
+            Log.d(TAG, "isServicesOK: an error occurred; you cannot make map requests");
+            ToastHelper.toastLong(getActivity(), "You can't make map requests");
+
+        }
+        return false;
+    }
+
 
 }
+
+/**
+ * FIRST
+ * Check the user has the correct Google Play Services Version. If he does, we run the map
+ * */

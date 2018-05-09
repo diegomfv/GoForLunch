@@ -53,6 +53,9 @@ dependencies {
     //Google Places
     implementation 'com.google.android.gms:play-services-places:15.0.0'
 
+    //Google Location
+    implementation 'com.google.android.gms:play-services-location:15.0.0'
+
     //Firebase: enables all services
     implementation 'com.google.firebase:firebase-core:15.0.2'
 
