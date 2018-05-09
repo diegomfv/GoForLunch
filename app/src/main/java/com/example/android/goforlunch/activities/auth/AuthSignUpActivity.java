@@ -60,13 +60,14 @@ public class AuthSignUpActivity extends AppCompatActivity {
         buttonResetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(AuthSignUpActivity.this, AuthResetPassworkActivity.class));
+                ToastHelper.toastShort(AuthSignUpActivity.this, "Not implemented yet");
             }
         });
 
         buttonSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                startActivity(new Intent(AuthSignUpActivity.this, AuthSignInActivity.class));
                 finish();
             }
         });
@@ -82,15 +83,11 @@ public class AuthSignUpActivity extends AppCompatActivity {
                     Log.d(TAG, "onClick: no email ");
                     ToastHelper.toastShort(AuthSignUpActivity.this, "Please, enter email");
                     return;
-                }
-
-                if (TextUtils.isEmpty(password)) {
+                } else if (TextUtils.isEmpty(password)) {
                     Log.d(TAG, "onClick: no password");
                     ToastHelper.toastShort(AuthSignUpActivity.this, "Please, enter password");
                     return;
-                }
-
-                if(password.length() < 6) {
+                } else  if (password.length() < 6) {
                     Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
                     ToastHelper.toastShort(AuthSignUpActivity.this, "Password is too short");
                     return;
@@ -120,7 +117,8 @@ public class AuthSignUpActivity extends AppCompatActivity {
                                     ToastHelper.toastShort(AuthSignUpActivity.this, "Something went wrong");
 
                                 } else {
-                                    startActivity(new Intent(AuthSignUpActivity.this, MainActivity.class));
+                                    startActivity(new Intent(AuthSignUpActivity.this, AuthEnterName.class));
+                                    finish();
                                 }
 
                             }
@@ -128,12 +126,6 @@ public class AuthSignUpActivity extends AppCompatActivity {
 
             }
         });
-
-
-
-
-
-
 
     }
 }

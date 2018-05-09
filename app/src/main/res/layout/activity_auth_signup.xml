@@ -42,12 +42,9 @@
             android:id="@+id/signup_email_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="email"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white"
-            android:textColorHighlight="@android:color/white"
-            android:textColorLink="@android:color/white"
-            android:shadowColor="@android:color/white" />
+            android:maxLines="1"
+            android:inputType="text"
+            android:hint="email" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -63,6 +60,8 @@
         android:id="@+id/signup_password_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:maxLines="1"
+        android:inputType="text"
         android:hint="password"/>
 
     </android.support.design.widget.TextInputLayout>

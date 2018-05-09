@@ -20,7 +20,7 @@ import java.util.Map;
  * Created by Diego Fajardo on 07/05/2018.
  */
 
-public class FirebaseActivity extends AppCompatActivity {
+public class FirebaseActivityDELETE extends AppCompatActivity {
 
     Button button;
 

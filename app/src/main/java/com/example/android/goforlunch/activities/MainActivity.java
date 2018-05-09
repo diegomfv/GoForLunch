@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
         if (auth.getCurrentUser() != null) {
+            name = auth.getCurrentUser().getDisplayName();
             email = auth.getCurrentUser().getEmail();
 
             Log.d(TAG, "onCreate: email: " + email);
@@ -63,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
 
         navUserName.setText(name);
         navUserEmail.setText(email);
-
-
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -154,9 +153,12 @@ public class MainActivity extends AppCompatActivity {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                             boolean notif = sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false);
 
-                            ToastHelper.toastShort(MainActivity.this, String.valueOf(notif));
+                            ToastHelper.toastShort(MainActivity.this, "Notif pref = " + String.valueOf(notif));
 
-                            startActivity(new Intent(MainActivity.this, FirebaseActivity.class));
+                            auth.signOut();
+
+                            startActivity(new Intent(MainActivity.this, AuthSignInActivity.class));
+                            finish();
 
                             return true;
                         }

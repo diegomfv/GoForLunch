@@ -73,7 +73,7 @@ public class AuthSignInActivity extends AppCompatActivity {
         buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(AuthSignInActivity.this, AuthResetPassworkActivity.class));
+                ToastHelper.toastShort(AuthSignInActivity.this, "Not implemented yet");
             }
         });
 
@@ -83,15 +83,11 @@ public class AuthSignInActivity extends AppCompatActivity {
                 String email = inputEmail.getText().toString();
                 final String password = inputPassword.getText().toString();
 
-                if(TextUtils.isEmpty(email)) {
+                if (TextUtils.isEmpty(email)) {
                     ToastHelper.toastShort(AuthSignInActivity.this, "Enter email address");
-                }
-
-                if (TextUtils.isEmpty(password)) {
+                } else  if (TextUtils.isEmpty(password)) {
                     ToastHelper.toastShort(AuthSignInActivity.this, "Enter password");
-                }
-
-                if (password.length() < 6) {
+                } else  if (password.length() < 6) {
                     Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
                     ToastHelper.toastShort(AuthSignInActivity.this, "Password is too short");
                     return;
@@ -123,7 +119,6 @@ public class AuthSignInActivity extends AppCompatActivity {
                                 } else {
                                     startActivity(new Intent(AuthSignInActivity.this, MainActivity.class));
                                 }
-
 
                             }
                         });
