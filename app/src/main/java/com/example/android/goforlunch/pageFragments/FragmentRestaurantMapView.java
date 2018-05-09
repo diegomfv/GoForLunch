@@ -22,12 +22,21 @@ import android.widget.TextView;
 import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
  */
 
-public class FragmentRestaurantMapView extends Fragment {
+public class FragmentRestaurantMapView extends Fragment implements OnMapReadyCallback {
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+    }
 
     private static final String TAG = "PageFragmentRestaurantM";
 
@@ -37,6 +46,10 @@ public class FragmentRestaurantMapView extends Fragment {
     private Toolbar toolbar;
     private RelativeLayout toolbar2;
     private ActionBar actionBar;
+
+
+    //Map
+    private GoogleMap mMap;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -75,6 +88,10 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
 
+        //SupportMapFragment mapFragment = (SupportMapFragment) ((AppCompatActivity)getActivity()).getSupportFragmentManager()
+
+
+
         return view;
     }
 
@@ -107,5 +124,6 @@ public class FragmentRestaurantMapView extends Fragment {
         }
         return super.onOptionsItemSelected(item);
     }
+
 
 }
