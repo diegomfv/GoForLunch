@@ -119,10 +119,8 @@ public class AuthSignInActivity extends AppCompatActivity {
                                 } else {
                                     startActivity(new Intent(AuthSignInActivity.this, MainActivity.class));
                                 }
-
                             }
                         });
-
             }
         });
 
