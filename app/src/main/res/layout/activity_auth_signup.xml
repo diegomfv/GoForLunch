@@ -73,7 +73,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:padding="10dp"
-        android:background="@android:color/white"
+        android:background="@drawable/button_border"
         android:text="REGISTER"
         android:textColor="@color/colorAccentDark" />
 
@@ -84,7 +84,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
         android:padding="10dp"
-        android:background="@android:color/white"
+        android:background="@drawable/button_border"
         android:text="FORGOT YOUR PASSWORD"
         android:textColor="@color/colorAccentDark"/>
 
@@ -95,7 +95,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
         android:padding="10dp"
-        android:background="@android:color/white"
+        android:background="@drawable/button_border"
         android:text="ALREADY REGISTERED, SIGN ME IN"
         android:textColor="@color/colorAccentDark"/>
 

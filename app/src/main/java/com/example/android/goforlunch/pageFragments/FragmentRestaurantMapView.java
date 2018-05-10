@@ -2,6 +2,7 @@ package com.example.android.goforlunch.pageFragments;
 
 import android.app.Dialog;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,9 +31,15 @@ import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -40,7 +47,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 
 /** Fragment that displays the Google Map
  * **/
-public class FragmentRestaurantMapView extends Fragment{
+public class FragmentRestaurantMapView extends Fragment {
 
     /**************************
      * LOG ********************
@@ -59,11 +66,12 @@ public class FragmentRestaurantMapView extends Fragment{
     private static final String FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final float DEFAULT_ZOOM = 15f;
 
     //vars
-    private boolean mLocationPermissionGranted = false;
-    private GoogleMap mMap;
-
+    private boolean mLocationPermissionGranted = false; //used in permissions
+    private GoogleMap mMap; //used to create the map
+    private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
 
 
     //Widgets
@@ -99,12 +107,12 @@ public class FragmentRestaurantMapView extends Fragment{
         toolbar = (Toolbar) view.findViewById(R.id.map_main_toolbar_id);
         toolbar2 = (RelativeLayout) view.findViewById(R.id.map_toolbar_search_id);
 
-        if (((AppCompatActivity)getActivity()) != null) {
-            ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        if (((AppCompatActivity) getActivity()) != null) {
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         }
 
-        if (((AppCompatActivity)getActivity()) != null) {
-            actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        if (((AppCompatActivity) getActivity()) != null) {
+            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
                 actionBar.setDisplayHomeAsUpEnabled(true);
@@ -121,10 +129,7 @@ public class FragmentRestaurantMapView extends Fragment{
         }
 
 
-
-
         //SupportMapFragment mapFragment = (SupportMapFragment) ((AppCompatActivity)getActivity()).getSupportFragmentManager()
-
 
 
         return view;
@@ -148,8 +153,8 @@ public class FragmentRestaurantMapView extends Fragment{
 
             case android.R.id.home: {
                 Log.d(TAG, "onOptionsItemSelected: home clicked");
-                if (((MainActivity)getActivity()) != null) {
-                    ((MainActivity)getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
+                if (((MainActivity) getActivity()) != null) {
+                    ((MainActivity) getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
                 }
                 return true;
             }
@@ -170,7 +175,7 @@ public class FragmentRestaurantMapView extends Fragment{
 
     /** Checks if the user has the correct Google Play Services Version
      */
-    public boolean isServicesOK () {
+    public boolean isServicesOK() {
         Log.d(TAG, "isServicesOK: checking google services version");
 
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity());
@@ -180,7 +185,7 @@ public class FragmentRestaurantMapView extends Fragment{
             Log.d(TAG, "isServicesOK: Google Play Services is working");
             return true;
 
-        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
             //There is an error but we can resolve it
             Log.d(TAG, "isServicesOK: an error occurred but we can fix it");
             Dialog dialog = GoogleApiAvailability.getInstance()
@@ -195,7 +200,7 @@ public class FragmentRestaurantMapView extends Fragment{
         return false;
     }
 
-    private void getLocationPermission () {
+    private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: getting location permission");
 
         String[] permissions = {
@@ -219,6 +224,43 @@ public class FragmentRestaurantMapView extends Fragment{
 
     }
 
+    /** Method used to get the user's location
+     * */
+    private void getDeviceLocation() {
+        Log.d(TAG, "getDeciceLocation: getting device's current location");
+
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        try {
+
+            Task location = mFusedLocationProviderClient.getLastLocation();
+            location.addOnCompleteListener(new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull Task task) {
+
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        //&& task.getResult() != null -- allows you to avoid crash if the app
+                        // did not get the location from the device (= currentLocation = null)
+                        Log.d(TAG, "onComplete: found location!");
+                        Location currentLocation = (Location) task.getResult();
+
+                        moveCamera(
+                                new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
+                                DEFAULT_ZOOM);
+
+                    } else {
+                        Log.d(TAG, "onComplete: current location is null");
+                    }
+
+                }
+            });
+
+        } catch (SecurityException e) {
+            Log.d(TAG, "getDeciceLocation: SecurityException " + e.getMessage());
+        }
+
+    }
+
     /** Method used to initialise the map
      * */
     private void initMap() {
@@ -233,8 +275,30 @@ public class FragmentRestaurantMapView extends Fragment{
                 Log.d(TAG, "onMapReady: map is ready");
                 ToastHelper.toastShort(getActivity(), "Map is ready");
                 mMap = googleMap;
+
+                if (mLocationPermissionGranted) {
+                    getDeviceLocation();
+
+                    if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                                    getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    mMap.setMyLocationEnabled(true); //displays the blue marker at your location
+                    //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
+
+                }
             }
         });
+    }
+
+    /** Method used to move the camera in the map
+     * */
+    private void moveCamera (LatLng latLng, float zoom) {
+
+        Log.d(TAG, "moveCamera: moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+
     }
 
     /** This method allows us to get a request permission result
@@ -255,6 +319,7 @@ public class FragmentRestaurantMapView extends Fragment{
 
                         if (grantResults[i] != PackageManager.PERMISSION_GRANTED){
                             mLocationPermissionGranted = false;
+                            //Might be that can be removed initMap();
 
                             Log.d(TAG, "onRequestPermissionsResult: permission failed");
                             return;
