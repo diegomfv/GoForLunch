@@ -51,7 +51,8 @@
                 android:hint="Search Restaurants"
                 android:background="@android:color/transparent"
                 android:maxLines="1"
-                android:inputType="text"/>
+                android:inputType="text"
+                android:imeOptions="actionSearch"/>
 
         </android.support.v7.widget.CardView>
 

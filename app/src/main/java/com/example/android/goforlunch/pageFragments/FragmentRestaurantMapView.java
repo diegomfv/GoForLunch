@@ -1,7 +1,10 @@
 package com.example.android.goforlunch.pageFragments;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,21 +17,25 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.android.goforlunch.Manifest;
-import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -37,9 +44,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -75,12 +89,15 @@ public class FragmentRestaurantMapView extends Fragment {
 
 
     //Widgets
+    private AutoCompleteTextView mSearchText;
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
     private Toolbar toolbar;
     private RelativeLayout toolbar2;
     private ActionBar actionBar;
 
+    //Markers. Used to store the markers and remove them each time we do a new search
+    private List<Marker> listOfMarkers;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -106,6 +123,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
         toolbar = (Toolbar) view.findViewById(R.id.map_main_toolbar_id);
         toolbar2 = (RelativeLayout) view.findViewById(R.id.map_toolbar_search_id);
+        mSearchText = (AutoCompleteTextView) view.findViewById(R.id.map_autocomplete_id);
 
         if (((AppCompatActivity) getActivity()) != null) {
             ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -119,12 +137,16 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
 
+        //List to store the markers
+        listOfMarkers = new ArrayList<>();
+
         /** First, we check that the user has the correct Google Play Services Version. If the user
          * does, we start the map
          * **/
         if (isServicesOK()) {
 
             getLocationPermission();
+            init();
 
         }
 
@@ -301,6 +323,85 @@ public class FragmentRestaurantMapView extends Fragment {
 
     }
 
+    /** Method used to enable search in the search bar
+     * */
+    private void init () {
+        Log.d(TAG, "init: initialising");
+
+        mSearchText.setOnEditorActionListener(searchListener);
+
+        Utils.hideKeyboard(getActivity());
+    }
+
+    /** Method used to geolocate places
+     * */
+    private void geolocate () {
+        Log.d(TAG, "geolocate: geolocating");
+
+        //We clean the map of markers (if there are any)
+        if (listOfMarkers.size() > 0) {
+
+            for (int i = 0; i < listOfMarkers.size(); i++) {
+                listOfMarkers.get(i).remove();
+            }
+            listOfMarkers.clear();
+        }
+
+        String searchString = mSearchText.getText().toString();
+
+        Geocoder geocoder = new Geocoder(getActivity());
+
+        /** Address object stores the info
+         * got from the geocoder when using get... methods
+         * */
+        List<Address> list = new ArrayList<>();
+
+        try {
+            /** Max results gives you the number of results*/
+            list = geocoder.getFromLocationName(searchString, 15);
+
+        } catch (IOException e) {
+            Log.e(TAG, "geolocate: IOException " + e.getMessage());
+        }
+
+        if (list.size() > 0) {
+            Log.d(TAG, "geolocate: list size = " + list.size());
+
+            /** Gives you a lot of information
+             * */
+            for (int i = 0; i < list.size() ; i++) {
+                Address address = list.get(i);
+                Log.d(TAG, "geolocate: found a location: " + address.toString());
+
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+                MarkerOptions options = new MarkerOptions()
+                        .position(latLng)
+                        .title(address.getFeatureName())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_lunch)); // would put this icon as market
+
+                listOfMarkers.add(mMap.addMarker(options));
+
+                //We move the camera to the first result of the list
+                if (i == 0) {
+                    moveCamera(
+                            new LatLng(address.getLatitude(), address.getLongitude()),
+                            DEFAULT_ZOOM);
+                }
+
+                Utils.hideKeyboard(getActivity());
+            }
+
+
+            //ToastHelper.toastShort(getActivity(), address.toString());
+        } else {
+            Log.d(TAG, "geolocate: nothing found");
+        }
+
+
+    }
+
     /** This method allows us to get a request permission result
      * */
     @Override
@@ -334,6 +435,29 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
     }
+
+    /**************************
+     * LISTENERS **************
+     * ***********************/
+
+    TextView.OnEditorActionListener searchListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+            //This ensures that when you press the key on the keyboard the action
+            //is executed eg. clicking enter will make the user to enter a next line and
+            //what we want is to start the search (See also the layout, editText)
+            if (actionId == EditorInfo.IME_ACTION_SEARCH
+                    || actionId == EditorInfo.IME_ACTION_DONE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
+
+                //execute our method for searching
+                geolocate();
+            }
+            return false;
+        }
+    };
+
 }
 
 /**
