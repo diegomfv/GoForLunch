@@ -50,6 +50,7 @@
                 android:layout_gravity="center_vertical"
                 android:hint="Search Restaurants"
                 android:background="@android:color/transparent"
+                android:dropDownWidth="wrap_content"
                 android:maxLines="1"
                 android:inputType="text"
                 android:imeOptions="actionSearch"/>

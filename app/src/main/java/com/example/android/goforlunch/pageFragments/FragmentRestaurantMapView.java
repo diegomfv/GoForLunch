@@ -1,6 +1,5 @@
 package com.example.android.goforlunch.pageFragments;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -25,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -36,16 +34,20 @@ import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -61,7 +63,8 @@ import java.util.List;
 
 /** Fragment that displays the Google Map
  * **/
-public class FragmentRestaurantMapView extends Fragment {
+public class FragmentRestaurantMapView extends Fragment
+        implements GoogleApiClient.OnConnectionFailedListener {
 
     /**************************
      * LOG ********************
@@ -81,12 +84,17 @@ public class FragmentRestaurantMapView extends Fragment {
     private static final String COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
+    private static final float LATITUDE_BOUND = 0.007f;
+    private static final float LONGITUDE_BOUND = 0.015f;
+    private static LatLngBounds latLngBounds;
 
     //vars
     private boolean mLocationPermissionGranted = false; //used in permissions
     private GoogleMap mMap; //used to create the map
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
-
+    private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
+    private GoogleApiClient mGoogleApiClient;
+    //private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds()
 
     //Widgets
     private AutoCompleteTextView mSearchText;
@@ -149,10 +157,6 @@ public class FragmentRestaurantMapView extends Fragment {
             init();
 
         }
-
-
-        //SupportMapFragment mapFragment = (SupportMapFragment) ((AppCompatActivity)getActivity()).getSupportFragmentManager()
-
 
         return view;
     }
@@ -249,7 +253,7 @@ public class FragmentRestaurantMapView extends Fragment {
     /** Method used to get the user's location
      * */
     private void getDeviceLocation() {
-        Log.d(TAG, "getDeciceLocation: getting device's current location");
+        Log.d(TAG, "getDeviceLocation: getting device's current location");
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
@@ -266,9 +270,21 @@ public class FragmentRestaurantMapView extends Fragment {
                         Log.d(TAG, "onComplete: found location!");
                         Location currentLocation = (Location) task.getResult();
 
+                        LatLng northEast = new LatLng(currentLocation.getLatitude() + LATITUDE_BOUND, currentLocation.getLongitude() + LONGITUDE_BOUND);
+                        LatLng southWest = new LatLng(currentLocation.getLatitude() - LATITUDE_BOUND, currentLocation.getLongitude() - LONGITUDE_BOUND);
+
+                        Log.d(TAG, "onComplete: currentLocation: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
+                        Log.d(TAG, "onComplete: northEast: " + (currentLocation.getLatitude() + LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() + LONGITUDE_BOUND));
+                        Log.d(TAG, "onComplete: southWest: " + (currentLocation.getLatitude() - LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() - LATITUDE_BOUND));
+
+                        latLngBounds = new LatLngBounds(
+                                southWest, northEast);
+
                         moveCamera(
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                 DEFAULT_ZOOM);
+
+                        Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
                     } else {
                         Log.d(TAG, "onComplete: current location is null");
@@ -278,7 +294,7 @@ public class FragmentRestaurantMapView extends Fragment {
             });
 
         } catch (SecurityException e) {
-            Log.d(TAG, "getDeciceLocation: SecurityException " + e.getMessage());
+            Log.d(TAG, "getDeviceLocation: SecurityException " + e.getMessage());
         }
 
     }
@@ -314,6 +330,31 @@ public class FragmentRestaurantMapView extends Fragment {
         });
     }
 
+    /** Method used to enable search in the search bar
+     * */
+    private void init () {
+        Log.d(TAG, "init: initialising");
+
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(getActivity())
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(getActivity(), this)
+                .build();
+
+        mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(
+                getActivity(),
+                mGoogleApiClient,
+                latLngBounds,
+                null);
+
+        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
+
+        mSearchText.setOnEditorActionListener(searchListener);
+
+        Utils.hideKeyboard(getActivity());
+    }
+
     /** Method used to move the camera in the map
      * */
     private void moveCamera (LatLng latLng, float zoom) {
@@ -321,16 +362,6 @@ public class FragmentRestaurantMapView extends Fragment {
         Log.d(TAG, "moveCamera: moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
-    }
-
-    /** Method used to enable search in the search bar
-     * */
-    private void init () {
-        Log.d(TAG, "init: initialising");
-
-        mSearchText.setOnEditorActionListener(searchListener);
-
-        Utils.hideKeyboard(getActivity());
     }
 
     /** Method used to geolocate places
@@ -436,6 +467,11 @@ public class FragmentRestaurantMapView extends Fragment {
         }
     }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
     /**************************
      * LISTENERS **************
      * ***********************/
@@ -458,6 +494,11 @@ public class FragmentRestaurantMapView extends Fragment {
         }
     };
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        mGoogleApiClient.stopAutoManage(getActivity());
+    }
 }
 
 /**

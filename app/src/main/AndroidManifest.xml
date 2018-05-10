@@ -21,25 +21,31 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAlaV29Ky7LVeDMgivDFdfUSipqn9PFYO4"/>
+            android:value="AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU"/>
 
         <activity android:name=".activities.MainActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
 
         </activity>
         <activity android:name=".activities.RestaurantActivity"
             android:label="Restaurant Activity"
-            android:parentActivityName=".activities.MainActivity"/>
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait"/>
         <activity android:name=".activities.SettingsActivity"
             android:label="Settings Activity"
-            android:parentActivityName=".activities.MainActivity"/>
-        <activity android:name=".activities.FirebaseActivityDELETE">
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".activities.FirebaseActivityDELETE"
+            android:screenOrientation="portrait">
 
         </activity>
-        <activity android:name=".activities.auth.AuthSignUpActivity">
-        </activity>
-        <activity android:name=".activities.auth.AuthResetPassworkActivity" />
-        <activity android:name=".activities.auth.AuthSignInActivity">
+        <activity android:name=".activities.auth.AuthSignUpActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".activities.auth.AuthResetPassworkActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".activities.auth.AuthSignInActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
