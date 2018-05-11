@@ -4,6 +4,7 @@ import com.example.android.goforlunch.model.MyPlaces;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 /**
@@ -11,8 +12,11 @@ import retrofit2.http.Url;
  */
 public interface IGoogleAPIService {
 
-    @GET
-    Call<MyPlaces> getNearbyPlaces (@Url String url);
-
-
+    @GET("json")
+    Call<MyPlaces> fetchData (
+            @Query("location") LatLngGoForLunch latLngGoForLunch,
+            @Query("rankby") String rankby,
+            @Query("type") String type,
+            @Query("key") String key
+    );
 }

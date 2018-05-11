@@ -17,7 +17,7 @@ public class ZZZNotes {
  *
  */
     /**
-    https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.459558, -2.599193&radius=10000&type=restaurant&key=AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc
+    https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=51.459558,-2.599193&radius=10000&type=restaurant&key=AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc
 
 
      51.456052

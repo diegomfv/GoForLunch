@@ -236,6 +236,10 @@ public class FragmentRestaurantMapView extends Fragment
     private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: getting location permission");
 
+        /** We can also check first if the Android Version of the device is equal or higher than Marshmallow:
+         *      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { "rest of code" } */
+
+
         String[] permissions = {
                 android.Manifest.permission.ACCESS_FINE_LOCATION,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
