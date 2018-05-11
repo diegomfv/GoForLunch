@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.pojo;
+package com.example.android.goforlunch.pojo_delete;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.

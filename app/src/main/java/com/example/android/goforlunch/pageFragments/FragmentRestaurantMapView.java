@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -34,12 +35,18 @@ import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -94,7 +101,7 @@ public class FragmentRestaurantMapView extends Fragment
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
     private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
     private GoogleApiClient mGoogleApiClient;
-    //private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds()
+    private PlaceInfo mPlace;
 
     //Widgets
     private AutoCompleteTextView mSearchText;
@@ -348,6 +355,8 @@ public class FragmentRestaurantMapView extends Fragment
                 latLngBounds,
                 null);
 
+        mSearchText.setOnItemClickListener(mAutocompleteclickListener);
+
         mSearchText.setAdapter(mPlaceAutocompleteAdapter);
 
         mSearchText.setOnEditorActionListener(searchListener);
@@ -494,11 +503,87 @@ public class FragmentRestaurantMapView extends Fragment
         }
     };
 
+    /**********************************
+     * GOOGLE PLACES API **************
+     * *******************************/
+
+    private AdapterView.OnItemClickListener mAutocompleteclickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            final AutocompletePrediction item = mPlaceAutocompleteAdapter.getItem(i);
+            final String placeId;
+            if (item != null) {
+                Log.d(TAG, "onItemClick: item is not null");
+                placeId = item.getPlaceId();
+
+                PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                        .getPlaceById(mGoogleApiClient, placeId); //We can submit a list instead of only one placeId
+
+                placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+            }
+
+            Utils.hideKeyboard(getActivity());
+        }
+    };
+
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(@NonNull PlaceBuffer places) {
+
+            if (!places.getStatus().isSuccess()) {
+                Log.d(TAG, "onResult: Place query did not complete successfully " + places.getStatus().toString());
+                places.release(); //this is necessary to prevent memory leaks
+                return;
+            }
+            
+            final Place place = places.get(0);
+
+            //We cannot create a global Place object list to store all the info because we have to call release() at
+            //the end of this method to void memory leaks and that will cause an error. That is why we have to create
+            //a PlaceInfo Object to store all the information (also, we could create a list
+
+            try {
+
+                mPlace = new PlaceInfo();
+                mPlace.setId(place.getId());
+                mPlace.setName(place.getName().toString());
+                Log.d(TAG, "onResult: " + mPlace.getName());
+                mPlace.setAddress(place.getAddress().toString());
+                Log.d(TAG, "onResult: " + mPlace.getAddress());
+                //mPlace.setAttributions(place.getAttributions().toString());
+                //Log.d(TAG, "onResult: " + mPlace.getAttributions());
+                mPlace.setPhoneNumber(place.getPhoneNumber().toString());
+                Log.d(TAG, "onResult: " + mPlace.getPhoneNumber());
+                mPlace.setTimetable("12pm");
+                mPlace.setWebsiteUri(place.getWebsiteUri());
+                mPlace.setLatLng(place.getLatLng());
+                mPlace.setRating(place.getRating());
+
+                Log.d(TAG, "onResult: " + mPlace.toString());
+
+            } catch (NullPointerException e) {
+                Log.e(TAG, "onResult: NullPointerException " + e.getMessage());
+            }
+
+            moveCamera(new LatLng(place.getViewport().getCenter().latitude,
+                    place.getViewport().getCenter().longitude), DEFAULT_ZOOM);
+
+            places.release();
+        }
+    };
+
+    // TODO: 10/05/2018 Explain better
+    /** stopAutoManage() is used to avoid the app to crash when coming back to the
+     * fragment*/
     @Override
     public void onPause() {
         super.onPause();
         mGoogleApiClient.stopAutoManage(getActivity());
     }
+
+
+
 }
 
 /**
