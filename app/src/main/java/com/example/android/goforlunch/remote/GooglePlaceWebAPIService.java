@@ -11,7 +11,7 @@ import retrofit2.http.Url;
 /**
  * Created by Diego Fajardo on 11/05/2018.
  */
-public interface IGoogleAPIService {
+public interface GooglePlaceWebAPIService {
 
     @GET("json")
     Call<MyPlaces> fetchData (

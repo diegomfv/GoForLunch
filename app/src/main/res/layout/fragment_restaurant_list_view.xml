@@ -51,6 +51,9 @@
                 android:layout_marginLeft="50dp"
                 android:layout_gravity="center_vertical"
                 android:hint="Search Restaurants"
+                android:textSize="14sp"
+                android:maxLength="40"
+                android:ellipsize="end"
                 android:background="@android:color/transparent"
                 android:maxLines="1"
                 android:inputType="text"/>
