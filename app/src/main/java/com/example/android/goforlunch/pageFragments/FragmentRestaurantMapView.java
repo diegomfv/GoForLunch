@@ -35,8 +35,14 @@ import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.model.Geometry;
+import com.example.android.goforlunch.model.LatLngForRetrofit;
+import com.example.android.goforlunch.model.MyPlaces;
+import com.example.android.goforlunch.model.Results;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
+import com.example.android.goforlunch.remote.Common;
+import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -64,12 +70,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  * Created by Diego Fajardo on 27/04/2018.
  */
 
 /** Fragment that displays the Google Map
- * **/
+ * */
 public class FragmentRestaurantMapView extends Fragment
         implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -90,7 +100,7 @@ public class FragmentRestaurantMapView extends Fragment
     private static final String FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    private static final float DEFAULT_ZOOM = 15f;
+    private static final float DEFAULT_ZOOM = 17f;
     private static final float LATITUDE_BOUND = 0.007f;
     private static final float LONGITUDE_BOUND = 0.015f;
     private static LatLngBounds latLngBounds;
@@ -113,6 +123,9 @@ public class FragmentRestaurantMapView extends Fragment
 
     //Markers. Used to store the markers and remove them each time we do a new search
     private List<Marker> listOfMarkers;
+
+    //Retrofit usage
+    private LatLngForRetrofit myPosition;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -288,12 +301,17 @@ public class FragmentRestaurantMapView extends Fragment
                         Log.d(TAG, "onComplete: northEast: " + (currentLocation.getLatitude() + LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() + LONGITUDE_BOUND));
                         Log.d(TAG, "onComplete: southWest: " + (currentLocation.getLatitude() - LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() - LATITUDE_BOUND));
 
+                        myPosition = new LatLngForRetrofit(currentLocation.getLatitude(),currentLocation.getLongitude());
+
                         latLngBounds = new LatLngBounds(
                                 southWest, northEast);
 
                         moveCamera(
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                 DEFAULT_ZOOM);
+
+                        //We do the request to the API
+                        doAPIRequest();
 
                         Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
@@ -307,6 +325,61 @@ public class FragmentRestaurantMapView extends Fragment
         } catch (SecurityException e) {
             Log.d(TAG, "getDeviceLocation: SecurityException " + e.getMessage());
         }
+
+    }
+
+    private void doAPIRequest() {
+
+        // TODO: 13/05/2018 Build the API Client here, do here the Request
+        GooglePlaceWebAPIService client = Common.getGoogleAPIService();
+
+        Call<MyPlaces> call = client.fetchData(myPosition, "distance", "restaurant", getResources().getString(R.string.browser_key));
+        call.enqueue(new Callback<MyPlaces>() {
+            @Override
+            public void onResponse(Call<MyPlaces> call, Response<MyPlaces> response) {
+                Log.d(TAG, "onResponse: correct call");
+                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+
+                MyPlaces myPlaces = response.body();
+
+                Log.d(TAG, "onResponse: " + myPlaces.toString());
+
+                Results[] results = myPlaces.getResults();
+
+                for (int i = 0; i < results.length ; i++) {
+
+                    Geometry geometry = results[i].getGeometry();
+
+                    com.example.android.goforlunch.model.Location location =
+                            geometry.getLocation();
+
+                    String lat = location.getLat();
+                    String lng = location.getLng();
+
+                    double latitude = Double.parseDouble(lat);
+                    double longitude = Double.parseDouble(lng);
+
+                    LatLng latLng = new LatLng(latitude,longitude);
+
+                    MarkerOptions options = new MarkerOptions()
+                            .position(latLng)
+                            .title(results[i].getName())
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                    //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_lunch)); // would put this icon as market
+
+                    listOfMarkers.add(mMap.addMarker(options));
+
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(Call<MyPlaces> call, Throwable t) {
+                Log.d(TAG, "onFailure: there was an error");
+                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+            }
+        });
 
     }
 
@@ -333,6 +406,7 @@ public class FragmentRestaurantMapView extends Fragment
                                     getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
+
                     mMap.setMyLocationEnabled(true); //displays the blue marker at your location
                     //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
 
@@ -353,6 +427,10 @@ public class FragmentRestaurantMapView extends Fragment
                 .enableAutoManage(getActivity(), this)
                 .build();
 
+        // TODO: 13/05/2018 Might be necessary to delete 
+        mGoogleApiClient.connect();
+        // TODO: 13/05/2018
+        
         mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(
                 getActivity(),
                 mGoogleApiClient,
@@ -507,10 +585,6 @@ public class FragmentRestaurantMapView extends Fragment
         }
     };
 
-    /**********************************
-     * GOOGLE PLACES API **************
-     * *******************************/
-
     private AdapterView.OnItemClickListener mAutocompleteclickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -530,6 +604,10 @@ public class FragmentRestaurantMapView extends Fragment
             Utils.hideKeyboard(getActivity());
         }
     };
+
+    /**********************************
+     * GOOGLE PLACES API **************
+     * *******************************/
 
     private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback = new ResultCallback<PlaceBuffer>() {
         @Override
@@ -585,8 +663,6 @@ public class FragmentRestaurantMapView extends Fragment
         super.onPause();
         mGoogleApiClient.stopAutoManage(getActivity());
     }
-
-
 
 }
 

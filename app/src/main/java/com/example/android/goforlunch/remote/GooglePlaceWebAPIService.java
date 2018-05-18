@@ -15,7 +15,7 @@ public interface GooglePlaceWebAPIService {
 
     @GET("json")
     Call<MyPlaces> fetchData (
-            @Query("location") LatLngForRetrofit latLngGoForLunch,
+            @Query("location") LatLngForRetrofit latLngForRetrofit,
             @Query("rankby") String rankby,
             @Query("type") String type,
             @Query("key") String key

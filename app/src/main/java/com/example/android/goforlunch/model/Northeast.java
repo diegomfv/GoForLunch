@@ -3,7 +3,7 @@ package com.example.android.goforlunch.model;
 /**
  * Created by Diego Fajardo on 11/05/2018.
  */
-class Northeast {
+public class Northeast {
 
     private String lng;
 

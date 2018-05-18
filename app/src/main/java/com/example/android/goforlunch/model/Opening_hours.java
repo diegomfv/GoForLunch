@@ -3,7 +3,7 @@ package com.example.android.goforlunch.model;
 /**
  * Created by Diego Fajardo on 11/05/2018.
  */
-class Opening_hours {
+public class Opening_hours {
 
     private String open_now;
 
