@@ -1,10 +1,10 @@
-package com.example.android.goforlunch.model;
+package com.example.android.goforlunch.models.modelplacebyid;
 
 /**
- * Created by Diego Fajardo on 11/05/2018.
+ * Created by Diego Fajardo on 19/05/2018.
  */
-public class Geometry {
-
+public class Geometry
+{
     private Viewport viewport;
 
     private Location location;
@@ -34,5 +34,4 @@ public class Geometry {
     {
         return "ClassPojo [viewport = "+viewport+", location = "+location+"]";
     }
-
 }

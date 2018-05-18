@@ -24,6 +24,8 @@ import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.google.firebase.auth.FirebaseAuth;
 
+// TODO: 18/05/2018 Check there is internet connection
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";

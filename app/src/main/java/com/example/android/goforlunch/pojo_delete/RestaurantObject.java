@@ -6,7 +6,7 @@ package com.example.android.goforlunch.pojo_delete;
 
 public class RestaurantObject {
 
-    int id;
+    String placeId;
     String name;
     String address;
     String timetable;
@@ -14,9 +14,15 @@ public class RestaurantObject {
     String coworkersJoining;
     String rating;
     String image_url;
+    String phone;
+    String website;
 
-    public RestaurantObject(int id, String name, String address, String timetable, String distance, String coworkersJoining, String rating, String image_url) {
-        this.id = id;
+    public RestaurantObject() {
+
+    }
+
+    public RestaurantObject(String placeId, String name, String address, String timetable, String distance, String coworkersJoining, String rating, String image_url, String phone, String website) {
+        this.placeId = placeId;
         this.name = name;
         this.address = address;
         this.timetable = timetable;
@@ -24,14 +30,16 @@ public class RestaurantObject {
         this.coworkersJoining = coworkersJoining;
         this.rating = rating;
         this.image_url = image_url;
+        this.phone = phone;
+        this.website = website;
     }
 
-    public int getId() {
-        return id;
+    public String getPlaceId() {
+        return placeId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
     }
 
     public String getName() {
@@ -90,10 +98,26 @@ public class RestaurantObject {
         this.image_url = image_url;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
     @Override
     public String toString() {
         return "RestaurantObject{" +
-                "id=" + id +
+                "placeId=" + placeId +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
                 ", timetable='" + timetable + '\'' +
@@ -101,6 +125,8 @@ public class RestaurantObject {
                 ", coworkersJoining='" + coworkersJoining + '\'' +
                 ", rating='" + rating + '\'' +
                 ", image_url='" + image_url + '\'' +
+                ", phone='" + phone + '\'' +
+                ", website='" + website + '\'' +
                 '}';
     }
 }

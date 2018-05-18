@@ -1,12 +1,11 @@
 package com.example.android.goforlunch.remote;
 
-import com.example.android.goforlunch.model.LatLngForRetrofit;
-import com.example.android.goforlunch.model.MyPlaces;
+import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
+import com.example.android.goforlunch.models.modelnearby.MyPlaces;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
-import retrofit2.http.Url;
 
 /**
  * Created by Diego Fajardo on 11/05/2018.
@@ -20,4 +19,7 @@ public interface GooglePlaceWebAPIService {
             @Query("type") String type,
             @Query("key") String key
     );
+
+    @GET("json")
+    Call<>
 }

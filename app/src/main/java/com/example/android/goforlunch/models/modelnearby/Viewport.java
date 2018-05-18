@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.model;
+package com.example.android.goforlunch.models.modelnearby;
 
 /**
  * Created by Diego Fajardo on 11/05/2018.

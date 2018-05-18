@@ -1,10 +1,10 @@
-package com.example.android.goforlunch.model;
+package com.example.android.goforlunch.models.modelplacebyid;
 
 /**
- * Created by Diego Fajardo on 11/05/2018.
+ * Created by Diego Fajardo on 19/05/2018.
  */
-public class Location {
-
+public class Southwest
+{
     private String lng;
 
     private String lat;
@@ -34,5 +34,4 @@ public class Location {
     {
         return "ClassPojo [lng = "+lng+", lat = "+lat+"]";
     }
-
 }

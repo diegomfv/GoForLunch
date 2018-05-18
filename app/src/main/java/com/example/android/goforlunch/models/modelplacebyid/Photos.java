@@ -1,10 +1,10 @@
-package com.example.android.goforlunch.model;
+package com.example.android.goforlunch.models.modelplacebyid;
 
 /**
- * Created by Diego Fajardo on 11/05/2018.
+ * Created by Diego Fajardo on 19/05/2018.
  */
-public class Photos {
-
+public class Photos
+{
     private String photo_reference;
 
     private String height;
@@ -58,5 +58,4 @@ public class Photos {
     {
         return "ClassPojo [photo_reference = "+photo_reference+", height = "+height+", html_attributions = "+html_attributions+", width = "+width+"]";
     }
-
 }

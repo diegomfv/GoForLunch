@@ -1,6 +1,7 @@
 package com.example.android.goforlunch.pageFragments;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -32,15 +33,17 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.MainActivity;
+import com.example.android.goforlunch.activities.RestaurantActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.model.Geometry;
-import com.example.android.goforlunch.model.LatLngForRetrofit;
-import com.example.android.goforlunch.model.MyPlaces;
-import com.example.android.goforlunch.model.Results;
+import com.example.android.goforlunch.models.modelnearby.Geometry;
+import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
+import com.example.android.goforlunch.models.modelnearby.MyPlaces;
+import com.example.android.goforlunch.models.modelnearby.Results;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
+import com.example.android.goforlunch.pojo_delete.RestaurantObject;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.google.android.gms.common.ConnectionResult;
@@ -68,6 +71,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -127,6 +131,9 @@ public class FragmentRestaurantMapView extends Fragment
     //Retrofit usage
     private LatLngForRetrofit myPosition;
 
+    //Store the address of every place we get from the Request using RETROFIT
+    private HashMap<String, RestaurantObject> restaurantsHashMap;
+
     /******************************
      * STATIC METHOD FOR **********
      * INSTANTIATING THE FRAGMENT *
@@ -167,6 +174,9 @@ public class FragmentRestaurantMapView extends Fragment
 
         //List to store the markers
         listOfMarkers = new ArrayList<>();
+
+        //Map of address (title, address)
+        restaurantsHashMap = new HashMap<>();
 
         /** First, we check that the user has the correct Google Play Services Version. If the user
          * does, we start the map
@@ -331,7 +341,7 @@ public class FragmentRestaurantMapView extends Fragment
     private void doAPIRequest() {
 
         // TODO: 13/05/2018 Build the API Client here, do here the Request
-        GooglePlaceWebAPIService client = Common.getGoogleAPIService();
+        GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
 
         Call<MyPlaces> call = client.fetchData(myPosition, "distance", "restaurant", getResources().getString(R.string.browser_key));
         call.enqueue(new Callback<MyPlaces>() {
@@ -348,9 +358,22 @@ public class FragmentRestaurantMapView extends Fragment
 
                 for (int i = 0; i < results.length ; i++) {
 
+                    /** Creating the object restaurant and storing it in the map
+                     * */
+
+                    RestaurantObject restaurant = new RestaurantObject();
+
+                    restaurant.setPlaceId(results[i].getPlace_id());
+                    restaurant.setName(results[i].getName());
+                    restaurant.setRating(results[i].getRating());
+                    restaurant.setImage_url(results[i].getIcon());
+                    restaurant.setAddress(results[i].getVicinity());
+
+                    restaurantsHashMap.put(restaurant.getName(), restaurant);
+
                     Geometry geometry = results[i].getGeometry();
 
-                    com.example.android.goforlunch.model.Location location =
+                    com.example.android.goforlunch.models.modelnearby.Location location =
                             geometry.getLocation();
 
                     String lat = location.getLat();
@@ -367,7 +390,12 @@ public class FragmentRestaurantMapView extends Fragment
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                     //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_lunch)); // would put this icon as market
 
+                    Log.d(TAG, "onResponse: " + results[i].getName());
+
                     listOfMarkers.add(mMap.addMarker(options));
+
+                    //Marker marker = mMap.addMarker(options);
+                    //marker.showInfoWindow(); to show the description from the beginning
 
                 }
 
@@ -397,6 +425,48 @@ public class FragmentRestaurantMapView extends Fragment
                 Log.d(TAG, "onMapReady: map is ready");
                 ToastHelper.toastShort(getActivity(), "Map is ready");
                 mMap = googleMap;
+
+                /** Listener for when clicking the info window in a map
+                 * */
+                if (mMap != null) {
+                    mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                        @Override
+                        public void onInfoWindowClick(Marker marker) {
+
+                            String clickedMarkerTitle = marker.getTitle();
+
+                            Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
+
+                            for (int i = 0; i < listOfMarkers.size(); i++) {
+
+                                if (listOfMarkers.get(i).getTitle().equals(clickedMarkerTitle)){
+
+                                    RestaurantObject restaurantObject = restaurantsHashMap.get(clickedMarkerTitle);
+
+                                    Log.d(TAG, "onInfoWindowClick: id: " + restaurantObject.getPlaceId());
+                                    Log.d(TAG, "onInfoWindowClick: name: " + restaurantObject.getName());
+                                    Log.d(TAG, "onInfoWindowClick: address: " + restaurantObject.getAddress());
+                                    Log.d(TAG, "onInfoWindowClick: rating: " + restaurantObject.getRating());
+                                    Log.d(TAG, "onInfoWindowClick: imageUrl: " + restaurantObject.getImage_url());
+
+                                    Intent intent = new Intent(getActivity(), RestaurantActivity.class);
+
+                                    intent.putExtra("id", restaurantObject.getPlaceId());
+                                    intent.putExtra("name", restaurantObject.getName());
+                                    intent.putExtra("address", restaurantObject.getAddress());
+                                    intent.putExtra("rating", restaurantObject.getRating());
+                                    intent.putExtra("image_url", restaurantObject.getImage_url());
+
+                                    startActivity(intent);
+
+                                    break;
+                                }
+
+                            }
+
+                        }
+                    });
+                }
 
                 if (mLocationPermissionGranted) {
                     getDeviceLocation();
@@ -455,7 +525,8 @@ public class FragmentRestaurantMapView extends Fragment
 
     }
 
-    /** Method used to geolocate places
+    /** Method used to geolocate places.
+     * It gets the input from the AutoCompleteTextView
      * */
     private void geolocate () {
         Log.d(TAG, "geolocate: geolocating");
@@ -514,7 +585,6 @@ public class FragmentRestaurantMapView extends Fragment
 
                 Utils.hideKeyboard(getActivity());
             }
-
 
             //ToastHelper.toastShort(getActivity(), address.toString());
         } else {
@@ -629,14 +699,15 @@ public class FragmentRestaurantMapView extends Fragment
 
                 mPlace = new PlaceInfo();
                 mPlace.setId(place.getId());
+                Log.d(TAG, "onResult: id: " + mPlace.getId());
                 mPlace.setName(place.getName().toString());
-                Log.d(TAG, "onResult: " + mPlace.getName());
+                Log.d(TAG, "onResult: name: " + mPlace.getName());
                 mPlace.setAddress(place.getAddress().toString());
-                Log.d(TAG, "onResult: " + mPlace.getAddress());
+                Log.d(TAG, "onResult: address: " + mPlace.getAddress());
                 //mPlace.setAttributions(place.getAttributions().toString());
                 //Log.d(TAG, "onResult: " + mPlace.getAttributions());
                 mPlace.setPhoneNumber(place.getPhoneNumber().toString());
-                Log.d(TAG, "onResult: " + mPlace.getPhoneNumber());
+                Log.d(TAG, "onResult: phone: " + mPlace.getPhoneNumber());
                 mPlace.setTimetable("12pm");
                 mPlace.setWebsiteUri(place.getWebsiteUri());
                 mPlace.setLatLng(place.getLatLng());

@@ -1,9 +1,9 @@
-package com.example.android.goforlunch.model;
+package com.example.android.goforlunch.models.modelnearby;
 
 /**
  * Created by Diego Fajardo on 11/05/2018.
  */
-public class Northeast {
+public class Location {
 
     private String lng;
 
@@ -34,6 +34,5 @@ public class Northeast {
     {
         return "ClassPojo [lng = "+lng+", lat = "+lat+"]";
     }
-
 
 }

@@ -9,7 +9,7 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/nav_drawer_image_id"
+        android:placeId="@+placeId/nav_drawer_image_id"
         android:layout_width="70dp"
         android:layout_height="70dp"
         app:civ_border_width="0.5dp"
@@ -19,7 +19,7 @@
         android:layout_alignParentBottom="true"/>
 
     <TextView
-        android:id="@+id/nav_drawer_title_id"
+        android:placeId="@+placeId/nav_drawer_title_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="GoForLunch!"
@@ -29,7 +29,7 @@
         android:layout_marginTop="20dp"/>
 
     <TextView
-        android:id="@+id/nav_drawer_name_id"
+        android:placeId="@+placeId/nav_drawer_name_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="John SMITH"
@@ -37,18 +37,18 @@
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/nav_drawer_image_id"
-        android:layout_above="@+id/nav_drawer_email_id"/>
+        android:layout_toRightOf="@placeId/nav_drawer_image_id"
+        android:layout_above="@+placeId/nav_drawer_email_id"/>
 
     <TextView
-        android:id="@+id/nav_drawer_email_id"
+        android:placeId="@+placeId/nav_drawer_email_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="jsmith.1337@gmail.com"
         android:textSize="12sp"
         android:textColor="@android:color/white"
         android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/nav_drawer_image_id"
+        android:layout_toRightOf="@+placeId/nav_drawer_image_id"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="25dp"/>
 

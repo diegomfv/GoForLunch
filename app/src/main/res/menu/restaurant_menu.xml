@@ -2,19 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/restaurant_view_call_id"
+        android:placeId="@+placeId/restaurant_view_call_id"
         android:title="CALL"
         android:icon="@drawable/ic_call"
         />
 
     <item
-        android:id="@+id/restaurant_view_like_id"
+        android:placeId="@+placeId/restaurant_view_like_id"
         android:title="LIKE"
         android:icon="@drawable/ic_star"
         />
 
     <item
-        android:id="@+id/restaurant_view_website_id"
+        android:placeId="@+placeId/restaurant_view_website_id"
         android:title="WEBSITE"
         android:icon="@drawable/ic_website"
         />
