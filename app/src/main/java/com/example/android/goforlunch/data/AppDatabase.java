@@ -15,6 +15,11 @@ import android.util.Log;
 
 /** version -> should be updated when we update our database
  * exportSchema -> writes the database info to a folder */
+
+/** Room cannot automatically map complex extractors like DATE. In this cases,
+ * you'll need a "type converter" (See Android Architecture Components,
+ * Android Development Course, UDACITY)
+ * */
 @Database(entities = {RestaurantEntry.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -34,9 +39,11 @@ public abstract class AppDatabase extends RoomDatabase {
 
             synchronized (LOCK) {
 
+                // TODO: 20/05/2018 Delete .allowMainThreadQueries() when ready
                 Log.d(TAG, "getInstance: Creating new Database Instance");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
+                        .allowMainThreadQueries() //allows queries in the main thread, test purposes
                         .build();
             }
         }

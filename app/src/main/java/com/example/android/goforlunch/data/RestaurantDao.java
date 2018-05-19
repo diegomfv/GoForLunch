@@ -18,7 +18,7 @@ import java.util.List;
 @Dao
 public interface RestaurantDao {
 
-    @Query("SELECT * FROM RestaurantEntry ORDER BY distance")
+    @Query("SELECT * FROM restaurant ORDER BY distance")
     List<RestaurantEntry> getAllRestaurants();
 
     @Insert
