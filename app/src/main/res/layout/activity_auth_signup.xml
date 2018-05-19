@@ -6,14 +6,14 @@
     android:orientation="vertical">
 
     <FrameLayout
-        android:placeId="@+placeId/signup_status_bar_id"
+        android:id="@+id/signup_status_bar_id"
         android:layout_width="match_parent"
         android:layout_height="25dp"
         android:background="@color/colorPrimaryDark">
     </FrameLayout>
 
     <ImageView
-        android:placeId="@+placeId/signup_image_id"
+        android:id="@+id/signup_image_id"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="30dp"
@@ -23,7 +23,7 @@
     </ImageView>
 
     <ProgressBar
-        android:placeId="@+placeId/signup_progressbar"
+        android:id="@+id/signup_progressbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
@@ -39,7 +39,7 @@
         >
 
         <android.support.design.widget.TextInputEditText
-            android:placeId="@+placeId/signup_email_id"
+            android:id="@+id/signup_email_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:maxLines="1"
@@ -57,7 +57,7 @@
         >
 
     <android.support.design.widget.TextInputEditText
-        android:placeId="@+placeId/signup_password_id"
+        android:id="@+id/signup_password_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:maxLines="1"
@@ -67,7 +67,7 @@
     </android.support.design.widget.TextInputLayout>
 
     <Button
-        android:placeId="@+placeId/signup_register_button_id"
+        android:id="@+id/signup_register_button_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -78,7 +78,7 @@
         android:textColor="@color/colorAccentDark" />
 
     <Button
-        android:placeId="@+placeId/signup_reset_button_id"
+        android:id="@+id/signup_reset_button_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -89,7 +89,7 @@
         android:textColor="@color/colorAccentDark"/>
 
     <Button
-        android:placeId="@+placeId/signup_registered_button_id"
+        android:id="@+id/signup_registered_button_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"

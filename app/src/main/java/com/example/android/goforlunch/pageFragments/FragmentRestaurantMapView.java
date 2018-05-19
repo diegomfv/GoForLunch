@@ -343,7 +343,7 @@ public class FragmentRestaurantMapView extends Fragment
         // TODO: 13/05/2018 Build the API Client here, do here the Request
         GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
 
-        Call<MyPlaces> call = client.fetchData(myPosition, "distance", "restaurant", getResources().getString(R.string.browser_key));
+        Call<MyPlaces> call = client.fetchDataNearby(myPosition, "distance", "restaurant", getResources().getString(R.string.browser_key));
         call.enqueue(new Callback<MyPlaces>() {
             @Override
             public void onResponse(Call<MyPlaces> call, Response<MyPlaces> response) {
@@ -451,7 +451,7 @@ public class FragmentRestaurantMapView extends Fragment
 
                                     Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
-                                    intent.putExtra("id", restaurantObject.getPlaceId());
+                                    intent.putExtra("placeId", restaurantObject.getPlaceId());
                                     intent.putExtra("name", restaurantObject.getName());
                                     intent.putExtra("address", restaurantObject.getAddress());
                                     intent.putExtra("rating", restaurantObject.getRating());

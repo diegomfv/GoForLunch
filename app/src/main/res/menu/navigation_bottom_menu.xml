@@ -2,19 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:placeId="@+placeId/nav_view_map_id"
+        android:id="@+id/nav_view_map_id"
         android:title="Map View"
         android:icon="@drawable/ic_map"
         />
 
     <item
-        android:placeId="@+placeId/nav_view_list_id"
+        android:id="@+id/nav_view_list_id"
         android:title="List View"
         android:icon="@drawable/ic_list"
         />
 
     <item
-        android:placeId="@+placeId/nav_view_coworkers_id"
+        android:id="@+id/nav_view_coworkers_id"
         android:title="Workmates"
         android:icon="@drawable/ic_coworkers"
         />

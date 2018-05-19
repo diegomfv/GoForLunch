@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <FrameLayout
-        android:placeId="@+placeId/settings_status_bar"
+        android:id="@+id/settings_status_bar"
         android:layout_width="match_parent"
         android:layout_height="24dp"
         android:background="@color/colorPrimaryDark"
@@ -14,7 +14,7 @@
     </FrameLayout>
     
     <android.support.v7.widget.Toolbar
-        android:placeId="@+placeId/settings_toolbar_id"
+        android:id="@+id/settings_toolbar_id"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
@@ -23,14 +23,14 @@
         app:title="Settings"
         app:titleTextColor="@android:color/white"
         app:layout_collapseMode="pin"
-        android:layout_below="@placeId/settings_status_bar"/>
+        android:layout_below="@id/settings_status_bar"/>
 
     <fragment
-        android:placeId="@+placeId/activity_settings"
+        android:id="@+id/activity_settings"
         android:name="com.example.android.goforlunch.pageFragments.SettingsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+placeId/settings_toolbar_id">
+        android:layout_below="@id/settings_toolbar_id">
 
     </fragment>
 

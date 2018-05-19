@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <android.support.v7.widget.Toolbar
-        android:placeId="@+placeId/map_main_toolbar_id"
+        android:id="@+id/map_main_toolbar_id"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
@@ -18,7 +18,7 @@
         app:layout_collapseMode="pin" />
 
     <RelativeLayout
-        android:placeId="@+placeId/map_toolbar_search_id"
+        android:id="@+id/map_toolbar_search_id"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
@@ -26,7 +26,7 @@
         android:visibility="gone">
 
         <android.support.v7.widget.CardView
-            android:placeId="@+placeId/map_cv_search_id"
+            android:id="@+id/map_cv_search_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/cardview_light_background"
@@ -34,7 +34,7 @@
             app:cardCornerRadius="5dp">
 
             <ImageView
-                android:placeId="@+placeId/map_search_icon_id"
+                android:id="@+id/map_search_icon_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_search"
@@ -43,7 +43,7 @@
                 android:contentDescription="Search icon"/>
 
             <AutoCompleteTextView
-                android:placeId="@+placeId/map_autocomplete_id"
+                android:id="@+id/map_autocomplete_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="50dp"
@@ -65,7 +65,7 @@
     <fragment
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:placeId="@+placeId/map"
+        android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MapsActivity"

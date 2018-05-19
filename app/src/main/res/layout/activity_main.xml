@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <android.support.v4.widget.DrawerLayout
-    android:placeId="@+placeId/drawer_layout_id"
+    android:id="@+id/drawer_layout_id"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -16,16 +16,16 @@
         tools:context="com.example.android.goforlunch.activities.MainActivity">
 
         <FrameLayout
-            android:placeId="@+placeId/fragment_container_id"
+            android:id="@+id/fragment_container_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+placeId/bottom_navigation_id"
+            android:layout_above="@id/bottom_navigation_id"
             android:layout_alignParentTop="true">
         </FrameLayout>
 
         <!-- By default, the background color of the Navigation View is transparent -->
         <android.support.design.widget.BottomNavigationView
-            android:placeId="@+placeId/bottom_navigation_id"
+            android:id="@+id/bottom_navigation_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -37,7 +37,7 @@
     </RelativeLayout>
 
     <android.support.design.widget.NavigationView
-        android:placeId="@+placeId/nav_view_id"
+        android:id="@+id/nav_view_id"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

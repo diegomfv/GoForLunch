@@ -4,18 +4,18 @@
     tools:showIn="navigation_view">
 
     <item
-        android:placeId="@+placeId/nav_lunch"
+        android:id="@+id/nav_lunch"
         android:icon="@drawable/ic_lunch"
         android:title="YOUR LUNCH" />
 
     <item android:title="SYSTEM">
         <menu>
             <item
-                android:placeId="@+placeId/nav_settings"
+                android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_settings"
                 android:title="SETTINGS" />
             <item
-                android:placeId="@+placeId/nav_logout"
+                android:id="@+id/nav_logout"
                 android:icon="@drawable/ic_logout"
                 android:title="LOG OUT" />
         </menu>

@@ -16,7 +16,7 @@
             android:layout_weight="4">
 
             <ImageView
-                android:placeId="@+placeId/restaurant_image_id"
+                android:id="@+id/restaurant_image_id"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/rest_thumbnail"
@@ -25,14 +25,14 @@
         </FrameLayout>
 
         <RelativeLayout
-            android:placeId="@+placeId/restaurant_info_id"
+            android:id="@+id/restaurant_info_id"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.75"
             android:background="@color/colorPrimaryLight">
 
             <TextView
-                android:placeId="@+placeId/restaurant_title_id"
+                android:id="@+id/restaurant_title_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
@@ -44,11 +44,11 @@
                 android:hint="Le Zinc"/>
 
             <TextView
-                android:placeId="@+placeId/restaurant_address_id"
+                android:id="@+id/restaurant_address_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+placeId/restaurant_title_id"
-                android:layout_alignLeft="@+placeId/restaurant_title_id"
+                android:layout_below="@id/restaurant_title_id"
+                android:layout_alignLeft="@id/restaurant_title_id"
                 android:layout_marginTop="5dp"
                 android:text="French Restaurant - 12 Rue du Faubourg Poissonnieère"
                 android:textSize="12sp"
@@ -57,7 +57,7 @@
                 android:hint="French Restaurant - 12 Rue du Faubourg Poissonnieère"/>
 
             <RatingBar
-                android:placeId="@+placeId/restaurant_rating_id"
+                android:id="@+id/restaurant_rating_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:isIndicator="true"
@@ -66,7 +66,7 @@
                 android:rating="2."
                 android:scaleX=".5"
                 android:scaleY=".5"
-                android:layout_below="@+placeId/restaurant_title_id"
+                android:layout_below="@id/restaurant_title_id"
                 android:layout_marginLeft="-25dp"
                 android:layout_marginTop="16dp"
                 android:progressTint="@android:color/background_light"
@@ -76,7 +76,7 @@
         </RelativeLayout>
 
         <android.support.design.widget.BottomNavigationView
-            android:placeId="@+placeId/restaurant_selector_id"
+            android:id="@+id/restaurant_selector_id"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -87,7 +87,7 @@
             android:background="@drawable/bottom_border"/>
 
         <android.support.v7.widget.RecyclerView
-            android:placeId="@+placeId/restaurant_recycler_view_id"
+            android:id="@+id/restaurant_recycler_view_id"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="3.25">
@@ -96,7 +96,7 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:placeId="@+placeId/restaurant_fab_id"
+        android:id="@+id/restaurant_fab_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
@@ -105,7 +105,7 @@
         app:backgroundTint="@android:color/white"
         app:rippleColor="@color/colorAccentLight"
         app:elevation="4dp"
-        app:layout_anchor="@placeId/restaurant_image_id"
+        app:layout_anchor="@id/restaurant_image_id"
         app:layout_anchorGravity="bottom|right|end" />
 
 </android.support.design.widget.CoordinatorLayout>
