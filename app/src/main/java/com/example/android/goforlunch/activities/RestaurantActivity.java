@@ -2,12 +2,15 @@ package com.example.android.goforlunch.activities;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -17,20 +20,15 @@ import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.models.modelnearby.MyPlaces;
-import com.example.android.goforlunch.models.modelplacebyid.Photos;
 import com.example.android.goforlunch.models.modelplacebyid.PlaceById;
 import com.example.android.goforlunch.models.modelplacebyid.Result;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
-import com.example.android.goforlunch.remote.RetrofitClient;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -42,6 +40,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
     //Widgets
     private FloatingActionButton fab;
+    private BottomNavigationView navigationView;
     private ImageView ivRestPicture;
     private TextView tvRestName;
     private TextView tvRestAddress;
@@ -49,7 +48,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
     //Variables
     private boolean fabIsOpen = true;
-    private String callToastString = "No phone available";
+    private String phoneToastString = "No phone available";
     private String webUrlToastString = "No web available";
     private String likeToastString = "Liked!";
 
@@ -65,6 +64,9 @@ public class RestaurantActivity extends AppCompatActivity {
 
         fab = findViewById(R.id.restaurant_fab_id);
         fab.setOnClickListener(mFabListener);
+
+        navigationView = (BottomNavigationView) findViewById(R.id.restaurant_selector_id);
+        navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
 
         ivRestPicture = (ImageView) findViewById(R.id.restaurant_image_id);
         tvRestName = (TextView) findViewById(R.id.restaurant_title_id);
@@ -95,48 +97,64 @@ public class RestaurantActivity extends AppCompatActivity {
 
                 Result result = placeById.getResult();
 
-                tvRestName.setText(result.getName());
-                tvRestAddress.setText(result.getFormatted_address());
-
-                float rating = Float.parseFloat(result.getRating());
-                if (rating > 3) {
-                    rating = rating * 3 / 5;
-                    Log.d(TAG, "onCreate: " + rating);
+                if (result.getName() != null) {
+                    tvRestName.setText(result.getName());
                 }
-                rbRestRating.setRating(rating);
 
-                callToastString = result.getFormatted_phone_number();
-                webUrlToastString = result.getUrl();
+                if (result.getFormatted_address() != null) {
+                    tvRestAddress.setText(result.getFormatted_address());
+                }
 
-                com.example.android.goforlunch.models.modelplacebyid.Photos[] photo = result.getPhotos();
+                if (result.getRating() != null) {
 
-                GooglePlaceWebAPIService client = Common.getGooglePlacePhotoApiService();
-                final Call<String> call1 = client.fetchDataPhoto("800" , photo[0].getPhoto_reference(), "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU");
-                call1.enqueue(new Callback<String>() {
-                    @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
-
-                        Log.d(TAG, "onResponse: correct call");
-                        Log.d(TAG, "onResponse: url = " + call1.request().url().toString());
-
-                        Glide.with(RestaurantActivity.this)
-                                .load(response)
-                                .into(ivRestPicture);
-
+                    float rating = Float.parseFloat(result.getRating());
+                    if (rating > 3) {
+                        rating = rating * 3 / 5;
+                        Log.d(TAG, "onCreate: " + rating);
                     }
+                    rbRestRating.setRating(rating);
+                }
 
-                    @Override
-                    public void onFailure(Call<String> call, Throwable t) {
+                if (result.getFormatted_phone_number() != null) {
+                    phoneToastString = result.getInternational_phone_number();
+                }
 
-                        Log.d(TAG, "onFailure: there was an error");
-                        Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+                if (webUrlToastString != null) {
+                    webUrlToastString = result.getWebsite();
+                }
 
-                        Glide.with(RestaurantActivity.this)
-                                .load(call.request().url().toString())
-                                .into(ivRestPicture);
-                    }
-                });
+                if (result.getPhotos() != null) {
 
+                    com.example.android.goforlunch.models.modelplacebyid.Photos[] photo = result.getPhotos();
+
+                    GooglePlaceWebAPIService client = Common.getGooglePlacePhotoApiService();
+                    final Call<String> call1 = client.fetchDataPhoto("800" , photo[0].getPhoto_reference(), "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU");
+                    call1.enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(Call<String> call, Response<String> response) {
+
+                            Log.d(TAG, "onResponse: correct call");
+                            Log.d(TAG, "onResponse: url = " + call1.request().url().toString());
+
+                            Glide.with(RestaurantActivity.this)
+                                    .load(response)
+                                    .into(ivRestPicture);
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<String> call, Throwable t) {
+
+                            Log.d(TAG, "onFailure: there was an error");
+                            Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+
+                            Glide.with(RestaurantActivity.this)
+                                    .load(call.request().url().toString())
+                                    .into(ivRestPicture);
+                        }
+                    });
+
+                }
 
             }
 
@@ -156,7 +174,7 @@ public class RestaurantActivity extends AppCompatActivity {
      * **************/
 
 
-    View.OnClickListener mFabListener = new View.OnClickListener() {
+    private View.OnClickListener mFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
 
@@ -174,13 +192,50 @@ public class RestaurantActivity extends AppCompatActivity {
 
             ToastHelper.toastShort(RestaurantActivity.this, "Fab Clicked");
 
-
-
         }
     };
 
+    private BottomNavigationView.OnNavigationItemSelectedListener bottomViewListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
+                    switch (item.getItemId()) {
 
+                        case R.id.restaurant_view_call_id: {
+                            Log.d(TAG, "onNavigationItemSelected: callButton CLICKED!");
+                            Log.d(TAG, "onNavigationItemSelected: phone = " + phoneToastString);
+                            if (phoneToastString.equals("")) {
+                                ToastHelper.toastShort(RestaurantActivity.this, "Phone not available");
+                            } else {
+                                ToastHelper.toastShort(RestaurantActivity.this, "Calling to " + phoneToastString);
+                            }
+
+                        } break;
+
+                        case R.id.restaurant_view_like_id: {
+                            Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
+                            ToastHelper.toastShort(RestaurantActivity.this, likeToastString);
+
+                        } break;
+
+                        case R.id.restaurant_view_website_id: {
+                            Log.d(TAG, "onNavigationItemSelected: websiteButton CLICKED!");
+                            Log.d(TAG, "onNavigationItemSelected: web URL = " + webUrlToastString);
+                            if (webUrlToastString.equals("")) {
+                                ToastHelper.toastShort(RestaurantActivity.this, "Website not available");
+                            } else {
+                                // TODO: 19/05/2018 Bring the user to the website. Don't open in the app, allow the user to go to the true website
+                                ToastHelper.toastShort(RestaurantActivity.this, "Brings the user to -> " + webUrlToastString);
+                            }
+
+                        } break;
+
+                    }
+
+                    return false; // TODO: 19/05/2018 Check true or false
+                }
+            };
 
 
     @Override

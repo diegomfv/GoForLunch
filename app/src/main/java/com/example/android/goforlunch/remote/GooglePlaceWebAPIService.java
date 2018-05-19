@@ -33,6 +33,9 @@ public interface GooglePlaceWebAPIService {
             @Query("photoreference") String photoReference,
             @Query("key") String key
     );
+
+    @GET()
+    Call<>
 }
 
 

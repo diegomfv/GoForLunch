@@ -24,7 +24,7 @@ import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.google.firebase.auth.FirebaseAuth;
 
-// TODO: 18/05/2018 Check there is internet connection
+// TODO: 18/05/2018 Check if there is internet connection
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,8 +35,10 @@ public class MainActivity extends AppCompatActivity {
     String name = "anonymous";
     String email = "anon@anon.com";
 
+    //Widgets
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
+    private BottomNavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: email: " + email);
         }
 
-        BottomNavigationView navigationView = findViewById(R.id.bottom_navigation_id);
+        navigationView = findViewById(R.id.bottom_navigation_id);
         navigationView.setOnNavigationItemSelectedListener(botNavListener);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_id);
@@ -136,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
 
+                            // TODO: 19/05/2018 Put in an intent the title of the place you are going toR
                             startActivity(new Intent(MainActivity.this, RestaurantActivity.class));
 
                             return true;

@@ -387,7 +387,8 @@ public class FragmentRestaurantMapView extends Fragment
                     MarkerOptions options = new MarkerOptions()
                             .position(latLng)
                             .title(results[i].getName())
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                            .snippet("Rating - " + results[i].getRating());
                     //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_lunch)); // would put this icon as market
 
                     Log.d(TAG, "onResponse: " + results[i].getName());
@@ -398,7 +399,6 @@ public class FragmentRestaurantMapView extends Fragment
                     //marker.showInfoWindow(); to show the description from the beginning
 
                 }
-
 
             }
 

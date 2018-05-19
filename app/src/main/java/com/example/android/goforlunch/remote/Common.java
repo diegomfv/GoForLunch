@@ -20,5 +20,10 @@ public class Common {
         return RetrofitClient.getPhotos().create(GooglePlaceWebAPIService.class);
     }
 
+    public static GooglePlaceWebAPIService getGoogleDistanceMatrixApiService() {
+
+        return RetrofitClient.getDistance().create(GooglePlaceWebAPIService.class);
+    }
+
 
 }
