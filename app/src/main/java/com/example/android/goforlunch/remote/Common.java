@@ -22,7 +22,7 @@ public class Common {
 
     public static GooglePlaceWebAPIService getGoogleDistanceMatrixApiService() {
 
-        return RetrofitClient.getDistance().create(GooglePlaceWebAPIService.class);
+        return RetrofitClient.getDistanceMatrix().create(GooglePlaceWebAPIService.class);
     }
 
 

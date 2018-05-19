@@ -23,10 +23,12 @@ public class RetrofitClient {
     private static final String GOOGLE_API_NEARBY_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/";
     private static final String GOOGLE_API_PLACE_ID_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/details/";
     private static final String GOOGLE_API_PLACE_PHOTO_URL = "https://maps.googleapis.com/maps/api/place/";
+    private static final String GOOGLE_API_MATRIX_DISTANCE_URL = "https://maps.googleapis.com/maps/api/distancematrix/";
 
     private static Retrofit retrofitNearby = null;
     private static Retrofit retrofitPlaceById = null;
     private static Retrofit retrofitPhotos = null;
+    private static Retrofit retrofitMatrixDistance = null;
 
     public static Retrofit getNearbyClient () {
 
@@ -69,6 +71,21 @@ public class RetrofitClient {
 
         return retrofitPhotos;
     }
+
+    public static Retrofit getDistanceMatrix () {
+
+        if (retrofitMatrixDistance == null) {
+
+            retrofitMatrixDistance = new Retrofit.Builder()
+                    .baseUrl(GOOGLE_API_MATRIX_DISTANCE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+        }
+
+        return retrofitMatrixDistance;
+    }
+
 
 
 

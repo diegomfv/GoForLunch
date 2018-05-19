@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.remote;
 
+import com.example.android.goforlunch.models.modeldistance.MatrixDistance;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models.modelnearby.MyPlaces;
 import com.example.android.goforlunch.models.modelplacebyid.PlaceById;
@@ -34,8 +35,13 @@ public interface GooglePlaceWebAPIService {
             @Query("key") String key
     );
 
-    @GET()
-    Call<>
+    @GET("json")
+    Call<MatrixDistance> fetchDistance(
+            @Query("units") String units,
+            @Query("origins") LatLngForRetrofit latLngForRetrofit,
+            @Query("destinations") String destinations,
+            @Query("key") String key
+    );
 }
 
 
