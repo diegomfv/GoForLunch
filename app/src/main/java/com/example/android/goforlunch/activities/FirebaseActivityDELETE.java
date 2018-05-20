@@ -1,35 +1,42 @@
 package com.example.android.goforlunch.activities;
 
-import android.arch.persistence.room.ColumnInfo;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.MainViewModelDELETE;
+import com.example.android.goforlunch.activities.auth.RVAdapterRestaurantDELETE;
 import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.pojo_delete.RestaurantObject;
 import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
  */
 
+// TODO: 20/05/2018 See UDACITY, Android Development, Android Architecture Components, 23 and forward
+// TODO: 20/05/2018 to see how to work with search queries by id
 public class FirebaseActivityDELETE extends AppCompatActivity {
 
     private static final String TAG = "FirebaseActivityDELETE";
 
     private Button button;
+    private Button button2;
 
     private HashMap<String,String> userData;
 
@@ -39,9 +46,11 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
     private ChildEventListener mChildEventListener;
 
-    private RestaurantObject object;
-    private RestaurantObject object2;
-    private RestaurantObject object3;
+
+    //Recycler View
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private RVAdapterRestaurantDELETE mAdapter;
 
     //Database
     private AppDatabase mDb;
@@ -56,54 +65,127 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
     private String rating;
     private String imageUrl;
 
+    private static int counter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
 
+        counter = 0;
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.firebase_recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(FirebaseActivityDELETE.this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
         mDb = AppDatabase.getInstance(getApplicationContext());
 
-        placeId = "pn12o3rbhfweu1";
-        name = "Koh Thai";
-        type = "Thai";
-        address = "Elmdale Road 119";
-        openUntil = "20.00pm";
-        distance = "120m";
-        rating = "4.5";
-        imageUrl = "https://imager.url";
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mDb.clearAllTables();
+            }
+        });
 
-        RestaurantEntry restaurantEntry = new RestaurantEntry(
-                placeId,
-                name,
-                type,
-                address,
-                openUntil,
-                distance,
-                rating,
-                imageUrl
-        );
+        button = findViewById(R.id.firebase_button_id);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        mDb.restaurantDao().insertRestaurant(restaurantEntry);
+                counter++;
 
-        List<RestaurantEntry> list = mDb.restaurantDao().getAllRestaurants();
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
 
-        Log.d(TAG, "onCreate: list.size() = " + list.size());
+                        placeId = "1";
+                        name = "Koh Thai - " + counter;
+                        type = "Thai";
+                        address = "Elmdale Road 119";
+                        openUntil = "20.00pm";
+                        distance = "120m";
+                        rating = "4.5";
+                        imageUrl = "https://imager.url";
 
-        for (int i = 0; i < list.size(); i++) {
+                        RestaurantEntry restaurantEntry = new RestaurantEntry(
+                                placeId,
+                                name,
+                                type,
+                                address,
+                                openUntil,
+                                distance,
+                                rating,
+                                imageUrl
+                        );
 
-            Log.d(TAG, "onCreate: list(" + i + ") -> " + list.get(i).toString());
+                        mDb.restaurantDao().insertRestaurant(restaurantEntry);
 
-        }
+                    }
+                });
 
-        mDb.restaurantDao().deleteRestaurant(restaurantEntry);
+            }
+        });
 
-        Log.d(TAG, "onCreate: list.size() = " + list.size());
+        button2 = findViewById(R.id.firebase_button_retrieve_item_id);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final LiveData<RestaurantEntry> restaurant = mDb.restaurantDao().getRestaurantByPlaceId("1");
+                restaurant.observe(FirebaseActivityDELETE.this, new Observer<RestaurantEntry>() {
+                    @Override
+                    public void onChanged(@Nullable RestaurantEntry restaurantEntry) {
 
-        for (int i = 0; i < list.size(); i++) {
+                        //Not clear what this does (.removeObserver). See UDACITY, Android Dev,
+                        // Lesson 8. Android Architecture Components, 20
+                        restaurant.removeObserver(this);
+                        Log.d(TAG, "onChanged: Receiving database update from LiveData");
+                        Log.d(TAG, "onChanged: restaurant --> " + restaurantEntry.toString());
+                    }
+                });
+            }
+        });
 
-            Log.d(TAG, "onCreate: list(" + i + ") -> " + list.get(i).toString());
+        /** LiveData runs by default outside of the main thread. We can avoid using
+         * the executor with it (with the other operations (insert, update and delete)
+         * we still need to use the executors.
+         * - LifeCycleOwner: objects that have a lifecycle, like Activities and Fragments.
+         * - LifeCycleObservers: Observe lifeCycleOwners and get notified on
+         * lifecycle changes.
+         * LiveData is lifecycle aware because it's a lifecycle observer. When we call observe() method
+         * and we pass the activity, we tell it which lifeCycleOwnser it should observe (in this case,
+         * the activity and therefore its lifecycle).
+         */
+//        LiveData<List<RestaurantEntry>> restaurants = mDb.restaurantDao().getAllRestaurants();
+//        restaurants.observe(FirebaseActivityDELETE.this, new Observer<List<RestaurantEntry>>() {
+//            @Override
+//            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
+//                Log.d(TAG, "onChanged: Receiving database update from LiveData");
+//
+//                for (int i = 0; i < restaurantEntries.size() ; i++) {
+//                    Log.d(TAG, "onChanged: item#" + i + ": " + restaurantEntries.get(i).toString());
+//                }
+//                mAdapter = new RVAdapterRestaurantDELETE(FirebaseActivityDELETE.this, restaurantEntries);
+//                mRecyclerView.setAdapter(mAdapter);
+//            }
+//        });
 
-        }
+
+        /** This substitutes the code immediately above. It makes that we receive the updates
+         * from the LiveDate IN the ViewModel
+         * */
+        MainViewModelDELETE mainViewModelDELETE = ViewModelProviders.of(this).get(MainViewModelDELETE.class);
+        mainViewModelDELETE.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onChanged: Updating list of tasks from LiveData in ViewModel");
+                mAdapter = new RVAdapterRestaurantDELETE(FirebaseActivityDELETE.this, restaurantEntries);
+                mRecyclerView.setAdapter(mAdapter);
+            }
+        });
+
+
+
 
 
 ////
@@ -183,4 +265,8 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
 
     }
+
+
+
+
 }

@@ -39,11 +39,10 @@ public abstract class AppDatabase extends RoomDatabase {
 
             synchronized (LOCK) {
 
-                // TODO: 20/05/2018 Delete .allowMainThreadQueries() when ready
                 Log.d(TAG, "getInstance: Creating new Database Instance");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
-                        .allowMainThreadQueries() //allows queries in the main thread, test purposes
+                        //.allowMainThreadQueries() //allows queries in the main thread, test purposes
                         .build();
             }
         }

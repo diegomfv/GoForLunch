@@ -3,6 +3,7 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
 
     <FrameLayout
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="25dp"
         android:background="@color/colorPrimaryDark"
@@ -13,7 +14,22 @@
         android:id="@+id/firebase_button_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_below="@id/top_bar"
         android:text="FIREBASE"/>
+
+    <Button
+        android:id="@+id/firebase_button_retrieve_item_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/firebase_button_id"
+        android:layout_alignTop="@id/firebase_button_id"
+        android:text="GET ITEM"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/firebase_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/firebase_button_id"
+        android:paddingBottom="15dp"/>
 
 </RelativeLayout>
