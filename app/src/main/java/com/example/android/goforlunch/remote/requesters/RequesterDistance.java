@@ -1,0 +1,70 @@
+package com.example.android.goforlunch.remote.requesters;
+
+import android.util.Log;
+
+import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.models.modeldistance.Distance;
+import com.example.android.goforlunch.models.modeldistance.Elements;
+import com.example.android.goforlunch.models.modeldistance.MatrixDistance;
+import com.example.android.goforlunch.models.modeldistance.Rows;
+import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
+import com.example.android.goforlunch.remote.Common;
+import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+/**
+ * Created by Diego Fajardo on 21/05/2018.
+ */
+public class RequesterDistance {
+
+    private static final String TAG = "RequesterDistance";
+
+    private static final String distanceKey = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
+
+    private AppDatabase mDb;
+
+    private LatLngForRetrofit myPosition;
+
+    public RequesterDistance(AppDatabase mDb, LatLngForRetrofit myPosition) {
+        this.mDb = mDb;
+        this.myPosition = myPosition;
+    }
+
+    public void doApiRequest(final String placeId) {
+
+        final GooglePlaceWebAPIService clientMatrix = Common.getGoogleDistanceMatrixApiService();
+        Call<MatrixDistance> callMatrix = clientMatrix.fetchDistance("imperial", "place_id:" + placeId, myPosition, distanceKey);
+        callMatrix.enqueue(new Callback<MatrixDistance>() {
+            @Override
+            public void onResponse(Call<MatrixDistance> call, Response<MatrixDistance> response) {
+
+                Log.d(TAG, "onResponse: correct call");
+                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+
+                MatrixDistance matrixDistance = response.body();
+
+                Rows[] rows = matrixDistance.getRows();
+
+                Elements[] elements = rows[0].getElements();
+
+                Distance distance = elements[0].getDistance();
+
+                final String distanceValue = distance.getText();
+
+                mDb.restaurantDao().updateRestaurantDistance(placeId, distanceValue);
+
+            }
+
+            @Override
+            public void onFailure(Call<MatrixDistance> call, Throwable t) {
+
+                Log.d(TAG, "onFailure: there was an error");
+                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+
+            }
+        });
+    }
+}

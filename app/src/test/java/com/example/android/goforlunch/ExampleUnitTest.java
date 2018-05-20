@@ -1,8 +1,10 @@
 package com.example.android.goforlunch;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -14,4 +16,18 @@ public class ExampleUnitTest {
     public void addition_isCorrect() throws Exception {
         assertEquals(4, 2 + 2);
     }
+
+    @Test
+    public void additionOfDotToDate () {
+
+        String time = "1600";
+
+        time = time.substring(0,2) + "." + time.substring(2, time.length());
+
+        System.out.println(time);
+
+        Assert.assertTrue(2 == 2);
+
+    }
+
 }

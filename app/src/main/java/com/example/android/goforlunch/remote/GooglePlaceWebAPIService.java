@@ -38,8 +38,8 @@ public interface GooglePlaceWebAPIService {
     @GET("json")
     Call<MatrixDistance> fetchDistance(
             @Query("units") String units,
-            @Query("origins") LatLngForRetrofit latLngForRetrofit,
-            @Query("destinations") String destinations,
+            @Query("origins") String placeId,
+            @Query("destinations") LatLngForRetrofit latLngForRetrofit,
             @Query("key") String key
     );
 }

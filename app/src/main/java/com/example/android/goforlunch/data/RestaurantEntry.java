@@ -23,11 +23,17 @@ public class RestaurantEntry {
     private String rating;
     @ColumnInfo(name = "image_url")
     private String imageUrl;
+    private String phone;
+    @ColumnInfo(name = "website_url")
+    private String websiteUrl;
+    private String latitude;
+    private String longitude;
 
     /** Used for when inserting info in the table
      * */
     @Ignore  // Use the Ignore annotation so Room knows that it has to use the other constructor instead
-    public RestaurantEntry(String placeId, String name, String type, String address, String openUntil, String distance, String rating, String imageUrl) {
+    public RestaurantEntry(String placeId, String name, String type, String address, String openUntil, String distance, String rating,
+                           String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.placeId = placeId;
         this.name = name;
         this.type = type;
@@ -36,11 +42,16 @@ public class RestaurantEntry {
         this.distance = distance;
         this.rating = rating;
         this.imageUrl = imageUrl;
+        this.phone = phone;
+        this.websiteUrl = websiteUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     /** Used for when reading from the table
      * */
-    public RestaurantEntry(int id, String placeId, String name, String type, String address, String openUntil, String distance, String rating, String imageUrl) {
+    public RestaurantEntry(int id, String placeId, String name, String type, String address, String openUntil, String distance, String rating,
+                           String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.id = id;
         this.placeId = placeId;
         this.name = name;
@@ -50,6 +61,10 @@ public class RestaurantEntry {
         this.distance = distance;
         this.rating = rating;
         this.imageUrl = imageUrl;
+        this.phone = phone;
+        this.websiteUrl = websiteUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public int getId() {
@@ -124,10 +139,42 @@ public class RestaurantEntry {
         this.imageUrl = imageUrl;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getWebsiteUrl() {
+        return websiteUrl;
+    }
+
+    public void setWebsiteUrl(String websiteUrl) {
+        this.websiteUrl = websiteUrl;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
     @Override
     public String toString() {
         return "RestaurantEntry{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", placeId='" + placeId + '\'' +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
@@ -136,6 +183,10 @@ public class RestaurantEntry {
                 ", distance='" + distance + '\'' +
                 ", rating='" + rating + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", phone='" + phone + '\'' +
+                ", websiteUrl='" + websiteUrl + '\'' +
+                ", latitude='" + latitude + '\'' +
+                ", longitude='" + longitude + '\'' +
                 '}';
     }
 }

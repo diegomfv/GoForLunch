@@ -72,6 +72,8 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
 
+        /**
+
         counter = 0;
 
         mRecyclerView = (RecyclerView) findViewById(R.id.firebase_recycler_view);
@@ -173,7 +175,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
         /** This substitutes the code immediately above. It makes that we receive the updates
          * from the LiveDate IN the ViewModel
-         * */
+         *
         MainViewModelDELETE mainViewModelDELETE = ViewModelProviders.of(this).get(MainViewModelDELETE.class);
         mainViewModelDELETE.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
             @Override
@@ -184,9 +186,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             }
         });
 
-
-
-
+        */
 
 ////
 ////        database = FirebaseDatabase.getInstance();
@@ -259,6 +259,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 //
 //            }
 //        };
+
 
 
 

@@ -27,7 +27,7 @@
 
     <fragment
         android:id="@+id/activity_settings"
-        android:name="com.example.android.goforlunch.pageFragments.SettingsFragment"
+        android:name="com.example.android.goforlunch.pageFragments.FragmentSettings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/settings_toolbar_id">
