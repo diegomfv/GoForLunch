@@ -30,15 +30,17 @@ public class RequesterNearby {
 
     private static String nearbyKey = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
     private AppDatabase mDb;
+    private LatLngForRetrofit myPosition;
 
-    public RequesterNearby(AppDatabase mDb) {
+    public RequesterNearby(AppDatabase mDb, LatLngForRetrofit myPosition) {
         this.mDb = mDb;
+        this.myPosition = myPosition;
     }
 
-    public void doApiRequest (final LatLngForRetrofit myPosition, String key) {
+    public void doApiRequest () {
 
         GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
-        Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", key);
+        Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", nearbyKey);
         callNearby.enqueue(new Callback<MyPlaces>() {
 
             @Override
