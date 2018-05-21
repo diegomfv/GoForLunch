@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.activities;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -81,89 +82,41 @@ public class RestaurantActivity extends AppCompatActivity {
         mAdapter = new RVAdapterRestaurant(RestaurantActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
+        Intent intent = getIntent();
 
-        GooglePlaceWebAPIService client = Common.getGooglePlaceIdApiService();
-        Call<PlaceById> call = client.fetchDataPlaceId(getIntent().getExtras().getString("placeId"), "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU");
-        call.enqueue(new Callback<PlaceById>() {
-            @Override
-            public void onResponse(Call<PlaceById> call, Response<PlaceById> response) {
+        if (intent.getStringExtra(getResources().getString(R.string.i_image_url)) != null
+                && !intent.getStringExtra(getResources().getString(R.string.i_image_url)).equals("nA")) {
+            Glide.with(RestaurantActivity.this)
+                    .load(intent.getStringExtra(getResources().getString(R.string.i_image_url)))
+                    .into(ivRestPicture);
+        }
 
-                Log.d(TAG, "onResponse: correct call");
-                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+        if (intent.getStringExtra(getResources().getString(R.string.i_name)) != null) {
+            tvRestName.setText(intent.getStringExtra(getResources().getString(R.string.i_name)));
+        }
 
-                PlaceById placeById = response.body();
+        if (intent.getStringExtra(getResources().getString(R.string.i_address)) != null) {
+            tvRestAddress.setText(intent.getStringExtra(getResources().getString(R.string.i_address)));
+        }
 
-                Log.d(TAG, "onResponse: " + placeById.toString());
+        if (intent.getStringExtra(getResources().getString(R.string.i_rating)) != null &&
+                !intent.getStringExtra(getResources().getString(R.string.i_rating)).equals("nA")) {
+            Log.d(TAG, "onCreate: Rating = " + intent.getStringExtra(getResources().getString(R.string.i_rating)));
+            float rating = Float.parseFloat(intent.getStringExtra(getResources().getString(R.string.i_rating)));
+            rbRestRating.setRating(rating);
+        } else {
+            Log.d(TAG, "onCreate: Rating is equal to nA || null");
+            rbRestRating.setRating(0f);
+        }
 
-                Result result = placeById.getResult();
+        if (intent.getStringExtra(getResources().getString(R.string.i_phone)) != null) {
+            phoneToastString = intent.getStringExtra(getResources().getString(R.string.i_phone));
 
-                if (result.getName() != null) {
-                    tvRestName.setText(result.getName());
-                }
+        }
 
-                if (result.getFormatted_address() != null) {
-                    tvRestAddress.setText(result.getFormatted_address());
-                }
-
-                if (result.getRating() != null) {
-
-                    float rating = Float.parseFloat(result.getRating());
-                    if (rating > 3) {
-                        rating = rating * 3 / 5;
-                        Log.d(TAG, "onCreate: " + rating);
-                    }
-                    rbRestRating.setRating(rating);
-                }
-
-                if (result.getFormatted_phone_number() != null) {
-                    phoneToastString = result.getInternational_phone_number();
-                }
-
-                if (webUrlToastString != null) {
-                    webUrlToastString = result.getWebsite();
-                }
-
-                if (result.getPhotos() != null) {
-
-                    com.example.android.goforlunch.models.modelplacebyid.Photos[] photo = result.getPhotos();
-
-                    GooglePlaceWebAPIService client = Common.getGooglePlacePhotoApiService();
-                    final Call<String> call1 = client.fetchDataPhoto("800" , photo[0].getPhoto_reference(), "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU");
-                    call1.enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(Call<String> call, Response<String> response) {
-
-                            Log.d(TAG, "onResponse: correct call");
-                            Log.d(TAG, "onResponse: url = " + call1.request().url().toString());
-
-                            Glide.with(RestaurantActivity.this)
-                                    .load(response)
-                                    .into(ivRestPicture);
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<String> call, Throwable t) {
-
-                            Log.d(TAG, "onFailure: there was an error");
-                            Log.d(TAG, "onResponse: url = " + call.request().url().toString());
-
-                            Glide.with(RestaurantActivity.this)
-                                    .load(call.request().url().toString())
-                                    .into(ivRestPicture);
-                        }
-                    });
-
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<PlaceById> call, Throwable t) {
-                Log.d(TAG, "onFailure: there was an error");
-                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
-            }
-        });
+        if (intent.getStringExtra(getResources().getString(R.string.i_website)) != null) {
+            webUrlToastString = intent.getStringExtra(getResources().getString(R.string.i_website));
+        }
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 
@@ -206,7 +159,7 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: callButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: phone = " + phoneToastString);
                             if (phoneToastString.equals("")) {
-                                ToastHelper.toastShort(RestaurantActivity.this, "Phone not available");
+                                ToastHelper.toastShort(RestaurantActivity.this, "Phone is not available");
                             } else {
                                 ToastHelper.toastShort(RestaurantActivity.this, "Calling to " + phoneToastString);
                             }
@@ -223,7 +176,7 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: websiteButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: web URL = " + webUrlToastString);
                             if (webUrlToastString.equals("")) {
-                                ToastHelper.toastShort(RestaurantActivity.this, "Website not available");
+                                ToastHelper.toastShort(RestaurantActivity.this, "Website is not available");
                             } else {
                                 // TODO: 19/05/2018 Bring the user to the website. Don't open in the app, allow the user to go to the true website
                                 ToastHelper.toastShort(RestaurantActivity.this, "Brings the user to -> " + webUrlToastString);

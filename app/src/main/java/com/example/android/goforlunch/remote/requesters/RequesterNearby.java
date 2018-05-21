@@ -96,7 +96,20 @@ public class RequesterNearby {
                         }
 
                         if (results[i].getRating() != null) {
-                            rating = results[i].getRating();
+
+                            float temp_rating = Float.parseFloat(results[i].getRating());
+
+                            if (temp_rating > 3) {
+                                temp_rating = temp_rating * 3 / 5;
+                                rating = String.valueOf(temp_rating);
+                            } else {
+                                rating = results[i].getRating();
+                            }
+
+                        }
+
+                        if (results[i].getVicinity() != null) {
+                            address = results[i].getVicinity();
                         }
 
                         if (results[i].getGeometry() != null) {
@@ -133,7 +146,12 @@ public class RequesterNearby {
 
                         /** We insert the object in the database
                          * */
-                        mDb.restaurantDao().insertRestaurant(restaurantEntry);
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDb.restaurantDao().insertRestaurant(restaurantEntry);
+                            }
+                        });
 
                     }
 

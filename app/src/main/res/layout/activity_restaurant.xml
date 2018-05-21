@@ -19,7 +19,7 @@
                 android:id="@+id/restaurant_image_id"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/rest_thumbnail"
+                android:src="@drawable/lunch_image"
                 android:scaleType="centerCrop"/>
 
         </FrameLayout>

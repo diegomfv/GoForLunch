@@ -51,6 +51,7 @@
 
         </activity>
         <activity android:name=".activities.auth.AuthEnterName" />
+        <activity android:name=".data.sqlite.AndroidDatabaseManager" />
     </application>
 
 </manifest>

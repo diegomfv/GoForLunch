@@ -3,6 +3,7 @@ package com.example.android.goforlunch.remote.requesters;
 import android.util.Log;
 
 import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models.modelplacebyid.Close;
 import com.example.android.goforlunch.models.modelplacebyid.Opening_hours;
@@ -54,18 +55,13 @@ public class RequesterPlaceId {
 
                 Log.d(TAG, "onResponse: " + placeById.toString());
 
-                String address = "nA";
                 String phone = "nA";
                 String websiteUrl = "nA";
                 String openTill = "nA";
 
                 if (placeById.getResult() != null) {
 
-                    Result result = placeById.getResult();
-
-                    if (result.getFormatted_address() != null) {
-                        address = result.getFormatted_address();
-                    }
+                    final Result result = placeById.getResult();
 
                     if (result.getFormatted_phone_number() != null) {
                         phone = result.getInternational_phone_number();
@@ -83,9 +79,18 @@ public class RequesterPlaceId {
                         }
                     }
 
+                    final String finalPhone = phone;
+                    final String finalWebsiteUrl = websiteUrl;
+                    final String finalOpenTill = openTill;
                     /** Updating the database
                      * */
-                    mDb.restaurantDao().updateRestaurant(result.getPlace_id(), address, phone, websiteUrl, openTill);
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            mDb.restaurantDao().updateRestaurant(result.getPlace_id(), finalPhone, finalWebsiteUrl, finalOpenTill);
+                        }
+                    });
+
 
                     /** Request to get a photo of the place
                      * */

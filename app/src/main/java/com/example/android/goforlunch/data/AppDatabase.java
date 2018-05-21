@@ -20,7 +20,7 @@ import android.util.Log;
  * you'll need a "type converter" (See Android Architecture Components,
  * Android Development Course, UDACITY)
  * */
-@Database(entities = {RestaurantEntry.class}, version = 2, exportSchema = false)
+@Database(entities = {RestaurantEntry.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String TAG = AppDatabase.class.getSimpleName();

@@ -1,5 +1,9 @@
 package com.example.android.goforlunch.pageFragments;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,6 +27,11 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.MainViewModelDELETE;
+import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
+import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.pojo_delete.RestaurantObject;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
@@ -45,12 +54,15 @@ public class FragmentRestaurantListView extends Fragment {
     private ActionBar actionBar;
 
     //List of elements
-    private List<RestaurantObject> listOfRestaurantObjects;
+    private List<RestaurantEntry> listOfRestaurants;
 
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    //Database
+    private AppDatabase mDb;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -74,6 +86,8 @@ public class FragmentRestaurantListView extends Fragment {
          * */
         setHasOptionsMenu(true);
 
+        mDb = AppDatabase.getInstance(getActivity());
+
         toolbar = (Toolbar) view.findViewById(R.id.list_main_toolbar_id);
         toolbar2 = (RelativeLayout) view.findViewById(R.id.list_toolbar_search_id);
 
@@ -94,8 +108,24 @@ public class FragmentRestaurantListView extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new RVAdapterList(getContext(), listOfRestaurantObjects);
-        mRecyclerView.setAdapter(mAdapter);
+        if (getActivity() != null) {
+
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    listOfRestaurants = mDb.restaurantDao().getAllRestaurantsNotLiveData();
+
+                    Log.d(TAG, "run: list.size() = " + listOfRestaurants.size());
+
+                    if (getContext() != null) {
+                        mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
+                        mRecyclerView.setAdapter(mAdapter);
+                    }
+                }
+            });
+
+        }
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 
@@ -123,9 +153,22 @@ public class FragmentRestaurantListView extends Fragment {
             }
 
             case R.id.list_search_button_id: {
-                Log.d(TAG, "onOptionsItemSelected: search button clicked");
-                toolbar.setVisibility(View.GONE);
-                Anim.crossFadeShortAnimation(toolbar2);
+
+                Log.d(TAG, "onOptionsItemSelected: clicked!");
+                // TODO: 21/05/2018 Remove
+
+                startActivity(new Intent(getActivity(), AndroidDatabaseManager.class));
+//                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mDb.restaurantDao().updateRestaurantDistance("ChIJiQCNwNqNcUgRIXPF8SO44lo", "0.1m");
+//                    }
+//                });
+
+                // TODO: 21/05/2018 Uncomment
+                //Log.d(TAG, "onOptionsItemSelected: search button clicked");
+                //toolbar.setVisibility(View.GONE);
+                //Anim.crossFadeShortAnimation(toolbar2);
                 return true;
             }
         }

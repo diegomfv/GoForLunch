@@ -14,7 +14,13 @@
     <string name="pref_summaryOn">Notifications are enabled</string>
     <string name="pref_key_notifications">notifications</string>
 
-
+    <!-- INTENT RECYCLER VIEW -> RESTAURANT ACTIVITY -->
+    <string name="i_image_url" translatable="false">image_url</string>
+    <string name="i_name" translatable="false">name</string>
+    <string name="i_address" translatable="false">address</string>
+    <string name="i_rating" translatable="false">rating</string>
+    <string name="i_phone" translatable="false">phone</string>
+    <string name="i_website" translatable="false">website</string>
 
 </resources>
 

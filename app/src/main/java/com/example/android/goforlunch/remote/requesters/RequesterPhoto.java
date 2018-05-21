@@ -3,6 +3,7 @@ package com.example.android.goforlunch.remote.requesters;
 import android.util.Log;
 
 import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 
@@ -22,7 +23,7 @@ public class RequesterPhoto {
     private static final String TAG = "RequesterPhoto";
 
     private static String photoKey = "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU";
-    private String maxWidth = "800";
+    private String maxWidth = "400";
     private AppDatabase mDb;
 
     public RequesterPhoto(AppDatabase mDb) {
@@ -40,19 +41,31 @@ public class RequesterPhoto {
                 Log.d(TAG, "onResponse: correct call");
                 Log.d(TAG, "onResponse: url = " + call.request().url().toString());
 
-                String photo_url = response.body();
+                final String photo_url = response.body();
 
                 /** Updating the database
                  * */
-                mDb.restaurantDao().updateRestaurantPhoto(placeId, photo_url);
-
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.restaurantDao().updateRestaurantPhoto(placeId, photo_url);
+                    }
+                });
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(final Call<String> call, Throwable t) {
 
                 Log.d(TAG, "onFailure: there was an error");
                 Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.restaurantDao().updateRestaurantPhoto(placeId, call.request().url().toString());
+                    }
+                });
+
 
             }
         });

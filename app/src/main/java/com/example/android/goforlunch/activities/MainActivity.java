@@ -54,6 +54,7 @@ import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocomplete
 import com.example.android.goforlunch.pojo_delete.RestaurantObject;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
+import com.example.android.goforlunch.remote.requesters.RequesterNearby;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -133,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
 
         mDb = AppDatabase.getInstance(getApplicationContext());
 
+        /**
         /** We check if our table is empty. If it is not, we delete the info.
-         * */
         mainViewModelDELETE = ViewModelProviders.of(this).get(MainViewModelDELETE.class);
         mainViewModelDELETE.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
             @Override
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        */
 
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
@@ -188,18 +190,6 @@ public class MainActivity extends AppCompatActivity {
             getLocationPermission();
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -409,8 +399,16 @@ public class MainActivity extends AppCompatActivity {
                         latLngBounds = new LatLngBounds(
                                 southWest, northEast);
 
+                        //We delete the database
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+                            }
+                        });
+
                         //We do the request to the API
-                        doAPIRequests();
+                        doAPIRequests(mDb, myPosition);
 
                         Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
@@ -427,10 +425,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void doAPIRequests() {
+    /** Method used to do the API Request
+     * */
+    private void doAPIRequests(AppDatabase appDatabase, LatLngForRetrofit myPosition) {
 
-
-
+        RequesterNearby requesterNearby = new RequesterNearby(appDatabase, myPosition);
+        requesterNearby.doApiRequest();
 
     }
 }

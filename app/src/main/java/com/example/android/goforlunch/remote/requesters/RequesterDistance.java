@@ -3,6 +3,7 @@ package com.example.android.goforlunch.remote.requesters;
 import android.util.Log;
 
 import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.models.modeldistance.Distance;
 import com.example.android.goforlunch.models.modeldistance.Elements;
 import com.example.android.goforlunch.models.modeldistance.MatrixDistance;
@@ -67,11 +68,18 @@ public class RequesterDistance {
                         }
                     }
                 }
+                //Needed to be final to access method
+                final String finalDistanceValue = distanceValue;
 
                 /** Updating the database
                  * */
-                mDb.restaurantDao().updateRestaurantDistance(placeId, distanceValue);
 
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.restaurantDao().updateRestaurantDistance(placeId, finalDistanceValue);
+                    }
+                });
             }
 
             @Override
