@@ -52,24 +52,38 @@ public class RequesterNearby {
 
                 if (myPlaces.getResults() != null) {
 
-                    String placeId = "nA";
-                    String name = "nA";
-                    String type = "nA";
-                    String address = "nA";
-                    String openUntil = "nA";
-                    String distance = "nA";
-                    String rating = "nA";
-                    String imageUrl = "nA";
-                    String phone = "nA";
-                    String websiteUrl = "nA";
-                    String lat = "nA";
-                    String lng = "nA";
+                    String placeId;
+                    String name;
+                    String type;
+                    String address;
+                    String openUntil;
+                    String distance;
+                    String rating;
+                    String imageUrl;
+                    String phone;
+                    String websiteUrl;
+                    String lat;
+                    String lng;
 
                     Results[] results = myPlaces.getResults();
 
                     /** Iterating through the results array
                      * */
                     for (int i = 0; i < results.length; i++) {
+
+                        placeId = "nA";
+                        name = "nA";
+                        type = "nA";
+                        address = "nA";
+                        openUntil = "nA";
+                        distance = "nA";
+                        rating = "nA";
+                        imageUrl = "nA";
+                        phone = "nA";
+                        websiteUrl = "nA";
+                        lat = "nA";
+                        lng = "nA";
+
 
                         if (results[i].getPlace_id() != null) {
                             placeId = results[i].getPlace_id();

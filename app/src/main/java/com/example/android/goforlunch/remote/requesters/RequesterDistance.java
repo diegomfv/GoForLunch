@@ -49,13 +49,24 @@ public class RequesterDistance {
 
                 MatrixDistance matrixDistance = response.body();
 
-                Rows[] rows = matrixDistance.getRows();
+                String distanceValue = "nA";
 
-                Elements[] elements = rows[0].getElements();
+                if (matrixDistance.getRows() != null) {
 
-                Distance distance = elements[0].getDistance();
+                    Rows[] rows = matrixDistance.getRows();
 
-                final String distanceValue = distance.getText();
+                    if (rows[0].getElements() != null) {
+
+                        Elements[] elements = rows[0].getElements();
+
+                        if (elements[0].getDistance() != null) {
+
+                            Distance distance = elements[0].getDistance();
+                            distanceValue = distance.getText();
+
+                        }
+                    }
+                }
 
                 /** Updating the database
                  * */
