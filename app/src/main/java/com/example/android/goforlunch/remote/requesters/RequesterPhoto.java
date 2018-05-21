@@ -13,14 +13,16 @@ import retrofit2.Response;
 /**
  * Created by Diego Fajardo on 21/05/2018.
  */
+
+/** Class that allows doing requests to Google Places API. Specifically, this class
+ * does Place Photos Requests to get the pictures from the specific place
+ * */
 public class RequesterPhoto {
 
     private static final String TAG = "RequesterPhoto";
 
     private static String photoKey = "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU";
-
     private String maxWidth = "800";
-
     private AppDatabase mDb;
 
     public RequesterPhoto(AppDatabase mDb) {
@@ -40,6 +42,8 @@ public class RequesterPhoto {
 
                 String photo_url = response.body();
 
+                /** Updating the database
+                 * */
                 mDb.restaurantDao().updateRestaurantPhoto(placeId, photo_url);
 
             }

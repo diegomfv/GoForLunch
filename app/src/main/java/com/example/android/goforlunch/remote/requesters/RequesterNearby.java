@@ -7,6 +7,7 @@ import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.models.modelnearby.Geometry;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
+import com.example.android.goforlunch.models.modelnearby.Location;
 import com.example.android.goforlunch.models.modelnearby.MyPlaces;
 import com.example.android.goforlunch.models.modelnearby.Results;
 import com.example.android.goforlunch.remote.Common;
@@ -19,10 +20,15 @@ import retrofit2.Response;
 /**
  * Created by Diego Fajardo on 21/05/2018.
  */
+
+/** Class that allows doing requests to Google Places API. Specifically, this class
+ * does Nearby Search Requests to get the places that are close to the user
+ * */
 public class RequesterNearby {
 
     private static final String TAG = "RequesterNearby";
 
+    private static String nearbyKey = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
     private AppDatabase mDb;
 
     public RequesterNearby(AppDatabase mDb) {
@@ -31,7 +37,7 @@ public class RequesterNearby {
 
     public void doApiRequest (final LatLngForRetrofit myPosition, String key) {
 
-        final GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
+        GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
         Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", key);
         callNearby.enqueue(new Callback<MyPlaces>() {
 
@@ -44,66 +50,86 @@ public class RequesterNearby {
 
                 Log.d(TAG, "onResponse: " + myPlaces.toString());
 
-                Results[] results = myPlaces.getResults();
+                if (myPlaces.getResults() != null) {
 
-                for (int i = 0; i < results.length; i++) {
+                    String placeId = "nA";
+                    String name = "nA";
+                    String type = "nA";
+                    String address = "nA";
+                    String openUntil = "nA";
+                    String distance = "nA";
+                    String rating = "nA";
+                    String imageUrl = "nA";
+                    String phone = "nA";
+                    String websiteUrl = "nA";
+                    String lat = "nA";
+                    String lng = "nA";
 
-                    /** Creating the object restaurant and storing it in the map
+                    Results[] results = myPlaces.getResults();
+
+                    /** Iterating through the results array
                      * */
+                    for (int i = 0; i < results.length; i++) {
 
-                    Geometry geometry = results[i].getGeometry();
+                        if (results[i].getPlace_id() != null) {
+                            placeId = results[i].getPlace_id();
+                        }
 
-                    com.example.android.goforlunch.models.modelnearby.Location location =
-                            geometry.getLocation();
+                        if (results[i].getName() != null) {
+                            name = results[i].getName();
+                        }
 
-                    final String placeId = results[i].getPlace_id();
-                    String name = results[i].getName();
-                    String type = "NoType";
-                    String address = "NoAddress";
-                    String openUntil = "NoTime";
-                    String distance = "NoDistance";
-                    String rating = results[i].getRating();
-                    String imageUrl = "NoImageUrl";
-                    String phone = "NoPhone";
-                    String websiteUrl = "NoWebsiteUrl";
-                    String lat = location.getLat();
-                    String lng = location.getLng();
+                        if (results[i].getRating() != null) {
+                            rating = results[i].getRating();
+                        }
 
-                    /** We create an object with all the info
-                     * */
-                    final RestaurantEntry restaurantEntry = new RestaurantEntry(
-                            placeId,
-                            name,
-                            type,
-                            address,
-                            openUntil,
-                            distance,
-                            rating,
-                            imageUrl,
-                            phone,
-                            websiteUrl,
-                            lat,
-                            lng
-                    );
+                        if (results[i].getGeometry() != null) {
 
-                    mDb.restaurantDao().insertRestaurant(restaurantEntry);
+                            Geometry geometry = results[i].getGeometry();
 
-                    /** We insert the object in the database
-                     * */
-                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "run: Inserting restaurantEntry: " + placeId);
+                            if (geometry.getLocation() != null) {
+
+                                Location location = geometry.getLocation();
+
+                                lat = location.getLat();
+                                lng = location.getLng();
+
+                            }
+                        }
+
+
+                        /** We create an object with all the info
+                         * */
+                        final RestaurantEntry restaurantEntry = new RestaurantEntry(
+                                placeId,
+                                name,
+                                type,
+                                address,
+                                openUntil,
+                                distance,
+                                rating,
+                                imageUrl,
+                                phone,
+                                websiteUrl,
+                                lat,
+                                lng
+                        );
+
+                        /** We insert the object in the database
+                         * */
+                        mDb.restaurantDao().insertRestaurant(restaurantEntry);
+
+                    }
+
+                    for (int i = 0; i < results.length; i++) {
+
+                        if (results[i].getPlace_id() != null) {
+
+                            RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
+                            requesterPlaceId.doApiRequest(results[i].getPlace_id());
 
                         }
-                    });
-                }
-
-                for (int i = 0; i < results.length; i++) {
-
-                    RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
-                    requesterPlaceId.doApiRequest(results[i].getPlace_id());
-
+                    }
                 }
             }
 

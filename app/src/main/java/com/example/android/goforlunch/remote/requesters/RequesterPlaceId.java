@@ -21,11 +21,16 @@ import retrofit2.Response;
 /**
  * Created by Diego Fajardo on 21/05/2018.
  */
+
+/** Class that allows doing requests to Google Places API. Specifically, this class
+ * does Place Details Requests to get detailed information about places
+ * */
 public class RequesterPlaceId {
 
     private static final String TAG = "RequesterPlaceId";
 
     private static String placeIdKey = "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU";
+    private static int day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
     private LatLngForRetrofit myPosition;
     private AppDatabase mDb;
 
@@ -37,7 +42,6 @@ public class RequesterPlaceId {
     public void doApiRequest(final String placeId) {
 
         GooglePlaceWebAPIService clientPlaceId = Common.getGooglePlaceIdApiService();
-
         Call<PlaceById> callPlaceId = clientPlaceId.fetchDataPlaceId(placeId, placeIdKey);
         callPlaceId.enqueue(new Callback<PlaceById>() {
             @Override
@@ -50,123 +54,52 @@ public class RequesterPlaceId {
 
                 Log.d(TAG, "onResponse: " + placeById.toString());
 
-                final Result result = placeById.getResult();
+                String address = "nA";
+                String phone = "nA";
+                String websiteUrl = "nA";
+                String openTill = "nA";
 
-                final String address = result.getFormatted_address();
-                final String phone = result.getInternational_phone_number();
-                final String websiteUrl = result.getWebsite();
+                if (placeById.getResult() != null) {
 
-                final String openTill;
-                Calendar c = Calendar.getInstance();
-                int day = c.get(Calendar.DAY_OF_WEEK);
+                    Result result = placeById.getResult();
 
-                Opening_hours opening_hours = result.getOpening_hours();
-                Periods[] periods = opening_hours.getPeriods();
-
-                switch (day) {
-
-                    case Calendar.SUNDAY: {
-
-                        Close close = periods[0].getClose();
-                        String time = close.getTime();
-
-                        time = time.substring(0, 2) + "." + time.substring(2, time.length());
-
-                        openTill = "Open until " + time;
-
+                    if (result.getFormatted_address() != null) {
+                        address = result.getFormatted_address();
                     }
-                    break;
 
-                    case Calendar.MONDAY: {
-
-                        Close close = periods[1].getClose();
-                        String time = close.getTime();
-
-                        time = time.substring(0, 2) + "." + time.substring(2, time.length());
-
-                        openTill = "Open until " + time;
-
+                    if (result.getFormatted_phone_number() != null) {
+                        phone = result.getInternational_phone_number();
                     }
-                    break;
 
-                    case Calendar.TUESDAY: {
-
-                        Close close = periods[2].getClose();
-                        String time = close.getTime();
-
-                        time = time.substring(0, 2) + "." + time.substring(2, time.length());
-
-                        openTill = "Open until " + time;
-
+                    if (result.getWebsite() != null) {
+                        websiteUrl = result.getWebsite();
                     }
-                    break;
 
-                    case Calendar.WEDNESDAY: {
-
-                        Close close = periods[3].getClose();
-                        String time = close.getTime();
-
-                        time = time.substring(0, 2) + "." + time.substring(2, time.length());
-
-                        openTill = "Open until " + time;
-
+                    if (result.getOpening_hours() != null) {
+                        Opening_hours opening_hours = result.getOpening_hours();
+                        if (opening_hours.getPeriods() != null) {
+                            Periods[] periods = opening_hours.getPeriods();
+                            openTill = formatTime(periods,day);
+                        }
                     }
-                    break;
 
-                    case Calendar.THURSDAY: {
+                    /** Updating the database
+                     * */
+                    mDb.restaurantDao().updateRestaurant(result.getPlace_id(), address, phone, websiteUrl, openTill);
 
-                        Close close = periods[4].getClose();
-                        String time = close.getTime();
-
-                        time = time.substring(0, 2) + "." + time.substring(2, time.length());
-
-                        openTill = "Open until " + time;
-
+                    /** Request to get a photo of the place
+                     * */
+                    if (result.getPhotos() != null) {
+                        RequesterPhoto requesterPhoto = new RequesterPhoto(mDb);
+                        requesterPhoto.doApiRequest(result.getPlace_id(), result.getPhotos()[0].getPhoto_reference());
                     }
-                    break;
 
-                    case Calendar.FRIDAY: {
-
-                        Close close = periods[5].getClose();
-                        String time = close.getTime();
-
-                        time = time.substring(0, 2) + "." + time.substring(2, time.length());
-
-                        openTill = "Open until " + time;
-
-                    }
-                    break;
-
-                    case Calendar.SATURDAY: {
-
-                        Close close = periods[6].getClose();
-                        String time = close.getTime();
-
-                        time = time.substring(0, 2) + "." + time.substring(2, time.length());
-
-                        openTill = "Open until " + time;
-
-                    }
-                    break;
-
-                    default: {
-                        openTill = "No time available";
-                    }
-                    break;
+                    /** Request to get the distance to the place
+                     * */
+                    RequesterDistance requesterDistance = new RequesterDistance(mDb, myPosition);
+                    requesterDistance.doApiRequest(result.getPlace_id());
 
                 }
-
-                mDb.restaurantDao().updateRestaurant(result.getPlace_id(), address, phone, websiteUrl, openTill);
-
-                if (result.getPhotos() != null) {
-
-                    RequesterPhoto requesterPhoto = new RequesterPhoto(mDb);
-                    requesterPhoto.doApiRequest(result.getPlace_id(), result.getPhotos()[0].getPhoto_reference());
-
-                }
-
-                RequesterDistance requesterDistance = new RequesterDistance(mDb, myPosition);
-                requesterDistance.doApiRequest(result.getPlace_id());
 
             }
 
@@ -178,5 +111,17 @@ public class RequesterPlaceId {
 
             }
         });
+    }
+
+    /** Method that formats the date that we get from the request to insert it in
+     * the database with the new format (the one that will be displayed)
+     * */
+    private String formatTime (Periods[] periods, int day) {
+
+        Close close = periods[day].getClose();
+        String time = close.getTime();
+        time = time.substring(0, 2) + "." + time.substring(2, time.length());
+        return "Open until " + time;
+
     }
 }

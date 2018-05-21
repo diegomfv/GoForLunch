@@ -18,15 +18,18 @@ import retrofit2.Response;
 /**
  * Created by Diego Fajardo on 21/05/2018.
  */
+
+/** Class that allows doing requests to Google Distance Matrix API. It allows to get
+ * the distance between two places. In our case, one will be a restaurant and the
+ * other one will be a position of the user
+ * */
 public class RequesterDistance {
 
     private static final String TAG = "RequesterDistance";
 
     private static final String distanceKey = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
-
-    private AppDatabase mDb;
-
     private LatLngForRetrofit myPosition;
+    private AppDatabase mDb;
 
     public RequesterDistance(AppDatabase mDb, LatLngForRetrofit myPosition) {
         this.mDb = mDb;
@@ -35,7 +38,7 @@ public class RequesterDistance {
 
     public void doApiRequest(final String placeId) {
 
-        final GooglePlaceWebAPIService clientMatrix = Common.getGoogleDistanceMatrixApiService();
+        GooglePlaceWebAPIService clientMatrix = Common.getGoogleDistanceMatrixApiService();
         Call<MatrixDistance> callMatrix = clientMatrix.fetchDistance("imperial", "place_id:" + placeId, myPosition, distanceKey);
         callMatrix.enqueue(new Callback<MatrixDistance>() {
             @Override
@@ -54,6 +57,8 @@ public class RequesterDistance {
 
                 final String distanceValue = distance.getText();
 
+                /** Updating the database
+                 * */
                 mDb.restaurantDao().updateRestaurantDistance(placeId, distanceValue);
 
             }
