@@ -23,9 +23,10 @@ public interface GooglePlaceWebAPIService {
             @Query("key") String key
     );
 
+    //encoded true avoids Retrofit to change "+" for 2%B in the url
     @GET("json")
     Call<PlacesByTextSearch> fetchDataTextSearch(
-            @Query("query") String query,
+            @Query(value = "query", encoded = true) String query,
             @Query("location") LatLngForRetrofit latLngForRetrofit,
             @Query("radius") int radius,
             @Query("key") String key

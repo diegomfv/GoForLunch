@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.remote.requesters.RequesterNearby;
 import com.example.android.goforlunch.remote.requesters.RequesterTextSearch;
 
 /**

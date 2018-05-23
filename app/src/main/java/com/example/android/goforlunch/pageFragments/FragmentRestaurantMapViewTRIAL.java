@@ -38,6 +38,7 @@ import android.widget.Toast;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.activities.RestaurantActivity;
+import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
@@ -201,12 +202,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                         public void run() {
 
 
-
-
-
-
-
-
                         }
                     });
 
@@ -349,8 +344,11 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
             case R.id.map_search_button_id: {
                 Log.d(TAG, "onOptionsItemSelected: search button clicked");
-                toolbar.setVisibility(View.GONE);
-                Anim.crossFadeShortAnimation(toolbar2);
+
+                startActivity(new Intent(getActivity(), AndroidDatabaseManager.class));
+
+                //toolbar.setVisibility(View.GONE);
+                //Anim.crossFadeShortAnimation(toolbar2);
                 return true;
             }
         }
@@ -786,7 +784,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
     @Override
     public void onPause() {
         super.onPause();
-        mGoogleApiClient.stopAutoManage(getActivity());
     }
 }
 

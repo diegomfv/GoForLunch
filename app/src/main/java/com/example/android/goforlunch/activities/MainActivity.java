@@ -25,9 +25,8 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthSignInActivity;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
+import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
 import com.example.android.goforlunch.viewmodel.MainViewModel;
-import com.example.android.goforlunch.atl.ATLInitApiGeneralRequests;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -396,10 +395,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (loader == null) {
             Log.i(TAG, "loadLoaderUpdateSwitchTable: ");
-            loaderManager.initLoader(id, null, loaderInitApiGeneralRequests);
+            loaderManager.initLoader(id, null, loaderInitApiTextSearchRequests);
         } else {
             Log.i(TAG, "loadLoaderUpdateSwitchTable: ");
-            loaderManager.restartLoader(id, null, loaderInitApiGeneralRequests);
+            loaderManager.restartLoader(id, null, loaderInitApiTextSearchRequests);
         }
     }
 
@@ -411,13 +410,13 @@ public class MainActivity extends AppCompatActivity {
     /** This LoaderCallback
      * uses ATLInitApi
      * */
-    private LoaderManager.LoaderCallbacks loaderInitApiGeneralRequests =
+    private LoaderManager.LoaderCallbacks loaderInitApiTextSearchRequests =
             new LoaderManager.LoaderCallbacks() {
 
                 @Override
                 public Loader onCreateLoader(int id, Bundle args) {
                     Log.d(TAG, "onCreateLoader: is called");
-                    return new ATLInitApiGeneralRequests(MainActivity.this, mDb, myPosition);
+                    return new ATLInitApiTextSearchRequests(MainActivity.this, mDb, myPosition);
                 }
 
                 @Override

@@ -23,5 +23,7 @@ public interface StringValues {
             "Vietnamese"
     };
 
+    String addRestaurantString = "+Restaurant";
+
 }
 
