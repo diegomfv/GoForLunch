@@ -4,6 +4,7 @@ import com.example.android.goforlunch.models.modeldistance.MatrixDistance;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models.modelnearby.MyPlaces;
 import com.example.android.goforlunch.models.modelplacebyid.PlaceById;
+import com.example.android.goforlunch.models.modelplacesbytextsearch.PlacesByTextSearch;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -21,6 +22,15 @@ public interface GooglePlaceWebAPIService {
             @Query("type") String type,
             @Query("key") String key
     );
+
+    @GET("json")
+    Call<PlacesByTextSearch> fetchDataTextSearch(
+            @Query("query") String query,
+            @Query("location") LatLngForRetrofit latLngForRetrofit,
+            @Query("radius") int radius,
+            @Query("key") String key
+    );
+
 
     @GET("json")
     Call<PlaceById> fetchDataPlaceId(

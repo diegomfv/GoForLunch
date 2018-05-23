@@ -204,6 +204,9 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
 
 
+
+
+
                         }
                     });
 

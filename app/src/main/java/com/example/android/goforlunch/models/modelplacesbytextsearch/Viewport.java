@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.models.modelplacesbysearch;
+package com.example.android.goforlunch.models.modelplacesbytextsearch;
 
 /**
  * Created by Diego Fajardo on 23/05/2018.
