@@ -26,7 +26,7 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthSignInActivity;
 import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
-import com.example.android.goforlunch.viewmodel.MainViewModel;
+import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;

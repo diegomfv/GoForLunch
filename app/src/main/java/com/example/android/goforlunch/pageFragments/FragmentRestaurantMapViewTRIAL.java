@@ -39,7 +39,7 @@ import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.activities.RestaurantActivity;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.strings.StringValues;
-import com.example.android.goforlunch.viewmodel.MainViewModel;
+import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -162,9 +162,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
-
-        String[] RESTAURANT_TYPES = getActivity().getResources().getStringArray(R.array.restaurant_types);
-
         /** Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
@@ -180,7 +177,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                     getActivity(),
                     android.R.layout.simple_list_item_1, //This layout has to be a textview
-                    RESTAURANT_TYPES
+                    StringValues.RESTAURANT_TYPES
             );
             //We could have a custom layout like this (adding id of textView)
             //ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -196,26 +193,18 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                 public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
                     Log.d(TAG, "onItemClick: CALLED!");
 
-                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                        @Override
-                        public void run() {
+                    for (int j = 0; j < listOfMarkers.size(); j++) {
 
-                            for (int j = 0; j < listOfMarkers.size(); j++) {
-
-                                if (!Arrays.asList(StringValues.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
-                                    listOfMarkers.get(i).setVisible(true);
-                                } else if (listOfMarkers.get(i).getSnippet().equals(adapterView.getItemAtPosition(i).toString())){
-                                    listOfMarkers.get(i).setVisible(true);
-                                } else {
-                                    listOfMarkers.get(i).setVisible(false);
-                                }
-                            }
+                        if (!Arrays.asList(StringValues.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
+                            listOfMarkers.get(i).setVisible(true);
+                        } else if (listOfMarkers.get(i).getSnippet().equals(adapterView.getItemAtPosition(i).toString())){
+                            listOfMarkers.get(i).setVisible(true);
+                        } else {
+                            listOfMarkers.get(i).setVisible(false);
                         }
-                    });
+                    }
                 }
             });
-
-
         }
 
         if (((AppCompatActivity) getActivity()) != null) {

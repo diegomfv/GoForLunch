@@ -1,5 +1,7 @@
 package com.example.android.goforlunch.pageFragments;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,6 +20,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,7 +35,10 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
+import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,6 +46,8 @@ import java.util.List;
  */
 
 public class FragmentRestaurantListViewTRIAL extends Fragment {
+
+    // TODO: 24/05/2018 Add the ViewModel here
 
     private static final String TAG = "PageFragmentRestaurantL";
 
@@ -50,6 +60,10 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
     //List of elements
     private List<RestaurantEntry> listOfRestaurants;
+    private List<RestaurantEntry> listOfRestaurantsByType;
+
+    //Widgets
+    private AutoCompleteTextView mSearchText;
 
     //RecyclerView
     private RecyclerView mRecyclerView;
@@ -58,6 +72,7 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
     //Database
     private AppDatabase mDb;
+    private MainViewModel mainViewModel;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -83,49 +98,84 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
         mDb = AppDatabase.getInstance(getActivity());
 
+        mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
+        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
+
+                if (restaurantEntries != null) {
+                    Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+                    listOfRestaurants = restaurantEntries;
+
+                } else {
+                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                }
+            }
+        });
+
         toolbar = (Toolbar) view.findViewById(R.id.list_main_toolbar_id);
         toolbar2 = (RelativeLayout) view.findViewById(R.id.list_toolbar_search_id);
-
-        if (((AppCompatActivity)getActivity()) != null) {
-            ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-        }
-
-        if (((AppCompatActivity)getActivity()) != null) {
-            actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-                actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        }
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.list_recycler_view_id);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
+        mRecyclerView.setAdapter(mAdapter);
+
+        mSearchText = (AutoCompleteTextView) view.findViewById(R.id.map_autocomplete_id);
 
         if (getActivity() != null) {
+            ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
+                    getActivity(),
+                    android.R.layout.simple_list_item_1, //This layout has to be a textview
+                    StringValues.RESTAURANT_TYPES
+            );
 
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            mSearchText.setAdapter(autocompleteAdapter);
+            mSearchText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
-                public void run() {
+                public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
+                    Log.d(TAG, "onItemClick: CALLED!");
 
-                    listOfRestaurants = mDb.restaurantDao().getAllRestaurantsNotLiveData();
-
-                    Log.d(TAG, "run: list.size() = " + listOfRestaurants.size());
-
-                    if (getContext() != null) {
-                        mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
+                    if (!Arrays.asList(StringValues.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
+                        listOfRestaurantsByType = listOfRestaurants;
+                        mAdapter = new RVAdapterList(getContext(), listOfRestaurantsByType);
                         mRecyclerView.setAdapter(mAdapter);
+                    } else if (Arrays.asList(StringValues.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                listOfRestaurantsByType = mDb.restaurantDao().getAllRestaurantsByType(adapterView.getItemAtPosition(i).toString());
+                                mAdapter = new RVAdapterList(getContext(), listOfRestaurantsByType);
+                                mRecyclerView.setAdapter(mAdapter);
+                            }
+                        });
                     }
                 }
             });
 
         }
 
+        if (((AppCompatActivity) getActivity()) != null) {
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        }
+
+        if (((AppCompatActivity) getActivity()) != null) {
+            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
+        }
+
         Anim.crossFadeShortAnimation(mRecyclerView);
 
         return view;
+
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

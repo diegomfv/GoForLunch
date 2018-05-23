@@ -32,8 +32,11 @@ public interface RestaurantDao {
     @Query("SELECT * FROM restaurant ORDER BY distance")
     LiveData<List<RestaurantEntry>> getAllRestaurants();
 
-    @Query("SELECT * FROM restaurant ORDER BY distance")
-    List<RestaurantEntry> getAllRestaurantsNotLiveData();
+    @Query("SELECT * FROM restaurant WHERE type = :type")
+    List<RestaurantEntry> getAllRestaurantsByType(String type);
+
+//    @Query("SELECT * FROM restaurant ORDER BY distance")
+//    List<RestaurantEntry> getAllRestaurantsNotLiveData();
 
     @Insert
     void insertRestaurant (RestaurantEntry restaurantEntry);
