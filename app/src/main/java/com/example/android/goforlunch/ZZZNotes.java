@@ -26,4 +26,14 @@ public class ZZZNotes {
      *
      * */
 
+
+    /**
+     * User visible or foreground updates
+     Example: A mapping app that needs frequent, accurate updates with very low latency. All updates happen in the foreground: the user starts an activity, consumes location data, and then stops the activity after a short time.
+
+     Use the setPriority() method with a value of PRIORITY_HIGH_ACCURACY or PRIORITY_BALANCED_POWER_ACCURACY.
+
+     The interval specified in the setInterval() method depends on the use case: for real time scenarios, set the value to few seconds; otherwise, limit to a few minutes (approximately two minutes or greater is recommended to minimize battery usage).
+     * */
+
 }

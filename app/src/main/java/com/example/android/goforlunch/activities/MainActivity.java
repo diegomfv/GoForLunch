@@ -1,20 +1,19 @@
 package com.example.android.goforlunch.activities;
 
 import android.app.Dialog;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -24,63 +23,44 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthSignInActivity;
-import com.example.android.goforlunch.activities.auth.MainViewModelDELETE;
-import com.example.android.goforlunch.activities.auth.RVAdapterRestaurantDELETE;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
+import com.example.android.goforlunch.viewmodel.MainViewModel;
+import com.example.android.goforlunch.atl.ATLInitApiGeneralRequests;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.models.modeldistance.Distance;
-import com.example.android.goforlunch.models.modeldistance.Elements;
-import com.example.android.goforlunch.models.modeldistance.MatrixDistance;
-import com.example.android.goforlunch.models.modeldistance.Rows;
-import com.example.android.goforlunch.models.modelnearby.Geometry;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.models.modelnearby.MyPlaces;
-import com.example.android.goforlunch.models.modelnearby.Results;
-import com.example.android.goforlunch.models.modelplacebyid.Close;
-import com.example.android.goforlunch.models.modelplacebyid.Opening_hours;
-import com.example.android.goforlunch.models.modelplacebyid.Periods;
-import com.example.android.goforlunch.models.modelplacebyid.PlaceById;
-import com.example.android.goforlunch.models.modelplacebyid.Result;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
-import com.example.android.goforlunch.pojo_delete.RestaurantObject;
-import com.example.android.goforlunch.remote.Common;
-import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
-import com.example.android.goforlunch.remote.requesters.RequesterNearby;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.Calendar;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.http.Query;
-
 // TODO: 18/05/2018 Check if there is internet connection
+// TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
+// TODO: 21/05/2018 Add a button to do the API Requests again
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+
+    //Loaders id
+    private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;
 
     private FirebaseAuth auth;
 
@@ -119,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
     //App Database
     private AppDatabase mDb;
-    private MainViewModelDELETE mainViewModelDELETE;
+    private MainViewModel mainViewModel;
     private List<RestaurantEntry> restaurants;
 
     @Override
@@ -133,27 +113,6 @@ public class MainActivity extends AppCompatActivity {
 //        editor.apply();
 
         mDb = AppDatabase.getInstance(getApplicationContext());
-
-        /**
-        /** We check if our table is empty. If it is not, we delete the info.
-        mainViewModelDELETE = ViewModelProviders.of(this).get(MainViewModelDELETE.class);
-        mainViewModelDELETE.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
-            @Override
-            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
-                Log.d(TAG, "onChanged: Updating list of tasks from LiveData in ViewModel");
-
-                if (restaurantEntries != null && restaurantEntries.size() > 0) {
-
-                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            mDb.restaurantDao().deleteAllRowsInRestaurantTable();
-                        }
-                    });
-                }
-            }
-        });
-        */
 
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
@@ -187,13 +146,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (isServicesOK()) {
 
+            //getLocationPermission() calls getDeviceLocation(). We can then store the Device Location
+            //in the database and use it in FragmentRestaurantMapView to display the current location
             getLocationPermission();
 
         }
 
+        // TODO: 21/05/2018 The fragment has to start working after 3,4 seconds.
+        // TODO: 21/05/2018 Create a progress bar that hides everything and, when loaded, make it disappear
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container_id, FragmentRestaurantMapView.newInstance())
+                .replace(R.id.fragment_container_id, FragmentRestaurantMapViewTRIAL.newInstance())
                 .commit();
 
         /** Use header view to change name displayed in navigation drawer
@@ -229,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
                         // TODO: 20/05/2018 If the user is currently in the fragment, avoid relaunching it (use a flag for example).
                         case R.id.nav_view_map_id:
-                            selectedFragment = FragmentRestaurantMapView.newInstance();
+                            selectedFragment = FragmentRestaurantMapViewTRIAL.newInstance();
                             break;
                         case R.id.nav_view_list_id:
                             selectedFragment = FragmentRestaurantListView.newInstance();
@@ -407,8 +370,9 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-                        //We do the request to the API
-                        doAPIRequests(mDb, myPosition);
+                        /** We do the API Requests. They will fill the database
+                         * */
+                        callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
 
                         Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
@@ -425,14 +389,47 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /** Method used to do the API Request
-     * */
-    private void doAPIRequests(AppDatabase appDatabase, LatLngForRetrofit myPosition) {
+    private void callLoaderInitApiGeneralRequests(int id) {
 
-        RequesterNearby requesterNearby = new RequesterNearby(appDatabase, myPosition);
-        requesterNearby.doApiRequest();
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<Void> loader = loaderManager.getLoader(id);
 
+        if (loader == null) {
+            Log.i(TAG, "loadLoaderUpdateSwitchTable: ");
+            loaderManager.initLoader(id, null, loaderInitApiGeneralRequests);
+        } else {
+            Log.i(TAG, "loadLoaderUpdateSwitchTable: ");
+            loaderManager.restartLoader(id, null, loaderInitApiGeneralRequests);
+        }
     }
+
+
+    /**********************/
+    /** LOADER CALLBACKS **/
+    /**********************/
+
+    /** This LoaderCallback
+     * uses ATLInitApi
+     * */
+    private LoaderManager.LoaderCallbacks loaderInitApiGeneralRequests =
+            new LoaderManager.LoaderCallbacks() {
+
+                @Override
+                public Loader onCreateLoader(int id, Bundle args) {
+                    Log.d(TAG, "onCreateLoader: is called");
+                    return new ATLInitApiGeneralRequests(MainActivity.this, mDb, myPosition);
+                }
+
+                @Override
+                public void onLoadFinished(Loader loader, Object data) {
+
+                }
+
+                @Override
+                public void onLoaderReset(Loader loader) {
+
+                }
+            };
 }
 
 /**

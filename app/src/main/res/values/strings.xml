@@ -9,6 +9,23 @@
 
     <string name="action_settings">Settings</string>
 
+    <!-- RESTAURANT TYPES -->
+    <string-array name="restaurant_types">
+        <item>All</item>
+        <item>American</item>
+        <item>Chineses</item>
+        <item>English</item>
+        <item>French</item>
+        <item>German</item>
+        <item>Indian</item>
+        <item>Italian</item>
+        <item>Japanese</item>
+        <item>Mexican</item>
+        <item>Spanish</item>
+        <item>Thai</item>
+        <item>Vietnamese</item>
+    </string-array>
+
     <!-- PREFERENCES FRAGMENT -->
     <string name="pref_summaryOff">Notifications are disabled</string>
     <string name="pref_summaryOn">Notifications are enabled</string>

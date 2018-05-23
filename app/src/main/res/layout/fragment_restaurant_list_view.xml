@@ -50,13 +50,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="50dp"
                 android:layout_gravity="center_vertical"
-                android:hint="Search Restaurants"
+                android:hint="Search Restaurants by Type"
                 android:textSize="14sp"
                 android:maxLength="40"
                 android:ellipsize="end"
                 android:background="@android:color/transparent"
                 android:maxLines="1"
-                android:inputType="text"/>
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:completionThreshold="1"
+                android:dropDownAnchor="@id/list_cv_search_id"
+                />
 
         </android.support.v7.widget.CardView>
 

@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.activities.auth;
+package com.example.android.goforlunch.viewmodel;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
@@ -19,9 +19,9 @@ import java.util.List;
  * Caches data. Since it is lifecycle aware we avoid
  * lifecycle problems
  * */
-public class MainViewModelDELETE extends AndroidViewModel {
+public class MainViewModel extends AndroidViewModel {
 
-    private static final String TAG = MainViewModelDELETE.class.getSimpleName();
+    private static final String TAG = MainViewModel.class.getSimpleName();
 
     /** We will use this ViewModel to cache the data.
      * This variable has to be "private" and has to have
@@ -29,10 +29,10 @@ public class MainViewModelDELETE extends AndroidViewModel {
      * */
     private LiveData<List<RestaurantEntry>> restaurants;
 
-    public MainViewModelDELETE(@NonNull Application application) {
+    public MainViewModel(@NonNull Application application) {
         super(application);
         AppDatabase database = AppDatabase.getInstance(this.getApplication());
-        Log.d(TAG, "MainViewModelDELETE: Actively retrieving tasks from the Database");
+        Log.d(TAG, "MainViewModel: Actively retrieving tasks from the Database");
         restaurants = database.restaurantDao().getAllRestaurants();
 
     }

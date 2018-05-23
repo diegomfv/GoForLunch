@@ -44,6 +44,9 @@ public interface RestaurantDao {
     @Delete
     void deleteRestaurant (RestaurantEntry restaurantEntry);
 
+    @Delete
+    int deleteAll (RestaurantEntry[] restaurantEntries);
+
     @Query("SELECT * FROM restaurant WHERE placeId = :placeId")
     LiveData<RestaurantEntry> getRestaurantByPlaceId (String placeId);
 

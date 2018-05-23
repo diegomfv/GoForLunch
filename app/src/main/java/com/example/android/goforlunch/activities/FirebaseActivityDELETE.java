@@ -1,29 +1,18 @@
 package com.example.android.goforlunch.activities;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.MainViewModelDELETE;
 import com.example.android.goforlunch.activities.auth.RVAdapterRestaurantDELETE;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
-import com.example.android.goforlunch.data.RestaurantEntry;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
@@ -176,7 +165,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
         /** This substitutes the code immediately above. It makes that we receive the updates
          * from the LiveDate IN the ViewModel
          *
-        MainViewModelDELETE mainViewModelDELETE = ViewModelProviders.of(this).get(MainViewModelDELETE.class);
+        MainViewModel mainViewModelDELETE = ViewModelProviders.of(this).get(MainViewModel.class);
         mainViewModelDELETE.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
             @Override
             public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {

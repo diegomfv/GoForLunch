@@ -126,7 +126,6 @@ public class RequesterNearby {
                             }
                         }
 
-
                         /** We create an object with all the info
                          * */
                         final RestaurantEntry restaurantEntry = new RestaurantEntry(
@@ -154,16 +153,16 @@ public class RequesterNearby {
                         });
 
                     }
-
-                    for (int i = 0; i < results.length; i++) {
-
-                        if (results[i].getPlace_id() != null) {
-
-                            RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
-                            requesterPlaceId.doApiRequest(results[i].getPlace_id());
-
-                        }
-                    }
+// TODO: 22/05/2018 Disabled to avoid to many requests
+//                    for (int i = 0; i < results.length; i++) {
+//
+//                        if (results[i].getPlace_id() != null) {
+//
+//                            RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
+//                            requesterPlaceId.doApiRequest(results[i].getPlace_id());
+//
+//                        }
+//                    }
                 }
             }
 
