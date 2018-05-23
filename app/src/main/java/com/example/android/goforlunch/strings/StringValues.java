@@ -5,9 +5,9 @@ package com.example.android.goforlunch.strings;
  */
 public interface StringValues {
 
-    String notAvailable = "NotAvailable";
+    String NOT_AVAILABLE = "NotAvailable";
 
-    String[] restaurantTypes = {
+    String[] RESTAURANT_TYPES = {
             "All",
             "American",
             "Chinese",
@@ -23,7 +23,7 @@ public interface StringValues {
             "Vietnamese"
     };
 
-    String addRestaurantString = "+Restaurant";
+    String ADD_RESTAURANT_STRING = "+Restaurant";
 
 }
 

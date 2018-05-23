@@ -33,13 +33,12 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.activities.RestaurantActivity;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
-import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.strings.StringValues;
 import com.example.android.goforlunch.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
@@ -73,8 +72,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
-import java.sql.Struct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -143,7 +142,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
     private MainViewModel mainViewModel;
 
     //String of restaurant types
-     //String[] RESTAURANT_TYPES;
+    //String[] RESTAURANT_TYPES;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -194,20 +193,27 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
             mSearchText.setAdapter(adapter);
             mSearchText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
                     Log.d(TAG, "onItemClick: CALLED!");
 
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
 
+                            for (int j = 0; j < listOfMarkers.size(); j++) {
 
+                                if (!Arrays.asList(StringValues.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
+                                    listOfMarkers.get(i).setVisible(true);
+                                } else if (listOfMarkers.get(i).getSnippet().equals(adapterView.getItemAtPosition(i).toString())){
+                                    listOfMarkers.get(i).setVisible(true);
+                                } else {
+                                    listOfMarkers.get(i).setVisible(false);
+                                }
+                            }
                         }
                     });
-
                 }
             });
-
 
 
         }
@@ -359,7 +365,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
      * METHODS ****************
      * ***********************/
 
-    /** Checks if the user has the correct Google Play Services Version
+    /**
+     * Checks if the user has the correct Google Play Services Version
      */
     public boolean isServicesOK() {
         Log.d(TAG, "isServicesOK: checking google services version");
@@ -412,8 +419,9 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         }
     }
 
-    /** Method used to get the user's location
-     * */
+    /**
+     * Method used to get the user's location
+     */
     private void getDeviceLocation() {
         Log.d(TAG, "getDeviceLocation: getting device's current location");
 
@@ -439,7 +447,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                         Log.d(TAG, "onComplete: northEast: " + (currentLocation.getLatitude() + LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() + LONGITUDE_BOUND));
                         Log.d(TAG, "onComplete: southWest: " + (currentLocation.getLatitude() - LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() - LATITUDE_BOUND));
 
-                        myPosition = new LatLngForRetrofit(currentLocation.getLatitude(),currentLocation.getLongitude());
+                        myPosition = new LatLngForRetrofit(currentLocation.getLatitude(), currentLocation.getLongitude());
 
                         latLngBounds = new LatLngBounds(
                                 southWest, northEast);
@@ -460,8 +468,9 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         }
     }
 
-    /** Method used to initialise the map
-     * */
+    /**
+     * Method used to initialise the map
+     */
     private void initMap() {
         Log.d(TAG, "initMap: initializing map");
 
@@ -504,7 +513,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                             //String clickedMarkerTitle = marker.getTitle();
                             Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
 
-                            for (int i = 0; i < listOfRestaurants.size() ; i++) {
+                            for (int i = 0; i < listOfRestaurants.size(); i++) {
 
                                 if (listOfRestaurants.get(i).getName().equals(marker.getTitle())) {
 
@@ -534,15 +543,11 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         });
     }
 
-    /** Method used to enable search in the search bar
-     * */
-    private void init () {
+    /**
+     * Method used to enable search in the search bar
+     */
+    private void init() {
         Log.d(TAG, "init: initialising");
-
-
-
-
-
 
 
 //        mGoogleApiClient = new GoogleApiClient
@@ -571,19 +576,21 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         Utils.hideKeyboard(getActivity());
     }
 
-    /** Method used to move the camera in the map
-     * */
-    private void moveCamera (LatLng latLng, float zoom) {
+    /**
+     * Method used to move the camera in the map
+     */
+    private void moveCamera(LatLng latLng, float zoom) {
 
         Log.d(TAG, "moveCamera: moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
     }
 
-    /** Method used to geolocate places.
+    /**
+     * Method used to geolocate places.
      * It gets the input from the AutoCompleteTextView
-     * */
-    private void geolocate () {
+     */
+    private void geolocate() {
         Log.d(TAG, "geolocate: geolocating");
 
         //We clean the map of markers (if there are any)
@@ -617,7 +624,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
             /** Gives you a lot of information
              * */
-            for (int i = 0; i < list.size() ; i++) {
+            for (int i = 0; i < list.size(); i++) {
                 Address address = list.get(i);
                 Log.d(TAG, "geolocate: found a location: " + address.toString());
 
@@ -627,7 +634,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                         .position(latLng)
                         .title(address.getFeatureName())
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                        //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_lunch)); // would put this icon as market
+                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_lunch)); // would put this icon as market
 
                 listOfMarkers.add(mMap.addMarker(options));
 
@@ -647,8 +654,9 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         }
     }
 
-    /** This method allows us to get a request permission result
-     * */
+    /**
+     * This method allows us to get a request permission result
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.d(TAG, "onRequestPermissionsResult: called");
@@ -659,11 +667,11 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
             case LOCATION_PERMISSION_REQUEST_CODE: {
 
-                if(grantResults.length > 0) {
+                if (grantResults.length > 0) {
 
-                    for (int i = 0; i < grantResults.length ; i++) {
+                    for (int i = 0; i < grantResults.length; i++) {
 
-                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED){
+                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionGranted = false;
                             //Might be that can be removed initMap();
 
@@ -740,7 +748,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                 places.release(); //this is necessary to prevent memory leaks
                 return;
             }
-            
+
             final Place place = places.get(0);
 
             //We cannot create a global Place object list to store all the info because we have to call release() at
@@ -777,19 +785,13 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
             places.release();
         }
     };
-
-    // TODO: 10/05/2018 Explain better
-    /** stopAutoManage() is used to avoid the app to crash when coming back to the
-     * fragment*/
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
 }
 
-/**
- * 1. MANIFEST STUFF
- * 2. CHECKING
- * Check the user has the correct Google Play Services Version. If he does, we run the map.
- * 3.
- * */
+//    // TODO: 10/05/2018 Explain better
+//    /** stopAutoManage() is used to avoid the app to crash when coming back to the
+//     * fragment*/
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//    }
+//}

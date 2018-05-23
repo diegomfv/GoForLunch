@@ -69,15 +69,15 @@ public class UnitTests {
         Random rand = new Random();
         int r = rand.nextInt(12) + 1;
 
-        String type = StringValues.notAvailable;
-        String urlTypePart = StringValues.restaurantTypes[r].substring(0,4);
+        String type = StringValues.NOT_AVAILABLE;
+        String urlTypePart = StringValues.RESTAURANT_TYPES[r].substring(0,4);
 
-        for (int i = 1; i < StringValues.restaurantTypes.length ; i++) {
+        for (int i = 1; i < StringValues.RESTAURANT_TYPES.length ; i++) {
 
-            System.out.println(StringValues.restaurantTypes[i].substring(0,4));
+            System.out.println(StringValues.RESTAURANT_TYPES[i].substring(0,4));
 
-            if (urlTypePart.equals(StringValues.restaurantTypes[i].substring(0,4))){
-                type = StringValues.restaurantTypes[i];
+            if (urlTypePart.equals(StringValues.RESTAURANT_TYPES[i].substring(0,4))){
+                type = StringValues.RESTAURANT_TYPES[i];
             }
         }
 

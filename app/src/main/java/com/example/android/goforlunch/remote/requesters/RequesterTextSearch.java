@@ -13,17 +13,27 @@ import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.example.android.goforlunch.strings.StringValues;
 
-import java.util.Random;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static junit.framework.Assert.assertTrue;
-
 /**
  * Created by Diego Fajardo on 23/05/2018.
  */
+
+/** The Google Places search services share the same usage limits. However, the Text Search service
+ * is subject to a 10-times multiplier. That is, each Text Search request that you make will count
+ * as 10 requests against your quota. If you've purchased the Google Places API as part of your
+ * Google Maps APIs Premium Plan contract, the multiplier may be different. Please refer to the
+ * Google Maps APIs Premium Plan documentation for details.*/
+
+/** Class that uses the Text Search service from Google Places API to do Requests.
+ * It is used to divide the restaurants by type, what will help us in the future to
+ * update the UI according to the type searched by the user
+ * */
+
+// TODO: 23/05/2018 We make the thread sleep because, if not, it does the calls in a random order.
+// TODO: 23/05/2018 We may be able to remove it now
 public class RequesterTextSearch {
 
     private static final String TAG = "RequesterTextSearch";
@@ -43,21 +53,15 @@ public class RequesterTextSearch {
 
         GooglePlaceWebAPIService client = Common.getGooglePlaceTextSearchApiService();
 
-        for (int j = 1; j < StringValues.restaurantTypes.length ; j++) {
+        for (int j = 1; j < StringValues.RESTAURANT_TYPES.length ; j++) {
 
-            restaurantType = StringValues.restaurantTypes[j];
+            restaurantType = StringValues.RESTAURANT_TYPES[j];
 
             Call<PlacesByTextSearch> callTextSearch = client.fetchDataTextSearch(
-                    restaurantType + StringValues.addRestaurantString,
+                    restaurantType + StringValues.ADD_RESTAURANT_STRING,
                     myPosition,
                     20,
                     textSearchKey);
-
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
             callTextSearch.enqueue(new Callback<PlacesByTextSearch>() {
 
@@ -65,7 +69,7 @@ public class RequesterTextSearch {
                 public void onResponse(Call<PlacesByTextSearch> call, Response<PlacesByTextSearch> response) {
                     Log.d(TAG, "onResponse: correct call");
                     Log.d(TAG, "onResponse: url = " + call.request().url().toString());
-                    Log.d(TAG, "onResponse: TYPE -> " + call.request().url().toString().substring(65,68));
+                    Log.d(TAG, "onResponse: TYPE -> " + call.request().url().toString().substring(65,69));
 
                     if (response.body() != null) {
 
@@ -89,20 +93,23 @@ public class RequesterTextSearch {
 
                             com.example.android.goforlunch.models.modelplacesbytextsearch.Results[] results = places.getResults();
 
-                            for (int i = 0; i < results.length ; i++) {
+                            /** We do not get all the result because there are too many (that is why we
+                             * divide it by two)
+                             * */
+                            for (int i = 0; i < results.length/2 ; i++) {
 
-                                placeId = StringValues.notAvailable;
-                                name = StringValues.notAvailable;
-                                type = StringValues.notAvailable;
-                                address = StringValues.notAvailable;
-                                openUntil = StringValues.notAvailable;
-                                distance = StringValues.notAvailable;
-                                rating = StringValues.notAvailable;
-                                imageUrl = StringValues.notAvailable;
-                                phone = StringValues.notAvailable;
-                                websiteUrl = StringValues.notAvailable;
-                                lat = StringValues.notAvailable;
-                                lng = StringValues.notAvailable;
+                                placeId = StringValues.NOT_AVAILABLE;
+                                name = StringValues.NOT_AVAILABLE;
+                                type = StringValues.NOT_AVAILABLE;
+                                address = StringValues.NOT_AVAILABLE;
+                                openUntil = StringValues.NOT_AVAILABLE;
+                                distance = StringValues.NOT_AVAILABLE;
+                                rating = StringValues.NOT_AVAILABLE;
+                                imageUrl = StringValues.NOT_AVAILABLE;
+                                phone = StringValues.NOT_AVAILABLE;
+                                websiteUrl = StringValues.NOT_AVAILABLE;
+                                lat = StringValues.NOT_AVAILABLE;
+                                lng = StringValues.NOT_AVAILABLE;
 
                                 if (results[i].getPlace_id() != null) {
                                     placeId = results[i].getPlace_id();
@@ -195,13 +202,13 @@ public class RequesterTextSearch {
      * */
     private String getType (String urlSubstring) {
 
-        for (int i = 1; i < StringValues.restaurantTypes.length ; i++) {
+        for (int i = 1; i < StringValues.RESTAURANT_TYPES.length ; i++) {
 
-            if (urlSubstring.equals(StringValues.restaurantTypes[i].substring(0,4))){
-                return StringValues.restaurantTypes[i];
+            if (urlSubstring.equals(StringValues.RESTAURANT_TYPES[i].substring(0,4))){
+                return StringValues.RESTAURANT_TYPES[i];
             }
         }
-        return StringValues.notAvailable;
+        return StringValues.NOT_AVAILABLE;
     }
 
     private String getRatingUnder3 (String rating) {
