@@ -42,6 +42,7 @@ public interface StringValues {
     interface SentIntent {
 
         String PLACE_ID = "placeId";
+        String RESTAURANT_TYPE = "restaurant_type";
 
     }
 

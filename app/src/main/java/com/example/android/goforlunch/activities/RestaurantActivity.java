@@ -29,8 +29,12 @@ import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.example.android.goforlunch.remote.requesters.RequesterPlaceId;
 import com.example.android.goforlunch.strings.StringValues;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -50,7 +54,11 @@ public class RestaurantActivity extends AppCompatActivity {
 
     //Variables
     private String placeId;
+    private String restaurantType;
     private RestaurantEntry restaurant;
+    private String userEmail;
+    private String userKey;
+
     private boolean fabIsOpen = true;
     private String phoneToastString = "No phone available";
     private String webUrlToastString = "No web available";
@@ -65,6 +73,7 @@ public class RestaurantActivity extends AppCompatActivity {
     private AppDatabase mDb;
 
     //Firebase Database
+    private FirebaseAuth auth;
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRef;
 
@@ -72,6 +81,20 @@ public class RestaurantActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant);
+
+        /** We get the user email. We will use it for when clicking the fab button
+         *  */
+        auth = FirebaseAuth.getInstance();
+
+        if (auth != null) {
+            userEmail = auth.getCurrentUser().getEmail();
+        } else {
+            userEmail = "Not Available";
+        }
+
+        /** Instantiation of the fab and set onClick listener*/
+        fab = findViewById(R.id.restaurant_fab_id);
+        fab.setOnClickListener(mFabListener);
 
         /** Instance of the local database
          * */
@@ -81,10 +104,6 @@ public class RestaurantActivity extends AppCompatActivity {
          * */
         fireDb = FirebaseDatabase.getInstance();
         fireDbRef = fireDb.getReference(StringValues.FirebaseReferences.USERS);
-
-        /** Instantiation of the fab and set onClick listener*/
-        fab = findViewById(R.id.restaurant_fab_id);
-        fab.setOnClickListener(mFabListener);
 
         navigationView = (BottomNavigationView) findViewById(R.id.restaurant_selector_id);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
@@ -111,6 +130,7 @@ public class RestaurantActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         placeId = intent.getStringExtra(StringValues.SentIntent.PLACE_ID);
+        restaurantType = intent.getStringExtra(StringValues.SentIntent.RESTAURANT_TYPE);
 
         if (placeId != null) {
 
@@ -214,9 +234,36 @@ public class RestaurantActivity extends AppCompatActivity {
             });
 
             // TODO: 24/05/2018 Hide the progress bar and Show the screen
-            //hideprogressBar();
+            //hideProgressBar();
         }
 
+        /** We get the id of the user. We need it to setValues() when the user clicks
+         * the fab button. Additionally, we set the value of "fabIsOpen"
+         * */
+        fireDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                for (DataSnapshot item:
+                        dataSnapshot.getChildren()) {
+
+                    if (item.child(StringValues.User.EMAIL).toString().equals(userEmail)) {
+                        userKey = item.getKey();
+
+                        /** We set the value of "fabIsOpen" according to the information found in the database
+                         * */
+                        fabIsOpen = item.child(StringValues.User.RESTAURANT).toString().equals(restaurant.getName());
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+            }
+        });
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 
@@ -236,26 +283,24 @@ public class RestaurantActivity extends AppCompatActivity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
 
-                    // TODO: 24/05/2018 Delete from database
+                    /** We delete the restaurant from the database (user's)
+                     **/
+                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT).setValue("None");
+                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT_TYPE).setValue("None");
 
-                    for (:
-                         ) {
-                        
-                    }
-                    
-                    
-                    fireDbRef.child(StringValues.User.)
-
-                    ToastHelper.toastShort(RestaurantActivity.this, "Going to the restaurant!");
+                    ToastHelper.toastShort(RestaurantActivity.this, "Not Going to the restaurant!");
                 }
             } else {
                 fabIsOpen = true;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
 
-                    // TODO: 24/05/2018 Add to database
+                    /** We add the restaurant to the database (user's)
+                     * */
+                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT).setValue(restaurant.getName());
+                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT_TYPE).setValue(restaurantType);
 
-                    ToastHelper.toastShort(RestaurantActivity.this, "Not going to the restaurant...");
+                    ToastHelper.toastShort(RestaurantActivity.this, "Going to the restaurant...");
                 }
             }
 
