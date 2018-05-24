@@ -8,6 +8,8 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import com.example.android.goforlunch.strings.StringValues;
+
 import java.util.List;
 
 /**
@@ -35,8 +37,11 @@ public interface RestaurantDao {
     @Query("SELECT * FROM restaurant WHERE type = :type")
     List<RestaurantEntry> getAllRestaurantsByType(String type);
 
-//    @Query("SELECT * FROM restaurant ORDER BY distance")
-//    List<RestaurantEntry> getAllRestaurantsNotLiveData();
+    @Query("SELECT * FROM restaurant WHERE placeId = :placeId")
+    RestaurantEntry getRestaurantById(String placeId);
+
+//  @Query("SELECT * FROM restaurant ORDER BY distance")
+//  List<RestaurantEntry> getAllRestaurantsNotLiveData();
 
     @Insert
     void insertRestaurant (RestaurantEntry restaurantEntry);

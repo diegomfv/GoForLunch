@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -85,6 +86,24 @@ public class UnitTests {
         System.out.println("urlTypePart = " + urlTypePart);
         assertTrue(type.contains(urlTypePart.substring(0,3)));
 
+    }
+
+    @Test
+    public void separateNameAndSurname () {
+
+        Random rand = new Random();
+        int firstname = rand.nextInt(12) + 1;
+        int lastname = rand.nextInt(12) + 1;
+
+        String name = String.valueOf(firstname) + " " + String.valueOf(lastname);
+
+        String[] nameParts = name.split(" ");
+
+        System.out.println(firstname);
+        System.out.println(lastname);
+
+        assertTrue(nameParts[0].equals(String.valueOf(firstname)));
+        assertTrue(nameParts[1].equals(String.valueOf(lastname)));
     }
 
 

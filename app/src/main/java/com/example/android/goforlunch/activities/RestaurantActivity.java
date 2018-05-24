@@ -19,17 +19,18 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
+import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.models.modelplacebyid.PlaceById;
-import com.example.android.goforlunch.models.modelplacebyid.Result;
+import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
-import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.example.android.goforlunch.remote.requesters.RequesterPlaceId;
+import com.example.android.goforlunch.strings.StringValues;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -48,6 +49,8 @@ public class RestaurantActivity extends AppCompatActivity {
     private RatingBar rbRestRating;
 
     //Variables
+    private String placeId;
+    private RestaurantEntry restaurant;
     private boolean fabIsOpen = true;
     private String phoneToastString = "No phone available";
     private String webUrlToastString = "No web available";
@@ -58,11 +61,28 @@ public class RestaurantActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    //Database
+    private AppDatabase mDb;
+
+    //Firebase Database
+    private FirebaseDatabase fireDb;
+    private DatabaseReference fireDbRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant);
 
+        /** Instance of the local database
+         * */
+        mDb = AppDatabase.getInstance(RestaurantActivity.this);
+
+        /** Reference to Firebase Database
+         * */
+        fireDb = FirebaseDatabase.getInstance();
+        fireDbRef = fireDb.getReference(StringValues.FirebaseReferences.USERS);
+
+        /** Instantiation of the fab and set onClick listener*/
         fab = findViewById(R.id.restaurant_fab_id);
         fab.setOnClickListener(mFabListener);
 
@@ -79,44 +99,124 @@ public class RestaurantActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(RestaurantActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+        // TODO: 24/05/2018 Set the list from Firebase!
         mAdapter = new RVAdapterRestaurant(RestaurantActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
+        /** We pass the placeId with the intent. Then, there can be 2 scenarios:
+         * Scenario 1. The placeId is in the local database (we get the item from there).
+         * Scenario 2. The placeId is not in the local database (it comes from a click in coworker's list).
+         * In the last case, we have to do an ApiRequest.
+         * */
         Intent intent = getIntent();
 
-        if (intent.getStringExtra(getResources().getString(R.string.i_image_url)) != null
-                && !intent.getStringExtra(getResources().getString(R.string.i_image_url)).equals("nA")) {
-            Glide.with(RestaurantActivity.this)
-                    .load(intent.getStringExtra(getResources().getString(R.string.i_image_url)))
-                    .into(ivRestPicture);
+        placeId = intent.getStringExtra(StringValues.SentIntent.PLACE_ID);
+
+        if (placeId != null) {
+
+            /** We check if the placeId is in the database. If it is, we get it from there,
+             * if not, we do an ApiRequest.
+             * */
+
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    restaurant = mDb.restaurantDao().getRestaurantById(placeId);
+
+                    if (restaurant != null){
+
+                        /** The restaurant is in the database, so we get the info and we won't do
+                         * the ApiRequest
+                         * */
+
+                        if (restaurant.getName() != null) {
+                            tvRestName.setText(restaurant.getName());
+                        }
+
+                        if (restaurant.getAddress() != null) {
+                            tvRestAddress.setText(restaurant.getAddress());
+                        }
+
+                        if (restaurant.getRating() != null) {
+                            float rating = Float.parseFloat(restaurant.getRating());
+                            rbRestRating.setRating(rating);
+                        }
+
+                        if (restaurant.getPhone() != null) {
+                            phoneToastString = restaurant.getPhone();
+                        }
+
+                        if (restaurant.getWebsiteUrl() != null) {
+                            webUrlToastString = restaurant.getWebsiteUrl();
+                        }
+
+                        if (restaurant.getImageUrl() != null) {
+                            Glide.with(RestaurantActivity.this)
+                                    .load(restaurant.getImageUrl())
+                                    .into(ivRestPicture);
+                        }
+
+                    } else {
+
+                        /** The restaurant is NOT in the database, so we get the info doing the ApiRequest
+                         * */
+
+                        LatLngForRetrofit latLngForRetrofit = new LatLngForRetrofit(0, 0);
+
+                        /** We pass a latLngForRetrofit with lat and lng equal to 0 to prevent the app
+                         *  to do the Distance Api Request (see RequesterPlaceId class). We do this
+                         *  because we don't have the restaurant location.
+                         * */
+                        RequesterPlaceId requester = new RequesterPlaceId(mDb, latLngForRetrofit);
+                        requester.doApiRequest(placeId);
+
+                        /** We wait a bit for the request to be done
+                         * */
+                        // TODO: 24/05/2018 Vary time if needed!
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        restaurant = mDb.restaurantDao().getRestaurantById(placeId);
+
+                        if (restaurant.getName() != null) {
+                            tvRestName.setText(restaurant.getName());
+                        }
+
+                        if (restaurant.getAddress() != null) {
+                            tvRestAddress.setText(restaurant.getAddress());
+                        }
+
+                        if (restaurant.getRating() != null) {
+                            float rating = Float.parseFloat(restaurant.getRating());
+                            rbRestRating.setRating(rating);
+                        }
+
+                        if (restaurant.getPhone() != null) {
+                            phoneToastString = restaurant.getPhone();
+                        }
+
+                        if (restaurant.getWebsiteUrl() != null) {
+                            webUrlToastString = restaurant.getWebsiteUrl();
+                        }
+
+                        if (restaurant.getImageUrl() != null) {
+                            Glide.with(RestaurantActivity.this)
+                                    .load(restaurant.getImageUrl())
+                                    .into(ivRestPicture);
+                        }
+
+                    }
+                }
+            });
+
+            // TODO: 24/05/2018 Hide the progress bar and Show the screen
+            //hideprogressBar();
         }
 
-        if (intent.getStringExtra(getResources().getString(R.string.i_name)) != null) {
-            tvRestName.setText(intent.getStringExtra(getResources().getString(R.string.i_name)));
-        }
-
-        if (intent.getStringExtra(getResources().getString(R.string.i_address)) != null) {
-            tvRestAddress.setText(intent.getStringExtra(getResources().getString(R.string.i_address)));
-        }
-
-        if (intent.getStringExtra(getResources().getString(R.string.i_rating)) != null &&
-                !intent.getStringExtra(getResources().getString(R.string.i_rating)).equals("nA")) {
-            Log.d(TAG, "onCreate: Rating = " + intent.getStringExtra(getResources().getString(R.string.i_rating)));
-            float rating = Float.parseFloat(intent.getStringExtra(getResources().getString(R.string.i_rating)));
-            rbRestRating.setRating(rating);
-        } else {
-            Log.d(TAG, "onCreate: Rating is equal to nA || null");
-            rbRestRating.setRating(0f);
-        }
-
-        if (intent.getStringExtra(getResources().getString(R.string.i_phone)) != null) {
-            phoneToastString = intent.getStringExtra(getResources().getString(R.string.i_phone));
-
-        }
-
-        if (intent.getStringExtra(getResources().getString(R.string.i_website)) != null) {
-            webUrlToastString = intent.getStringExtra(getResources().getString(R.string.i_website));
-        }
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 
@@ -135,11 +235,27 @@ public class RestaurantActivity extends AppCompatActivity {
                 fabIsOpen = false;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
+
+                    // TODO: 24/05/2018 Delete from database
+
+                    for (:
+                         ) {
+                        
+                    }
+                    
+                    
+                    fireDbRef.child(StringValues.User.)
+
+                    ToastHelper.toastShort(RestaurantActivity.this, "Going to the restaurant!");
                 }
             } else {
                 fabIsOpen = true;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
+
+                    // TODO: 24/05/2018 Add to database
+
+                    ToastHelper.toastShort(RestaurantActivity.this, "Not going to the restaurant...");
                 }
             }
 

@@ -93,10 +93,10 @@ public class RequesterTextSearch {
 
                             com.example.android.goforlunch.models.modelplacesbytextsearch.Results[] results = places.getResults();
 
-                            /** We do not get all the result because there are too many (that is why we
-                             * divide it by two)
+                            /** We do not get all the result because there are too many (that is why choose 5)
                              * */
-                            for (int i = 0; i < results.length/2 ; i++) {
+                            // TODO: 24/05/2018 Can be changed to more options
+                            for (int i = 0; i < 5 ; i++) {
 
                                 placeId = StringValues.NOT_AVAILABLE;
                                 name = StringValues.NOT_AVAILABLE;
@@ -170,7 +170,7 @@ public class RequesterTextSearch {
                                 });
 
                                 // TODO: 22/05/2018 Disabled to avoid to many requests
-//                    for (int i = 0; i < results.length; i++) {
+//                        for (int i = 0; i < 5; i++) {
 //
 //                        if (results[i].getPlace_id() != null) {
 //

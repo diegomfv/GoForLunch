@@ -18,9 +18,6 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.RestaurantActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
-import com.example.android.goforlunch.pojo_delete.RestaurantObject;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 

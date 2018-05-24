@@ -1,9 +1,10 @@
-package com.example.android.goforlunch.pojo_delete;
+package com.example.android.goforlunch.pojo;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
  */
 
+// TODO: 24/05/2018 DELETE!
 public class RestaurantObject {
 
     String placeId;

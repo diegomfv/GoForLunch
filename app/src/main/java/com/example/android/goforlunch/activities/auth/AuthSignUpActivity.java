@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -117,7 +116,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
                                     ToastHelper.toastShort(AuthSignUpActivity.this, "Something went wrong");
 
                                 } else {
-                                    startActivity(new Intent(AuthSignUpActivity.this, AuthEnterName.class));
+                                    startActivity(new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroup.class));
                                     finish();
                                 }
 

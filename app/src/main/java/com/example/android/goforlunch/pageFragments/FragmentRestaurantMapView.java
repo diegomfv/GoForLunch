@@ -43,7 +43,7 @@ import com.example.android.goforlunch.models.modelnearby.MyPlaces;
 import com.example.android.goforlunch.models.modelnearby.Results;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
-import com.example.android.goforlunch.pojo_delete.RestaurantObject;
+import com.example.android.goforlunch.pojo.RestaurantObject;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.google.android.gms.common.ConnectionResult;

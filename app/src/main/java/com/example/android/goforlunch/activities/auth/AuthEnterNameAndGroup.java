@@ -14,7 +14,6 @@ import android.widget.ProgressBar;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.google.android.gms.common.oob.SignUp;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,14 +21,12 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-import org.w3c.dom.Text;
-
 /**
  * Created by Diego Fajardo on 09/05/2018.
  */
-public class AuthEnterName extends AppCompatActivity{
+public class AuthEnterNameAndGroup extends AppCompatActivity{
 
-    private static final String TAG = "AuthEnterName";
+    private static final String TAG = "AuthEnterNameAndGroup";
 
     private FirebaseAuth auth;
     private FirebaseUser user;
@@ -44,7 +41,7 @@ public class AuthEnterName extends AppCompatActivity{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_auth_enter_name);
+        setContentView(R.layout.activity_auth_enter_name_and_group);
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
@@ -82,18 +79,18 @@ public class AuthEnterName extends AppCompatActivity{
                                             Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                         }
 
-                                        ToastHelper.toastShort(AuthEnterName.this, "Something went wrong. Please, sign up again");
+                                        ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Something went wrong. Please, sign up again");
 
                                     } else {
                                         Log.d(TAG, "onComplete: task was succesful");
-                                        startActivity(new Intent(AuthEnterName.this, MainActivity.class));
+                                        startActivity(new Intent(AuthEnterNameAndGroup.this, MainActivity.class));
                                     }
                                 }
                             });
 
                 } else {
-                    ToastHelper.toastShort(AuthEnterName.this, "An error has occurred. Please, sign up again");
-                    startActivity(new Intent(AuthEnterName.this, AuthSignUpActivity.class));
+                    ToastHelper.toastShort(AuthEnterNameAndGroup.this, "An error has occurred. Please, sign up again");
+                    startActivity(new Intent(AuthEnterNameAndGroup.this, AuthSignUpActivity.class));
                 }
 
             }

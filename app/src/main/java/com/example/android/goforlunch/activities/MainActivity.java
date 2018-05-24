@@ -35,8 +35,11 @@ import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTRIAL;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
+import com.example.android.goforlunch.pojo.User;
+import com.example.android.goforlunch.strings.StringValues;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -48,12 +51,19 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO: 18/05/2018 Check if there is internet connection
 // TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
 // TODO: 21/05/2018 Add a button to do the API Requests again
+// TODO: 24/05/2018 Add JOIN GROUP in NavigationDrawer
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -63,8 +73,10 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
 
-    String name = "anonymous";
-    String email = "anon@anonymous.com";
+    //Values to store user's name
+    private String name = "anonymous";
+    private String email = "anon@anonymous.com";
+    private List<User> listOfUsers;
 
     //Widgets
     private DrawerLayout mDrawerLayout;
@@ -96,10 +108,15 @@ public class MainActivity extends AppCompatActivity {
     //Retrofit usage
     private LatLngForRetrofit myPosition;
 
-    //App Database
+    //App Local Database
     private AppDatabase mDb;
     private MainViewModel mainViewModel;
     private List<RestaurantEntry> restaurants;
+
+    //Firebase
+    private FirebaseDatabase fireDb;
+    private DatabaseReference fireDbRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +129,11 @@ public class MainActivity extends AppCompatActivity {
 //        editor.apply();
 
         mDb = AppDatabase.getInstance(getApplicationContext());
+        fireDb = FirebaseDatabase.getInstance();
+        fireDbRef = fireDb.getReference("users");
+
+        // TODO: 24/05/2018 Create a list with all the users of the App doesn't make much sense
+        listOfUsers = new ArrayList<>();
 
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
@@ -135,7 +157,71 @@ public class MainActivity extends AppCompatActivity {
             name = auth.getCurrentUser().getDisplayName();
             email = auth.getCurrentUser().getEmail();
 
-            Log.d(TAG, "onCreate: email: " + email);
+            // TODO: 24/05/2018 Save this to the database (firebase)
+            /** This listener is supposedly only called once and then removed. With it,
+             * we fill the listOfUsers and check if the user is already in the database.
+             * If the user is not, we add him/her to the database
+             * */
+            fireDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    User user;
+
+                    if (dataSnapshot.getChildren() != null) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+                        Log.d(TAG, "onDataChange: KEY = " + dataSnapshot.getKey());
+
+                        for (DataSnapshot item: dataSnapshot.getChildren()) {
+                            Log.d(TAG, "onDataChange: DATASNAPSHOT = " + item.toString());
+
+                            user = new User(
+                                    item.child(StringValues.User.FIRSTNAME).toString(),
+                                    item.child(StringValues.User.LASTNAME).toString(),
+                                    item.child(StringValues.User.EMAIL).toString(),
+                                    item.child(StringValues.User.GROUP).toString(),
+                                    item.child(StringValues.User.RESTAURANT).toString(),
+                                    item.child(StringValues.User.RESTAURANT_TYPE).toString()
+                            );
+
+                            listOfUsers.add(user);
+                        }
+                    }
+
+                    for (int i = 0; i < listOfUsers.size() ; i++) {
+
+                        if (listOfUsers.get(i).getEmail().equals(auth.getCurrentUser().getEmail())) {
+                            //if the user is already in the database, do nothing
+                        } else {
+                            //if the user is not in the database, add him
+
+                            String name = auth.getCurrentUser().getDisplayName();
+
+                            if (name != null) {
+
+                                String[] nameParts = name.split(" ");
+                                fireDbRef.push().setValue(new User(
+                                        nameParts[0],
+                                        nameParts[1],
+                                        auth.getCurrentUser().getEmail(),
+                                        "None",
+                                        "None",
+                                        "None"
+                                ));
+                            }
+
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
         }
 
         navUserName.setText(name);
@@ -194,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
                             selectedFragment = FragmentRestaurantMapViewTRIAL.newInstance();
                             break;
                         case R.id.nav_view_list_id:
-                            selectedFragment = FragmentRestaurantListView.newInstance();
+                            selectedFragment = FragmentRestaurantListViewTRIAL.newInstance();
                             break;
                         case R.id.nav_view_coworkers_id:
                             selectedFragment = FragmentCoworkersView.newInstance();
@@ -371,7 +457,8 @@ public class MainActivity extends AppCompatActivity {
 
                         /** We do the API Requests. They will fill the database
                          * */
-                        callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
+                        // TODO: 24/05/2018 Allow to do the calls when ready
+                        //callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
 
                         Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 

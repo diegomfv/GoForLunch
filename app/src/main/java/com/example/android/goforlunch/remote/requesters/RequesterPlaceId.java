@@ -99,13 +99,15 @@ public class RequesterPlaceId {
                         requesterPhoto.doApiRequest(result.getPlace_id(), result.getPhotos()[0].getPhoto_reference());
                     }
 
-                    /** Request to get the distance to the place
-                     * */
-                    RequesterDistance requesterDistance = new RequesterDistance(mDb, myPosition);
-                    requesterDistance.doApiRequest(result.getPlace_id());
+                    if (myPosition.getLat() != 0) {
 
+                        /** Request to get the distance to the place
+                         * */
+                        RequesterDistance requesterDistance = new RequesterDistance(mDb, myPosition);
+                        requesterDistance.doApiRequest(result.getPlace_id());
+
+                    }
                 }
-
             }
 
             @Override

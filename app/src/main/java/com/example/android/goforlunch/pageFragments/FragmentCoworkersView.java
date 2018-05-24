@@ -21,7 +21,18 @@ import android.widget.TextView;
 import com.example.android.goforlunch.activities.MainActivity;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
+import com.example.android.goforlunch.strings.StringValues;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -41,6 +52,17 @@ public class FragmentCoworkersView extends Fragment {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    //Firabase
+    private FirebaseDatabase fireDb;
+    private DatabaseReference dbRef;
+    private FirebaseAuth auth;
+
+    private String usersEmail;
+    private String userGroup;
+
+    //List of Coworkers
+    private List<User> listOfCoworkers;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -64,6 +86,90 @@ public class FragmentCoworkersView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
 
+        listOfCoworkers = new ArrayList<>();
+
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.coworkers_recycler_view_id);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        /** We get the group of the user
+         * */
+        auth = FirebaseAuth.getInstance();
+
+        if (auth.getCurrentUser() != null) {
+            usersEmail = auth.getCurrentUser().getEmail();
+        } else {
+            // TODO: 24/05/2018 Remove this
+            usersEmail = "Neville_Busken@gmail.com";
+        }
+
+        fireDb = FirebaseDatabase.getInstance();
+        dbRef = fireDb.getReference(StringValues.FirebaseReferences.USERS);
+
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                for (DataSnapshot item:
+                        dataSnapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: in the foreach loop");
+
+                    if (usersEmail != null) {
+                        Log.d(TAG, "onDataChange: users email is not null");
+
+                        /** If the usersEmail of the user in the list is the same as the current user,
+                         * then it is the user we are looking for and we save the user's group to
+                         * build a list */
+                        if (item.child(StringValues.User.EMAIL).getValue().equals(usersEmail)) {
+                            userGroup = item.child(StringValues.User.GROUP).getValue().toString();
+                            Log.d(TAG, "onDataChange: userGroup = " + userGroup);
+                            break;
+                        }
+                    }
+                }
+
+                if (userGroup != null) {
+                    Log.d(TAG, "onDataChange: userGroup is not null");
+
+                    for (DataSnapshot item:
+                            dataSnapshot.getChildren()) {
+
+                        /** If the user's group and the coworker's group coincide, we add the
+                         * coworker to the list
+                         * */
+                        if(item.child(StringValues.User.GROUP).getValue().equals(userGroup)){
+
+                            if (!item.child(StringValues.User.EMAIL).getValue().equals(usersEmail)) {
+                                // TODO: 24/05/2018 Check null values
+                                listOfCoworkers.add(new User(
+                                        item.child(StringValues.User.FIRSTNAME).getValue().toString(),
+                                        item.child(StringValues.User.LASTNAME).getValue().toString(),
+                                        item.child(StringValues.User.EMAIL).getValue().toString(),
+                                        item.child(StringValues.User.GROUP).getValue().toString(),
+                                        item.child(StringValues.User.RESTAURANT).getValue().toString(),
+                                        item.child(StringValues.User.RESTAURANT_TYPE).getValue().toString()
+                                        )
+                                );
+                            }
+                        }
+                    }
+
+                    Log.d(TAG, "onDataChange: setting the adapter with list.size() = " + listOfCoworkers.size());
+
+                    mAdapter = new RVAdapterCoworkers(getContext(), listOfCoworkers);
+                    mRecyclerView.setAdapter(mAdapter);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+            }
+        });
+
         toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
         if (((AppCompatActivity)getActivity()) != null) {
             ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
@@ -76,14 +182,6 @@ public class FragmentCoworkersView extends Fragment {
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
-
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.coworkers_recycler_view_id);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-
-        mAdapter = new RVAdapterCoworkers(getContext());
-        mRecyclerView.setAdapter(mAdapter);
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 

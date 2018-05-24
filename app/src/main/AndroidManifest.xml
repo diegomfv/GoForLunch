@@ -50,7 +50,7 @@
             android:screenOrientation="portrait">
 
         </activity>
-        <activity android:name=".activities.auth.AuthEnterName" />
+        <activity android:name=".activities.auth.AuthEnterNameAndGroup" />
         <activity android:name=".data.sqlite.AndroidDatabaseManager" />
     </application>
 

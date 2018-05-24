@@ -266,7 +266,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                     @Override
                     public void run() {
 
-                        listOfRestaurants = mDb.restaurantDao().getAllRestaurantsNotLiveData();
+                        //listOfRestaurants = mDb.restaurantDao().getAllRestaurantsNotLiveData();
 
                         MarkerOptions options;
 

@@ -176,7 +176,6 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
     }
 
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
@@ -198,22 +197,9 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
             }
 
             case R.id.list_search_button_id: {
-
-                Log.d(TAG, "onOptionsItemSelected: clicked!");
-                // TODO: 21/05/2018 Remove
-
-                startActivity(new Intent(getActivity(), AndroidDatabaseManager.class));
-//                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mDb.restaurantDao().updateRestaurantDistance("ChIJiQCNwNqNcUgRIXPF8SO44lo", "0.1m");
-//                    }
-//                });
-
-                // TODO: 21/05/2018 Uncomment
-                //Log.d(TAG, "onOptionsItemSelected: search button clicked");
-                //toolbar.setVisibility(View.GONE);
-                //Anim.crossFadeShortAnimation(toolbar2);
+                Log.d(TAG, "onOptionsItemSelected: search button clicked");
+                toolbar.setVisibility(View.GONE);
+                Anim.crossFadeShortAnimation(toolbar2);
                 return true;
             }
         }

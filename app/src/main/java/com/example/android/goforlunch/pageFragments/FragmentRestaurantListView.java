@@ -109,7 +109,7 @@ public class FragmentRestaurantListView extends Fragment {
                 @Override
                 public void run() {
 
-                    listOfRestaurants = mDb.restaurantDao().getAllRestaurantsNotLiveData();
+                    //listOfRestaurants = mDb.restaurantDao().getAllRestaurantsNotLiveData();
 
                     Log.d(TAG, "run: list.size() = " + listOfRestaurants.size());
 
