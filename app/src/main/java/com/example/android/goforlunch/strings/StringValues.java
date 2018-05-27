@@ -60,6 +60,8 @@ public interface StringValues {
         String NAME = "name";
         String MEMBERS = "members";
 
+        String USER_ID = "userid";
+
     }
 
 

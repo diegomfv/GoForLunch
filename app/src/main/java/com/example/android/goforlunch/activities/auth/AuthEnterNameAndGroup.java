@@ -34,7 +34,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -219,16 +221,73 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                                                                 ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Something went wrong. Please, sign up again");
 
                                                             } else {
-                                                                Log.d(TAG, "onComplete: task was succesful");
+                                                                Log.d(TAG, "onComplete: task was successful");
 
                                                                 // TODO: 27/05/2018 We insert the user in the database in position x
 
-
                                                                 DatabaseReference fireDbRefUser = fireDb.getReference(StringValues.FirebaseReference.USERS);
+                                                                fireDbRefUser.addValueEventListener(new ValueEventListener() {
+                                                                    @Override
+                                                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
+                                                                        int i = 0;
 
-                                                                startActivity(new Intent(AuthEnterNameAndGroup.this, MainActivity.class));
-                                                                finish();
+                                                                        for (DataSnapshot item:
+                                                                                dataSnapshot.getChildren()) {
+
+                                                                            if (item.child(StringValues.FirebaseReference.EMAIL).getValue().equals("")) {
+
+                                                                                String key = item.getKey();
+
+                                                                                DatabaseReference fireDbRefSpecificUser =
+                                                                                        fireDb.getReference(StringValues.FirebaseReference.USERS + key);
+
+                                                                                Map<String, Object> map = new HashMap<>();
+
+                                                                                map.put((StringValues.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
+                                                                                map.put((StringValues.FirebaseReference.LASTNAME), inputLastName.getText().toString());
+                                                                                map.put((StringValues.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
+                                                                                map.put((StringValues.FirebaseReference.GROUP), inputGroup.getText().toString());
+
+                                                                                fireDbRefSpecificUser.updateChildren(map);
+
+                                                                                startActivity(new Intent(AuthEnterNameAndGroup.this, MainActivity.class));
+                                                                                finish();
+                                                                            }
+                                                                            i++;
+                                                                        }
+
+                                                                        DatabaseReference fireDbRefNewUser =
+                                                                                fireDb.getReference(StringValues.FirebaseReference.USERS + "/userid" + i);
+
+                                                                        Map<String, Object> map = new HashMap<>();
+
+                                                                        map.put((StringValues.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
+                                                                        map.put((StringValues.FirebaseReference.LASTNAME), inputLastName.getText().toString());
+                                                                        map.put((StringValues.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
+                                                                        map.put((StringValues.FirebaseReference.GROUP), inputGroup.getText().toString());
+
+                                                                        map.put((StringValues.FirebaseReference.IMAGE_URL), "");
+                                                                        map.put((StringValues.FirebaseReference.PHONE), "");
+                                                                        map.put((StringValues.FirebaseReference.PLACE_ID), "");
+                                                                        map.put((StringValues.FirebaseReference.RATING), "");
+                                                                        map.put((StringValues.FirebaseReference.RESTAURANT), "");
+                                                                        map.put((StringValues.FirebaseReference.RESTAURANT_TYPE), "");
+
+                                                                        fireDbRefNewUser.updateChildren(map);
+
+                                                                        startActivity(new Intent(AuthEnterNameAndGroup.this, MainActivity.class));
+                                                                        finish();
+
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onCancelled(DatabaseError databaseError) {
+                                                                        Log.d(TAG, "onCancelled: " + databaseError.toString());
+
+                                                                    }
+                                                                });
                                                             }
                                                         }
                                                     });
@@ -241,9 +300,4 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        // TODO: 27/05/2018 Don't allow the user to go back!
-        super.onBackPressed();
-    }
 }
