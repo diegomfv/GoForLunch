@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.activities;
+package com.example.android.goforlunch.activities.rest;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -26,15 +26,13 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthSignInActivity;
 import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
-import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTRIAL;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
@@ -176,12 +174,13 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "onDataChange: DATASNAPSHOT = " + item.toString());
 
                             user = new User(
-                                    item.child(StringValues.User.FIRSTNAME).toString(),
-                                    item.child(StringValues.User.LASTNAME).toString(),
-                                    item.child(StringValues.User.EMAIL).toString(),
-                                    item.child(StringValues.User.GROUP).toString(),
-                                    item.child(StringValues.User.RESTAURANT).toString(),
-                                    item.child(StringValues.User.RESTAURANT_TYPE).toString()
+                                    item.child(StringValues.FirebaseReference.FIRSTNAME).toString(),
+                                    item.child(StringValues.FirebaseReference.LASTNAME).toString(),
+                                    item.child(StringValues.FirebaseReference.EMAIL).toString(),
+                                    item.child(StringValues.FirebaseReference.GROUP).toString(),
+                                    item.child(StringValues.FirebaseReference.PLACE_ID).getValue().toString(),
+                                    item.child(StringValues.FirebaseReference.RESTAURANT).toString(),
+                                    item.child(StringValues.FirebaseReference.RESTAURANT_TYPE).toString()
                             );
 
                             listOfUsers.add(user);
@@ -204,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
                                         nameParts[0],
                                         nameParts[1],
                                         auth.getCurrentUser().getEmail(),
+                                        "None",
                                         "None",
                                         "None",
                                         "None"
@@ -413,7 +413,6 @@ public class MainActivity extends AppCompatActivity {
         if (mLocationPermissionGranted) {
             getDeviceLocation();
         }
-
     }
 
     private void getDeviceLocation() {
@@ -447,20 +446,21 @@ public class MainActivity extends AppCompatActivity {
                         latLngBounds = new LatLngBounds(
                                 southWest, northEast);
 
+                        // TODO: 25/05/2018 Uncomment this
                         //We delete the database
-                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
-                            }
-                        });
+                        //AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        //    @Override
+                        //    public void run() {
+                        //        mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+                        //    }
+                        //});
 
                         /** We do the API Requests. They will fill the database
                          * */
                         // TODO: 24/05/2018 Allow to do the calls when ready
                         //callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
 
-                        Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
+                        //Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
                     } else {
                         Log.d(TAG, "onComplete: current location is null");

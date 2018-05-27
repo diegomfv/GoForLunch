@@ -5,6 +5,9 @@ package com.example.android.goforlunch.strings;
  */
 public interface StringValues {
 
+    // TODO: 25/05/2018 Delete this
+    String FAKE_USER_EMAIL = "Dana_Overcash@gmail.com";
+
     String NOT_AVAILABLE = "NotAvailable";
 
     /** This string is used in for requests (TextSearch)
@@ -29,26 +32,33 @@ public interface StringValues {
             "Vietnamese"
     };
 
-    interface User {
-
-        String FIRSTNAME = "firstname";
-        String LASTNAME = "lastname";
-        String EMAIL = "email";
-        String GROUP = "group";
-        String RESTAURANT = "restaurant";
-        String RESTAURANT_TYPE = "restaurantType";
-    }
-
     interface SentIntent {
+
+        String EMAIL = "email";
+        String PASSWORD = "password";
 
         String PLACE_ID = "placeId";
         String RESTAURANT_TYPE = "restaurant_type";
 
     }
 
-    interface FirebaseReferences {
+    interface FirebaseReference {
 
-        String USERS = "users";
+        String USERS = "users/";
+        String FIRSTNAME = "firstName";
+        String LASTNAME = "lastName";
+        String EMAIL = "email";
+        String GROUP = "group";
+        String PLACE_ID = "placeId";
+        String RESTAURANT = "restaurant";
+        String RESTAURANT_TYPE = "restaurantType";
+        String PHONE = "phone";
+        String RATING = "rating";
+        String IMAGE_URL = "image_url";
+
+        String GROUPS = "groups/";
+        String NAME = "name";
+        String MEMBERS = "members";
 
     }
 

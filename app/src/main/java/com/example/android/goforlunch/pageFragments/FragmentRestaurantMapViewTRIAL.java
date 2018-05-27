@@ -35,13 +35,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.MainActivity;
-import com.example.android.goforlunch.activities.RestaurantActivity;
+import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.strings.StringValues;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
@@ -70,6 +69,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -141,8 +146,14 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
     private AppDatabase mDb;
     private MainViewModel mainViewModel;
 
-    //String of restaurant types
-    //String[] RESTAURANT_TYPES;
+    //Firebase Database
+    private FirebaseAuth auth;
+    private FirebaseDatabase fireDb;
+    private DatabaseReference fireDbRefToUsers;
+    private DatabaseReference fireDbRefToGroups;
+
+    private String usersEmail;
+    private String userGroup;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -165,6 +176,88 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         /** Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
+
+        auth = FirebaseAuth.getInstance();
+
+        /** We get the group of the user
+         * */
+        auth = FirebaseAuth.getInstance();
+
+        if (auth.getCurrentUser() != null) {
+            usersEmail = auth.getCurrentUser().getEmail();
+        } else {
+            // TODO: 24/05/2018 Remove this
+            usersEmail = StringValues.FAKE_USER_EMAIL;
+        }
+
+        fireDb = FirebaseDatabase.getInstance();
+        fireDbRefToUsers = fireDb.getReference("users");
+        fireDbRefToUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: dataSnapshot = " + dataSnapshot.toString());
+
+                for (DataSnapshot item:
+                        dataSnapshot.getChildren()
+                     ) {
+
+                    if (usersEmail != null) {
+                        Log.d(TAG, "onDataChange: users email is not null");
+
+                        /** If the usersEmail of the user in the list is the same as the current user,
+                         * then it is the user we are looking for and we save the user's group to
+                         * get the visited restaurants from there
+                         * */
+                        if (item.child(StringValues.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
+                            userGroup = item.child(StringValues.FirebaseReference.GROUP).getValue().toString();
+                            Log.d(TAG, "onDataChange: userGroup = " + userGroup);
+
+                            fireDbRefToGroups = fireDb.getReference("groups");
+                            fireDbRefToGroups.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Log.d(TAG, "onDataChange: datasnapshot = " + dataSnapshot.toString());
+
+                                    for (DataSnapshot item:
+                                         dataSnapshot.getChildren()) {
+
+                                        if (item.child("name").getValue().toString().equals(userGroup)) {
+                                            Log.d(TAG, "onDataChange: " + userGroup);
+
+                                        }
+
+                                    }
+
+
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    Log.d(TAG, "onCancelled: " + databaseError.getCode());
+                                }
+                            });
+
+
+
+
+                            break;
+
+
+
+                        }
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+            }
+        });
+
+        Log.d(TAG, "onCreateView: " + usersEmail);
+        Log.d(TAG, "onCreateView: " + userGroup);
 
         mDb = AppDatabase.getInstance(getActivity());
 
@@ -236,16 +329,26 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
                 if (restaurantEntries != null) {
                     Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+
+                    /** If we retrieve all the data from the database, we fill the list of restaurants
+                     * with the restaurants and create MarkerOptions with their info
+                     * */
+                    listOfRestaurants = restaurantEntries;
+                    // TODO: 25/05/2018 Add check if the place has been visited!
+                    createMarkerOptions(listOfRestaurants);
+
+                    if (mMap != null) {
+                        addMarkersToMap(listOfMarkerOptions);
+                    }
+
                 } else {
                     Log.d(TAG, "onChanged: restaurantEntries is NULL");
                 }
             }
         });
 
-        //Fills the listOfRestaurants
-        getAllRestaurantLocations();
-
-        /** First, we check that the user has the correct Google Play Services Version.
+        /** STARTING THE MAP:
+         * First, we check that the user has the correct Google Play Services Version.
          * If the user does, we start the map
          * **/
         if (isServicesOK()) {
@@ -255,58 +358,58 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         return view;
     }
 
-    private void getAllRestaurantLocations() {
+    private void createMarkerOptions (List<RestaurantEntry> listOfRestaurants) {
 
-        // TODO: 21/05/2018 Do this with LiveData instead that like this
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
+        MarkerOptions options;
 
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
+        for (int i = 0; i < listOfRestaurants.size(); i++) {
 
-                        //listOfRestaurants = mDb.restaurantDao().getAllRestaurantsNotLiveData();
+            LatLng latLng = new LatLng(
+                    Double.parseDouble(listOfRestaurants.get(i).getLatitude()),
+                    Double.parseDouble(listOfRestaurants.get(i).getLongitude()));
 
-                        MarkerOptions options;
+            // TODO: 22/05/2018 Add here a comparison to change colour if a place has been visited already
+            if (placeHasBeenAlreadyVisited(listOfRestaurants.get(i))) {
 
-                        for (int i = 0; i < listOfRestaurants.size(); i++) {
+                options = new MarkerOptions()
+                        .position(latLng)
+                        .title(listOfRestaurants.get(i).getName())
+                        .snippet(listOfRestaurants.get(i).getAddress())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)); //Different colour
 
-                            LatLng latLng = new LatLng(
-                                    Double.parseDouble(listOfRestaurants.get(i).getLatitude()),
-                                    Double.parseDouble(listOfRestaurants.get(i).getLongitude()));
+            } else {
 
-                            // TODO: 22/05/2018 Add here a comparison to change colour if a place has been visited already
-                            if (placeHasBeenAlreadyVisited()) {
+                options = new MarkerOptions()
+                        .position(latLng)
+                        .title(listOfRestaurants.get(i).getName())
+                        .snippet(listOfRestaurants.get(i).getAddress())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
-                                options = new MarkerOptions()
-                                        .position(latLng)
-                                        .title(listOfRestaurants.get(i).getName())
-                                        .snippet(listOfRestaurants.get(i).getAddress())
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)); //Different colour
-
-                            } else {
-
-                                options = new MarkerOptions()
-                                        .position(latLng)
-                                        .title(listOfRestaurants.get(i).getName())
-                                        .snippet(listOfRestaurants.get(i).getAddress())
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-
-                            }
-
-                            listOfMarkerOptions.add(options);
-                            //listOfMarkers.add(mMap.addMarker(options));
-
-                        }
-                    }
-                });
             }
-        });
+
+            listOfMarkerOptions.add(options);
+        }
+        Log.d(TAG, "createMarkerOptions: size: " + listOfMarkerOptions.size());
     }
 
+    private void addMarkersToMap (List<MarkerOptions> listOfMarkerOptions) {
+
+        /** We add all the markers when the map is ready
+         * */
+        Log.d(TAG, "onMapReady: before adding markers");
+        Log.d(TAG, "onMapReady: listOfMarkerOptions.size() = " + listOfMarkerOptions.size());
+        for (int i = 0; i < listOfMarkerOptions.size(); i++) {
+            listOfMarkers.add(mMap.addMarker(listOfMarkerOptions.get(i)));
+        }
+
+    }
+
+
     // TODO: 22/05/2018 This method should be changed when posible
-    private boolean placeHasBeenAlreadyVisited() {
+    private boolean placeHasBeenAlreadyVisited(RestaurantEntry restaurant) {
+
+
+
 
         // TODO: 22/05/2018 Check in firebase
 
@@ -485,12 +588,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
                     mMap.setMyLocationEnabled(true); //displays the blue marker at your location
                     //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
 
-                }
-
-                /** We add all the markers when the map is ready
-                 * */
-                for (int i = 0; i < listOfMarkerOptions.size(); i++) {
-                    listOfMarkers.add(mMap.addMarker(listOfMarkerOptions.get(i)));
                 }
 
                 /** Listener for when clicking the info window in a map

@@ -33,6 +33,7 @@
             android:id="@+id/enter_first_name_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
             android:hint="Enter your first name" />
@@ -51,9 +52,48 @@
             android:id="@+id/enter_last_name_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
             android:hint="Enter your last name" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/enter_email_id"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:inputType="text"
+            android:hint="Enter your email" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/enter_password_id"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:inputType="text"
+            android:hint="Enter your password" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -68,31 +108,13 @@
             android:id="@+id/enter_group_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Enter your group"
-            android:maxLines="1"
-            android:inputType="text"
-            android:imeOptions="actionSearch"
-            android:completionThreshold="3"
-            android:maxLength="12" />
-
-        <AutoCompleteTextView
-            android:id="@+id/map_autocomplete_id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
-            android:layout_gravity="center_vertical"
-            android:hint="Search Restaurants by Type"
             android:textSize="14sp"
-            android:maxLength="40"
-            android:ellipsize="end"
-            android:background="@android:color/transparent"
-            android:dropDownWidth="250dp"
+            android:hint="Enter your group (optional)"
             android:maxLines="1"
             android:inputType="text"
             android:imeOptions="actionSearch"
             android:completionThreshold="1"
-            android:dropDownAnchor="@id/map_cv_search_id"
-            />
+            android:maxLength="12" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -116,3 +138,6 @@
         android:visibility="invisible"/>
 
 </LinearLayout>
+
+
+<!-- -->

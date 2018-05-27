@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.activities;
+package com.example.android.goforlunch.activities.rest;
 
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;

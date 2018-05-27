@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.android.goforlunch.activities.MainActivity;
+import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.pojo.User;
@@ -101,11 +101,11 @@ public class FragmentCoworkersView extends Fragment {
             usersEmail = auth.getCurrentUser().getEmail();
         } else {
             // TODO: 24/05/2018 Remove this
-            usersEmail = "Neville_Busken@gmail.com";
+            usersEmail = StringValues.FAKE_USER_EMAIL;
         }
 
         fireDb = FirebaseDatabase.getInstance();
-        dbRef = fireDb.getReference(StringValues.FirebaseReferences.USERS);
+        dbRef = fireDb.getReference(StringValues.FirebaseReference.USERS);
 
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -122,8 +122,8 @@ public class FragmentCoworkersView extends Fragment {
                         /** If the usersEmail of the user in the list is the same as the current user,
                          * then it is the user we are looking for and we save the user's group to
                          * build a list */
-                        if (item.child(StringValues.User.EMAIL).getValue().equals(usersEmail)) {
-                            userGroup = item.child(StringValues.User.GROUP).getValue().toString();
+                        if (item.child(StringValues.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
+                            userGroup = item.child(StringValues.FirebaseReference.GROUP).getValue().toString();
                             Log.d(TAG, "onDataChange: userGroup = " + userGroup);
                             break;
                         }
@@ -139,17 +139,18 @@ public class FragmentCoworkersView extends Fragment {
                         /** If the user's group and the coworker's group coincide, we add the
                          * coworker to the list
                          * */
-                        if(item.child(StringValues.User.GROUP).getValue().equals(userGroup)){
+                        if(item.child(StringValues.FirebaseReference.GROUP).getValue().equals(userGroup)){
 
-                            if (!item.child(StringValues.User.EMAIL).getValue().equals(usersEmail)) {
+                            if (!item.child(StringValues.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
                                 // TODO: 24/05/2018 Check null values
                                 listOfCoworkers.add(new User(
-                                        item.child(StringValues.User.FIRSTNAME).getValue().toString(),
-                                        item.child(StringValues.User.LASTNAME).getValue().toString(),
-                                        item.child(StringValues.User.EMAIL).getValue().toString(),
-                                        item.child(StringValues.User.GROUP).getValue().toString(),
-                                        item.child(StringValues.User.RESTAURANT).getValue().toString(),
-                                        item.child(StringValues.User.RESTAURANT_TYPE).getValue().toString()
+                                        item.child(StringValues.FirebaseReference.FIRSTNAME).getValue().toString(),
+                                        item.child(StringValues.FirebaseReference.LASTNAME).getValue().toString(),
+                                        item.child(StringValues.FirebaseReference.EMAIL).getValue().toString(),
+                                        item.child(StringValues.FirebaseReference.GROUP).getValue().toString(),
+                                        item.child(StringValues.FirebaseReference.PLACE_ID).getValue().toString(),
+                                        item.child(StringValues.FirebaseReference.RESTAURANT).getValue().toString(),
+                                        item.child(StringValues.FirebaseReference.RESTAURANT_TYPE).getValue().toString()
                                         )
                                 );
                             }

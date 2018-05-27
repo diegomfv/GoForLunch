@@ -36,4 +36,33 @@ public class ZZZNotes {
      The interval specified in the setInterval() method depends on the use case: for real time scenarios, set the value to few seconds; otherwise, limit to a few minutes (approximately two minutes or greater is recommended to minimize battery usage).
      * */
 
+/**
+    // An index to track Ada's memberships
+    {
+        "users": {
+        "alovelace": {
+            "name": "Ada Lovelace",
+                    // Index Ada's groups in her profile
+                    "groups": {
+                // the value here doesn't matter, just that the key exists
+                "techpioneers": true,
+                        "womentechmakers": true
+            }
+        },
+    ...
+    },
+        "groups": {
+        "techpioneers": {
+            "name": "Historical Tech Pioneers",
+                    "members": {
+                "alovelace": true,
+                        "ghopper": true,
+                        "eclarke": true
+            }
+        },
+    ...
+    }
+    }
+
+    */
 }

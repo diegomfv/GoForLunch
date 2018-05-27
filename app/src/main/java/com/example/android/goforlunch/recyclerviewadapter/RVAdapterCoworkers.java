@@ -1,6 +1,7 @@
 package com.example.android.goforlunch.recyclerviewadapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -11,8 +12,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.strings.StringValues;
 
@@ -63,9 +64,9 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
         Log.d(TAG, "onBindViewHolder: position# " + position);
         Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(position));
 
-        holder.textview.setText(listOfCoworkers.get(position).getFirstname()
+        holder.textview.setText(listOfCoworkers.get(position).getFirstName()
                 + " "
-                + listOfCoworkers.get(position).getLastname()
+                + listOfCoworkers.get(position).getLastName()
                 + " is eating "
                 + listOfCoworkers.get(position).getRestaurantType()
                 + " ("
@@ -76,10 +77,15 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: 24/05/2018 Bring the user to the restaurant page
-                ToastHelper.toastShort(mContext, "Bringing the user to "
-                        + listOfCoworkers.get(position).getRestaurant()
-                        + " restaurant page");
+
+                // TODO: 24/05/2018 Brings the user to the restaurant page
+
+                Intent intent = new Intent(mContext, RestaurantActivity.class);
+                intent.putExtra(StringValues.SentIntent.PLACE_ID, listOfCoworkers.get(position).getPlaceId());
+                intent.putExtra(StringValues.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(position).getRestaurantType());
+
+                mContext.startActivity(intent);
+
             }
         });
 

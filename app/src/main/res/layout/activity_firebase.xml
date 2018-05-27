@@ -11,25 +11,26 @@
     </FrameLayout>
 
     <Button
-        android:id="@+id/firebase_button_id"
+        android:id="@+id/firebase_button_add_restaurants_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/top_bar"
-        android:text="FIREBASE"/>
+        android:text="BUTTON 1"/>
 
     <Button
-        android:id="@+id/firebase_button_retrieve_item_id"
+        android:id="@+id/firebase_button_add_group_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/firebase_button_id"
-        android:layout_alignTop="@id/firebase_button_id"
-        android:text="GET ITEM"/>
+        android:layout_toRightOf="@id/firebase_button_add_restaurants_id"
+        android:layout_alignTop="@id/firebase_button_add_restaurants_id"
+        android:text="BUTTON 2"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/firebase_recycler_view"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/firebase_button_add_place_id"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/firebase_button_id"
-        android:paddingBottom="15dp"/>
+        android:layout_toRightOf="@id/firebase_button_add_group_id"
+        android:layout_alignTop="@id/firebase_button_add_restaurants_id"
+        android:text="BUTTON 3"/>
 
 </RelativeLayout>

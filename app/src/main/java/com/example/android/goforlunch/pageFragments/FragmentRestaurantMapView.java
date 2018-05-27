@@ -32,8 +32,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.MainActivity;
-import com.example.android.goforlunch.activities.RestaurantActivity;
+import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;

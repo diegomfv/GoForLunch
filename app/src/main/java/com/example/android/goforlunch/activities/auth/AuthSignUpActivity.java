@@ -14,11 +14,21 @@ import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.strings.StringValues;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
@@ -27,8 +37,6 @@ import com.google.firebase.auth.FirebaseAuthException;
 public class AuthSignUpActivity extends AppCompatActivity {
 
     private static final String TAG = "AuthSignUpActivity";
-
-    private FirebaseAuth auth;
 
     private TextInputEditText inputEmail;
     private TextInputEditText inputPassword;
@@ -39,6 +47,14 @@ public class AuthSignUpActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
 
+    //List that contains the list of users in the database
+    private List<String> listOfUsers;
+
+    //Firebase
+    private FirebaseAuth auth;
+    private FirebaseDatabase fireDb;
+    private DatabaseReference fireDbRefUsers;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,13 +63,54 @@ public class AuthSignUpActivity extends AppCompatActivity {
         inputEmail = (TextInputEditText) findViewById(R.id.signup_email_id);
         inputPassword = (TextInputEditText) findViewById(R.id.signup_password_id);
 
+        /** We get the info from the other screen AuthSignInActivity
+         * */
+        Intent intent = getIntent();
+        if (intent.getStringExtra(StringValues.SentIntent.EMAIL) != null
+                && intent.getStringExtra(StringValues.SentIntent.PASSWORD) != null) {
+
+            inputEmail.setText(intent.getStringExtra(StringValues.SentIntent.EMAIL));
+            inputPassword.setText(intent.getStringExtra(StringValues.SentIntent.PASSWORD));
+        }
+
         buttonResetPassword = (Button) findViewById(R.id.signup_reset_button_id);
         buttonSignUp = (Button) findViewById(R.id.signup_register_button_id);
         buttonSignIn = (Button) findViewById(R.id.signup_registered_button_id);
 
         progressBar = (ProgressBar) findViewById(R.id.signup_progressbar);
 
-        //Get Firebase auth instance
+        listOfUsers = new ArrayList<>();
+
+        /** We get the list fo users from the database to avoid creating two users
+         * with the same email (which is the element we will use to identify the users)
+         * */
+        fireDb = FirebaseDatabase.getInstance();
+        fireDbRefUsers = fireDb.getReference(StringValues.FirebaseReference.USERS);
+        fireDbRefUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                for (DataSnapshot item :
+                        dataSnapshot.getChildren()) {
+
+                    listOfUsers.add(Objects.requireNonNull(
+                            item.child(StringValues.FirebaseReference.EMAIL).getValue()).toString().toLowerCase());
+
+                }
+
+                Log.d(TAG, "onDataChange: list.size() = " + listOfUsers.size());
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.toString());
+            }
+        });
+
+        /** We get a reference to FirebaseAuth to create the user later
+         * */
         auth = FirebaseAuth.getInstance();
 
         buttonResetPassword.setOnClickListener(new View.OnClickListener() {
@@ -66,7 +123,11 @@ public class AuthSignUpActivity extends AppCompatActivity {
         buttonSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(AuthSignUpActivity.this, AuthSignInActivity.class));
+
+                Intent intent = new Intent(AuthSignUpActivity.this, AuthSignInActivity.class);
+                intent.putExtra(StringValues.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
+                intent.putExtra(StringValues.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
+                startActivity(intent);
                 finish();
             }
         });
@@ -75,56 +136,41 @@ public class AuthSignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                String email = inputEmail.getText().toString().trim();
+                String email = inputEmail.getText().toString().trim().toLowerCase();
                 String password = inputPassword.getText().toString().trim();
 
-                if (TextUtils.isEmpty(email)){
+                if (listOfUsers.size() > 0 &&
+                        listOfUsers.contains(email)){
+                    ToastHelper.toastShort(AuthSignUpActivity.this, "Sorry, that email is already in the database");
+
+                } else if (TextUtils.isEmpty(email)) {
                     Log.d(TAG, "onClick: no email ");
                     ToastHelper.toastShort(AuthSignUpActivity.this, "Please, enter email");
-                    return;
+
                 } else if (TextUtils.isEmpty(password)) {
                     Log.d(TAG, "onClick: no password");
                     ToastHelper.toastShort(AuthSignUpActivity.this, "Please, enter password");
-                    return;
-                } else  if (password.length() < 6) {
-                    Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
+
+                } else if (password.length() < 6) {
+                    Log.d(TAG, "onClick: password too short, only " + password.length() + " characters");
                     ToastHelper.toastShort(AuthSignUpActivity.this, "Password is too short");
-                    return;
+
+                } else {
+                    Log.d(TAG, "onClick: not same email in database");
+
+                    /** We proceed
+                     * to next activity
+                     * */
+                    Intent intent = new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroup.class);
+                    intent.putExtra(StringValues.SentIntent.EMAIL,email);
+                    intent.putExtra(StringValues.SentIntent.PASSWORD,password);
+                    startActivity(intent);
+                    finish();
+
                 }
-
-                progressBar.setVisibility(View.VISIBLE);
-
-                //we create the user
-                auth.createUserWithEmailAndPassword(email,password)
-                        .addOnCompleteListener(AuthSignUpActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                progressBar.setVisibility(View.GONE);
-
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
-                                if (!task.isSuccessful()) {
-                                    Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
-
-                                    //We get the exception and display why it was not succesful
-                                    FirebaseAuthException e = (FirebaseAuthException )task.getException();
-                                    if (e != null) {
-                                        Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                    }
-
-                                    ToastHelper.toastShort(AuthSignUpActivity.this, "Something went wrong");
-
-                                } else {
-                                    startActivity(new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroup.class));
-                                    finish();
-                                }
-
-                            }
-                        });
-
             }
         });
-
     }
+
+
 }

@@ -1,13 +1,22 @@
 package com.example.android.goforlunch;
 
+import android.content.Intent;
+
 import com.example.android.goforlunch.strings.StringValues;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runners.model.TestTimedOutException;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -56,7 +65,7 @@ public class UnitTests {
             generatedFloat = generatedFloat * 3 / 5;
         }
 
-        System.out.println(df.format(generatedFloat));
+        System.out.println("generated float = " + df.format(generatedFloat));
         assertTrue(generatedFloat < 3);
 
     }
@@ -106,6 +115,150 @@ public class UnitTests {
         assertTrue(nameParts[1].equals(String.valueOf(lastname)));
     }
 
+    @Test
+    public void findDayInTheArray () {
 
+        Random rand = new Random();
 
+        int counter = 0;
+
+        List<String> days = new ArrayList<>();
+
+        for (int i = 0; i < 7; i++) {
+
+            if (rand.nextBoolean()) {
+
+                days.add(String.valueOf(counter));
+                counter++;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        for (int i = 0; i < days.size(); i++) {
+            System.out.println("day (" + i + ") = " + days.get(i));
+        }
+
+        String[] daysInRequest = new String[days.size()];
+        daysInRequest = days.toArray(daysInRequest);
+
+        String today = String.valueOf(rand.nextInt(6));
+        System.out.println("today = " + today);
+
+        for (int i = 0; i < daysInRequest.length; i++) {
+
+            if (daysInRequest[i].equals(today)) {
+                //We get the close time in the app
+                System.out.println("Days list contains today");
+                assertTrue(daysInRequest[i].equals(today));
+                break;
+            }
+        }
+
+        if (!days.contains(today)) {
+            System.out.println("Days list doesn't contain today");
+            assertTrue(!days.contains(today));
+        }
+    }
+
+    /** Method used in the android job to know if an element has to be added to the list
+     * */
+    @Test
+    public void checkAnElementIsInTheList () {
+
+        List<String> listOfRestaurants = new ArrayList<>();
+
+        listOfRestaurants.add("KFC");
+        listOfRestaurants.add("McDonalds");
+        listOfRestaurants.add("Tony Romas");
+        listOfRestaurants.add("Burger King");
+
+        int sizeOfList = listOfRestaurants.size();
+
+        String restaurant;
+
+        Random rand = new Random();
+
+        int r = rand.nextInt(10);
+        System.out.println("r = " + r);
+
+        if (r < 4) {
+            System.out.println("r < 4");
+            restaurant = listOfRestaurants.get(r);
+        } else {
+            System.out.println("r > 4");
+            restaurant = "Not in the list";
+        }
+
+        if (listOfRestaurants.contains(restaurant)) {
+            System.out.println("restaurant is in the list");
+            assertTrue(listOfRestaurants.contains(restaurant));
+        } else {
+            System.out.println("restaurant is not in the list");
+            listOfRestaurants.add(restaurant);
+            assertTrue(listOfRestaurants.size() == (sizeOfList + 1));
+
+        }
+    }
+
+    @Test
+    public void emailTransformation () {
+
+        String email = "Stack_Overflow@email.com";
+
+        email = email.toLowerCase();
+
+        if (email.contains(".")) {
+            email = email.replace(".", ",");
+        }
+
+        System.out.println(email);
+
+        assertTrue(2==2);
+
+    }
+
+    @Test
+    public void getFirsUserIdThatIsEmptyAndFillIt () {
+
+        Random random = new Random();
+
+        List<Integer> randomNumbers = new ArrayList<>();
+        randomNumbers.add(random.nextInt(200));
+        randomNumbers.add(random.nextInt(200));
+        randomNumbers.add(random.nextInt(200));
+        randomNumbers.add(random.nextInt(200));
+
+        /** We create a map with all the users and some gaps
+         * according to random numbers
+         * */
+        Map<String,Object> map = new HashMap<>();
+
+        for (int i = 0; i < 200; i++) {
+
+            if (randomNumbers.contains(i)){
+                map.put("user" + i, "");
+
+            } else {
+                map.put("user" + i, "user" + i);
+            }
+
+        }
+
+        /** We find the gaps
+         * */
+
+        for (Map.Entry<String,Object> entry:
+             map.entrySet()) {
+
+            if (entry.getValue().equals("")) {
+                System.out.println(entry.getKey());
+            }
+        }
+
+        System.out.println(randomNumbers.toString());
+    }
 }

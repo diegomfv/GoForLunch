@@ -7,39 +7,42 @@ import com.example.android.goforlunch.strings.StringValues;
  */
 public class User {
 
-    String firstname;
-    String lastname;
+    String firstName;
+    String lastName;
     String email;
     String group;
+    //placeId is the restaurant placeId
+    String placeId;
     String restaurant;
     String restaurantType;
 
     public User() {
     }
 
-    public User(String firstname, String lastname, String email, String group, String restaurant, String restaurantType) {
-        this.firstname = firstname;
-        this.lastname = lastname;
+    public User(String firstName, String lastName, String email, String group, String placeId, String restaurant, String restaurantType) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.group = group;
+        this.placeId = placeId;
         this.restaurant = restaurant;
         this.restaurantType = restaurantType;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {
@@ -56,6 +59,14 @@ public class User {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public String getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
     }
 
     public String getRestaurant() {
@@ -77,10 +88,11 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "firstname='" + firstname + '\'' +
-                ", lastname='" + lastname + '\'' +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", group='" + group + '\'' +
+                ", placeId='" + placeId + '\'' +
                 ", restaurant='" + restaurant + '\'' +
                 ", restaurantType='" + restaurantType + '\'' +
                 '}';

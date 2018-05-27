@@ -31,7 +31,7 @@ public class RequesterPlaceId {
     private static final String TAG = "RequesterPlaceId";
 
     private static String placeIdKey = "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU";
-    private static int day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+    private static String day = String.valueOf((Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) - 1);
     private LatLngForRetrofit myPosition;
     private AppDatabase mDb;
 
@@ -71,11 +71,25 @@ public class RequesterPlaceId {
                         websiteUrl = result.getWebsite();
                     }
 
+                    /** periods[] is an array of opening periods covering seven days, starting from Sunday, in chronological order.
+                     * (API Documentation)
+                     * */
                     if (result.getOpening_hours() != null) {
                         Opening_hours opening_hours = result.getOpening_hours();
                         if (opening_hours.getPeriods() != null) {
+
+                            // TODO: 25/05/2018 ------------------------
+
                             Periods[] periods = opening_hours.getPeriods();
-                            openTill = formatTime(periods,day);
+
+                            for (int i = 0; i < periods.length ; i++) {
+
+                                Close close = periods[i].getClose();
+                                if (close.getDay() != null
+                                        && close.getDay().equals(day)){
+                                    openTill = formatTime(close.getTime());
+                                }
+                            }
                         }
                     }
 
@@ -105,7 +119,6 @@ public class RequesterPlaceId {
                          * */
                         RequesterDistance requesterDistance = new RequesterDistance(mDb, myPosition);
                         requesterDistance.doApiRequest(result.getPlace_id());
-
                     }
                 }
             }
@@ -123,10 +136,8 @@ public class RequesterPlaceId {
     /** Method that formats the date that we get from the request to insert it in
      * the database with the new format (the one that will be displayed)
      * */
-    private String formatTime (Periods[] periods, int day) {
+    private String formatTime (String time) {
 
-        Close close = periods[day].getClose();
-        String time = close.getTime();
         time = time.substring(0, 2) + "." + time.substring(2, time.length());
         return "Open until " + time;
 

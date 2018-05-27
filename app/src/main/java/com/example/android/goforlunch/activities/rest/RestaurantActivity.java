@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.activities;
+package com.example.android.goforlunch.activities.rest;
 
 import android.content.Intent;
 import android.os.Build;
@@ -26,7 +26,6 @@ import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
-import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.example.android.goforlunch.remote.requesters.RequesterPlaceId;
 import com.example.android.goforlunch.strings.StringValues;
 import com.google.firebase.auth.FirebaseAuth;
@@ -59,7 +58,7 @@ public class RestaurantActivity extends AppCompatActivity {
     private String userEmail;
     private String userKey;
 
-    private boolean fabIsOpen = true;
+    private boolean fabIsOpen;
     private String phoneToastString = "No phone available";
     private String webUrlToastString = "No web available";
     private String likeToastString = "Liked!";
@@ -86,11 +85,12 @@ public class RestaurantActivity extends AppCompatActivity {
          *  */
         auth = FirebaseAuth.getInstance();
 
-        if (auth != null) {
-            userEmail = auth.getCurrentUser().getEmail();
-        } else {
-            userEmail = "Not Available";
-        }
+        // TODO: 25/05/2018 Modify this!
+//        if (auth != null) {
+//            userEmail = auth.getCurrentUser().getEmail();
+//        }
+            userEmail = StringValues.FAKE_USER_EMAIL;
+            userKey = "-LDJQcELSJlLyD5LD9PW";
 
         /** Instantiation of the fab and set onClick listener*/
         fab = findViewById(R.id.restaurant_fab_id);
@@ -103,7 +103,7 @@ public class RestaurantActivity extends AppCompatActivity {
         /** Reference to Firebase Database
          * */
         fireDb = FirebaseDatabase.getInstance();
-        fireDbRef = fireDb.getReference(StringValues.FirebaseReferences.USERS);
+        fireDbRef = fireDb.getReference(StringValues.FirebaseReference.USERS);
 
         navigationView = (BottomNavigationView) findViewById(R.id.restaurant_selector_id);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
@@ -132,7 +132,54 @@ public class RestaurantActivity extends AppCompatActivity {
         placeId = intent.getStringExtra(StringValues.SentIntent.PLACE_ID);
         restaurantType = intent.getStringExtra(StringValues.SentIntent.RESTAURANT_TYPE);
 
-        if (placeId != null) {
+        // TODO: 25/05/2018 delete this if statement and start with the "if else" statement
+        if (placeId.equals("0")
+                || placeId.equals("1")
+                || placeId.equals("2")
+                || placeId.equals("3")) {
+            Log.d(TAG, "onCreate: placeId = " + placeId);
+
+            String name;
+
+            if (placeId.equals("0")) {
+                name = "Burger King";
+            } else if (placeId.equals("1")) {
+                name = "McDonalds";
+            }else if (placeId.equals("2")) {
+                name = "KFC";
+            } else {
+                name = "Tony Romas";
+            }
+
+            restaurant = new RestaurantEntry(
+                    placeId,
+                    name,
+                    restaurantType,
+                    "Elmdale Road, 9",
+                    "21.00h.",
+                    "0.1m",
+                    "2.75",
+                    "image",
+                    "+34 65482",
+                    "website_url",
+                    "0",
+                    "0"
+            );
+
+            tvRestName.setText(restaurant.getName());
+            tvRestAddress.setText(restaurant.getAddress());
+            float rating = Float.parseFloat(restaurant.getRating());
+            rbRestRating.setRating(rating);
+            phoneToastString = restaurant.getPhone();
+            webUrlToastString = restaurant.getWebsiteUrl();
+            Glide.with(RestaurantActivity.this)
+                    .load(restaurant.getImageUrl())
+                    .into(ivRestPicture);
+
+
+            // TODO: 25/05/2018 Make else if an "if statement" that starts everything
+        } else if (placeId != null) {
+            Log.d(TAG, "onCreate: checking if restaurant is in the database");
 
             /** We check if the placeId is in the database. If it is, we get it from there,
              * if not, we do an ApiRequest.
@@ -145,6 +192,7 @@ public class RestaurantActivity extends AppCompatActivity {
                     restaurant = mDb.restaurantDao().getRestaurantById(placeId);
 
                     if (restaurant != null){
+                        Log.d(TAG, "run: restaurant is in the database");
 
                         /** The restaurant is in the database, so we get the info and we won't do
                          * the ApiRequest
@@ -178,6 +226,7 @@ public class RestaurantActivity extends AppCompatActivity {
                         }
 
                     } else {
+                        Log.d(TAG, "run: restaurant is not in the database. Proceeding with Api Request");
 
                         /** The restaurant is NOT in the database, so we get the info doing the ApiRequest
                          * */
@@ -248,12 +297,27 @@ public class RestaurantActivity extends AppCompatActivity {
                 for (DataSnapshot item:
                         dataSnapshot.getChildren()) {
 
-                    if (item.child(StringValues.User.EMAIL).toString().equals(userEmail)) {
-                        userKey = item.getKey();
+                    Log.d(TAG, "onDataChange: item.child()... " + item.child(StringValues.FirebaseReference.EMAIL).getValue().toString());
+                    Log.d(TAG, "onDataChange: userMail = " + userEmail);
+
+                    if (item.child(StringValues.FirebaseReference.EMAIL).getValue().toString().equals(userEmail)) {
 
                         /** We set the value of "fabIsOpen" according to the information found in the database
                          * */
-                        fabIsOpen = item.child(StringValues.User.RESTAURANT).toString().equals(restaurant.getName());
+                        fabIsOpen = item.child(StringValues.FirebaseReference.RESTAURANT).getValue().toString().equals(restaurant.getName());
+                        Log.d(TAG, "onDataChange: item.child()... = " + item.child(StringValues.FirebaseReference.RESTAURANT).getValue().toString());
+                        Log.d(TAG, "onDataChange: restaurant.getName() = " + restaurant.getName());
+                        Log.d(TAG, "onDataChange: fabIsOpen = " + fabIsOpen);
+
+                        if (fabIsOpen) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
+                            }
+                        } else {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
+                            }
+                        }
                         break;
                     }
                 }
@@ -273,7 +337,6 @@ public class RestaurantActivity extends AppCompatActivity {
      * LISTENERS *****
      * **************/
 
-
     private View.OnClickListener mFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -285,10 +348,13 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     /** We delete the restaurant from the database (user's)
                      **/
-                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT).setValue("None");
-                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT_TYPE).setValue("None");
+                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.PLACE_ID).setValue("None");
+                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT).setValue("None");
+                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT_TYPE).setValue("None");
 
                     ToastHelper.toastShort(RestaurantActivity.this, "Not Going to the restaurant!");
+
+                    Log.d(TAG, "onClick: fabIsOpen = " + fabIsOpen);
                 }
             } else {
                 fabIsOpen = true;
@@ -297,10 +363,13 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     /** We add the restaurant to the database (user's)
                      * */
-                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT).setValue(restaurant.getName());
-                    fireDbRef.child(userKey).child(StringValues.User.RESTAURANT_TYPE).setValue(restaurantType);
+                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.PLACE_ID).setValue(placeId);
+                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT).setValue(restaurant.getName());
+                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT_TYPE).setValue(restaurantType);
 
                     ToastHelper.toastShort(RestaurantActivity.this, "Going to the restaurant...");
+
+                    Log.d(TAG, "onClick: fabIsOpen = " + fabIsOpen);
                 }
             }
 

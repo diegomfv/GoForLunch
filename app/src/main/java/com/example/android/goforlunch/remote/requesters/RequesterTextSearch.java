@@ -13,6 +13,9 @@ import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.example.android.goforlunch.strings.StringValues;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -96,7 +99,14 @@ public class RequesterTextSearch {
                             /** We do not get all the result because there are too many (that is why choose 5)
                              * */
                             // TODO: 24/05/2018 Can be changed to more options
-                            for (int i = 0; i < 5 ; i++) {
+
+                            /** We limit how many results we use
+                             * */
+                            int resultsUsed;
+                            if (results.length > 5) { resultsUsed = 5; }
+                            else { resultsUsed = results.length; }
+
+                            for (int i = 0; i < resultsUsed ; i++) {
 
                                 placeId = StringValues.NOT_AVAILABLE;
                                 name = StringValues.NOT_AVAILABLE;
@@ -123,20 +133,19 @@ public class RequesterTextSearch {
 
                                 type = getType(call.request().url().toString().substring(65,69));
 
+                                if (results[i].getFormatted_address() != null) {
+                                    address = results[i].getFormatted_address();
+                                }
+
                                 if (results[i].getRating() != null) {
-
-                                   rating = getRatingUnder3(results[i].getRating());
-
+                                   rating = formatToTwoDecimalsAndGetRatingUnder3(results[i].getRating());
                                 }
 
                                 if (results[i].getGeometry() != null) {
-
                                     Geometry geometry = results[i].getGeometry();
-
                                     if (geometry.getLocation() != null) {
 
                                         Location location = geometry.getLocation();
-
                                         lat = location.getLat();
                                         lng = location.getLng();
 
@@ -169,21 +178,15 @@ public class RequesterTextSearch {
                                     }
                                 });
 
-                                // TODO: 22/05/2018 Disabled to avoid to many requests
-//                        for (int i = 0; i < 5; i++) {
-//
-//                        if (results[i].getPlace_id() != null) {
-//
-//                            RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
-//                            requesterPlaceId.doApiRequest(results[i].getPlace_id());
-//
-//                        }
-//                    }
+                                if (results[i].getPlace_id() != null) {
 
+                                    RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
+                                    requesterPlaceId.doApiRequest(results[i].getPlace_id());
+
+                                }
                             }
                         }
                     }
-
                 }
 
                 @Override
@@ -211,14 +214,22 @@ public class RequesterTextSearch {
         return StringValues.NOT_AVAILABLE;
     }
 
-    private String getRatingUnder3 (String rating) {
+    /** This method returns a rating with max. value = 3 if
+     * it was higher than 3. Additionally, it formats the rating
+     * so it has only 2 decimals
+     * */
+    private String formatToTwoDecimalsAndGetRatingUnder3(String rating) {
 
         float temp_rating = Float.parseFloat(rating);
+
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.DOWN);
 
         if (temp_rating > 3) {
             temp_rating = temp_rating * 3 / 5;
             rating = String.valueOf(temp_rating);
         }
-        return rating;
+
+        return df.format(rating);
     }
 }
