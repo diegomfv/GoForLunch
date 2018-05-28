@@ -2,7 +2,6 @@ package com.example.android.goforlunch.activities.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
@@ -14,12 +13,8 @@ import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.strings.StringValues;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -66,11 +61,11 @@ public class AuthSignUpActivity extends AppCompatActivity {
         /** We get the info from the other screen AuthSignInActivity
          * */
         Intent intent = getIntent();
-        if (intent.getStringExtra(StringValues.SentIntent.EMAIL) != null
-                && intent.getStringExtra(StringValues.SentIntent.PASSWORD) != null) {
+        if (intent.getStringExtra(RepoStrings.SentIntent.EMAIL) != null
+                && intent.getStringExtra(RepoStrings.SentIntent.PASSWORD) != null) {
 
-            inputEmail.setText(intent.getStringExtra(StringValues.SentIntent.EMAIL));
-            inputPassword.setText(intent.getStringExtra(StringValues.SentIntent.PASSWORD));
+            inputEmail.setText(intent.getStringExtra(RepoStrings.SentIntent.EMAIL));
+            inputPassword.setText(intent.getStringExtra(RepoStrings.SentIntent.PASSWORD));
         }
 
         buttonResetPassword = (Button) findViewById(R.id.signup_reset_button_id);
@@ -85,7 +80,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
          * with the same email (which is the element we will use to identify the users)
          * */
         fireDb = FirebaseDatabase.getInstance();
-        fireDbRefUsers = fireDb.getReference(StringValues.FirebaseReference.USERS);
+        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
         fireDbRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -95,7 +90,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
                         dataSnapshot.getChildren()) {
 
                     listOfUsers.add(Objects.requireNonNull(
-                            item.child(StringValues.FirebaseReference.EMAIL).getValue()).toString().toLowerCase());
+                            item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().toLowerCase());
 
                 }
 
@@ -125,8 +120,8 @@ public class AuthSignUpActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(AuthSignUpActivity.this, AuthSignInActivity.class);
-                intent.putExtra(StringValues.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
-                intent.putExtra(StringValues.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
+                intent.putExtra(RepoStrings.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
+                intent.putExtra(RepoStrings.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
@@ -163,8 +158,8 @@ public class AuthSignUpActivity extends AppCompatActivity {
                      * to next activity
                      * */
                     Intent intent = new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroup.class);
-                    intent.putExtra(StringValues.SentIntent.EMAIL,email);
-                    intent.putExtra(StringValues.SentIntent.PASSWORD,password);
+                    intent.putExtra(RepoStrings.SentIntent.EMAIL,email);
+                    intent.putExtra(RepoStrings.SentIntent.PASSWORD,password);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                     finish();

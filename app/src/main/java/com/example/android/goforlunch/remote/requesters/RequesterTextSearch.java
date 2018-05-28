@@ -11,7 +11,7 @@ import com.example.android.goforlunch.models.modelplacesbytextsearch.Location;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.PlacesByTextSearch;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -56,12 +56,12 @@ public class RequesterTextSearch {
 
         GooglePlaceWebAPIService client = Common.getGooglePlaceTextSearchApiService();
 
-        for (int j = 1; j < StringValues.RESTAURANT_TYPES.length ; j++) {
+        for (int j = 1; j < RepoStrings.RESTAURANT_TYPES.length ; j++) {
 
-            restaurantType = StringValues.RESTAURANT_TYPES[j];
+            restaurantType = RepoStrings.RESTAURANT_TYPES[j];
 
             Call<PlacesByTextSearch> callTextSearch = client.fetchDataTextSearch(
-                    restaurantType + StringValues.ADD_RESTAURANT_STRING,
+                    restaurantType + RepoStrings.ADD_RESTAURANT_STRING,
                     myPosition,
                     20,
                     textSearchKey);
@@ -108,18 +108,18 @@ public class RequesterTextSearch {
 
                             for (int i = 0; i < resultsUsed ; i++) {
 
-                                placeId = StringValues.NOT_AVAILABLE;
-                                name = StringValues.NOT_AVAILABLE;
-                                type = StringValues.NOT_AVAILABLE;
-                                address = StringValues.NOT_AVAILABLE;
-                                openUntil = StringValues.NOT_AVAILABLE;
-                                distance = StringValues.NOT_AVAILABLE;
-                                rating = StringValues.NOT_AVAILABLE;
-                                imageUrl = StringValues.NOT_AVAILABLE;
-                                phone = StringValues.NOT_AVAILABLE;
-                                websiteUrl = StringValues.NOT_AVAILABLE;
-                                lat = StringValues.NOT_AVAILABLE;
-                                lng = StringValues.NOT_AVAILABLE;
+                                placeId = RepoStrings.NOT_AVAILABLE;
+                                name = RepoStrings.NOT_AVAILABLE;
+                                type = RepoStrings.NOT_AVAILABLE;
+                                address = RepoStrings.NOT_AVAILABLE;
+                                openUntil = RepoStrings.NOT_AVAILABLE;
+                                distance = RepoStrings.NOT_AVAILABLE;
+                                rating = RepoStrings.NOT_AVAILABLE;
+                                imageUrl = RepoStrings.NOT_AVAILABLE;
+                                phone = RepoStrings.NOT_AVAILABLE;
+                                websiteUrl = RepoStrings.NOT_AVAILABLE;
+                                lat = RepoStrings.NOT_AVAILABLE;
+                                lng = RepoStrings.NOT_AVAILABLE;
 
                                 if (results[i].getPlace_id() != null) {
                                     placeId = results[i].getPlace_id();
@@ -205,13 +205,13 @@ public class RequesterTextSearch {
      * */
     private String getType (String urlSubstring) {
 
-        for (int i = 1; i < StringValues.RESTAURANT_TYPES.length ; i++) {
+        for (int i = 1; i < RepoStrings.RESTAURANT_TYPES.length ; i++) {
 
-            if (urlSubstring.equals(StringValues.RESTAURANT_TYPES[i].substring(0,4))){
-                return StringValues.RESTAURANT_TYPES[i];
+            if (urlSubstring.equals(RepoStrings.RESTAURANT_TYPES[i].substring(0,4))){
+                return RepoStrings.RESTAURANT_TYPES[i];
             }
         }
-        return StringValues.NOT_AVAILABLE;
+        return RepoStrings.NOT_AVAILABLE;
     }
 
     /** This method returns a rating with max. value = 3 if

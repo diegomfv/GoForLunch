@@ -12,7 +12,7 @@ import com.example.android.goforlunch.activities.auth.RVAdapterRestaurantDELETE;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -192,18 +192,20 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                 for (int i = 0; i < 45; i++) {
 
-                    dbRefUsers = fireDb.getReference(StringValues.FirebaseReference.USERS);
+                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                     map = new HashMap<>();
-                    map.put(StringValues.FirebaseReference.FIRSTNAME,listOfNames.get(i).getFirstName());
-                    map.put(StringValues.FirebaseReference.LASTNAME,listOfNames.get(i).getLastName());
-                    map.put(StringValues.FirebaseReference.EMAIL,listOfEmails.get(i));
-                    map.put(StringValues.FirebaseReference.GROUP,listOfGroups.get(random.nextInt(4)));
-                    map.put(StringValues.FirebaseReference.PLACE_ID,"");
-                    map.put(StringValues.FirebaseReference.RESTAURANT,"");
-                    map.put(StringValues.FirebaseReference.RESTAURANT_TYPE,"");
-                    map.put(StringValues.FirebaseReference.RATING,"");
-                    map.put(StringValues.FirebaseReference.PHONE,"");
-                    map.put(StringValues.FirebaseReference.IMAGE_URL,"");
+                    map.put(RepoStrings.FirebaseReference.FIRSTNAME,listOfNames.get(i).getFirstName());
+                    map.put(RepoStrings.FirebaseReference.LASTNAME,listOfNames.get(i).getLastName());
+                    map.put(RepoStrings.FirebaseReference.EMAIL,listOfEmails.get(i));
+                    map.put(RepoStrings.FirebaseReference.GROUP,listOfGroups.get(random.nextInt(4)));
+                    map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT,"");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
+                    map.put(RepoStrings.FirebaseReference.ADDRESS, "");
+                    map.put(RepoStrings.FirebaseReference.RATING,"");
+                    map.put(RepoStrings.FirebaseReference.PHONE,"");
+                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,"");
+                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
 
                     dbRefUsers.push().setValue(map);
                 }
@@ -215,7 +217,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: CALLED!");
 
-                DatabaseReference dbRef = fireDb.getReference(StringValues.FirebaseReference.USERS);
+                DatabaseReference dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                 dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -225,7 +227,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                              dataSnapshot.getChildren()) {
                             Log.d(TAG, "onDataChange: in the foreach loop");
 
-                            if (Objects.requireNonNull(item.child(StringValues.FirebaseReference.EMAIL).getValue()).equals("brad_berry@gmail.com")){
+                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals("brad_berry@gmail.com")){
                                 Log.d(TAG, "onDataChange: in the if statement");
                                 ToastHelper.toastShort(FirebaseActivityDELETE.this, item.getKey());
                             }
@@ -240,16 +242,18 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                 Map<String, Object> map;
                 map = new HashMap<>();
-                map.put(StringValues.FirebaseReference.FIRSTNAME,"");
-                map.put(StringValues.FirebaseReference.LASTNAME,"");
-                map.put(StringValues.FirebaseReference.EMAIL,"");
-                map.put(StringValues.FirebaseReference.GROUP,"");
-                map.put(StringValues.FirebaseReference.PLACE_ID,"");
-                map.put(StringValues.FirebaseReference.RESTAURANT,"");
-                map.put(StringValues.FirebaseReference.RESTAURANT_TYPE,"");
-                map.put(StringValues.FirebaseReference.RATING,"");
-                map.put(StringValues.FirebaseReference.PHONE,"");
-                map.put(StringValues.FirebaseReference.IMAGE_URL,"");
+                map.put(RepoStrings.FirebaseReference.FIRSTNAME,"");
+                map.put(RepoStrings.FirebaseReference.LASTNAME,"");
+                map.put(RepoStrings.FirebaseReference.EMAIL,"");
+                map.put(RepoStrings.FirebaseReference.GROUP,"");
+                map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
+                map.put(RepoStrings.FirebaseReference.RESTAURANT,"");
+                map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
+                map.put(RepoStrings.FirebaseReference.ADDRESS, "");
+                map.put(RepoStrings.FirebaseReference.RATING,"");
+                map.put(RepoStrings.FirebaseReference.PHONE,"");
+                map.put(RepoStrings.FirebaseReference.IMAGE_URL,"");
+                map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
 
                 dbRef.push().setValue(map);
 

@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -77,11 +77,11 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
         setContentView(R.layout.activity_auth_enter_name_and_group);
 
         Intent intent = getIntent();
-        if (intent.getStringExtra(StringValues.SentIntent.EMAIL) != null
-                && intent.getStringExtra(StringValues.SentIntent.PASSWORD) != null) {
+        if (intent.getStringExtra(RepoStrings.SentIntent.EMAIL) != null
+                && intent.getStringExtra(RepoStrings.SentIntent.PASSWORD) != null) {
 
-            email = intent.getStringExtra(StringValues.SentIntent.EMAIL);
-            password = intent.getStringExtra(StringValues.SentIntent.PASSWORD);
+            email = intent.getStringExtra(RepoStrings.SentIntent.EMAIL);
+            password = intent.getStringExtra(RepoStrings.SentIntent.PASSWORD);
         }
 
         inputFirstName = (TextInputEditText) findViewById(R.id.enter_first_name_id);
@@ -110,7 +110,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
          * TextInputAutocompleteTextView with it
          * */
         fireDb = FirebaseDatabase.getInstance();
-        fireDbRefGroups = fireDb.getReference(StringValues.FirebaseReference.GROUPS);
+        fireDbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
         fireDbRefGroups.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -119,7 +119,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                 for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
-                    listOfGroups.add(Objects.requireNonNull(item.child(StringValues.FirebaseReference.GROUPS_NAME).getValue()).toString());
+                    listOfGroups.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUPS_NAME).getValue()).toString());
 
                     Log.d(TAG, "onDataChange: listOfGroups.size() = " + listOfGroups.size());
 
@@ -150,7 +150,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
 
         /** We get an empty userId if it exists in the list. We will use it with a new user (this way,
          * we will avoid creating new ids when there are some that are not used) */
-        fireDbRefUsers = fireDb.getReference(StringValues.FirebaseReference.USERS);
+        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
         fireDbRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -159,9 +159,9 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                 for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
-                    if (Objects.requireNonNull(item.child(StringValues.FirebaseReference.EMAIL).getValue()).equals("")) {
+                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals("")) {
                         Log.d(TAG, "onDataChange: found an empty userId");
-                        Log.d(TAG, "onDataChange: " + Objects.requireNonNull(item.child(StringValues.FirebaseReference.EMAIL).getValue()));
+                        Log.d(TAG, "onDataChange: " + Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()));
 
                         targetEmptyUserKey = item.getKey();
                         break;
@@ -259,21 +259,21 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                                                                     Log.d(TAG, "onDataChange: no empty keys");
 
                                                                     DatabaseReference fireDbRefNewUser =
-                                                                            fireDb.getReference(StringValues.FirebaseReference.USERS);
+                                                                            fireDb.getReference(RepoStrings.FirebaseReference.USERS);
 
                                                                     Map<String, Object> map = new HashMap<>();
 
-                                                                    map.put((StringValues.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
-                                                                    map.put((StringValues.FirebaseReference.LASTNAME), inputLastName.getText().toString());
-                                                                    map.put((StringValues.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
-                                                                    map.put((StringValues.FirebaseReference.GROUP), inputGroup.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.LASTNAME), inputLastName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
+                                                                    map.put((RepoStrings.FirebaseReference.GROUP), inputGroup.getText().toString());
 
-                                                                    map.put((StringValues.FirebaseReference.IMAGE_URL), "");
-                                                                    map.put((StringValues.FirebaseReference.PHONE), "");
-                                                                    map.put((StringValues.FirebaseReference.PLACE_ID), "");
-                                                                    map.put((StringValues.FirebaseReference.RATING), "");
-                                                                    map.put((StringValues.FirebaseReference.RESTAURANT), "");
-                                                                    map.put((StringValues.FirebaseReference.RESTAURANT_TYPE), "");
+                                                                    map.put((RepoStrings.FirebaseReference.IMAGE_URL), "");
+                                                                    map.put((RepoStrings.FirebaseReference.PHONE), "");
+                                                                    map.put((RepoStrings.FirebaseReference.PLACE_ID), "");
+                                                                    map.put((RepoStrings.FirebaseReference.RATING), "");
+                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT), "");
+                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT_TYPE), "");
 
                                                                     fireDbRefNewUser.push().setValue(map);
 
@@ -286,21 +286,21 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                                                                     Log.d(TAG, "onComplete: empty keys");
 
                                                                     DatabaseReference fireDbRefSpecificUser =
-                                                                            fireDb.getReference(StringValues.FirebaseReference.USERS + "/" + targetEmptyUserKey);
+                                                                            fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + targetEmptyUserKey);
 
                                                                     Map<String, Object> map = new HashMap<>();
 
-                                                                    map.put((StringValues.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
-                                                                    map.put((StringValues.FirebaseReference.LASTNAME), inputLastName.getText().toString());
-                                                                    map.put((StringValues.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
-                                                                    map.put((StringValues.FirebaseReference.GROUP), inputGroup.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.LASTNAME), inputLastName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
+                                                                    map.put((RepoStrings.FirebaseReference.GROUP), inputGroup.getText().toString());
 
-                                                                    map.put((StringValues.FirebaseReference.IMAGE_URL), "");
-                                                                    map.put((StringValues.FirebaseReference.PHONE), "");
-                                                                    map.put((StringValues.FirebaseReference.PLACE_ID), "");
-                                                                    map.put((StringValues.FirebaseReference.RATING), "");
-                                                                    map.put((StringValues.FirebaseReference.RESTAURANT), "");
-                                                                    map.put((StringValues.FirebaseReference.RESTAURANT_TYPE), "");
+                                                                    map.put((RepoStrings.FirebaseReference.IMAGE_URL), "");
+                                                                    map.put((RepoStrings.FirebaseReference.PHONE), "");
+                                                                    map.put((RepoStrings.FirebaseReference.PLACE_ID), "");
+                                                                    map.put((RepoStrings.FirebaseReference.RATING), "");
+                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT), "");
+                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT_TYPE), "");
 
                                                                     fireDbRefSpecificUser.updateChildren(map);
 

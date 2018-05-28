@@ -15,7 +15,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 
 import java.util.List;
 
@@ -81,8 +81,8 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
                 // TODO: 24/05/2018 Brings the user to the restaurant page
 
                 Intent intent = new Intent(mContext, RestaurantActivity.class);
-                intent.putExtra(StringValues.SentIntent.PLACE_ID, listOfCoworkers.get(position).getPlaceId());
-                intent.putExtra(StringValues.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(position).getRestaurantType());
+                intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfCoworkers.get(position).getPlaceId());
+                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(position).getRestaurantType());
 
                 mContext.startActivity(intent);
 

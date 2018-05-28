@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -61,11 +61,11 @@ public class AuthSignInActivity extends AppCompatActivity {
         /** We get the info from the other screen AuthSignInActivity
          * */
         Intent intent = getIntent();
-        if (intent.getStringExtra(StringValues.SentIntent.EMAIL) != null
-                && intent.getStringExtra(StringValues.SentIntent.PASSWORD) != null) {
+        if (intent.getStringExtra(RepoStrings.SentIntent.EMAIL) != null
+                && intent.getStringExtra(RepoStrings.SentIntent.PASSWORD) != null) {
 
-            inputEmail.setText(intent.getStringExtra(StringValues.SentIntent.EMAIL));
-            inputPassword.setText(intent.getStringExtra(StringValues.SentIntent.PASSWORD));
+            inputEmail.setText(intent.getStringExtra(RepoStrings.SentIntent.EMAIL));
+            inputPassword.setText(intent.getStringExtra(RepoStrings.SentIntent.PASSWORD));
         }
 
         buttonSignIn = (Button) findViewById(R.id.signin_button_id);
@@ -79,8 +79,8 @@ public class AuthSignInActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(AuthSignInActivity.this, AuthSignUpActivity.class);
-                intent.putExtra(StringValues.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
-                intent.putExtra(StringValues.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
+                intent.putExtra(RepoStrings.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
+                intent.putExtra(RepoStrings.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }

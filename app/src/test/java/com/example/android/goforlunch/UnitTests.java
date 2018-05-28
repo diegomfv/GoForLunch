@@ -1,22 +1,17 @@
 package com.example.android.goforlunch;
 
-import android.content.Intent;
-
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runners.model.TestTimedOutException;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -79,15 +74,15 @@ public class UnitTests {
         Random rand = new Random();
         int r = rand.nextInt(12) + 1;
 
-        String type = StringValues.NOT_AVAILABLE;
-        String urlTypePart = StringValues.RESTAURANT_TYPES[r].substring(0,4);
+        String type = RepoStrings.NOT_AVAILABLE;
+        String urlTypePart = RepoStrings.RESTAURANT_TYPES[r].substring(0,4);
 
-        for (int i = 1; i < StringValues.RESTAURANT_TYPES.length ; i++) {
+        for (int i = 1; i < RepoStrings.RESTAURANT_TYPES.length ; i++) {
 
-            System.out.println(StringValues.RESTAURANT_TYPES[i].substring(0,4));
+            System.out.println(RepoStrings.RESTAURANT_TYPES[i].substring(0,4));
 
-            if (urlTypePart.equals(StringValues.RESTAURANT_TYPES[i].substring(0,4))){
-                type = StringValues.RESTAURANT_TYPES[i];
+            if (urlTypePart.equals(RepoStrings.RESTAURANT_TYPES[i].substring(0,4))){
+                type = RepoStrings.RESTAURANT_TYPES[i];
             }
         }
 

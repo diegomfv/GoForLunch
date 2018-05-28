@@ -38,7 +38,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -80,6 +80,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -187,29 +188,40 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
             usersEmail = auth.getCurrentUser().getEmail();
         } else {
             // TODO: 24/05/2018 Remove this
-            usersEmail = StringValues.FAKE_USER_EMAIL;
+            usersEmail = RepoStrings.FAKE_USER_EMAIL;
         }
 
         fireDb = FirebaseDatabase.getInstance();
-        fireDbRefToUsers = fireDb.getReference("users");
+        fireDbRefToUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
         fireDbRefToUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: dataSnapshot = " + dataSnapshot.toString());
 
-                for (DataSnapshot item:
-                        dataSnapshot.getChildren()
-                     ) {
 
-                    if (usersEmail != null) {
-                        Log.d(TAG, "onDataChange: users email is not null");
+                if (usersEmail != null) {
+                    Log.d(TAG, "onDataChange: users email is not null");
+
+                    for (DataSnapshot item:
+                            dataSnapshot.getChildren()
+                            ) {
+
+                        if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals(usersEmail)) {
+                            userGroup = item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString();
+                            Log.d(TAG, "onDataChange: userGroup = " + userGroup);
+                        }
+
+
+                    }
+
+
 
                         /** If the usersEmail of the user in the list is the same as the current user,
                          * then it is the user we are looking for and we save the user's group to
                          * get the visited restaurants from there
                          * */
-                        if (item.child(StringValues.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
-                            userGroup = item.child(StringValues.FirebaseReference.GROUP).getValue().toString();
+                        if (item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
+                            userGroup = item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString();
                             Log.d(TAG, "onDataChange: userGroup = " + userGroup);
 
                             fireDbRefToGroups = fireDb.getReference("groups");
@@ -270,7 +282,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                     getActivity(),
                     android.R.layout.simple_list_item_1, //This layout has to be a textview
-                    StringValues.RESTAURANT_TYPES
+                    RepoStrings.RESTAURANT_TYPES
             );
             //We could have a custom layout like this (adding id of textView)
             //ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -288,7 +300,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
                     for (int j = 0; j < listOfMarkers.size(); j++) {
 
-                        if (!Arrays.asList(StringValues.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
+                        if (!Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
                             listOfMarkers.get(i).setVisible(true);
                         } else if (listOfMarkers.get(i).getSnippet().equals(adapterView.getItemAtPosition(i).toString())){
                             listOfMarkers.get(i).setVisible(true);

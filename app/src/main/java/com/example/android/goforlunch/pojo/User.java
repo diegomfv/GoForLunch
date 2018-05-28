@@ -1,7 +1,5 @@
 package com.example.android.goforlunch.pojo;
 
-import com.example.android.goforlunch.strings.StringValues;
-
 /**
  * Created by Diego Fajardo on 24/05/2018.
  */
@@ -15,11 +13,17 @@ public class User {
     String placeId;
     String restaurant;
     String restaurantType;
+    String imageUrl;
+    String address;
+    String rating;
+    String phone;
+    String websiteUrl;
+
 
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String group, String placeId, String restaurant, String restaurantType) {
+    public User(String firstName, String lastName, String email, String group, String placeId, String restaurant, String restaurantType, String imageUrl, String address, String rating, String phone, String websiteUrl) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -27,6 +31,11 @@ public class User {
         this.placeId = placeId;
         this.restaurant = restaurant;
         this.restaurantType = restaurantType;
+        this.imageUrl = imageUrl;
+        this.address = address;
+        this.rating = rating;
+        this.phone = phone;
+        this.websiteUrl = websiteUrl;
     }
 
     public String getFirstName() {
@@ -85,6 +94,46 @@ public class User {
         this.restaurantType = restaurantType;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getWebsiteUrl() {
+        return websiteUrl;
+    }
+
+    public void setWebsiteUrl(String websiteUrl) {
+        this.websiteUrl = websiteUrl;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -95,6 +144,11 @@ public class User {
                 ", placeId='" + placeId + '\'' +
                 ", restaurant='" + restaurant + '\'' +
                 ", restaurantType='" + restaurantType + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", address='" + address + '\'' +
+                ", rating='" + rating + '\'' +
+                ", phone='" + phone + '\'' +
+                ", websiteUrl='" + websiteUrl + '\'' +
                 '}';
     }
 }

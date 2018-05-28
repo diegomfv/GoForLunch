@@ -37,7 +37,7 @@ import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTR
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
 import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -55,8 +55,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 // TODO: 18/05/2018 Check if there is internet connection
 // TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
@@ -69,12 +70,11 @@ public class MainActivity extends AppCompatActivity {
     //Loaders id
     private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;
 
-    private FirebaseAuth auth;
+    //Values to store user's info
+    private String userName = "anonymous";
+    private String userEmail = "anon@anonymous.com";
+    private User user;
 
-    //Values to store user's name
-    private String name = "anonymous";
-    private String email = "anon@anonymous.com";
-    private List<User> listOfUsers;
 
     //Widgets
     private DrawerLayout mDrawerLayout;
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private static final float LONGITUDE_BOUND = 0.015f;
     private static LatLngBounds latLngBounds;
 
-    //vars
+    //Vars
     private boolean mLocationPermissionGranted = false; //used in permissions
     private GoogleMap mMap; //used to create the map
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
@@ -111,10 +111,13 @@ public class MainActivity extends AppCompatActivity {
     private MainViewModel mainViewModel;
     private List<RestaurantEntry> restaurants;
 
+    //Shared Preferences
+    private SharedPreferences sharedPref;
+
     //Firebase
+    private FirebaseAuth auth;
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRef;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,13 +128,7 @@ public class MainActivity extends AppCompatActivity {
 //        SharedPreferences.Editor editor = sharedPreferences.edit();
 //        editor.putBoolean("boolean", true);
 //        editor.apply();
-
-        mDb = AppDatabase.getInstance(getApplicationContext());
-        fireDb = FirebaseDatabase.getInstance();
-        fireDbRef = fireDb.getReference("users");
-
-        // TODO: 24/05/2018 Create a list with all the users of the App doesn't make much sense
-        listOfUsers = new ArrayList<>();
+        
 
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
@@ -152,13 +149,67 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
         if (auth.getCurrentUser() != null) {
-            name = auth.getCurrentUser().getDisplayName();
-            email = auth.getCurrentUser().getEmail();
-
+            userName = auth.getCurrentUser().getDisplayName();
+            userEmail = auth.getCurrentUser().getEmail();
         }
 
-        navUserName.setText(name);
-        navUserEmail.setText(email);
+        navUserName.setText(userName);
+        navUserEmail.setText(userEmail);
+
+        /** 1. We store the key of the user in Shared Preferences
+         *  2. Once we have the key, we store the Restaurant of the user to use all the info
+         *  for an intent to Restaurant Activity
+         * */
+        mDb = AppDatabase.getInstance(getApplicationContext());
+        fireDb = FirebaseDatabase.getInstance();
+        fireDbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        fireDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                for (DataSnapshot item :
+                        dataSnapshot.getChildren()) {
+
+                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().equals(userEmail)){
+
+                        /** We save the user's key in SharedPreferences
+                         * */
+                        sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString(RepoStrings.SharedPreferences.USER_ID_KEY, item.getKey());
+                        editor.apply();
+
+                        /** We fill the object with the info we will need to pass in the intent
+                         * */
+                        user = new User(
+                                item.child(RepoStrings.FirebaseReference.FIRSTNAME).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.LASTNAME).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
+                                );
+
+                        break;
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+            }
+        });
+
 
         //---------------------- GET CURRENT LOCATION --------------------------//
 
@@ -177,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container_id, FragmentRestaurantMapViewTRIAL.newInstance())
                 .commit();
 
-        /** Use header view to change name displayed in navigation drawer
+        /** Use header view to change userName displayed in navigation drawer
          NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
          View headerView = navigationView.getHeaderView(0);
          TextView navUsername = (TextView) headerView.findViewById(R.id.navUsername);
@@ -242,8 +293,23 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
 
-                            // TODO: 19/05/2018 Put in an intent the title of the place you are going toR
-                            startActivity(new Intent(MainActivity.this, RestaurantActivity.class));
+                            if (user == null) {
+                                ToastHelper.toastShort(MainActivity.this, "An error occurred. Restaurant Entry is null");
+
+                            } else {
+
+                                Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
+                                intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, user.getImageUrl());
+                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT, user.getFirstName());
+                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, user.getRestaurantType());
+                                intent.putExtra(RepoStrings.SentIntent.ADDRESS, user.getAddress());
+                                intent.putExtra(RepoStrings.SentIntent.RATING, user.getRating());
+                                intent.putExtra(RepoStrings.SentIntent.PHONE, user.getPhone());
+                                intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, user.getWebsiteUrl());
+
+                                startActivity(intent);
+
+                            }
 
                             return true;
                         }
@@ -259,20 +325,35 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.nav_logout: {
                             Log.d(TAG, "onNavigationItemSelected: log out pressed");
 
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                            boolean notif = sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false);
+                            /** We delete all the sharedPreferences info
+                             * */
+                            Map<String,?> map = sharedPref.getAll();
 
-                            ToastHelper.toastShort(MainActivity.this, "Notif pref = " + String.valueOf(notif));
+                            for (Map.Entry<String,?> entry :
+                                    map.entrySet()) {
 
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.putString(entry.getKey(), "");
+                                editor.apply();
+
+                            }
+
+                            /** The user signs out
+                             *  and goes to AuthSignIn Activity
+                             *  */
                             auth.signOut();
 
-                            startActivity(new Intent(MainActivity.this, AuthSignInActivity.class));
+                            Intent intent = new Intent(MainActivity.this, AuthSignInActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
                             finish();
 
                             return true;
                         }
 
                     }
+
+                    // TODO: 28/05/2018 Add item "Choose Group"
 
                     item.setChecked(true);
 
@@ -379,6 +460,8 @@ public class MainActivity extends AppCompatActivity {
                         latLngBounds = new LatLngBounds(
                                 southWest, northEast);
 
+                        // TODO: 28/05/2018 Ensure that we don't do this if if has been already done (quota is very limited)
+
                         // TODO: 25/05/2018 Uncomment this
                         //We delete the database
                         //AppExecutors.getInstance().diskIO().execute(new Runnable() {
@@ -388,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
                         //    }
                         //});
 
-                        /** We do the API Requests. They will fill the database
+                        /** We do the API Requests. It will fill the database
                          * */
                         // TODO: 24/05/2018 Allow to do the calls when ready
                         //callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);

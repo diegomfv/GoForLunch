@@ -27,7 +27,7 @@ import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 import com.example.android.goforlunch.remote.requesters.RequesterPlaceId;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -89,7 +89,7 @@ public class RestaurantActivity extends AppCompatActivity {
 //        if (auth != null) {
 //            userEmail = auth.getCurrentUser().getEmail();
 //        }
-            userEmail = StringValues.FAKE_USER_EMAIL;
+            userEmail = RepoStrings.FAKE_USER_EMAIL;
             userKey = "-LDJQcELSJlLyD5LD9PW";
 
         /** Instantiation of the fab and set onClick listener*/
@@ -103,7 +103,7 @@ public class RestaurantActivity extends AppCompatActivity {
         /** Reference to Firebase Database
          * */
         fireDb = FirebaseDatabase.getInstance();
-        fireDbRef = fireDb.getReference(StringValues.FirebaseReference.USERS);
+        fireDbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
 
         navigationView = (BottomNavigationView) findViewById(R.id.restaurant_selector_id);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
@@ -129,8 +129,8 @@ public class RestaurantActivity extends AppCompatActivity {
          * */
         Intent intent = getIntent();
 
-        placeId = intent.getStringExtra(StringValues.SentIntent.PLACE_ID);
-        restaurantType = intent.getStringExtra(StringValues.SentIntent.RESTAURANT_TYPE);
+        placeId = intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID);
+        restaurantType = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE);
 
         // TODO: 25/05/2018 delete this if statement and start with the "if else" statement
         if (placeId.equals("0")
@@ -297,15 +297,15 @@ public class RestaurantActivity extends AppCompatActivity {
                 for (DataSnapshot item:
                         dataSnapshot.getChildren()) {
 
-                    Log.d(TAG, "onDataChange: item.child()... " + item.child(StringValues.FirebaseReference.EMAIL).getValue().toString());
+                    Log.d(TAG, "onDataChange: item.child()... " + item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString());
                     Log.d(TAG, "onDataChange: userMail = " + userEmail);
 
-                    if (item.child(StringValues.FirebaseReference.EMAIL).getValue().toString().equals(userEmail)) {
+                    if (item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString().equals(userEmail)) {
 
                         /** We set the value of "fabIsOpen" according to the information found in the database
                          * */
-                        fabIsOpen = item.child(StringValues.FirebaseReference.RESTAURANT).getValue().toString().equals(restaurant.getName());
-                        Log.d(TAG, "onDataChange: item.child()... = " + item.child(StringValues.FirebaseReference.RESTAURANT).getValue().toString());
+                        fabIsOpen = item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString().equals(restaurant.getName());
+                        Log.d(TAG, "onDataChange: item.child()... = " + item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString());
                         Log.d(TAG, "onDataChange: restaurant.getName() = " + restaurant.getName());
                         Log.d(TAG, "onDataChange: fabIsOpen = " + fabIsOpen);
 
@@ -348,9 +348,9 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     /** We delete the restaurant from the database (user's)
                      **/
-                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.PLACE_ID).setValue("None");
-                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT).setValue("None");
-                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT_TYPE).setValue("None");
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.PLACE_ID).setValue("None");
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT).setValue("None");
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).setValue("None");
 
                     ToastHelper.toastShort(RestaurantActivity.this, "Not Going to the restaurant!");
 
@@ -363,9 +363,9 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     /** We add the restaurant to the database (user's)
                      * */
-                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.PLACE_ID).setValue(placeId);
-                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT).setValue(restaurant.getName());
-                    fireDbRef.child(userKey).child(StringValues.FirebaseReference.RESTAURANT_TYPE).setValue(restaurantType);
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.PLACE_ID).setValue(placeId);
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT).setValue(restaurant.getName());
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).setValue(restaurantType);
 
                     ToastHelper.toastShort(RestaurantActivity.this, "Going to the restaurant...");
 

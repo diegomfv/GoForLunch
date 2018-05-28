@@ -23,7 +23,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
-import com.example.android.goforlunch.strings.StringValues;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -101,11 +101,11 @@ public class FragmentCoworkersView extends Fragment {
             usersEmail = auth.getCurrentUser().getEmail();
         } else {
             // TODO: 24/05/2018 Remove this
-            usersEmail = StringValues.FAKE_USER_EMAIL;
+            usersEmail = RepoStrings.FAKE_USER_EMAIL;
         }
 
         fireDb = FirebaseDatabase.getInstance();
-        dbRef = fireDb.getReference(StringValues.FirebaseReference.USERS);
+        dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
 
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -122,8 +122,8 @@ public class FragmentCoworkersView extends Fragment {
                         /** If the usersEmail of the user in the list is the same as the current user,
                          * then it is the user we are looking for and we save the user's group to
                          * build a list */
-                        if (item.child(StringValues.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
-                            userGroup = item.child(StringValues.FirebaseReference.GROUP).getValue().toString();
+                        if (item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
+                            userGroup = item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString();
                             Log.d(TAG, "onDataChange: userGroup = " + userGroup);
                             break;
                         }
@@ -139,18 +139,18 @@ public class FragmentCoworkersView extends Fragment {
                         /** If the user's group and the coworker's group coincide, we add the
                          * coworker to the list
                          * */
-                        if(item.child(StringValues.FirebaseReference.GROUP).getValue().equals(userGroup)){
+                        if(item.child(RepoStrings.FirebaseReference.GROUP).getValue().equals(userGroup)){
 
-                            if (!item.child(StringValues.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
+                            if (!item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
                                 // TODO: 24/05/2018 Check null values
                                 listOfCoworkers.add(new User(
-                                        item.child(StringValues.FirebaseReference.FIRSTNAME).getValue().toString(),
-                                        item.child(StringValues.FirebaseReference.LASTNAME).getValue().toString(),
-                                        item.child(StringValues.FirebaseReference.EMAIL).getValue().toString(),
-                                        item.child(StringValues.FirebaseReference.GROUP).getValue().toString(),
-                                        item.child(StringValues.FirebaseReference.PLACE_ID).getValue().toString(),
-                                        item.child(StringValues.FirebaseReference.RESTAURANT).getValue().toString(),
-                                        item.child(StringValues.FirebaseReference.RESTAURANT_TYPE).getValue().toString()
+                                        item.child(RepoStrings.FirebaseReference.FIRSTNAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.LASTNAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString()
                                         )
                                 );
                             }
