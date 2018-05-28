@@ -539,18 +539,20 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
 
                                     Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
-                                    intent.putExtra(getActivity().getResources().getString(R.string.i_image_url),
+                                    intent.putExtra(RepoStrings.SentIntent.IMAGE_URL,
                                             listOfRestaurants.get(i).getImageUrl());
-                                    intent.putExtra(getActivity().getResources().getString(R.string.i_name),
+                                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME,
                                             listOfRestaurants.get(i).getName());
-                                    intent.putExtra(getActivity().getResources().getString(R.string.i_address),
+                                    intent.putExtra(RepoStrings.SentIntent.ADDRESS,
                                             listOfRestaurants.get(i).getAddress());
-                                    intent.putExtra(getActivity().getResources().getString(R.string.i_rating),
+                                    intent.putExtra(RepoStrings.SentIntent.RATING,
                                             listOfRestaurants.get(i).getRating());
-                                    intent.putExtra(getActivity().getResources().getString(R.string.i_phone),
+                                    intent.putExtra(RepoStrings.SentIntent.PHONE,
                                             listOfRestaurants.get(i).getPhone());
-                                    intent.putExtra(getActivity().getResources().getString(R.string.i_website),
+                                    intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL,
                                             listOfRestaurants.get(i).getWebsiteUrl());
+                                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE,
+                                            listOfRestaurants.get(i).getType());
 
                                     startActivity(intent);
 

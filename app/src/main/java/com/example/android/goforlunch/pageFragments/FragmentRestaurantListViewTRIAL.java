@@ -29,13 +29,14 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.strings.RepoStrings;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -94,6 +95,9 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
          * */
         setHasOptionsMenu(true);
 
+        listOfRestaurants = new ArrayList<>();
+        listOfRestaurantsByType = new ArrayList<>();
+
         mDb = AppDatabase.getInstance(getActivity());
 
         mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
@@ -105,6 +109,9 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                 if (restaurantEntries != null) {
                     Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
                     listOfRestaurants = restaurantEntries;
+                    mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
+                    mRecyclerView.setAdapter(mAdapter);
+
 
                 } else {
                     Log.d(TAG, "onChanged: restaurantEntries is NULL");
@@ -122,7 +129,7 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
         mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
         mRecyclerView.setAdapter(mAdapter);
 
-        mSearchText = (AutoCompleteTextView) view.findViewById(R.id.map_autocomplete_id);
+        mSearchText = (AutoCompleteTextView) view.findViewById(R.id.list_autocomplete_id);
 
         if (getActivity() != null) {
             ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
@@ -137,23 +144,28 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                 public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
                     Log.d(TAG, "onItemClick: CALLED!");
 
-                    if (!Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
-                        listOfRestaurantsByType = listOfRestaurants;
+                    String type = adapterView.getItemAtPosition(i).toString();
+
+                    if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(type)) {
+
+                        for (int j = 0; j < listOfRestaurants.size(); j++) {
+
+                            if (listOfRestaurants.get(j).getType().equals(type)) {
+                                listOfRestaurantsByType.add(listOfRestaurants.get(j));
+                            }
+                        }
+
                         mAdapter = new RVAdapterList(getContext(), listOfRestaurantsByType);
                         mRecyclerView.setAdapter(mAdapter);
-                    } else if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(adapterView.getItemAtPosition(i).toString())) {
-                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                listOfRestaurantsByType = mDb.restaurantDao().getAllRestaurantsByType(adapterView.getItemAtPosition(i).toString());
-                                mAdapter = new RVAdapterList(getContext(), listOfRestaurantsByType);
-                                mRecyclerView.setAdapter(mAdapter);
-                            }
-                        });
+
+                    } else {
+
+                        mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
+                        mRecyclerView.setAdapter(mAdapter);
+
                     }
                 }
             });
-
         }
 
         if (((AppCompatActivity) getActivity()) != null) {

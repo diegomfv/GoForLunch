@@ -124,9 +124,16 @@ public class RestaurantActivity extends AppCompatActivity {
         phoneToastString = intent.getStringExtra(RepoStrings.SentIntent.PHONE);
         webUrlToastString = intent.getStringExtra(RepoStrings.SentIntent.WEBSITE_URL);
 
-        Glide.with(RestaurantActivity.this)
-                .load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL))
-                .into(ivRestPicture);
+        if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) != null) {
+            Glide.with(RestaurantActivity.this)
+                    .load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL))
+                    .into(ivRestPicture);
+
+        } else {
+            Glide.with(RestaurantActivity.this)
+                    .load(R.drawable.lunch_image)
+                    .into(ivRestPicture);
+        }
 
         restaurantType = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE);
 
@@ -221,6 +228,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     map = new HashMap<>();
 
+                    // TODO: 28/05/2018 Take care, if sth is null it will be deleted from the database because it won't be added to the map
                     map.put(RepoStrings.FirebaseReference.PLACE_ID, "");
                     map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
                     map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
@@ -252,14 +260,17 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     map = new HashMap<>();
 
-                    map.put(RepoStrings.FirebaseReference.PLACE_ID,  getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID));
-                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME));
-                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE));
-                    map.put(RepoStrings.FirebaseReference.ADDRESS, getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS));
-                    map.put(RepoStrings.FirebaseReference.RATING, getIntent().getStringExtra(RepoStrings.SentIntent.RATING));
-                    map.put(RepoStrings.FirebaseReference.PHONE, getIntent().getStringExtra(RepoStrings.SentIntent.PHONE));
-                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,  getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL));
-                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL));
+                    // TODO: 28/05/2018 Take care, if sth is null it will be deleted from the database because it won't be added to the map
+                    map.put(RepoStrings.FirebaseReference.PLACE_ID,  checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)));
+                    map.put(RepoStrings.FirebaseReference.ADDRESS, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)));
+                    map.put(RepoStrings.FirebaseReference.RATING, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)));
+                    map.put(RepoStrings.FirebaseReference.PHONE, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)));
+                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,  checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)));
+                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL)));
+
+                    Log.d(TAG, "onClick: " + map.get(RepoStrings.FirebaseReference.IMAGE_URL));
 
                     fireDbRefUserWithKey.updateChildren(map);
 
@@ -316,5 +327,16 @@ public class RestaurantActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         NavUtils.navigateUpFromSameTask(this);
+    }
+
+    /** We use this method to check if the strings that come from the intent are null or not
+     * */
+    private String checkIfIsNull (String string) {
+
+        if (string == null) {
+            return "";
+        } else {
+            return string;
+        }
     }
 }

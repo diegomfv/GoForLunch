@@ -256,4 +256,32 @@ public class UnitTests {
 
         System.out.println(randomNumbers.toString());
     }
+
+    @Test
+    public void mapOfListsCreation () {
+
+        Map<String, List<String>> map = new HashMap<>();
+
+        String thaiRestaurants = "thai_restaurants";
+        String chineseRestaurants = "chinese_restaurants";
+
+        List<String> listOfThaiRestaurants = new ArrayList<>();
+        List<String> listOfChineseRestaurants = new ArrayList<>();
+
+        listOfThaiRestaurants.add("Koh Thai");
+        listOfThaiRestaurants.add("Thai Sesame");
+
+        listOfChineseRestaurants.add("Woh Gung");
+        listOfChineseRestaurants.add("Chinese Paradise");
+
+        map.put(thaiRestaurants, listOfThaiRestaurants);
+        map.put(chineseRestaurants, listOfChineseRestaurants);
+
+        List<String> tempList = map.get(thaiRestaurants);
+
+        for (int i = 0; i < tempList.size(); i++) {
+            System.out.println("tempList: " + tempList.get(i));
+        }
+    }
+
 }

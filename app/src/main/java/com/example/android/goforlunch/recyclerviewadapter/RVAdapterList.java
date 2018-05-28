@@ -18,6 +18,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.strings.RepoStrings;
 
 import java.util.List;
 
@@ -35,11 +36,11 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
     private int mShortAnimationDuration;
 
     private Context mContext;
-    private List<RestaurantEntry> listOfObjects;
+    private List<RestaurantEntry> listOfRestaurantsByType;
 
-    public RVAdapterList(Context context, List<RestaurantEntry> listOfObjects) {
+    public RVAdapterList(Context context, List<RestaurantEntry> listOfRestaurantsByType) {
         this.mContext = context;
-        this.listOfObjects = listOfObjects;
+        this.listOfRestaurantsByType = listOfRestaurantsByType;
         mShortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 
@@ -69,20 +70,21 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
         Anim.crossFadeShortAnimation(holder.itemView);
 
-        holder.title.setText(listOfObjects.get(position).getName());
-        holder.address.setText(listOfObjects.get(position).getAddress());
-        holder.openUntil.setText(listOfObjects.get(position).getOpenUntil());
-        holder.distance.setText(listOfObjects.get(position).getDistance());
+        holder.title.setText(listOfRestaurantsByType.get(position).getName());
+        holder.address.setText(listOfRestaurantsByType.get(position).getAddress());
+        holder.openUntil.setText(listOfRestaurantsByType.get(position).getOpenUntil());
+        holder.distance.setText(listOfRestaurantsByType.get(position).getDistance());
         // TODO: 21/05/2018 Add coworkers joining!
 
-        if (listOfObjects.get(position).getRating() != null
-            && !listOfObjects.get(position).getRating().equals("nA")) {
-            holder.ratingBar.setRating(Float.parseFloat(listOfObjects.get(position).getRating()));
+        if (listOfRestaurantsByType.get(position).getRating() != null
+            && !listOfRestaurantsByType.get(position).getRating().equals("nA")) {
+            holder.ratingBar.setRating(Float.parseFloat(listOfRestaurantsByType.get(position).getRating()));
         }
 
-        if (!listOfObjects.get(position).getImageUrl().equals("nA")) {
+        if (listOfRestaurantsByType.get(position).getImageUrl() != null
+            && !listOfRestaurantsByType.get(position).getImageUrl().equals("nA")) {
             Glide.with(mContext)
-                    .load(listOfObjects.get(position).getImageUrl())
+                    .load(listOfRestaurantsByType.get(position).getImageUrl())
                     .into(holder.photo);
         } else {
             Glide.with(mContext)
@@ -96,19 +98,14 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
             public void onClick(View view) {
 
                 Intent intent = new Intent(mContext, RestaurantActivity.class);
-
-                intent.putExtra(mContext.getResources().getString(R.string.i_image_url),
-                        listOfObjects.get(position).getImageUrl());
-                intent.putExtra(mContext.getResources().getString(R.string.i_name),
-                        listOfObjects.get(position).getName());
-                intent.putExtra(mContext.getResources().getString(R.string.i_address),
-                        listOfObjects.get(position).getAddress());
-                intent.putExtra(mContext.getResources().getString(R.string.i_rating),
-                        listOfObjects.get(position).getRating());
-                intent.putExtra(mContext.getResources().getString(R.string.i_phone),
-                        listOfObjects.get(position).getPhone());
-                intent.putExtra(mContext.getResources().getString(R.string.i_website),
-                        listOfObjects.get(position).getWebsiteUrl());
+                intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfRestaurantsByType.get(holder.getAdapterPosition()).getPlaceId());
+                intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, listOfRestaurantsByType.get(holder.getAdapterPosition()).getImageUrl());
+                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME,listOfRestaurantsByType.get(holder.getAdapterPosition()).getName());
+                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfRestaurantsByType.get(holder.getAdapterPosition()).getType());
+                intent.putExtra(RepoStrings.SentIntent.ADDRESS, listOfRestaurantsByType.get(holder.getAdapterPosition()).getAddress());
+                intent.putExtra(RepoStrings.SentIntent.RATING, listOfRestaurantsByType.get(holder.getAdapterPosition()).getRating());
+                intent.putExtra(RepoStrings.SentIntent.PHONE, listOfRestaurantsByType.get(holder.getAdapterPosition()).getPhone());
+                intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, listOfRestaurantsByType.get(holder.getAdapterPosition()).getWebsiteUrl());
 
                 mContext.startActivity(intent);
             }
@@ -117,7 +114,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
     @Override
     public int getItemCount() {
-        return listOfObjects.size();
+        return listOfRestaurantsByType.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
