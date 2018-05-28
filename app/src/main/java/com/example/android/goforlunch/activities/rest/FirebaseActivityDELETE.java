@@ -120,7 +120,20 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
         }
 
         fireDb = FirebaseDatabase.getInstance();
-        dbRefUsers = fireDb.getReference("users/");
+        dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+        Map<String,Object> map;
+        for (int i = 0; i < listOfGroups.size(); i++) {
+
+            map = new HashMap<>();
+            map.put(RepoStrings.FirebaseReference.GROUP_NAME, listOfGroups.get(i));
+            map.put(RepoStrings.FirebaseReference.GROUP_MEMBERS,"");
+            map.put(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
+
+            dbRefGroups.push().setValue(map);
+
+        }
+
+        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
         dbRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -135,8 +148,6 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                     String userEmail;
                     String userGroup;
 
-                    Map<String, Object> map;
-
                     for (DataSnapshot item :
                             dataSnapshot.getChildren()) {
                         Log.d(TAG, "onDataChange: DATASNAPSHOT = " + item.toString());
@@ -150,25 +161,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                     Log.d(TAG, "onDataChange: " + mapEmailGroup);
 
-                    dbRefGroups = fireDb.getReference("groups/");
-                    for (int i = 0; i < listOfGroups.size(); i++) {
 
-                        map = new HashMap<>();
-                        map.put("group" + i, "");
-
-                        dbRefGroups.updateChildren(map);
-                    }
-
-                    for (int i = 0; i < listOfGroups.size(); i++) {
-
-                        dbRefGroups = fireDb.getReference("groups/group" + i);
-                        map = new HashMap<>();
-
-                        map.put("name", listOfGroups.get(i));
-                        map.put("members","");
-
-                        dbRefGroups.updateChildren(map);
-                    }
                 }
             }
 
@@ -194,12 +187,12 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                     map = new HashMap<>();
-                    map.put(RepoStrings.FirebaseReference.FIRSTNAME,listOfNames.get(i).getFirstName());
-                    map.put(RepoStrings.FirebaseReference.LASTNAME,listOfNames.get(i).getLastName());
+                    map.put(RepoStrings.FirebaseReference.FIRST_NAME,listOfNames.get(i).getFirstName());
+                    map.put(RepoStrings.FirebaseReference.LAST_NAME,listOfNames.get(i).getLastName());
                     map.put(RepoStrings.FirebaseReference.EMAIL,listOfEmails.get(i));
                     map.put(RepoStrings.FirebaseReference.GROUP,listOfGroups.get(random.nextInt(4)));
                     map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
-                    map.put(RepoStrings.FirebaseReference.RESTAURANT,"");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME,"");
                     map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
                     map.put(RepoStrings.FirebaseReference.ADDRESS, "");
                     map.put(RepoStrings.FirebaseReference.RATING,"");
@@ -242,12 +235,12 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                 Map<String, Object> map;
                 map = new HashMap<>();
-                map.put(RepoStrings.FirebaseReference.FIRSTNAME,"");
-                map.put(RepoStrings.FirebaseReference.LASTNAME,"");
+                map.put(RepoStrings.FirebaseReference.FIRST_NAME,"");
+                map.put(RepoStrings.FirebaseReference.LAST_NAME,"");
                 map.put(RepoStrings.FirebaseReference.EMAIL,"");
                 map.put(RepoStrings.FirebaseReference.GROUP,"");
                 map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
-                map.put(RepoStrings.FirebaseReference.RESTAURANT,"");
+                map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME,"");
                 map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
                 map.put(RepoStrings.FirebaseReference.ADDRESS, "");
                 map.put(RepoStrings.FirebaseReference.RATING,"");
@@ -270,7 +263,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                 for (int i = 0; i < listOfGroups.size(); i++) {
 
-                    dbRefGroups = fireDb.getReference("groups/group" + i + "/" + "members");
+                    dbRefGroups = fireDb.getReference("groups/group" + i + "/" + RepoStrings.FirebaseReference.GROUP_MEMBERS);
 
                     for (Map.Entry<String,Object> entry:
                             mapEmailGroup.entrySet()) {

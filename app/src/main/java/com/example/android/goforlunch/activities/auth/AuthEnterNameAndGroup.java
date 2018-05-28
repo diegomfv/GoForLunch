@@ -119,7 +119,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                 for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
-                    listOfGroups.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUPS_NAME).getValue()).toString());
+                    listOfGroups.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue()).toString());
 
                     Log.d(TAG, "onDataChange: listOfGroups.size() = " + listOfGroups.size());
 
@@ -263,17 +263,19 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
 
                                                                     Map<String, Object> map = new HashMap<>();
 
-                                                                    map.put((RepoStrings.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
-                                                                    map.put((RepoStrings.FirebaseReference.LASTNAME), inputLastName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.FIRST_NAME), inputFirstName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.LAST_NAME), inputLastName.getText().toString());
                                                                     map.put((RepoStrings.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
                                                                     map.put((RepoStrings.FirebaseReference.GROUP), inputGroup.getText().toString());
 
-                                                                    map.put((RepoStrings.FirebaseReference.IMAGE_URL), "");
-                                                                    map.put((RepoStrings.FirebaseReference.PHONE), "");
-                                                                    map.put((RepoStrings.FirebaseReference.PLACE_ID), "");
-                                                                    map.put((RepoStrings.FirebaseReference.RATING), "");
-                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT), "");
-                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT_TYPE), "");
+                                                                    map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
+                                                                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME,"");
+                                                                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
+                                                                    map.put(RepoStrings.FirebaseReference.ADDRESS, "");
+                                                                    map.put(RepoStrings.FirebaseReference.RATING,"");
+                                                                    map.put(RepoStrings.FirebaseReference.PHONE,"");
+                                                                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,"");
+                                                                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
 
                                                                     fireDbRefNewUser.push().setValue(map);
 
@@ -290,17 +292,19 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
 
                                                                     Map<String, Object> map = new HashMap<>();
 
-                                                                    map.put((RepoStrings.FirebaseReference.FIRSTNAME), inputFirstName.getText().toString());
-                                                                    map.put((RepoStrings.FirebaseReference.LASTNAME), inputLastName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.FIRST_NAME), inputFirstName.getText().toString());
+                                                                    map.put((RepoStrings.FirebaseReference.LAST_NAME), inputLastName.getText().toString());
                                                                     map.put((RepoStrings.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
                                                                     map.put((RepoStrings.FirebaseReference.GROUP), inputGroup.getText().toString());
 
-                                                                    map.put((RepoStrings.FirebaseReference.IMAGE_URL), "");
-                                                                    map.put((RepoStrings.FirebaseReference.PHONE), "");
-                                                                    map.put((RepoStrings.FirebaseReference.PLACE_ID), "");
-                                                                    map.put((RepoStrings.FirebaseReference.RATING), "");
-                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT), "");
-                                                                    map.put((RepoStrings.FirebaseReference.RESTAURANT_TYPE), "");
+                                                                    map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
+                                                                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME,"");
+                                                                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
+                                                                    map.put(RepoStrings.FirebaseReference.ADDRESS, "");
+                                                                    map.put(RepoStrings.FirebaseReference.RATING,"");
+                                                                    map.put(RepoStrings.FirebaseReference.PHONE,"");
+                                                                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,"");
+                                                                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
 
                                                                     fireDbRefSpecificUser.updateChildren(map);
 

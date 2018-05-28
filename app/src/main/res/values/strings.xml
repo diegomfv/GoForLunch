@@ -16,7 +16,7 @@
     <string name="pref_summaryOn">Notifications are enabled</string>
     <string name="pref_key_notifications">notifications</string>
 
-    <!-- INTENT RECYCLER VIEW -> RESTAURANT ACTIVITY -->
+    <!-- INTENT RECYCLER VIEW -> RESTAURANT_NAME ACTIVITY -->
     <string name="i_image_url" translatable="false">image_url</string>
     <string name="i_name" translatable="false">name</string>
     <string name="i_address" translatable="false">address</string>

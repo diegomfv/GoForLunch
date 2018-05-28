@@ -46,12 +46,10 @@
 
 
 
-
         </activity>
 
         <activity android:name=".activities.auth.AuthSignInActivity"
             android:screenOrientation="portrait">
-
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

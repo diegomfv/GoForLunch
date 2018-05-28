@@ -143,16 +143,21 @@ public class FragmentCoworkersView extends Fragment {
 
                             if (!item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
                                 // TODO: 24/05/2018 Check null values
+
                                 listOfCoworkers.add(new User(
-                                        item.child(RepoStrings.FirebaseReference.FIRSTNAME).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.LASTNAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
                                         item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
                                         item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
                                         item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString()
-                                        )
-                                );
+                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
+                                ));
                             }
                         }
                     }

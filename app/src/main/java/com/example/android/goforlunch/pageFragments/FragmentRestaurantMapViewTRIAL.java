@@ -37,16 +37,16 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
-import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
-import com.example.android.goforlunch.strings.RepoStrings;
-import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
+import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -70,17 +70,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -192,81 +188,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment
         }
 
         fireDb = FirebaseDatabase.getInstance();
-        fireDbRefToUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbRefToUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: dataSnapshot = " + dataSnapshot.toString());
-
-
-                if (usersEmail != null) {
-                    Log.d(TAG, "onDataChange: users email is not null");
-
-                    for (DataSnapshot item:
-                            dataSnapshot.getChildren()
-                            ) {
-
-                        if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals(usersEmail)) {
-                            userGroup = item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString();
-                            Log.d(TAG, "onDataChange: userGroup = " + userGroup);
-                        }
-
-
-                    }
-
-
-
-                        /** If the usersEmail of the user in the list is the same as the current user,
-                         * then it is the user we are looking for and we save the user's group to
-                         * get the visited restaurants from there
-                         * */
-                        if (item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
-                            userGroup = item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString();
-                            Log.d(TAG, "onDataChange: userGroup = " + userGroup);
-
-                            fireDbRefToGroups = fireDb.getReference("groups");
-                            fireDbRefToGroups.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    Log.d(TAG, "onDataChange: datasnapshot = " + dataSnapshot.toString());
-
-                                    for (DataSnapshot item:
-                                         dataSnapshot.getChildren()) {
-
-                                        if (item.child("name").getValue().toString().equals(userGroup)) {
-                                            Log.d(TAG, "onDataChange: " + userGroup);
-
-                                        }
-
-                                    }
-
-
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    Log.d(TAG, "onCancelled: " + databaseError.getCode());
-                                }
-                            });
-
-
-
-
-                            break;
-
-
-
-                        }
-                    }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-            }
-        });
+        fireDbRefToUsers = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
 
         Log.d(TAG, "onCreateView: " + usersEmail);
         Log.d(TAG, "onCreateView: " + userGroup);

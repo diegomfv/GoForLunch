@@ -304,8 +304,8 @@ public class RestaurantActivity extends AppCompatActivity {
 
                         /** We set the value of "fabIsOpen" according to the information found in the database
                          * */
-                        fabIsOpen = item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString().equals(restaurant.getName());
-                        Log.d(TAG, "onDataChange: item.child()... = " + item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString());
+                        fabIsOpen = item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equals(restaurant.getName());
+                        Log.d(TAG, "onDataChange: item.child()... = " + item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
                         Log.d(TAG, "onDataChange: restaurant.getName() = " + restaurant.getName());
                         Log.d(TAG, "onDataChange: fabIsOpen = " + fabIsOpen);
 
@@ -349,7 +349,7 @@ public class RestaurantActivity extends AppCompatActivity {
                     /** We delete the restaurant from the database (user's)
                      **/
                     fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.PLACE_ID).setValue("None");
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT).setValue("None");
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_NAME).setValue("None");
                     fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).setValue("None");
 
                     ToastHelper.toastShort(RestaurantActivity.this, "Not Going to the restaurant!");
@@ -364,7 +364,7 @@ public class RestaurantActivity extends AppCompatActivity {
                     /** We add the restaurant to the database (user's)
                      * */
                     fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.PLACE_ID).setValue(placeId);
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT).setValue(restaurant.getName());
+                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_NAME).setValue(restaurant.getName());
                     fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).setValue(restaurantType);
 
                     ToastHelper.toastShort(RestaurantActivity.this, "Going to the restaurant...");

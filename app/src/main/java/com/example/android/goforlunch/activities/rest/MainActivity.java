@@ -183,12 +183,12 @@ public class MainActivity extends AppCompatActivity {
                         /** We fill the object with the info we will need to pass in the intent
                          * */
                         user = new User(
-                                item.child(RepoStrings.FirebaseReference.FIRSTNAME).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.LASTNAME).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
                                 item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
                                 item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
                                 item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.RESTAURANT).getValue().toString(),
+                                item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
                                 item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
                                 item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
                                 item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
@@ -295,6 +295,9 @@ public class MainActivity extends AppCompatActivity {
 
                             if (user == null) {
                                 ToastHelper.toastShort(MainActivity.this, "An error occurred. Restaurant Entry is null");
+
+                            } else if (user.getRestaurant().equals("")) {
+                                ToastHelper.toastShort(MainActivity.this, "You have not chosen a restaurant yet!");
 
                             } else {
 
