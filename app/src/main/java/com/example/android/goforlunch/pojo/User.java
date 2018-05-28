@@ -9,9 +9,9 @@ public class User {
     String lastName;
     String email;
     String group;
-    //placeId is the restaurant placeId
+    //placeId is the restaurantName placeId
     String placeId;
-    String restaurant;
+    String restaurantName;
     String restaurantType;
     String imageUrl;
     String address;
@@ -23,13 +23,13 @@ public class User {
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String group, String placeId, String restaurant, String restaurantType, String imageUrl, String address, String rating, String phone, String websiteUrl) {
+    public User(String firstName, String lastName, String email, String group, String placeId, String restaurantName, String restaurantType, String imageUrl, String address, String rating, String phone, String websiteUrl) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.group = group;
         this.placeId = placeId;
-        this.restaurant = restaurant;
+        this.restaurantName = restaurantName;
         this.restaurantType = restaurantType;
         this.imageUrl = imageUrl;
         this.address = address;
@@ -78,12 +78,12 @@ public class User {
         this.placeId = placeId;
     }
 
-    public String getRestaurant() {
-        return restaurant;
+    public String getRestaurantName() {
+        return restaurantName;
     }
 
-    public void setRestaurant(String restaurant) {
-        this.restaurant = restaurant;
+    public void setRestaurantName(String restaurantName) {
+        this.restaurantName = restaurantName;
     }
 
     public String getRestaurantType() {
@@ -142,7 +142,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", group='" + group + '\'' +
                 ", placeId='" + placeId + '\'' +
-                ", restaurant='" + restaurant + '\'' +
+                ", restaurantName='" + restaurantName + '\'' +
                 ", restaurantType='" + restaurantType + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", address='" + address + '\'' +

@@ -38,6 +38,7 @@ import java.util.List;
  * Created by Diego Fajardo on 27/04/2018.
  */
 
+// TODO: 28/05/2018 Remove the user from the list!
 public class FragmentCoworkersView extends Fragment {
 
     private static final String TAG = "PageFragmentCoworkersVi";
@@ -55,7 +56,8 @@ public class FragmentCoworkersView extends Fragment {
 
     //Firabase
     private FirebaseDatabase fireDb;
-    private DatabaseReference dbRef;
+    private DatabaseReference fireDbRefUsers;
+    private DatabaseReference fireDbRefGroups;
     private FirebaseAuth auth;
 
     private String usersEmail;
@@ -86,6 +88,19 @@ public class FragmentCoworkersView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
 
+        toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
+        if (((AppCompatActivity)getActivity()) != null) {
+            ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        }
+
+        if (((AppCompatActivity)getActivity()) != null) {
+            actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
+        }
+
         listOfCoworkers = new ArrayList<>();
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.coworkers_recycler_view_id);
@@ -104,20 +119,22 @@ public class FragmentCoworkersView extends Fragment {
             usersEmail = RepoStrings.FAKE_USER_EMAIL;
         }
 
+        /** We get the group of the user and fill a list with the coworkers. We will pass
+         * that list to the RecyclerView
+         * */
         fireDb = FirebaseDatabase.getInstance();
-        dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-
-        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                for (DataSnapshot item:
+                for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: in the foreach loop");
 
                     if (usersEmail != null) {
-                        Log.d(TAG, "onDataChange: users email is not null");
+                        Log.d(TAG, "onDataChange: users email is not null: " + usersEmail);
 
                         /** If the usersEmail of the user in the list is the same as the current user,
                          * then it is the user we are looking for and we save the user's group to
@@ -130,42 +147,38 @@ public class FragmentCoworkersView extends Fragment {
                     }
                 }
 
-                if (userGroup != null) {
-                    Log.d(TAG, "onDataChange: userGroup is not null");
 
-                    for (DataSnapshot item:
+                /** If user's group is different than null, then we get all the users from the database
+                 * that are in the same group and fill a list with them
+                 * */
+                if (userGroup != null) {
+                    Log.d(TAG, "onDataChange: userGroup is not null: " + userGroup);
+
+                    for (DataSnapshot item :
                             dataSnapshot.getChildren()) {
 
-                        /** If the user's group and the coworker's group coincide, we add the
-                         * coworker to the list
-                         * */
-                        if(item.child(RepoStrings.FirebaseReference.GROUP).getValue().equals(userGroup)){
+                        if (item.child(RepoStrings.FirebaseReference.GROUP).getValue().equals(userGroup)) {
 
-                            if (!item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
-                                // TODO: 24/05/2018 Check null values
-
-                                listOfCoworkers.add(new User(
-                                        item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
-                                ));
-                            }
+                            listOfCoworkers.add(new User(
+                                    item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
+                                    item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
+                            ));
                         }
                     }
-
-                    Log.d(TAG, "onDataChange: setting the adapter with list.size() = " + listOfCoworkers.size());
-
-                    mAdapter = new RVAdapterCoworkers(getContext(), listOfCoworkers);
-                    mRecyclerView.setAdapter(mAdapter);
+                    if (getActivity() != null) {
+                        mAdapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
+                        mRecyclerView.setAdapter(mAdapter);
+                    }
 
                 }
             }
@@ -175,19 +188,6 @@ public class FragmentCoworkersView extends Fragment {
                 Log.d(TAG, "onCancelled: " + databaseError.getCode());
             }
         });
-
-        toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
-        if (((AppCompatActivity)getActivity()) != null) {
-            ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-        }
-
-        if (((AppCompatActivity)getActivity()) != null) {
-            actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-                actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        }
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 

@@ -47,10 +47,10 @@ public class AuthSignInActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
-//        if (auth.getCurrentUser() != null) {
-//            startActivity(new Intent(AuthSignInActivity.this, MainActivity.class));
-//            finish();
-//        }
+        if (auth.getCurrentUser() != null) {
+            startActivity(new Intent(AuthSignInActivity.this, MainActivity.class));
+            finish();
+        }
 
         //We set the contentView AFTER checking if the user is already logged in
         setContentView(R.layout.activity_auth_signin);

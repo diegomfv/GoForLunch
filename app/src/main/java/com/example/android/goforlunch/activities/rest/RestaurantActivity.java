@@ -1,8 +1,10 @@
 package com.example.android.goforlunch.activities.rest;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
@@ -19,14 +21,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
-import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
+import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
-import com.example.android.goforlunch.remote.requesters.RequesterPlaceId;
 import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -34,6 +32,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -52,29 +56,28 @@ public class RestaurantActivity extends AppCompatActivity {
     private RatingBar rbRestRating;
 
     //Variables
-    private String placeId;
     private String restaurantType;
-    private RestaurantEntry restaurant;
     private String userEmail;
     private String userKey;
+    private String userRestaurant;
 
-    private boolean fabIsOpen;
+    private boolean fabShowsCheck;
     private String phoneToastString = "No phone available";
     private String webUrlToastString = "No web available";
     private String likeToastString = "Liked!";
+
+    private List<String> listOfCoworkers;
 
     //RecyclerView
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    //Database
-    private AppDatabase mDb;
-
     //Firebase Database
     private FirebaseAuth auth;
     private FirebaseDatabase fireDb;
-    private DatabaseReference fireDbRef;
+    private DatabaseReference fireDbRefUserWithKey;
+    private DatabaseReference fireDbRefUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,25 +88,15 @@ public class RestaurantActivity extends AppCompatActivity {
          *  */
         auth = FirebaseAuth.getInstance();
 
-        // TODO: 25/05/2018 Modify this!
-//        if (auth != null) {
-//            userEmail = auth.getCurrentUser().getEmail();
-//        }
-            userEmail = RepoStrings.FAKE_USER_EMAIL;
-            userKey = "-LDJQcELSJlLyD5LD9PW";
+        if (auth != null) {
+            userEmail = Objects.requireNonNull(auth.getCurrentUser()).getEmail();
+        }
 
         /** Instantiation of the fab and set onClick listener*/
         fab = findViewById(R.id.restaurant_fab_id);
         fab.setOnClickListener(mFabListener);
 
-        /** Instance of the local database
-         * */
-        mDb = AppDatabase.getInstance(RestaurantActivity.this);
-
-        /** Reference to Firebase Database
-         * */
-        fireDb = FirebaseDatabase.getInstance();
-        fireDbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        listOfCoworkers = new ArrayList<>();
 
         navigationView = (BottomNavigationView) findViewById(R.id.restaurant_selector_id);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
@@ -118,216 +111,85 @@ public class RestaurantActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(RestaurantActivity.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        // TODO: 24/05/2018 Set the list from Firebase!
-        mAdapter = new RVAdapterRestaurant(RestaurantActivity.this);
-        mRecyclerView.setAdapter(mAdapter);
-
-        /** We pass the placeId with the intent. Then, there can be 2 scenarios:
-         * Scenario 1. The placeId is in the local database (we get the item from there).
-         * Scenario 2. The placeId is not in the local database (it comes from a click in coworker's list).
-         * In the last case, we have to do an ApiRequest.
+        /** We get the intent to display the information
          * */
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
 
-        placeId = intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID);
+        tvRestName.setText(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME));
+        tvRestAddress.setText(intent.getStringExtra(RepoStrings.SentIntent.ADDRESS));
+
+        float rating = Float.parseFloat(intent.getStringExtra(RepoStrings.SentIntent.RATING));
+        rbRestRating.setRating(rating);
+
+        phoneToastString = intent.getStringExtra(RepoStrings.SentIntent.PHONE);
+        webUrlToastString = intent.getStringExtra(RepoStrings.SentIntent.WEBSITE_URL);
+
+        Glide.with(RestaurantActivity.this)
+                .load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL))
+                .into(ivRestPicture);
+
         restaurantType = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE);
 
-        // TODO: 25/05/2018 delete this if statement and start with the "if else" statement
-        if (placeId.equals("0")
-                || placeId.equals("1")
-                || placeId.equals("2")
-                || placeId.equals("3")) {
-            Log.d(TAG, "onCreate: placeId = " + placeId);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(RestaurantActivity.this);
+        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "Not Found");
+        userRestaurant = sharedPref.getString(RepoStrings.SharedPreferences.USER_RESTAURANT_NAME, "Not Found");
 
-            String name;
-
-            if (placeId.equals("0")) {
-                name = "Burger King";
-            } else if (placeId.equals("1")) {
-                name = "McDonalds";
-            }else if (placeId.equals("2")) {
-                name = "KFC";
-            } else {
-                name = "Tony Romas";
+        // TODO: 28/05/2018 See another way of doing things for lower versions
+        if (userRestaurant.equals(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME))) {
+            fabShowsCheck = true;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
             }
 
-            restaurant = new RestaurantEntry(
-                    placeId,
-                    name,
-                    restaurantType,
-                    "Elmdale Road, 9",
-                    "21.00h.",
-                    "0.1m",
-                    "2.75",
-                    "image",
-                    "+34 65482",
-                    "website_url",
-                    "0",
-                    "0"
-            );
-
-            tvRestName.setText(restaurant.getName());
-            tvRestAddress.setText(restaurant.getAddress());
-            float rating = Float.parseFloat(restaurant.getRating());
-            rbRestRating.setRating(rating);
-            phoneToastString = restaurant.getPhone();
-            webUrlToastString = restaurant.getWebsiteUrl();
-            Glide.with(RestaurantActivity.this)
-                    .load(restaurant.getImageUrl())
-                    .into(ivRestPicture);
-
-
-            // TODO: 25/05/2018 Make else if an "if statement" that starts everything
-        } else if (placeId != null) {
-            Log.d(TAG, "onCreate: checking if restaurant is in the database");
-
-            /** We check if the placeId is in the database. If it is, we get it from there,
-             * if not, we do an ApiRequest.
-             * */
-
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-
-                    restaurant = mDb.restaurantDao().getRestaurantById(placeId);
-
-                    if (restaurant != null){
-                        Log.d(TAG, "run: restaurant is in the database");
-
-                        /** The restaurant is in the database, so we get the info and we won't do
-                         * the ApiRequest
-                         * */
-
-                        if (restaurant.getName() != null) {
-                            tvRestName.setText(restaurant.getName());
-                        }
-
-                        if (restaurant.getAddress() != null) {
-                            tvRestAddress.setText(restaurant.getAddress());
-                        }
-
-                        if (restaurant.getRating() != null) {
-                            float rating = Float.parseFloat(restaurant.getRating());
-                            rbRestRating.setRating(rating);
-                        }
-
-                        if (restaurant.getPhone() != null) {
-                            phoneToastString = restaurant.getPhone();
-                        }
-
-                        if (restaurant.getWebsiteUrl() != null) {
-                            webUrlToastString = restaurant.getWebsiteUrl();
-                        }
-
-                        if (restaurant.getImageUrl() != null) {
-                            Glide.with(RestaurantActivity.this)
-                                    .load(restaurant.getImageUrl())
-                                    .into(ivRestPicture);
-                        }
-
-                    } else {
-                        Log.d(TAG, "run: restaurant is not in the database. Proceeding with Api Request");
-
-                        /** The restaurant is NOT in the database, so we get the info doing the ApiRequest
-                         * */
-
-                        LatLngForRetrofit latLngForRetrofit = new LatLngForRetrofit(0, 0);
-
-                        /** We pass a latLngForRetrofit with lat and lng equal to 0 to prevent the app
-                         *  to do the Distance Api Request (see RequesterPlaceId class). We do this
-                         *  because we don't have the restaurant location.
-                         * */
-                        RequesterPlaceId requester = new RequesterPlaceId(mDb, latLngForRetrofit);
-                        requester.doApiRequest(placeId);
-
-                        /** We wait a bit for the request to be done
-                         * */
-                        // TODO: 24/05/2018 Vary time if needed!
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        restaurant = mDb.restaurantDao().getRestaurantById(placeId);
-
-                        if (restaurant.getName() != null) {
-                            tvRestName.setText(restaurant.getName());
-                        }
-
-                        if (restaurant.getAddress() != null) {
-                            tvRestAddress.setText(restaurant.getAddress());
-                        }
-
-                        if (restaurant.getRating() != null) {
-                            float rating = Float.parseFloat(restaurant.getRating());
-                            rbRestRating.setRating(rating);
-                        }
-
-                        if (restaurant.getPhone() != null) {
-                            phoneToastString = restaurant.getPhone();
-                        }
-
-                        if (restaurant.getWebsiteUrl() != null) {
-                            webUrlToastString = restaurant.getWebsiteUrl();
-                        }
-
-                        if (restaurant.getImageUrl() != null) {
-                            Glide.with(RestaurantActivity.this)
-                                    .load(restaurant.getImageUrl())
-                                    .into(ivRestPicture);
-                        }
-
-                    }
-                }
-            });
-
-            // TODO: 24/05/2018 Hide the progress bar and Show the screen
-            //hideProgressBar();
+        } else {
+            fabShowsCheck = false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
+            }
         }
 
-        /** We get the id of the user. We need it to setValues() when the user clicks
-         * the fab button. Additionally, we set the value of "fabIsOpen"
+        /** We get the Firebase Database
          * */
-        fireDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        fireDb = FirebaseDatabase.getInstance();
+
+        /** Reference to Firebase Database, users.
+         * We get the list of coworkers that will go to this Restaurant
+         * */
+        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        fireDbRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                for (DataSnapshot item:
+                for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
-                    Log.d(TAG, "onDataChange: item.child()... " + item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString());
-                    Log.d(TAG, "onDataChange: userMail = " + userEmail);
+                    if (item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME)
+                            .equals(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME))) {
 
-                    if (item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString().equals(userEmail)) {
-
-                        /** We set the value of "fabIsOpen" according to the information found in the database
-                         * */
-                        fabIsOpen = item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equals(restaurant.getName());
-                        Log.d(TAG, "onDataChange: item.child()... = " + item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
-                        Log.d(TAG, "onDataChange: restaurant.getName() = " + restaurant.getName());
-                        Log.d(TAG, "onDataChange: fabIsOpen = " + fabIsOpen);
-
-                        if (fabIsOpen) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
-                            }
-                        } else {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
-                            }
-                        }
-                        break;
+                        listOfCoworkers.add(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString());
                     }
                 }
+
+                mAdapter = new RVAdapterRestaurant(RestaurantActivity.this, listOfCoworkers);
+                mRecyclerView.setAdapter(mAdapter);
+
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
             }
         });
+
+
+        // TODO: 28/05/2018 Get this to modify the database
+
+        Log.d(TAG, "onCreate: userRestaurant " + userRestaurant);
+        Log.d(TAG, "onCreate: userEmail " + userEmail);
+        Log.d(TAG, "onCreate: userKey " + userKey);
+
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 
@@ -341,40 +203,70 @@ public class RestaurantActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            if (fabIsOpen) {
-                fabIsOpen = false;
+            Map<String,Object> map;
+
+            if (fabShowsCheck) {
+                /** If we click the fab when it shows check it has to display "add".
+                 * Moreover, we modify the info in the database
+                 * */
+                fabShowsCheck = false;
+                Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
 
                     /** We delete the restaurant from the database (user's)
                      **/
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.PLACE_ID).setValue("None");
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_NAME).setValue("None");
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).setValue("None");
+                    fireDbRefUserWithKey = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+
+                    map = new HashMap<>();
+
+                    map.put(RepoStrings.FirebaseReference.PLACE_ID, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
+                    map.put(RepoStrings.FirebaseReference.ADDRESS, "");
+                    map.put(RepoStrings.FirebaseReference.RATING, "");
+                    map.put(RepoStrings.FirebaseReference.PHONE, "");
+                    map.put(RepoStrings.FirebaseReference.IMAGE_URL, "");
+                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
+
+                    fireDbRefUserWithKey.updateChildren(map);
 
                     ToastHelper.toastShort(RestaurantActivity.this, "Not Going to the restaurant!");
-
-                    Log.d(TAG, "onClick: fabIsOpen = " + fabIsOpen);
                 }
+
             } else {
-                fabIsOpen = true;
+
+                /** If we click the fab when it shows "add" it has to display "check".
+                 * Moreover, we modify the info in the database
+                 * */
+                fabShowsCheck = true;
+                Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
 
                     /** We add the restaurant to the database (user's)
                      * */
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.PLACE_ID).setValue(placeId);
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_NAME).setValue(restaurant.getName());
-                    fireDbRef.child(userKey).child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).setValue(restaurantType);
+                    fireDbRefUserWithKey = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
 
-                    ToastHelper.toastShort(RestaurantActivity.this, "Going to the restaurant...");
+                    map = new HashMap<>();
 
-                    Log.d(TAG, "onClick: fabIsOpen = " + fabIsOpen);
+                    map.put(RepoStrings.FirebaseReference.PLACE_ID,  getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE));
+                    map.put(RepoStrings.FirebaseReference.ADDRESS, getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS));
+                    map.put(RepoStrings.FirebaseReference.RATING, getIntent().getStringExtra(RepoStrings.SentIntent.RATING));
+                    map.put(RepoStrings.FirebaseReference.PHONE, getIntent().getStringExtra(RepoStrings.SentIntent.PHONE));
+                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,  getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL));
+                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL));
+
+                    fireDbRefUserWithKey.updateChildren(map);
+
+                    ToastHelper.toastShort(RestaurantActivity.this, "Going to "
+                            + getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME));
                 }
             }
-
-            ToastHelper.toastShort(RestaurantActivity.this, "Fab Clicked");
-
         }
     };
 

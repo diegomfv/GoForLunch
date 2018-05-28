@@ -2,13 +2,11 @@ package com.example.android.goforlunch.activities.rest;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.RVAdapterRestaurantDELETE;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.pojo.User;
@@ -51,11 +49,6 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
     private DatabaseReference dbRefGroups;
 
     private ChildEventListener mChildEventListener;
-
-    //Recycler View
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private RVAdapterRestaurantDELETE mAdapter;
 
     //Database
     private AppDatabase mDb;

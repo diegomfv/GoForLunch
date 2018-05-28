@@ -35,6 +35,7 @@ public interface RepoStrings {
     interface SharedPreferences {
 
         String USER_ID_KEY = "key";
+        String USER_RESTAURANT_NAME = "restaurant_name";
 
     }
 
@@ -44,7 +45,7 @@ public interface RepoStrings {
         String PASSWORD = "password";
 
         String PLACE_ID = "place_id";
-        String RESTAURANT = "restaurant";
+        String RESTAURANT_NAME = "restaurant_name";
         String RESTAURANT_TYPE = "restaurant_type";
         String ADDRESS = "address";
         String RATING = "rating";

@@ -59,10 +59,14 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
 
         Log.d(TAG, "onBindViewHolder: position# " + position);
         Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(position));
+
+        Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(holder.getAdapterPosition()).getPlaceId());
+        Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantName());
+        Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(holder.getAdapterPosition()).getRating());
 
         holder.textview.setText(listOfCoworkers.get(position).getFirstName()
                 + " "
@@ -70,7 +74,7 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
                 + " is eating "
                 + listOfCoworkers.get(position).getRestaurantType()
                 + " ("
-                + listOfCoworkers.get(position).getRestaurant()
+                + listOfCoworkers.get(position).getRestaurantName()
                 + ")"
         );
 
@@ -78,11 +82,15 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             @Override
             public void onClick(View view) {
 
-                // TODO: 24/05/2018 Brings the user to the restaurant page
-
                 Intent intent = new Intent(mContext, RestaurantActivity.class);
-                intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfCoworkers.get(position).getPlaceId());
-                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(position).getRestaurantType());
+                intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfCoworkers.get(holder.getAdapterPosition()).getPlaceId());
+                intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getImageUrl());
+                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME,listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantName());
+                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantType());
+                intent.putExtra(RepoStrings.SentIntent.ADDRESS, listOfCoworkers.get(holder.getAdapterPosition()).getAddress());
+                intent.putExtra(RepoStrings.SentIntent.RATING, listOfCoworkers.get(holder.getAdapterPosition()).getRating());
+                intent.putExtra(RepoStrings.SentIntent.PHONE, listOfCoworkers.get(holder.getAdapterPosition()).getPhone());
+                intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getWebsiteUrl());
 
                 mContext.startActivity(intent);
 
@@ -95,7 +103,7 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
 
     @Override
     public int getItemCount() {
-        return 10;
+        return listOfCoworkers.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

@@ -177,7 +177,12 @@ public class MainActivity extends AppCompatActivity {
                          * */
                         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString(RepoStrings.SharedPreferences.USER_ID_KEY, item.getKey());
+                        editor.putString(
+                                RepoStrings.SharedPreferences.USER_ID_KEY,
+                                item.getKey());
+                        editor.putString(
+                                RepoStrings.SharedPreferences.USER_RESTAURANT_NAME,
+                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
                         editor.apply();
 
                         /** We fill the object with the info we will need to pass in the intent
@@ -296,14 +301,14 @@ public class MainActivity extends AppCompatActivity {
                             if (user == null) {
                                 ToastHelper.toastShort(MainActivity.this, "An error occurred. Restaurant Entry is null");
 
-                            } else if (user.getRestaurant().equals("")) {
+                            } else if (user.getRestaurantName().equals("")) {
                                 ToastHelper.toastShort(MainActivity.this, "You have not chosen a restaurant yet!");
 
                             } else {
 
                                 Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
                                 intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, user.getImageUrl());
-                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT, user.getFirstName());
+                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, user.getFirstName());
                                 intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, user.getRestaurantType());
                                 intent.putExtra(RepoStrings.SentIntent.ADDRESS, user.getAddress());
                                 intent.putExtra(RepoStrings.SentIntent.RATING, user.getRating());
