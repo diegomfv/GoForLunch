@@ -56,9 +56,9 @@ public class RestaurantActivity extends AppCompatActivity {
     private RatingBar rbRestRating;
 
     //Variables
-    private String restaurantType;
     private String userEmail;
     private String userKey;
+    private String userGroup;
     private String userRestaurant;
 
     private boolean fabShowsCheck;
@@ -78,6 +78,8 @@ public class RestaurantActivity extends AppCompatActivity {
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRefUserWithKey;
     private DatabaseReference fireDbRefUsers;
+
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,11 +137,12 @@ public class RestaurantActivity extends AppCompatActivity {
                     .into(ivRestPicture);
         }
 
-        restaurantType = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE);
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(RestaurantActivity.this);
+        /** We get the necessary info from Shared Preferences
+         * */
+        final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(RestaurantActivity.this);
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "Not Found");
         userRestaurant = sharedPref.getString(RepoStrings.SharedPreferences.USER_RESTAURANT_NAME, "Not Found");
+        userGroup = sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, "Not Found");
 
         // TODO: 28/05/2018 See another way of doing things for lower versions
         if (userRestaurant.equals(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME))) {
@@ -160,7 +163,8 @@ public class RestaurantActivity extends AppCompatActivity {
         fireDb = FirebaseDatabase.getInstance();
 
         /** Reference to Firebase Database, users.
-         * We get the list of coworkers that will go to this Restaurant
+         * We get the list of coworkers that will go to this Restaurant which
+         * will be displayed in the recyclerView
          * */
         fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
         fireDbRefUsers.addValueEventListener(new ValueEventListener() {
@@ -168,16 +172,40 @@ public class RestaurantActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
+                Log.d(TAG, "onDataChange: userEmail = " + userEmail);
+
+                /** We clear the list to avoid adding same users to it
+                 * */
+                listOfCoworkers.clear();
+
                 for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
-                    if (item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME)
-                            .equals(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME))) {
+                    /** If another user is in the same group of the current user
+                     *  */
+                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).equals(userGroup)) {
 
-                        listOfCoworkers.add(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString());
+                        /** If another user is going to the restaurant we are seeing in the screen
+                         * */
+                        if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue())
+                                .equals(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME))) {
+
+                            /** If the user we are going to add to the recyclerView is not the current user
+                             * */
+                            if (!Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals(userEmail)) {
+
+                                /** We add the other user to the list, and this list will be used in the recyclerview
+                                 * */
+                                listOfCoworkers.add(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString());
+                            }
+                        }
                     }
                 }
 
+                Log.d(TAG, "onDataChange: listOfCoworkers.size() = " + listOfCoworkers.size());
+
+                /** We used the list in the adapter
+                 * */
                 mAdapter = new RVAdapterRestaurant(RestaurantActivity.this, listOfCoworkers);
                 mRecyclerView.setAdapter(mAdapter);
 
@@ -190,15 +218,14 @@ public class RestaurantActivity extends AppCompatActivity {
             }
         });
 
-
-        // TODO: 28/05/2018 Get this to modify the database
-
-        Log.d(TAG, "onCreate: userRestaurant " + userRestaurant);
-        Log.d(TAG, "onCreate: userEmail " + userEmail);
-        Log.d(TAG, "onCreate: userKey " + userKey);
-
-
         Anim.crossFadeShortAnimation(mRecyclerView);
+
+        // TODO: 28/05/2018 Delete when app is finished
+        Map<String, ?> prefsMap = sharedPref.getAll();
+        for (Map.Entry<String, ?> entry: prefsMap.entrySet()) {
+            Log.d("SharedPreferences: ", entry.getKey() + ":" +
+                    entry.getValue().toString());
+        }
 
     }
 

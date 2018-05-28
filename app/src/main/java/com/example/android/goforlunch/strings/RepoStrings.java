@@ -36,6 +36,7 @@ public interface RepoStrings {
 
         String USER_ID_KEY = "key";
         String USER_RESTAURANT_NAME = "restaurant_name";
+        String USER_GROUP = "group";
 
     }
 

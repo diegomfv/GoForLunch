@@ -183,6 +183,9 @@ public class MainActivity extends AppCompatActivity {
                         editor.putString(
                                 RepoStrings.SharedPreferences.USER_RESTAURANT_NAME,
                                 Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
+                        editor.putString(
+                                RepoStrings.SharedPreferences.USER_GROUP,
+                                item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString());
                         editor.apply();
 
                         /** We fill the object with the info we will need to pass in the intent
