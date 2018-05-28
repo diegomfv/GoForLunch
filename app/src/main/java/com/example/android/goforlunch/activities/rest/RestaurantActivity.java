@@ -117,23 +117,53 @@ public class RestaurantActivity extends AppCompatActivity {
          * */
         final Intent intent = getIntent();
 
-        tvRestName.setText(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME));
-        tvRestAddress.setText(intent.getStringExtra(RepoStrings.SentIntent.ADDRESS));
+        // TODO: 28/05/2018 We can use here the checkIfIsNull method (for intent strings)
 
-        float rating = Float.parseFloat(intent.getStringExtra(RepoStrings.SentIntent.RATING));
-        rbRestRating.setRating(rating);
+        if (intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) == null
+                || intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME).equals("")) {
+
+            tvRestName.setText("Restaurant name not available");
+
+        } else {
+
+            tvRestName.setText(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME));
+        }
+
+        if (intent.getStringExtra(RepoStrings.SentIntent.ADDRESS) == null
+                || intent.getStringExtra(RepoStrings.SentIntent.ADDRESS).equals("")) {
+
+            tvRestAddress.setText("Address not available");
+
+        } else {
+
+            tvRestAddress.setText(intent.getStringExtra(RepoStrings.SentIntent.ADDRESS));
+        }
+
+        if (intent.getStringExtra(RepoStrings.SentIntent.RATING) == null
+                || intent.getStringExtra(RepoStrings.SentIntent.RATING).equals("")) {
+
+            rbRestRating.setRating(0f);
+
+        } else {
+
+            float rating = Float.parseFloat(intent.getStringExtra(RepoStrings.SentIntent.RATING));
+            rbRestRating.setRating(rating);
+        }
 
         phoneToastString = intent.getStringExtra(RepoStrings.SentIntent.PHONE);
         webUrlToastString = intent.getStringExtra(RepoStrings.SentIntent.WEBSITE_URL);
 
-        if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) != null) {
+        if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) == null
+                || intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL).equals("")) {
+
             Glide.with(RestaurantActivity.this)
-                    .load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL))
+                    .load(R.drawable.lunch_image)
                     .into(ivRestPicture);
 
         } else {
+
             Glide.with(RestaurantActivity.this)
-                    .load(R.drawable.lunch_image)
+                    .load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL))
                     .into(ivRestPicture);
         }
 

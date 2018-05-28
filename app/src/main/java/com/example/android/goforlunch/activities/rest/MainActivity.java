@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         mDb = AppDatabase.getInstance(getApplicationContext());
         fireDb = FirebaseDatabase.getInstance();
         fireDbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        fireDbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
                                 intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, user.getImageUrl());
-                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, user.getFirstName());
+                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, user.getRestaurantName());
                                 intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, user.getRestaurantType());
                                 intent.putExtra(RepoStrings.SentIntent.ADDRESS, user.getAddress());
                                 intent.putExtra(RepoStrings.SentIntent.RATING, user.getRating());

@@ -68,34 +68,48 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
         Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantName());
         Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(holder.getAdapterPosition()).getRating());
 
-        holder.textview.setText(listOfCoworkers.get(position).getFirstName()
-                + " "
-                + listOfCoworkers.get(position).getLastName()
-                + " is eating "
-                + listOfCoworkers.get(position).getRestaurantType()
-                + " ("
-                + listOfCoworkers.get(position).getRestaurantName()
-                + ")"
-        );
+        if (listOfCoworkers.get(position).getRestaurantName() == null
+                || listOfCoworkers.get(position).getRestaurantName().equals("")) {
 
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            holder.textview.setText(listOfCoworkers.get(position).getFirstName()
+                    + " "
+                    + listOfCoworkers.get(position).getLastName()
+                    + " has not decided yet...");
+            holder.textview.setTextColor(mContext.getResources().getColor(android.R.color.darker_gray));
+            holder.cardView.setOnClickListener(null);
 
-                Intent intent = new Intent(mContext, RestaurantActivity.class);
-                intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfCoworkers.get(holder.getAdapterPosition()).getPlaceId());
-                intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getImageUrl());
-                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME,listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantName());
-                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantType());
-                intent.putExtra(RepoStrings.SentIntent.ADDRESS, listOfCoworkers.get(holder.getAdapterPosition()).getAddress());
-                intent.putExtra(RepoStrings.SentIntent.RATING, listOfCoworkers.get(holder.getAdapterPosition()).getRating());
-                intent.putExtra(RepoStrings.SentIntent.PHONE, listOfCoworkers.get(holder.getAdapterPosition()).getPhone());
-                intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getWebsiteUrl());
+        } else {
 
-                mContext.startActivity(intent);
+            holder.textview.setText(listOfCoworkers.get(position).getFirstName()
+                    + " "
+                    + listOfCoworkers.get(position).getLastName()
+                    + " is eating "
+                    + listOfCoworkers.get(position).getRestaurantType()
+                    + " ("
+                    + listOfCoworkers.get(position).getRestaurantName()
+                    + ")"
+            );
+            holder.textview.setTextColor(mContext.getResources().getColor(android.R.color.black));
 
-            }
-        });
+            holder.cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent intent = new Intent(mContext, RestaurantActivity.class);
+                    intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfCoworkers.get(holder.getAdapterPosition()).getPlaceId());
+                    intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getImageUrl());
+                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME,listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantName());
+                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantType());
+                    intent.putExtra(RepoStrings.SentIntent.ADDRESS, listOfCoworkers.get(holder.getAdapterPosition()).getAddress());
+                    intent.putExtra(RepoStrings.SentIntent.RATING, listOfCoworkers.get(holder.getAdapterPosition()).getRating());
+                    intent.putExtra(RepoStrings.SentIntent.PHONE, listOfCoworkers.get(holder.getAdapterPosition()).getPhone());
+                    intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getWebsiteUrl());
+
+                    mContext.startActivity(intent);
+
+                }
+            });
+        }
 
         Anim.crossFadeShortAnimation(holder.itemView);
 

@@ -58,15 +58,25 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
         Log.d(TAG, "onBindViewHolder: position# " + position);
 
-        holder.tv_text.setText(listOfCoworkers.get(position) + " is joining!");
+        if (listOfCoworkers.size() == 0) {
+            holder.tv_text.setText("No coworkers joining at the moment!");
+
+        } else {
+
+            holder.tv_text.setText(listOfCoworkers.get(position) + " is joining!");
+        }
 
         Anim.crossFadeShortAnimation(holder.itemView);
-
     }
 
     @Override
     public int getItemCount() {
-        return listOfCoworkers.size();
+
+        if (listOfCoworkers.size() == 0){
+            return 1;
+        } else {
+            return listOfCoworkers.size();
+        }
     }
 
 

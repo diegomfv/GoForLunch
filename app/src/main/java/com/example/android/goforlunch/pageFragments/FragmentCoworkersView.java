@@ -124,7 +124,7 @@ public class FragmentCoworkersView extends Fragment {
          * */
         fireDb = FirebaseDatabase.getInstance();
         fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+        fireDbRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
@@ -154,25 +154,30 @@ public class FragmentCoworkersView extends Fragment {
                 if (userGroup != null) {
                     Log.d(TAG, "onDataChange: userGroup is not null: " + userGroup);
 
+                    listOfCoworkers.clear();
+
                     for (DataSnapshot item :
                             dataSnapshot.getChildren()) {
 
                         if (item.child(RepoStrings.FirebaseReference.GROUP).getValue().equals(userGroup)) {
 
-                            listOfCoworkers.add(new User(
-                                    item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
-                                    item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
-                            ));
+                            if(!item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
+
+                                listOfCoworkers.add(new User(
+                                        item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
+                                        item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
+                                ));
+                            }
                         }
                     }
                     if (getActivity() != null) {

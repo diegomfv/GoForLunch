@@ -12,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -138,15 +140,24 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                     RepoStrings.RESTAURANT_TYPES
             );
 
+            // TODO: 28/05/2018 Change the position of the displayed text in the Adapter
             mSearchText.setAdapter(autocompleteAdapter);
-            mSearchText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            mSearchText.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
-                    Log.d(TAG, "onItemClick: CALLED!");
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    Log.d(TAG, "beforeTextChanged: " + charSequence);
 
-                    String type = adapterView.getItemAtPosition(i).toString();
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    Log.d(TAG, "onTextChanged: " + charSequence);
+
+                    String type = charSequence.toString();
 
                     if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(type)) {
+
+                        listOfRestaurantsByType = new ArrayList<>();
 
                         for (int j = 0; j < listOfRestaurants.size(); j++) {
 
@@ -164,6 +175,12 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                         mRecyclerView.setAdapter(mAdapter);
 
                     }
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    Log.d(TAG, "afterTextChanged: " + editable);
+
                 }
             });
         }
