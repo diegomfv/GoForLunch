@@ -81,7 +81,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
 
         listOfUsers = new ArrayList<>();
 
-        /** We get the list fo users from the database to avoid creating two users
+        /** We get the list from users from the database to avoid creating two users
          * with the same email (which is the element we will use to identify the users)
          * */
         fireDb = FirebaseDatabase.getInstance();
@@ -127,6 +127,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
                 Intent intent = new Intent(AuthSignUpActivity.this, AuthSignInActivity.class);
                 intent.putExtra(StringValues.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
                 intent.putExtra(StringValues.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
             }
@@ -164,6 +165,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
                     Intent intent = new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroup.class);
                     intent.putExtra(StringValues.SentIntent.EMAIL,email);
                     intent.putExtra(StringValues.SentIntent.PASSWORD,password);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                     finish();
 

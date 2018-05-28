@@ -10,7 +10,9 @@ import android.widget.Button;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.RVAdapterRestaurantDELETE;
 import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.pojo.User;
+import com.example.android.goforlunch.strings.StringValues;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,7 +46,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
     private HashMap<String,String> userData;
 
-    private FirebaseDatabase fDb;
+    private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
     private DatabaseReference dbRefGroups;
 
@@ -117,8 +119,8 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
         }
 
-        fDb = FirebaseDatabase.getInstance();
-        dbRefUsers = fDb.getReference("users/");
+        fireDb = FirebaseDatabase.getInstance();
+        dbRefUsers = fireDb.getReference("users/");
         dbRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -139,8 +141,8 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                             dataSnapshot.getChildren()) {
                         Log.d(TAG, "onDataChange: DATASNAPSHOT = " + item.toString());
 
-                        userEmail = Objects.requireNonNull(item.child("email").getValue()).toString();
-                        userGroup = Objects.requireNonNull(item.child("group").getValue()).toString();
+                        userEmail = item.child("email").getValue().toString();
+                        userGroup = item.child("group").getValue().toString();
 
                         mapEmailGroup.put(userEmail, userGroup);
 
@@ -148,7 +150,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                     Log.d(TAG, "onDataChange: " + mapEmailGroup);
 
-                    dbRefGroups = fDb.getReference("groups/");
+                    dbRefGroups = fireDb.getReference("groups/");
                     for (int i = 0; i < listOfGroups.size(); i++) {
 
                         map = new HashMap<>();
@@ -159,7 +161,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                     for (int i = 0; i < listOfGroups.size(); i++) {
 
-                        dbRefGroups = fDb.getReference("groups/group" + i);
+                        dbRefGroups = fireDb.getReference("groups/group" + i);
                         map = new HashMap<>();
 
                         map.put("name", listOfGroups.get(i));
@@ -190,23 +192,20 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                 for (int i = 0; i < 45; i++) {
 
+                    dbRefUsers = fireDb.getReference(StringValues.FirebaseReference.USERS);
                     map = new HashMap<>();
-                    map.put("userid" + i, listOfEmails.get(i));
+                    map.put(StringValues.FirebaseReference.FIRSTNAME,listOfNames.get(i).getFirstName());
+                    map.put(StringValues.FirebaseReference.LASTNAME,listOfNames.get(i).getLastName());
+                    map.put(StringValues.FirebaseReference.EMAIL,listOfEmails.get(i));
+                    map.put(StringValues.FirebaseReference.GROUP,listOfGroups.get(random.nextInt(4)));
+                    map.put(StringValues.FirebaseReference.PLACE_ID,"");
+                    map.put(StringValues.FirebaseReference.RESTAURANT,"");
+                    map.put(StringValues.FirebaseReference.RESTAURANT_TYPE,"");
+                    map.put(StringValues.FirebaseReference.RATING,"");
+                    map.put(StringValues.FirebaseReference.PHONE,"");
+                    map.put(StringValues.FirebaseReference.IMAGE_URL,"");
 
-                    dbRefUsers = fDb.getReference("users/userid" + i);
-                    map = new HashMap<>();
-                    map.put("firstname",listOfNames.get(i).getFirstName());
-                    map.put("lastname",listOfNames.get(i).getLastName());
-                    map.put("email",listOfEmails.get(i));
-                    map.put("group",listOfGroups.get(random.nextInt(4)));
-                    map.put("placeId","");
-                    map.put("restaurant","");
-                    map.put("restaurantType","");
-                    map.put("rating","");
-                    map.put("phone","");
-                    map.put("image_url","");
-
-                    dbRefUsers.updateChildren(map);
+                    dbRefUsers.push().setValue(map);
                 }
             }
         });
@@ -215,6 +214,44 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: CALLED!");
+
+                DatabaseReference dbRef = fireDb.getReference(StringValues.FirebaseReference.USERS);
+                dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        for (DataSnapshot item:
+                             dataSnapshot.getChildren()) {
+                            Log.d(TAG, "onDataChange: in the foreach loop");
+
+                            if (Objects.requireNonNull(item.child(StringValues.FirebaseReference.EMAIL).getValue()).equals("brad_berry@gmail.com")){
+                                Log.d(TAG, "onDataChange: in the if statement");
+                                ToastHelper.toastShort(FirebaseActivityDELETE.this, item.getKey());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+                    }
+                });
+
+                Map<String, Object> map;
+                map = new HashMap<>();
+                map.put(StringValues.FirebaseReference.FIRSTNAME,"");
+                map.put(StringValues.FirebaseReference.LASTNAME,"");
+                map.put(StringValues.FirebaseReference.EMAIL,"");
+                map.put(StringValues.FirebaseReference.GROUP,"");
+                map.put(StringValues.FirebaseReference.PLACE_ID,"");
+                map.put(StringValues.FirebaseReference.RESTAURANT,"");
+                map.put(StringValues.FirebaseReference.RESTAURANT_TYPE,"");
+                map.put(StringValues.FirebaseReference.RATING,"");
+                map.put(StringValues.FirebaseReference.PHONE,"");
+                map.put(StringValues.FirebaseReference.IMAGE_URL,"");
+
+                dbRef.push().setValue(map);
 
             }
         });
@@ -229,7 +266,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                 for (int i = 0; i < listOfGroups.size(); i++) {
 
-                    dbRefGroups = fDb.getReference("groups/group" + i + "/" + "members");
+                    dbRefGroups = fireDb.getReference("groups/group" + i + "/" + "members");
 
                     for (Map.Entry<String,Object> entry:
                             mapEmailGroup.entrySet()) {
@@ -253,6 +290,11 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                 }
             }
         });
+
+
+
+
+
 
         /** com.google.firebase.database.DatabaseException: Serializing Arrays is not supported, please use Lists instead */
 

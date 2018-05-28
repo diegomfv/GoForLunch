@@ -6,7 +6,7 @@ package com.example.android.goforlunch.strings;
 public interface StringValues {
 
     // TODO: 25/05/2018 Delete this
-    String FAKE_USER_EMAIL = "Dana_Overcash@gmail.com";
+    String FAKE_USER_EMAIL = "diego_fajardo@hotmail.com";
 
     String NOT_AVAILABLE = "NotAvailable";
 
@@ -57,7 +57,7 @@ public interface StringValues {
         String IMAGE_URL = "image_url";
 
         String GROUPS = "groups/";
-        String NAME = "name";
+        String GROUPS_NAME = "name";
         String MEMBERS = "members";
 
         String USER_ID = "userid";

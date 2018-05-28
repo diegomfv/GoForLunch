@@ -81,6 +81,7 @@ public class AuthSignInActivity extends AppCompatActivity {
                 Intent intent = new Intent(AuthSignInActivity.this, AuthSignUpActivity.class);
                 intent.putExtra(StringValues.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
                 intent.putExtra(StringValues.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
         });
@@ -136,6 +137,8 @@ public class AuthSignInActivity extends AppCompatActivity {
                                     }
 
                                 } else {
+                                    Intent intent = new Intent(AuthSignInActivity.this, MainActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(new Intent(AuthSignInActivity.this, MainActivity.class));
                                     finish();
                                 }
