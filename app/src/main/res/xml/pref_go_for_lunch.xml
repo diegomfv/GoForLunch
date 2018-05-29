@@ -7,7 +7,6 @@
         android:title="Notifications"
         android:summaryOff="@string/pref_summaryOff"
         android:summaryOn="@string/pref_summaryOn">
-
     </CheckBoxPreference>
 
 </PreferenceScreen>
