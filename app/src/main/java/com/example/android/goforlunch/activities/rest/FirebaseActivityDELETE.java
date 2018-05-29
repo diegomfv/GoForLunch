@@ -16,6 +16,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.ajbrown.namemachine.Name;
@@ -42,30 +43,9 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
     private Button button2;
     private Button button3;
 
-    private HashMap<String,String> userData;
-
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
     private DatabaseReference dbRefGroups;
-
-    private ChildEventListener mChildEventListener;
-
-    //Database
-    private AppDatabase mDb;
-
-    //Variables for objects
-    private String placeId;
-    private String name;
-    private String type;
-    private String address;
-    private String openUntil;
-    private String distance;
-    private String rating;
-    private String imageUrl;
-
-    private static int counter = 0;
-
-    private List<User> listOfUsers;
 
     //List of Fake Data
     private List<Name> listOfNames;
@@ -83,7 +63,6 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
         random = new Random();
 
-        listOfUsers = new ArrayList<>();
         listOfEmails = new ArrayList<>();
         listOfGroups = new ArrayList<>();
         listOfRestaurants = new ArrayList<>();
@@ -251,40 +230,33 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: CALLED!");
 
-                Map<String,Object> map = new HashMap<>();
-                String modEmail;
+                dbRefUsers.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(final DataSnapshot dataSnapshot) {
 
-                for (int i = 0; i < listOfGroups.size(); i++) {
-
-                    dbRefGroups = fireDb.getReference("groups/group" + i + "/" + RepoStrings.FirebaseReference.GROUP_MEMBERS);
-
-                    for (Map.Entry<String,Object> entry:
-                            mapEmailGroup.entrySet()) {
-
-                        map = new HashMap<>();
-
-                        Log.d(TAG, "onClick: entry.getValue() = " + entry.getValue());
-                        Log.d(TAG, "onClick: listOfGroups.get(i) = " + listOfGroups.get(i));
-
-                        if (entry.getValue().toString().equals(listOfGroups.get(i))){
-
-                            modEmail = entry.getKey();
-                            if (modEmail.contains(".")) {
-                                modEmail = modEmail.replace(".",",");
+                        Query query = dbRefUsers.orderByChild("group").startAt("Apple");
+                        query.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Log.d(TAG, "onDataChange: HERE! " + dataSnapshot.toString());
                             }
 
-                            map.put(modEmail, true);
-                            dbRefGroups.updateChildren(map);
-                        }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                            }
+                        });
+
                     }
-                }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
-
-
-
-
-
 
         /** com.google.firebase.database.DatabaseException: Serializing Arrays is not supported, please use Lists instead */
 
@@ -309,5 +281,6 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
          }
 
          */
+
     }
 }

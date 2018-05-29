@@ -69,8 +69,6 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
     private DatabaseReference fireDbRefGroups;
     private DatabaseReference fireDbRefUsers;
 
-    // TODO: 27/05/2018 Block back button! The user is already created and has to choose a group!
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

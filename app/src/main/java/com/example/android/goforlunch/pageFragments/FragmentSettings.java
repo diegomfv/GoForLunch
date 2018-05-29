@@ -11,7 +11,6 @@ import com.example.android.goforlunch.R;
 
 public class FragmentSettings extends PreferenceFragmentCompat {
 
-
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.pref_go_for_lunch);

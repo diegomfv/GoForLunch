@@ -63,6 +63,7 @@ import java.util.Objects;
 // TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
 // TODO: 21/05/2018 Add a button to do the API Requests again
 // TODO: 24/05/2018 Add JOIN GROUP in NavigationDrawer
+// TODO: 28/05/2018 Check if distance is too far, delete from the database!
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -178,6 +179,12 @@ public class MainActivity extends AppCompatActivity {
                         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putString(
+                                RepoStrings.SharedPreferences.USER_FIRST_NAME,
+                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue()).toString());
+                        editor.putString(
+                                RepoStrings.SharedPreferences.USER_LAST_NAME,
+                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue()).toString());
+                        editor.putString(
                                 RepoStrings.SharedPreferences.USER_ID_KEY,
                                 item.getKey());
                         editor.putString(
@@ -187,6 +194,12 @@ public class MainActivity extends AppCompatActivity {
                                 RepoStrings.SharedPreferences.USER_GROUP,
                                 item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString());
                         editor.apply();
+
+                        Log.d(TAG, "onCreate: userFirstName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
+                        Log.d(TAG, "onCreate: userLastName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
+                        Log.d(TAG, "onCreate: userIdKey: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, ""));
+                        Log.d(TAG, "onCreate: userRestaurantName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_RESTAURANT_NAME, ""));
+                        Log.d(TAG, "onCreate: userGroup: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, ""));
 
                         /** We fill the object with the info we will need to pass in the intent
                          * */
@@ -325,6 +338,23 @@ public class MainActivity extends AppCompatActivity {
                             return true;
                         }
 
+                        case R.id.nav_join_group: {
+                            Log.d(TAG, "onNavigationItemSelected: join group pressed");
+
+                            startActivity(new Intent(MainActivity.this, JoinGroupActivity.class));
+
+                            return true;
+
+                        }
+
+                        case R.id.nav_personal_info: {
+                            Log.d(TAG, "onNavigationItemSelected: personal info pressed");
+
+                            startActivity(new Intent(MainActivity.this, PersInfoActivity.class));
+
+                            return true;
+                        }
+
                         case R.id.nav_settings: {
                             Log.d(TAG, "onNavigationItemSelected: settings pressed");
 
@@ -338,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
 
                             /** We delete all the sharedPreferences info
                              * */
+                            // TODO: 28/05/2018 Should be done in SignInActivity
                             Map<String,?> map = sharedPref.getAll();
 
                             for (Map.Entry<String,?> entry :

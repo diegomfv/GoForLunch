@@ -8,6 +8,16 @@
         android:icon="@drawable/ic_lunch"
         android:title="YOUR LUNCH" />
 
+    <item
+        android:id="@+id/nav_join_group"
+        android:icon="@drawable/ic_coworkers"
+        android:title="JOIN GROUP" />
+
+    <item
+        android:id="@+id/nav_personal_info"
+        android:icon="@drawable/ic_person"
+        android:title="PERSONAL INFO" />
+
     <item android:title="SYSTEM">
         <menu>
             <item

@@ -71,7 +71,10 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         Anim.crossFadeShortAnimation(holder.itemView);
 
         holder.title.setText(listOfRestaurantsByType.get(position).getName());
-        holder.address.setText(listOfRestaurantsByType.get(position).getAddress());
+        holder.address.setText(
+                listOfRestaurantsByType.get(position).getType()
+                        + " - "
+                        +  listOfRestaurantsByType.get(position).getAddress());
         holder.openUntil.setText(listOfRestaurantsByType.get(position).getOpenUntil());
         holder.distance.setText(listOfRestaurantsByType.get(position).getDistance());
         // TODO: 21/05/2018 Add coworkers joining!

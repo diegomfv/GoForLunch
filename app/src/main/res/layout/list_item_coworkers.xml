@@ -34,6 +34,7 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/cv_coworkers_image_id"
             android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             android:textSize="14sp"/>
 
     </RelativeLayout>

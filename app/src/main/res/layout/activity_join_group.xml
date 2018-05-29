@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/enter_status_bar_id"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:background="@color/colorPrimaryDark">
+    </FrameLayout>
+
+    <android.support.design.widget.TextInputLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="30dp"
+    android:layout_marginRight="30dp"
+    android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+    android:layout_marginBottom="10dp">
+
+    <com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView
+        android:id="@+id/join_autocomplete_enter_group_id"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="14sp"
+        android:hint="Group"
+        android:maxLines="1"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:completionThreshold="0"
+        android:maxLength="12" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/join_button_join_group_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:textColor="@color/colorAccentDark"
+        android:text="JOIN GROUP"/>
+
+
+
+
+</LinearLayout>

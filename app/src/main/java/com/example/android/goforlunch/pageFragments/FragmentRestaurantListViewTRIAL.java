@@ -30,12 +30,17 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.strings.RepoStrings;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -48,7 +53,8 @@ import java.util.List;
 
 public class FragmentRestaurantListViewTRIAL extends Fragment {
 
-    // TODO: 24/05/2018 Add the ViewModel here
+    // TODO: 28/05/2018 Some names appear over the others
+    // TODO: 29/05/2018 Modify the number of users that go to a place!
 
     private static final String TAG = "PageFragmentRestaurantL";
 
@@ -74,6 +80,11 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
     //Database
     private AppDatabase mDb;
     private MainViewModel mainViewModel;
+
+    // TODO: 29/05/2018 Use these variables to get the necessary info to display the number of coworkers that are going to a specific place
+    //Firebase Database
+    private FirebaseDatabase fireDb;
+    private DatabaseReference fireDbRefUsers;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -140,6 +151,7 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                     RepoStrings.RESTAURANT_TYPES
             );
 
+            // TODO: 29/05/2018 Hide the keyboard when the item is clicked or enter is pressed
             // TODO: 28/05/2018 Change the position of the displayed text in the Adapter
             mSearchText.setAdapter(autocompleteAdapter);
             mSearchText.addTextChangedListener(new TextWatcher() {
@@ -152,6 +164,10 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     Log.d(TAG, "onTextChanged: " + charSequence);
+
+                    // TODO: 29/05/2018 Might be a way of doing it more efficiently
+                    // TODO: 29/05/2018 Eg, only change after 4 letters
+                    // TODO: 29/05/2018 Hide keyboard when magnifying class is clicked
 
                     String type = charSequence.toString();
 
@@ -183,7 +199,20 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
                 }
             });
+
+            mSearchText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Log.d(TAG, "onItemClick: ITEM CLICKED");
+
+                    Utils.hideKeyboard(getActivity());
+
+                }
+            });
         }
+
+
+
 
         if (((AppCompatActivity) getActivity()) != null) {
             ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);

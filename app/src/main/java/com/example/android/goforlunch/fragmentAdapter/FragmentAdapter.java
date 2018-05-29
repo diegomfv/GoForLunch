@@ -24,7 +24,6 @@ public class FragmentAdapter extends FragmentPagerAdapter {
         super(fm);
     }
 
-
     // TODO: 27/04/2018 Take care. We create a list but later we don't use it here
     @Override
     public Fragment getItem(int position) {
@@ -41,7 +40,6 @@ public class FragmentAdapter extends FragmentPagerAdapter {
                 return null;
 
             }
-
         }
 
     @Override
