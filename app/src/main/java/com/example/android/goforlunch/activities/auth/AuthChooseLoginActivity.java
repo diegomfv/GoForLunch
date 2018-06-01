@@ -14,6 +14,7 @@ import android.widget.Button;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.strings.RepoStrings;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -29,6 +30,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 31/05/2018.
@@ -78,7 +80,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
             } else {
 
                 //go to AuthEnterNameAndGroupActivity
-                startActivity(new Intent(AuthChooseLoginActivity.this, MainActivity.class));
+                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameAndGroupActivity.class));
                 finish();
 
             }
@@ -172,14 +174,32 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = auth.getCurrentUser();
-                            //updateUI(user);
+                            user = auth.getCurrentUser();
 
-                            Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameAndGroupActivity.class);
-                            startActivity(intent);
+                            if (user != null) {
+                                Log.d(TAG, "onComplete: user != null");
 
-                            ToastHelper.toastShort(AuthChooseLoginActivity.this, "Authentication Completed");
+                                if (user.getDisplayName() == null) {
+                                    Log.d(TAG, "onComplete: user.getDisplayName() == null");
+                                    /** If the user has not chosen yet a first name and last name we
+                                     * launch AuthEnterNameAndGroupActivity
+                                     * */
+                                    Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameAndGroupActivity.class);
+                                    startActivity(intent);
 
+                                } else {
+                                    Log.d(TAG, "onComplete: user.getDisplayName() = " + user.getDisplayName());
+                                    /** If the user has already set a first name and last name we can fill SharedPreferences with
+                                     * the user's info and launch MainActivity
+                                     * */
+                                    fillSharedPreferencesWithFirstNameAndLastName();
+
+                                    Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+
+                                }
+
+                            }
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -194,14 +214,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                 });
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
     /** Method that deletes all the sharedPreferences info
      * */
     public void deleteSharedPreferencesInfo() {
+        Log.d(TAG, "deleteSharedPreferencesInfo: called!");
 
         if (sharedPref.getAll().size() > 0) {
 
@@ -214,6 +230,28 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                 editor.apply();
 
             }
+        }
+    }
+
+    /** Method that fills SharedPreferences with user's info
+     * */
+    public void fillSharedPreferencesWithFirstNameAndLastName() {
+        Log.d(TAG, "fillSharedPreferencesWithFirstNameAndLastName: called!");
+
+        String names = user.getDisplayName();
+
+        if (names != null) {
+            String[] tokens = names.split(" ");
+
+            sharedPref = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
+            editor.putString(
+                    RepoStrings.SharedPreferences.USER_FIRST_NAME,
+                    Objects.requireNonNull(tokens[0]));
+            editor.putString(
+                    RepoStrings.SharedPreferences.USER_LAST_NAME,
+                    Objects.requireNonNull(tokens[1]));
+            editor.apply();
+
         }
     }
 

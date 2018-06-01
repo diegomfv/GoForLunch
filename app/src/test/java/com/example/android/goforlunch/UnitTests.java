@@ -1,5 +1,7 @@
 package com.example.android.goforlunch;
 
+import com.example.android.goforlunch.activities.auth.AuthEnterNameAndGroupActivity;
+import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.strings.RepoStrings;
 
 import org.junit.Assert;
@@ -376,6 +378,38 @@ public class UnitTests {
         //restaurant
 
     }
+
+    @Test
+    public void checkMinimumRequisites () {
+
+        String firstName = "Diego";
+        String lastName = "Fajardo";
+        String email = "diego.fajardo@gmail.com";
+        String password = "123456";
+        boolean flag = true;
+
+
+        if (firstName.length() == 0) {
+            flag = false;
+
+        } else if (lastName.length() == 0) {
+            flag = false;
+
+        } else if (email.length() == 0) {
+            flag = false;
+
+        } else if (password.length() == 0) {
+            flag = false;
+
+        } else if (password.length() < 6) {
+            flag = false;
+        }
+
+        assertTrue(flag);
+
+
+    }
+
 
 
 
