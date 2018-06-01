@@ -2,7 +2,9 @@ package com.example.android.goforlunch.pageFragments;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -30,22 +32,26 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
-import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.Anim;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.strings.RepoStrings;
-import com.example.android.goforlunch.data.viewmodel.MainViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -69,6 +75,9 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
     private List<RestaurantEntry> listOfRestaurants;
     private List<RestaurantEntry> listOfRestaurantsByType;
 
+    //This list will have as many elements repeated as coworkers going to the restaurant
+    private List<String> listOfRestaurantsByCoworker;
+
     //Widgets
     private AutoCompleteTextView mSearchText;
 
@@ -81,8 +90,14 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
     private AppDatabase mDb;
     private MainViewModel mainViewModel;
 
+    //SharedPreferences
+    private SharedPreferences sharedPref;
+    private String userGroup;
+    private String userEmail;
+
     // TODO: 29/05/2018 Use these variables to get the necessary info to display the number of coworkers that are going to a specific place
     //Firebase Database
+    private FirebaseAuth auth;
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRefUsers;
 
@@ -104,12 +119,23 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
 
+        auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            userEmail = auth.getCurrentUser().getEmail();
+        }
+
         /** Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
 
+        /** SharedPreferences
+         * */
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        userGroup = sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, "");
+
         listOfRestaurants = new ArrayList<>();
         listOfRestaurantsByType = new ArrayList<>();
+        listOfRestaurantsByCoworker = new ArrayList<>();
 
         mDb = AppDatabase.getInstance(getActivity());
 
@@ -121,10 +147,13 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
                 if (restaurantEntries != null) {
                     Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
-                    listOfRestaurants = restaurantEntries;
-                    mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
-                    mRecyclerView.setAdapter(mAdapter);
 
+                    listOfRestaurants = restaurantEntries;
+
+                    /** We fill the list with the Restaurants in the database
+                     * */
+                    mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
+                    mRecyclerView.setAdapter(mAdapter);
 
                 } else {
                     Log.d(TAG, "onChanged: restaurantEntries is NULL");
@@ -139,7 +168,7 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
+        mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
         mRecyclerView.setAdapter(mAdapter);
 
         mSearchText = (AutoCompleteTextView) view.findViewById(R.id.list_autocomplete_id);
@@ -182,12 +211,12 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                             }
                         }
 
-                        mAdapter = new RVAdapterList(getContext(), listOfRestaurantsByType);
+                        mAdapter = new RVAdapterList(getContext(), listOfRestaurantsByType, listOfRestaurantsByCoworker);
                         mRecyclerView.setAdapter(mAdapter);
 
                     } else {
 
-                        mAdapter = new RVAdapterList(getContext(), listOfRestaurants);
+                        mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
                         mRecyclerView.setAdapter(mAdapter);
 
                     }
@@ -211,9 +240,6 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
             });
         }
 
-
-
-
         if (((AppCompatActivity) getActivity()) != null) {
             ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         }
@@ -225,6 +251,52 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
+
+        /** We get the Coworkers per Restaurant
+         */
+        fireDb = FirebaseDatabase.getInstance();
+        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        fireDbRefUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                listOfRestaurantsByCoworker = new ArrayList<>();
+
+                for (DataSnapshot item :
+                        dataSnapshot.getChildren()) {
+
+                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).equals(userGroup)) {
+
+                        if (!Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals(userEmail))
+
+                        listOfRestaurantsByCoworker.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
+
+                    }
+                }
+
+                mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
+                mRecyclerView.setAdapter(mAdapter);
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 

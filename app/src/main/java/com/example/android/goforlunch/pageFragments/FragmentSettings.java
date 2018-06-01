@@ -1,6 +1,7 @@
 package com.example.android.goforlunch.pageFragments;
 
 import android.os.Bundle;
+import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
 import com.example.android.goforlunch.R;

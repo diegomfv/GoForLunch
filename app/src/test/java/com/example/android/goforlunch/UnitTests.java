@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,12 +57,34 @@ public class UnitTests {
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.DOWN);
 
+        System.out.println("generated float = " + generatedFloat);
+
         if (generatedFloat > 3) {
             generatedFloat = generatedFloat * 3 / 5;
         }
 
         System.out.println("generated float = " + df.format(generatedFloat));
         assertTrue(generatedFloat < 3);
+
+    }
+
+
+    @Test
+    public void ratingTransformation2 () {
+
+        String rating = "4.2";
+
+        float number = Float.parseFloat(rating);
+
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.DOWN);
+
+        DecimalFormat df2 = new DecimalFormat("#.##");
+        df2.setRoundingMode(RoundingMode.DOWN);
+
+        System.out.println("generated float = " + df.format(number));
+
+            System.out.println("generated float = " + df2.format(number));
 
     }
 
@@ -283,5 +306,77 @@ public class UnitTests {
             System.out.println("tempList: " + tempList.get(i));
         }
     }
+
+    /** This is use to choose the title of the restaurants
+     * displayed in the list
+     * */
+    @Test
+    public void chooseWordsAccordingToSize () {
+
+        String restaurant1 = "Zerodegrees Microbrewery Restaurant Bristol";
+        String restaurant2 = "Gourmet Burger Kitchen (Bristol Cabot)";
+        String restaurant3 = "Joy Raj Indian Restaurant";
+        String restaurant4 = "Fujiyama Japanese Restaurant";
+
+        StringBuilder restaurantTransf = new StringBuilder();
+
+        String tokens[] = restaurant1.split(" ");
+
+        for (int i = 0; i < tokens.length; i++) {
+
+            if (restaurantTransf.length() < 27) {
+
+                /** 1 is the space between words
+                 * */
+                if ((restaurantTransf.length() + tokens[i].length()) + 1 < 27) {
+                    restaurantTransf.append(" ").append(tokens[i]);
+
+                } else {
+                    break;
+                }
+            }
+
+        }
+
+        String endString= restaurantTransf.toString().trim();
+
+        System.out.println(endString);
+        System.out.println(endString.length());
+
+    }
+
+    @Test
+    public void getStringBeforeFirstComma () {
+
+        String address1 = "8 Colston Ave, Bristol";
+        String kept = address1.substring(0, address1.indexOf(","));
+
+        System.out.println(kept);
+
+    }
+
+
+    // TODO: 31/05/2018
+    @Test
+    public void increaseByOneTheValueIfACoworkerJoins () {
+
+        List<String> listOfRestaurants = new ArrayList<>();
+
+        Random rand = new Random();
+        int numberOfRestaurants = rand.nextInt(10);
+
+        for (int i = 0; i < numberOfRestaurants; i++) {
+
+            listOfRestaurants.add("Restaurant" + i);
+            System.out.println(listOfRestaurants.get(i));
+
+        }
+        //name
+        //group
+        //restaurant
+
+    }
+
+
 
 }

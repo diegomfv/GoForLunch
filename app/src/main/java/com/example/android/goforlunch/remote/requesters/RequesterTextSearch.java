@@ -230,6 +230,6 @@ public class RequesterTextSearch {
             rating = String.valueOf(temp_rating);
         }
 
-        return df.format(rating);
+        return df.format(temp_rating);
     }
 }

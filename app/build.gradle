@@ -68,6 +68,9 @@ dependencies {
     //Firebase Authentication
     implementation 'com.google.firebase:firebase-auth:15.1.0'
 
+    //Google Sign In
+    implementation 'com.google.android.gms:play-services-auth:15.0.1'
+
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
 

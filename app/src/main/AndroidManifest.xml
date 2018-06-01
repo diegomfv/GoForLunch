@@ -47,14 +47,10 @@
 
         </activity>
 
-        <activity android:name=".activities.auth.AuthSignInActivity"
+        <activity android:name=".activities.auth.AuthSignInPasswordActivity"
             android:screenOrientation="portrait">
 
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
 
 
@@ -72,10 +68,21 @@
         <activity android:name=".activities.auth.AuthResetPassworkActivity"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".activities.auth.AuthEnterNameAndGroup" />
+        <activity android:name=".activities.auth.AuthEnterNameAndGroupActivity" />
         <activity android:name=".data.sqlite.AndroidDatabaseManager" />
         <activity android:name=".activities.rest.PersInfoActivity" />
         <activity android:name=".activities.rest.JoinGroupActivity" />
+
+        <activity android:name=".activities.auth.AuthChooseLoginActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+
+
+        </activity>
 
 
     </application>

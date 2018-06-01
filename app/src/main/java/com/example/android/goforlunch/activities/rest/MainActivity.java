@@ -24,7 +24,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthSignInActivity;
+import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -34,7 +34,7 @@ import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTRIAL;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.strings.RepoStrings;
@@ -59,12 +59,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-// TODO: 18/05/2018 Check if there is internet connection
 // TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
-// TODO: 21/05/2018 Add a button to do the API Requests again
-// TODO: 24/05/2018 Add JOIN GROUP in NavigationDrawer
 // TODO: 28/05/2018 Check if distance is too far, delete from the database!
-public class MainActivity extends AppCompatActivity {
+
+// TODO: 29/05/2018 YET TO DO -------------------------------------------------------
+// TODO: 31/05/2018 Update user info in onStart()!
+// TODO: 29/05/2018 Check if there is internet connection
+// TODO: 29/05/2018 Allow the camera access for profile pictures
+// TODO: 29/05/2018 Allow to get a picture from facebook or google
+// TODO: 29/05/2018 Add filter in Map
+// TODO: 29/05/2018 Change that the RV is not setting the adapter each time the word changes in Search Bar
+// TODO: 29/05/2018 Use Storage for user's picture (might use FirebaseAuth instead). Profile picture got from facebook or google
+// TODO: 29/05/2018 Enable notifications at 4pm
+// TODO: 29/05/2018 Enable notifications if restaurant is chosen
+// TODO: 29/05/2018 Modify Requests (Nearby + Distance)
+// TODO: 29/05/2018 Translations
+// TODO: 29/05/2018 Elective Functionality, add Google and Facebook logins (password is done)
+// TODO: 29/05/2018 Check deprecated problem RVAdapter
+// TODO: 29/05/2018 General clean up
+
+public class MainActivity extends AppCompatActivity{
 
     private static final String TAG = "MainActivity";
 
@@ -195,12 +209,13 @@ public class MainActivity extends AppCompatActivity {
                                 item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString());
                         editor.apply();
 
-                        Log.d(TAG, "onCreate: userFirstName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
-                        Log.d(TAG, "onCreate: userLastName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
-                        Log.d(TAG, "onCreate: userIdKey: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, ""));
-                        Log.d(TAG, "onCreate: userRestaurantName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_RESTAURANT_NAME, ""));
-                        Log.d(TAG, "onCreate: userGroup: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, ""));
+                        Log.d(TAG, "onDataChange: userFirstName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
+                        Log.d(TAG, "onDataChange: userLastName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
+                        Log.d(TAG, "onDataChange: userIdKey: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, ""));
+                        Log.d(TAG, "onDataChange: userRestaurantName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_RESTAURANT_NAME, ""));
+                        Log.d(TAG, "onDataChange: userGroup: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, ""));
 
+                        // TODO: 31/05/2018 Check nulls
                         /** We fill the object with the info we will need to pass in the intent
                          * */
                         user = new User(
@@ -231,6 +246,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /** There are two types of background jobs.
+         * 1st. If notifications are enabled, the user has to be told at 1.00pm the restaurant
+         * where he/she is going. If no restaurant is chosen, no notification should appear.
+         * 2nd. At 4pm, the database has to be filled with the visited restaurants.
+         * */
+
+        // TODO: 29/05/2018 Do here Android Job, fill database with visited restaurant
+
+
+
+
+        // TODO: 29/05/2018 Do here Android Job, notification to the user
+        /** We check if notifications are enabled. If they are and the user has chosen a restaurant,
+         * a notification should be triggered at 1.00pm
+         * */
+//        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+//        if (sharedPref.getBoolean(getString(R.string.pref_key_notifications), false)) {
+//            /** If they are enabled, we check if a job is running
+//             * */
+//
+//
+//            if(job is already running) {
+//                //do nothing
+//            } else {
+//                //prepare the alarm
+//            }
+//        }
 
         //---------------------- GET CURRENT LOCATION --------------------------//
 
@@ -246,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
         // TODO: 21/05/2018 Create a progress bar that hides everything and, when loaded, make it disappear
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container_id, FragmentRestaurantMapViewTRIAL.newInstance())
+                .replace(R.id.fragment_container_id, FragmentRestaurantMapView.newInstance())
                 .commit();
 
         /** Use header view to change userName displayed in navigation drawer
@@ -282,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
 
                         // TODO: 20/05/2018 If the user is currently in the fragment, avoid relaunching it (use a flag for example).
                         case R.id.nav_view_map_id:
-                            selectedFragment = FragmentRestaurantMapViewTRIAL.newInstance();
+                            selectedFragment = FragmentRestaurantMapView.newInstance();
                             break;
                         case R.id.nav_view_list_id:
                             selectedFragment = FragmentRestaurantListViewTRIAL.newInstance();
@@ -385,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
                              *  */
                             auth.signOut();
 
-                            Intent intent = new Intent(MainActivity.this, AuthSignInActivity.class);
+                            Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                             finish();
@@ -502,23 +544,23 @@ public class MainActivity extends AppCompatActivity {
                         latLngBounds = new LatLngBounds(
                                 southWest, northEast);
 
-                        // TODO: 28/05/2018 Ensure that we don't do this if if has been already done (quota is very limited)
+                        //TODO: 28/05/2018 Ensure that we don't do this if if has been already done (quota is very limited)
 
                         // TODO: 25/05/2018 Uncomment this
-                        //We delete the database
-                        //AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                        //    @Override
-                        //    public void run() {
-                        //        mDb.restaurantDao().deleteAllRowsInRestaurantTable();
-                        //    }
-                        //});
+                        // We delete the database
+//                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+//                            }
+//                        });
 
                         /** We do the API Requests. It will fill the database
                          * */
                         // TODO: 24/05/2018 Allow to do the calls when ready
                         //callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
 
-                        //Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
+                       //Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
                     } else {
                         Log.d(TAG, "onComplete: current location is null");

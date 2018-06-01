@@ -21,14 +21,17 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseUser;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
  */
 
-public class AuthSignInActivity extends AppCompatActivity {
+// TODO: 01/06/2018 We can create a database to store userNames and passwords
+// TODO: 01/06/2018 and display them using TextInputAutocompleteTextView
+public class AuthSignInPasswordActivity extends AppCompatActivity {
 
-    private static final String TAG = "AuthSignInActivity";
+    private static final String TAG = "AuthSignInPasswordActiv";
 
     private FirebaseAuth auth;
 
@@ -47,38 +50,24 @@ public class AuthSignInActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
-        if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(AuthSignInActivity.this, MainActivity.class));
-            finish();
-        }
-
-        //We set the contentView AFTER checking if the user is already logged in
-        setContentView(R.layout.activity_auth_signin);
+        //We set the contentView after checking if the user is already logged in
+        setContentView(R.layout.activity_auth_signin_password);
 
         inputEmail = (TextInputEditText) findViewById(R.id.signin_textinput_email_id);
         inputPassword = (TextInputEditText) findViewById(R.id.signin_textinput_password_id);
-
-        /** We get the info from the other screen AuthSignInActivity
-         * */
-        Intent intent = getIntent();
-        if (intent.getStringExtra(RepoStrings.SentIntent.EMAIL) != null
-                && intent.getStringExtra(RepoStrings.SentIntent.PASSWORD) != null) {
-
-            inputEmail.setText(intent.getStringExtra(RepoStrings.SentIntent.EMAIL));
-            inputPassword.setText(intent.getStringExtra(RepoStrings.SentIntent.PASSWORD));
-        }
 
         buttonSignIn = (Button) findViewById(R.id.signin_button_id);
         buttonReset = (Button) findViewById(R.id.signin_reset_button_id);
         buttonSignUp = (Button) findViewById(R.id.signin_signup_button_id);
 
+        // TODO: 01/06/2018 Delete?
         progressBar = (ProgressBar) findViewById(R.id.signin_progressbar_id);
 
         buttonSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(AuthSignInActivity.this, AuthSignUpActivity.class);
+                Intent intent = new Intent(AuthSignInPasswordActivity.this, AuthSignUpActivity.class);
                 intent.putExtra(RepoStrings.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
                 intent.putExtra(RepoStrings.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -89,7 +78,7 @@ public class AuthSignInActivity extends AppCompatActivity {
         buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ToastHelper.toastShort(AuthSignInActivity.this, "Not implemented yet");
+                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Not implemented yet");
             }
         });
 
@@ -100,14 +89,14 @@ public class AuthSignInActivity extends AppCompatActivity {
                 final String password = inputPassword.getText().toString();
 
                 if (TextUtils.isEmpty(email)) {
-                    ToastHelper.toastShort(AuthSignInActivity.this, "Enter email address");
+                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter email address");
                     return;
                 } else  if (TextUtils.isEmpty(password)) {
-                    ToastHelper.toastShort(AuthSignInActivity.this, "Enter password");
+                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter password");
                     return;
                 } else  if (password.length() < 6) {
                     Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
-                    ToastHelper.toastShort(AuthSignInActivity.this, "Password is too short");
+                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Password is too short");
                     return;
                 }
 
@@ -115,7 +104,7 @@ public class AuthSignInActivity extends AppCompatActivity {
 
                 //authenticate user
                 auth.signInWithEmailAndPassword(email,password)
-                        .addOnCompleteListener(AuthSignInActivity.this, new OnCompleteListener<AuthResult>() {
+                        .addOnCompleteListener(AuthSignInPasswordActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 // If sign in fails, display a message to the user. If sign in succeeds
@@ -131,15 +120,15 @@ public class AuthSignInActivity extends AppCompatActivity {
 
                                     if (e != null) {
                                         Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                        ToastHelper.toastShort(AuthSignInActivity.this, e.getMessage());
+                                        ToastHelper.toastShort(AuthSignInPasswordActivity.this, e.getMessage());
                                     } else {
-                                        ToastHelper.toastShort(AuthSignInActivity.this, "Something went wrong");
+                                        ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Something went wrong");
                                     }
 
                                 } else {
-                                    Intent intent = new Intent(AuthSignInActivity.this, MainActivity.class);
+                                    Intent intent = new Intent(AuthSignInPasswordActivity.this, MainActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(new Intent(AuthSignInActivity.this, MainActivity.class));
+                                    startActivity(new Intent(AuthSignInPasswordActivity.this, MainActivity.class));
                                     finish();
                                 }
                             }

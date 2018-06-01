@@ -2,6 +2,7 @@ package com.example.android.goforlunch.activities.rest;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -126,7 +127,26 @@ public class RestaurantActivity extends AppCompatActivity {
 
         } else {
 
-            tvRestName.setText(intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME));
+            StringBuilder displayedName = new StringBuilder();
+            String tokens[] = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME).split(" ");
+
+            for (int i = 0; i < tokens.length; i++) {
+                if (displayedName.length() < 27) {
+
+                    /** 1 is the space between words
+                     * */
+                    if ((displayedName.length() + tokens[i].length()) + 1 < 27) {
+                        displayedName.append(" ").append(tokens[i]);
+
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            String transformedName = displayedName.toString().trim();
+
+            tvRestName.setText(transformedName);
         }
 
         if (intent.getStringExtra(RepoStrings.SentIntent.ADDRESS) == null
@@ -368,8 +388,10 @@ public class RestaurantActivity extends AppCompatActivity {
                             if (webUrlToastString.equals("")) {
                                 ToastHelper.toastShort(RestaurantActivity.this, "Website is not available");
                             } else {
-                                // TODO: 19/05/2018 Bring the user to the website. Don't open in the app, allow the user to go to the true website
-                                ToastHelper.toastShort(RestaurantActivity.this, "Brings the user to -> " + webUrlToastString);
+
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlToastString));
+                                startActivity(browserIntent);
+
                             }
 
                         } break;

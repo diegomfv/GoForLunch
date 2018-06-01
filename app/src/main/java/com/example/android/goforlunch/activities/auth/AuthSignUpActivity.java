@@ -58,7 +58,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
         inputEmail = (TextInputEditText) findViewById(R.id.signup_email_id);
         inputPassword = (TextInputEditText) findViewById(R.id.signup_password_id);
 
-        /** We get the info from the other screen AuthSignInActivity
+        /** We get the info from the other screen AuthSignInPasswordActivity
          * */
         Intent intent = getIntent();
         if (intent.getStringExtra(RepoStrings.SentIntent.EMAIL) != null
@@ -119,7 +119,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(AuthSignUpActivity.this, AuthSignInActivity.class);
+                Intent intent = new Intent(AuthSignUpActivity.this, AuthSignInPasswordActivity.class);
                 intent.putExtra(RepoStrings.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
                 intent.putExtra(RepoStrings.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -157,7 +157,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
                     /** We proceed
                      * to next activity
                      * */
-                    Intent intent = new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroup.class);
+                    Intent intent = new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroupActivity.class);
                     intent.putExtra(RepoStrings.SentIntent.EMAIL,email);
                     intent.putExtra(RepoStrings.SentIntent.PASSWORD,password);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

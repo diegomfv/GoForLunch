@@ -40,9 +40,9 @@ import java.util.Objects;
 /**
  * Created by Diego Fajardo on 09/05/2018.
  */
-public class AuthEnterNameAndGroup extends AppCompatActivity{
+public class AuthEnterNameAndGroupActivity extends AppCompatActivity{
 
-    private static final String TAG = "AuthEnterNameAndGroup";
+    private static final String TAG = "AuthEnterNameAndGroupAc";
 
     private TextInputEditText inputFirstName;
     private TextInputEditText inputLastName;
@@ -127,7 +127,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                         arrayOfGroups = listOfGroups.toArray(arrayOfGroups);
 
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                                AuthEnterNameAndGroup.this,
+                                AuthEnterNameAndGroupActivity.this,
                                 android.R.layout.simple_list_item_1,
                                 arrayOfGroups
                         );
@@ -185,25 +185,25 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                 progressBar.setVisibility(View.VISIBLE);
 
                 if (inputFirstName.getText().toString().length() == 0) {
-                    ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Please, enter your First name");
+                    ToastHelper.toastShort(AuthEnterNameAndGroupActivity.this, "Please, enter your First name");
 
                 } else if (inputLastName.getText().toString().length() == 0) {
-                    ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Please, enter your Last name");
+                    ToastHelper.toastShort(AuthEnterNameAndGroupActivity.this, "Please, enter your Last name");
 
                 } else if (inputEmail.getText().toString().length() == 0) {
-                    ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Please, enter email");
+                    ToastHelper.toastShort(AuthEnterNameAndGroupActivity.this, "Please, enter email");
 
                 } else if (inputPassword.getText().toString().length() == 0) {
-                    ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Please, enter password");
+                    ToastHelper.toastShort(AuthEnterNameAndGroupActivity.this, "Please, enter password");
 
                 } else if (inputPassword.getText().toString().length() < 6) {
-                    ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Sorry, password is too short");
+                    ToastHelper.toastShort(AuthEnterNameAndGroupActivity.this, "Sorry, password is too short");
 
                 } else {
 
                     //We create the user
                     auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
-                            .addOnCompleteListener(AuthEnterNameAndGroup.this, new OnCompleteListener<AuthResult>() {
+                            .addOnCompleteListener(AuthEnterNameAndGroupActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     progressBar.setVisibility(View.GONE);
@@ -220,7 +220,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                                             Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                         }
 
-                                        ToastHelper.toastShort(AuthEnterNameAndGroup.this, e.getMessage());
+                                        ToastHelper.toastShort(AuthEnterNameAndGroupActivity.this, e.getMessage());
 
                                     } else {
 
@@ -246,7 +246,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
                                                                     Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                                                 }
 
-                                                                ToastHelper.toastShort(AuthEnterNameAndGroup.this, "Something went wrong. Please, sign up again");
+                                                                ToastHelper.toastShort(AuthEnterNameAndGroupActivity.this, "Something went wrong. Please, sign up again");
 
                                                             } else {
                                                                 Log.d(TAG, "onComplete: task was successful");
@@ -277,7 +277,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
 
                                                                     fireDbRefNewUser.push().setValue(map);
 
-                                                                    startActivity(new Intent(AuthEnterNameAndGroup.this, MainActivity.class));
+                                                                    startActivity(new Intent(AuthEnterNameAndGroupActivity.this, MainActivity.class));
                                                                     finish();
 
                                                                 } else {
@@ -306,7 +306,7 @@ public class AuthEnterNameAndGroup extends AppCompatActivity{
 
                                                                     fireDbRefSpecificUser.updateChildren(map);
 
-                                                                    startActivity(new Intent(AuthEnterNameAndGroup.this, MainActivity.class));
+                                                                    startActivity(new Intent(AuthEnterNameAndGroupActivity.this, MainActivity.class));
                                                                     finish();
 
                                                                 }

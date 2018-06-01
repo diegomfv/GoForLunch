@@ -25,7 +25,8 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_marginTop="7dp"
-            android:layout_marginLeft="10dp"/>
+            android:layout_marginLeft="10dp"
+            android:maxLength="25"/>
 
         <TextView
             android:id="@+id/cv_addressandtype_id"
@@ -35,7 +36,7 @@
             android:layout_below="@id/cv_title_id"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="10dp"
-            android:maxLength="20"/>
+            android:maxLength="25" />
 
         <TextView
             android:id="@+id/cv_timetable_id"

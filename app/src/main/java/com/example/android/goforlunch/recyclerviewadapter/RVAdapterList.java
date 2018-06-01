@@ -20,6 +20,8 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.strings.RepoStrings;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,7 +31,7 @@ import java.util.List;
 public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder> {
 
     // TODO: 21/05/2018 Add coworkers joining!
-    // TODO: 21/05/2018 Get a different address that "formatted address"
+    // TODO: 21/05/2018 Get a different address than "formatted address"
 
     private static final String TAG = "RVAdapterList";
 
@@ -37,10 +39,12 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
     private Context mContext;
     private List<RestaurantEntry> listOfRestaurantsByType;
+    private List<String> listOfRestaurantsByCoworkers;
 
-    public RVAdapterList(Context context, List<RestaurantEntry> listOfRestaurantsByType) {
+    public RVAdapterList(Context context, List<RestaurantEntry> listOfRestaurantsByType, List<String> listOfRestaurantsByCoworkers) {
         this.mContext = context;
         this.listOfRestaurantsByType = listOfRestaurantsByType;
+        this.listOfRestaurantsByCoworkers = listOfRestaurantsByCoworkers;
         mShortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 
@@ -70,22 +74,42 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
         Anim.crossFadeShortAnimation(holder.itemView);
 
-        holder.title.setText(listOfRestaurantsByType.get(position).getName());
+        StringBuilder displayedName = new StringBuilder();
+        String tokens[] = listOfRestaurantsByType.get(position).getName().split(" ");
+
+        for (int i = 0; i < tokens.length; i++) {
+            if (displayedName.length() < 27) {
+
+                /** 1 is the space between words
+                 * */
+                if ((displayedName.length() + tokens[i].length()) + 1 < 27) {
+                    displayedName.append(" ").append(tokens[i]);
+
+                } else {
+                    break;
+                }
+            }
+        }
+
+        String transformedName = displayedName.toString().trim();
+        holder.title.setText(transformedName);
+
         holder.address.setText(
                 listOfRestaurantsByType.get(position).getType()
                         + " - "
-                        +  listOfRestaurantsByType.get(position).getAddress());
+                        +  listOfRestaurantsByType.get(position).getAddress().substring(0, listOfRestaurantsByType.get(position).getAddress().indexOf(",")));
+
         holder.openUntil.setText(listOfRestaurantsByType.get(position).getOpenUntil());
         holder.distance.setText(listOfRestaurantsByType.get(position).getDistance());
         // TODO: 21/05/2018 Add coworkers joining!
 
         if (listOfRestaurantsByType.get(position).getRating() != null
-            && !listOfRestaurantsByType.get(position).getRating().equals("nA")) {
+            && !listOfRestaurantsByType.get(position).getRating().equals("NotAvailable")) {
             holder.ratingBar.setRating(Float.parseFloat(listOfRestaurantsByType.get(position).getRating()));
         }
 
         if (listOfRestaurantsByType.get(position).getImageUrl() != null
-            && !listOfRestaurantsByType.get(position).getImageUrl().equals("nA")) {
+            && !listOfRestaurantsByType.get(position).getImageUrl().equals("NotAvailable")) {
             Glide.with(mContext)
                     .load(listOfRestaurantsByType.get(position).getImageUrl())
                     .into(holder.photo);
@@ -95,6 +119,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
                     .into(holder.photo);
         }
 
+        holder.coworkersJoining.setText(String.valueOf(Collections.frequency(listOfRestaurantsByCoworkers, listOfRestaurantsByType.get(position).getName())));
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
