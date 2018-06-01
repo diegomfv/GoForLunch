@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity{
     private String userEmail = "anon@anonymous.com";
     private User user;
 
-
     //Widgets
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
@@ -139,12 +138,6 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        editor.putBoolean("boolean", true);
-//        editor.apply();
-        
-
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
         navigationView = findViewById(R.id.bottom_navigation_id);
@@ -188,7 +181,8 @@ public class MainActivity extends AppCompatActivity{
 
                     if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().equals(userEmail)){
 
-                        /** We save the user's key in SharedPreferences, the restaurant and the group
+                        /** We save the user's key in SharedPreferences,
+                         * the restaurant and the group
                          * */
                         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPref.edit();
@@ -212,26 +206,25 @@ public class MainActivity extends AppCompatActivity{
                         // TODO: 31/05/2018 Check nulls
                         /** We fill the object with the info we will need to pass in the intent
                          * */
-                        user = new User(
-                                item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
-                                item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
-                                );
+                        User.Builder builder = new User.Builder();
+                        builder.setFirstName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue()).toString());
+                        builder.setLastName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue()).toString());
+                        builder.setEmail(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString());
+                        builder.setGroup(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).toString());
+                        builder.setPlaceId(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue()).toString());
+                        builder.setRestaurantName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
+                        builder.setRestaurantType(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString());
+                        builder.setImageUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue()).toString());
+                        builder.setAddress(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.ADDRESS).getValue()).toString());
+                        builder.setRating(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RATING).getValue()).toString());
+                        builder.setPhone(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.PHONE).getValue()).toString());
+                        builder.setWebsiteUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue()).toString());
+
+                        user = builder.create();
 
                         break;
                     }
                 }
-
-
             }
 
             @Override

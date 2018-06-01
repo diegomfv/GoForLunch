@@ -1,154 +1,165 @@
 package com.example.android.goforlunch.pojo;
 
 /**
- * Created by Diego Fajardo on 24/05/2018.
+ * Created by Diego Fajardo on 01/06/2018.
  */
 public class User {
 
-    String firstName;
-    String lastName;
-    String email;
-    String group;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String group;
     //placeId is the restaurantName placeId
-    String placeId;
-    String restaurantName;
-    String restaurantType;
-    String imageUrl;
-    String address;
-    String rating;
-    String phone;
-    String websiteUrl;
+    private String placeId;
+    private String restaurantName;
+    private String restaurantType;
+    private String imageUrl;
+    private String address;
+    private String rating;
+    private String phone;
+    private String websiteUrl;
 
-
-    public User() {
-    }
-
-    public User(String firstName, String lastName, String email, String group, String placeId, String restaurantName, String restaurantType, String imageUrl, String address, String rating, String phone, String websiteUrl) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.group = group;
-        this.placeId = placeId;
-        this.restaurantName = restaurantName;
-        this.restaurantType = restaurantType;
-        this.imageUrl = imageUrl;
-        this.address = address;
-        this.rating = rating;
-        this.phone = phone;
-        this.websiteUrl = websiteUrl;
+    private User (final Builder builder) {
+        firstName = builder.firstName;
+        lastName = builder.lastName;
+        email = builder.email;
+        group = builder.group;
+        placeId = builder.placeId;
+        restaurantName = builder.restaurantName;
+        restaurantType = builder.restaurantType;
+        imageUrl = builder.imageUrl;
+        address = builder.address;
+        rating = builder.rating;
+        phone = builder.phone;
+        websiteUrl = builder.websiteUrl;
     }
 
     public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
     public String getLastName() {
         return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getGroup() {
         return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
     }
 
     public String getPlaceId() {
         return placeId;
     }
 
-    public void setPlaceId(String placeId) {
-        this.placeId = placeId;
-    }
-
     public String getRestaurantName() {
         return restaurantName;
-    }
-
-    public void setRestaurantName(String restaurantName) {
-        this.restaurantName = restaurantName;
     }
 
     public String getRestaurantType() {
         return restaurantType;
     }
 
-    public void setRestaurantType(String restaurantType) {
-        this.restaurantType = restaurantType;
-    }
-
     public String getImageUrl() {
         return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
     }
 
     public String getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getRating() {
         return rating;
-    }
-
-    public void setRating(String rating) {
-        this.rating = rating;
     }
 
     public String getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public String getWebsiteUrl() {
         return websiteUrl;
     }
 
-    public void setWebsiteUrl(String websiteUrl) {
-        this.websiteUrl = websiteUrl;
-    }
+    public static class Builder {
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", group='" + group + '\'' +
-                ", placeId='" + placeId + '\'' +
-                ", restaurantName='" + restaurantName + '\'' +
-                ", restaurantType='" + restaurantType + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", address='" + address + '\'' +
-                ", rating='" + rating + '\'' +
-                ", phone='" + phone + '\'' +
-                ", websiteUrl='" + websiteUrl + '\'' +
-                '}';
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String group;
+        private String placeId;
+        private String restaurantName;
+        private String restaurantType;
+        private String imageUrl;
+        private String address;
+        private String rating;
+        private String phone;
+        private String websiteUrl;
+
+        public Builder setFirstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder setLastName(String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder setGroup(String group) {
+            this.group = group;
+            return this;
+        }
+
+        public Builder setPlaceId(String placeId) {
+            this.placeId = placeId;
+            return this;
+        }
+
+        public Builder setRestaurantName(String restaurantName) {
+            this.restaurantName = restaurantName;
+            return this;
+        }
+
+        public Builder setRestaurantType(String restaurantType) {
+            this.restaurantType = restaurantType;
+            return this;
+        }
+
+        public Builder setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
+            return this;
+        }
+
+        public Builder setAddress(String address) {
+            this.address = address;
+            return this;
+        }
+
+        public Builder setRating(String rating) {
+            this.rating = rating;
+            return this;
+        }
+
+        public Builder setPhone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public Builder setWebsiteUrl(String websiteUrl) {
+            this.websiteUrl = websiteUrl;
+            return this;
+        }
+
+        public User create() {
+            return new User(this);
+
+        }
     }
 }
