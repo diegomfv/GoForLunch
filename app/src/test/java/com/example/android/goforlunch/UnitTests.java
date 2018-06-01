@@ -1,8 +1,6 @@
 package com.example.android.goforlunch;
 
-import com.example.android.goforlunch.activities.auth.AuthEnterNameAndGroupActivity;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,7 +8,6 @@ import org.junit.Test;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

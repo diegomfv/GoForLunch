@@ -7,11 +7,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.strings.RepoStrings;
-import com.google.firebase.database.ChildEventListener;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;

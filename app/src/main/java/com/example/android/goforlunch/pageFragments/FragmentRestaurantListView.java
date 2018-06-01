@@ -37,7 +37,7 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

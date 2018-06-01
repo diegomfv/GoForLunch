@@ -11,7 +11,7 @@ import com.example.android.goforlunch.models.modelplacesbytextsearch.Location;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.PlacesByTextSearch;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;

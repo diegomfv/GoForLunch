@@ -14,7 +14,7 @@ import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

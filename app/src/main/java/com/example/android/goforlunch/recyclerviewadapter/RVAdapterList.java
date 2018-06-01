@@ -18,9 +18,8 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 

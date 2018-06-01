@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -157,7 +157,7 @@ public class AuthSignUpActivity extends AppCompatActivity {
                     /** We proceed
                      * to next activity
                      * */
-                    Intent intent = new Intent(AuthSignUpActivity.this, AuthEnterNameAndGroupActivity.class);
+                    Intent intent = new Intent(AuthSignUpActivity.this, AuthEnterNameActivity.class);
                     intent.putExtra(RepoStrings.SentIntent.EMAIL,email);
                     intent.putExtra(RepoStrings.SentIntent.PASSWORD,password);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

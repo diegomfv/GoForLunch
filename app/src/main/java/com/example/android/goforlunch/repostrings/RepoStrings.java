@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.strings;
+package com.example.android.goforlunch.repostrings;
 
 /**
  * Created by Diego Fajardo on 23/05/2018.

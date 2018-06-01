@@ -104,28 +104,6 @@
 
     </android.support.design.widget.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="10dp">
-
-        <com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView
-            android:id="@+id/enter_group_id"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textSize="14sp"
-            android:hint="Enter your group (optional)"
-            android:maxLines="1"
-            android:inputType="text"
-            android:imeOptions="actionSearch"
-            android:completionThreshold="1"
-            android:maxLength="12" />
-
-    </android.support.design.widget.TextInputLayout>
-
     <Button
         android:id="@+id/enter_start_button_id"
         android:layout_width="wrap_content"

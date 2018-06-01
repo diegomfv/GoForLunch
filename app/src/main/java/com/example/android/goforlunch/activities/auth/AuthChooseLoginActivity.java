@@ -14,7 +14,7 @@ import android.widget.Button;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -79,8 +79,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
             } else {
 
-                //go to AuthEnterNameAndGroupActivity
-                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameAndGroupActivity.class));
+                //go to AuthEnterNameActivity
+                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
                 finish();
 
             }
@@ -182,9 +182,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                 if (user.getDisplayName() == null) {
                                     Log.d(TAG, "onComplete: user.getDisplayName() == null");
                                     /** If the user has not chosen yet a first name and last name we
-                                     * launch AuthEnterNameAndGroupActivity
+                                     * launch AuthEnterNameActivity
                                      * */
-                                    Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameAndGroupActivity.class);
+                                    Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class);
                                     startActivity(intent);
 
                                 } else {

@@ -37,7 +37,7 @@ import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTR
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
 import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.strings.RepoStrings;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -188,16 +188,10 @@ public class MainActivity extends AppCompatActivity{
 
                     if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().equals(userEmail)){
 
-                        /** We save the user's key in SharedPreferences
+                        /** We save the user's key in SharedPreferences, the restaurant and the group
                          * */
                         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString(
-                                RepoStrings.SharedPreferences.USER_FIRST_NAME,
-                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue()).toString());
-                        editor.putString(
-                                RepoStrings.SharedPreferences.USER_LAST_NAME,
-                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue()).toString());
                         editor.putString(
                                 RepoStrings.SharedPreferences.USER_ID_KEY,
                                 item.getKey());
