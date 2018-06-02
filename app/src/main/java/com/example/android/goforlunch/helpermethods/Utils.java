@@ -1,11 +1,17 @@
 package com.example.android.goforlunch.helpermethods;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import java.util.Map;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -13,14 +19,15 @@ import android.view.inputmethod.InputMethodManager;
 
 public class Utils {
 
-    public static void menuIconColor (MenuItem menuItem, int color) {
+    public static void menuIconColor(MenuItem menuItem, int color) {
         Drawable drawable = menuItem.getIcon();
         drawable.mutate();
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     }
 
-    /** Method that hides the keyboard
-     * */
+    /**
+     * Method that hides the keyboard
+     */
     public static void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         //Find the currently focused view, so we can grab the correct window token from it.
@@ -31,5 +38,4 @@ public class Utils {
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
-
 }

@@ -80,7 +80,8 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="Enter your email" />
+            android:hint="Enter your email"
+            android:enabled="false"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -100,7 +101,8 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="Enter your password" />
+            android:hint="Enter your password"
+            android:enabled="false"/>
 
     </android.support.design.widget.TextInputLayout>
 

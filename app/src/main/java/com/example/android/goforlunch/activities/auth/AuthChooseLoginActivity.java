@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.activities.auth;
 
+import android.arch.persistence.room.Database;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -28,7 +30,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -50,6 +58,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
     private FirebaseAuth auth;
     private FirebaseUser user;
+    private FirebaseDatabase fireDb;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -61,16 +70,23 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
         editor = sharedPref.edit();
 
+        fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
+        //auth.signOut();
+
+        Log.d(TAG, "onCreate: user = " + user);
+
         if (user == null) {
+            Log.d(TAG, "onCreate: user is null");
             //We delete Shared preferences info
             deleteSharedPreferencesInfo();
 
         } else {
 
             if (user.getDisplayName() != null){
+                Log.d(TAG, "onCreate: user is not null");
 
                 //go directly to MainActivity
                 startActivity(new Intent(AuthChooseLoginActivity.this, MainActivity.class));
@@ -107,9 +123,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Google Button clicked!");
-
                 signIn();
-
             }
         });
 
@@ -118,7 +132,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Facebook Button clicked!");
-
                 ToastHelper.toastShort(AuthChooseLoginActivity.this, "Facebook Button clicked");
 
             }
@@ -190,15 +203,64 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                 } else {
                                     Log.d(TAG, "onComplete: user.getDisplayName() = " + user.getDisplayName());
                                     /** If the user has already set a first name and last name we can fill SharedPreferences with
-                                     * the user's info and launch MainActivity
+                                     * the user's info, create the user in the database and launch MainActivity
                                      * */
                                     fillSharedPreferencesWithFirstNameAndLastName();
 
-                                    Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
+                                    /** Two options. The user already exists
+                                     * in Firebase Realtime Database or not.
+                                     * */
+                                    fireDb = FirebaseDatabase.getInstance();
+                                    DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                    fireDbUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
+                                            boolean userExists = false;
+
+                                            for (DataSnapshot item :
+                                                    dataSnapshot.getChildren()) {
+
+                                                if (Objects.requireNonNull(user.getEmail()).equalsIgnoreCase(
+                                                        Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString())) {
+                                                    Log.d(TAG, "onDataChange: user already exists");
+
+                                                    // TODO: 02/06/2018 Check this, might be able to be deleted
+                                                    userExists = true;
+
+                                                    Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                    break;
+
+                                                } else {
+
+
+                                                }
+                                            }
+
+                                            if (!userExists) {
+                                                /** If it is not in the foreach loop, then the user does not exist and we have to create him/her
+                                                 * */
+                                                Log.d(TAG, "onDataChange: user didn't exist");
+
+                                                DatabaseReference dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                                dbRef.push().setValue(createMapWithUserInfo());
+                                                Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                                                startActivity(intent);
+                                                finish();
+
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                                        }
+                                    });
                                 }
-
                             }
 
                         } else {
@@ -231,7 +293,15 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
             }
         }
+
+        // TODO: 02/06/2018 Delete this!
+        Map<String, ?> prefsMap = sharedPref.getAll();
+        for (Map.Entry<String, ?> entry: prefsMap.entrySet()) {
+            Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
+                    entry.getValue().toString());
+        }
     }
+
 
     /** Method that fills SharedPreferences with user's info
      * */
@@ -252,7 +322,37 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                     Objects.requireNonNull(tokens[1]));
             editor.apply();
 
+            // TODO: 02/06/2018 Delete this!
+            Map<String, ?> prefsMap = sharedPref.getAll();
+            for (Map.Entry<String, ?> entry: prefsMap.entrySet()) {
+                Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
+                        entry.getValue().toString());
+            }
+
+
         }
     }
+
+    public Map<String,Object> createMapWithUserInfo () {
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put(RepoStrings.FirebaseReference.FIRST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
+        map.put(RepoStrings.FirebaseReference.LAST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
+        map.put((RepoStrings.FirebaseReference.EMAIL), user.getEmail());
+        map.put(RepoStrings.FirebaseReference.GROUP, "");
+
+        map.put(RepoStrings.FirebaseReference.PLACE_ID, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
+        map.put(RepoStrings.FirebaseReference.ADDRESS, "");
+        map.put(RepoStrings.FirebaseReference.RATING, "");
+        map.put(RepoStrings.FirebaseReference.PHONE, "");
+        map.put(RepoStrings.FirebaseReference.IMAGE_URL, "");
+        map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
+
+        return map;
+    }
+
 
 }

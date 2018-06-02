@@ -51,13 +51,13 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     private FirebaseAuth auth;
     private FirebaseUser user;
     private FirebaseDatabase fireDb;
-    private DatabaseReference fireDbRefGroups;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth_enter_name);
 
+        fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
@@ -67,7 +67,6 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         inputPassword = (TextInputEditText) findViewById(R.id.enter_password_id);
         buttonStart = (Button) findViewById(R.id.enter_start_button_id);
         progressBar = (ProgressBar) findViewById(R.id.enter_progressbar);
-
 
         /** If we have sign in with google or facebook first time, the user needs to fill some
          * information. This code will fill the email and password fields for the user automatically.
@@ -278,6 +277,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         map.put((RepoStrings.FirebaseReference.FIRST_NAME), inputFirstName.getText().toString());
         map.put((RepoStrings.FirebaseReference.LAST_NAME), inputLastName.getText().toString());
         map.put((RepoStrings.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
+        map.put((RepoStrings.FirebaseReference.GROUP), "");
 
         map.put(RepoStrings.FirebaseReference.PLACE_ID, "");
         map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
@@ -290,9 +290,5 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
         return map;
     }
-
-
-
-
 
 }

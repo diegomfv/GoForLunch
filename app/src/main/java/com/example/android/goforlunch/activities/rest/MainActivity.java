@@ -140,6 +140,8 @@ public class MainActivity extends AppCompatActivity{
 
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+
         navigationView = findViewById(R.id.bottom_navigation_id);
         navigationView.setOnNavigationItemSelectedListener(botNavListener);
 
@@ -155,6 +157,7 @@ public class MainActivity extends AppCompatActivity{
         /** We get the user information
          * */
         auth = FirebaseAuth.getInstance();
+        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
         if (auth.getCurrentUser() != null) {
             userName = auth.getCurrentUser().getDisplayName();
@@ -163,6 +166,10 @@ public class MainActivity extends AppCompatActivity{
 
         navUserName.setText(userName);
         navUserEmail.setText(userEmail);
+
+        if (Objects.requireNonNull(sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, "")).equals("")) {
+            ToastHelper.toastShort(this, "You haven't chosen a group yet!");
+        }
 
         /** 1. We store the key of the user in Shared Preferences
          *  2. Once we have the key, we store the Restaurant of the user to use all the info
@@ -175,16 +182,15 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+                Log.d(TAG, "onDataChange: userEmail = " + userEmail);
 
                 for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
                     if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().equals(userEmail)){
-
                         /** We save the user's key in SharedPreferences,
                          * the restaurant and the group
                          * */
-                        sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putString(
                                 RepoStrings.SharedPreferences.USER_ID_KEY,
@@ -194,16 +200,11 @@ public class MainActivity extends AppCompatActivity{
                                 Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
                         editor.putString(
                                 RepoStrings.SharedPreferences.USER_GROUP,
-                                item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString());
+                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).toString());
                         editor.apply();
 
-                        Log.d(TAG, "onDataChange: userFirstName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
-                        Log.d(TAG, "onDataChange: userLastName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
-                        Log.d(TAG, "onDataChange: userIdKey: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, ""));
-                        Log.d(TAG, "onDataChange: userRestaurantName: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_RESTAURANT_NAME, ""));
-                        Log.d(TAG, "onDataChange: userGroup: " + sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, ""));
+                        Log.d(TAG, "onDataChange: SharedPreferences = " + sharedPref.getAll().toString());
 
-                        // TODO: 31/05/2018 Check nulls
                         /** We fill the object with the info we will need to pass in the intent
                          * */
                         User.Builder builder = new User.Builder();
@@ -300,6 +301,7 @@ public class MainActivity extends AppCompatActivity{
      * LISTENERS *****
      * **************/
 
+
     private BottomNavigationView.OnNavigationItemSelectedListener botNavListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -332,6 +334,7 @@ public class MainActivity extends AppCompatActivity{
                     return true;
                 }
             };
+
 
     private NavigationView.OnNavigationItemSelectedListener navViewListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -469,6 +472,7 @@ public class MainActivity extends AppCompatActivity{
         return false;
     }
 
+
     private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: getting location permission");
 
@@ -499,6 +503,7 @@ public class MainActivity extends AppCompatActivity{
             getDeviceLocation();
         }
     }
+
 
     private void getDeviceLocation() {
 
@@ -561,6 +566,7 @@ public class MainActivity extends AppCompatActivity{
         }
 
     }
+
 
     private void callLoaderInitApiGeneralRequests(int id) {
 

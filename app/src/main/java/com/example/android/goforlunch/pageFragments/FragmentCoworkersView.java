@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -146,7 +148,6 @@ public class FragmentCoworkersView extends Fragment {
                     }
                 }
 
-
                 /** If user's group is different than null, then we get all the users from the database
                  * that are in the same group and fill a list with them
                  * */
@@ -158,27 +159,31 @@ public class FragmentCoworkersView extends Fragment {
                     for (DataSnapshot item :
                             dataSnapshot.getChildren()) {
 
-                        if (item.child(RepoStrings.FirebaseReference.GROUP).getValue().equals(userGroup)) {
+                        if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).equals(userGroup)) {
 
-                            if(!item.child(RepoStrings.FirebaseReference.EMAIL).getValue().equals(usersEmail)) {
+                            if(!Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals(usersEmail)) {
 
-                                listOfCoworkers.add(new User(
-                                        item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.EMAIL).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.ADDRESS).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.RATING).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.PHONE).getValue().toString(),
-                                        item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue().toString()
-                                ));
+                                User.Builder builder = new User.Builder();
+
+                                builder.setFirstName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue()).toString());
+                                builder.setLastName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue()).toString());
+                                builder.setEmail(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString());
+                                builder.setGroup(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).toString());
+                                builder.setPlaceId(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue()).toString());
+                                builder.setRestaurantName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
+                                builder.setRestaurantType(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString());
+                                builder.setImageUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue()).toString());
+                                builder.setAddress(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.ADDRESS).getValue()).toString());
+                                builder.setRating(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RATING).getValue()).toString());
+                                builder.setPhone(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.PHONE).getValue()).toString());
+                                builder.setWebsiteUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue()).toString());
+
+                                listOfCoworkers.add(builder.create());
+
                             }
                         }
                     }
+
                     if (getActivity() != null) {
                         mAdapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
                         mRecyclerView.setAdapter(mAdapter);
