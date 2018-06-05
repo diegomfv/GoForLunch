@@ -21,7 +21,8 @@
         app:civ_border_width="0.5dp"
         app:civ_border_color="#FF000000"
         android:src="@drawable/homer_simpson"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center_horizontal"
+        android:clickable="true">
     </de.hdodenhof.circleimageview.CircleImageView>
 
     <android.support.design.widget.TextInputLayout
@@ -40,7 +41,7 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="Enter your first name" />
+            android:hint="First name" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -60,7 +61,7 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="Enter your last name" />
+            android:hint="Last name" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -70,8 +71,7 @@
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="10dp"
-        >
+        android:layout_marginBottom="10dp">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/enter_email_id"
@@ -80,8 +80,7 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="Enter your email"
-            android:enabled="false"/>
+            android:hint="email" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -91,8 +90,7 @@
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="10dp"
-        >
+        android:layout_marginBottom="10dp">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/enter_password_id"
@@ -100,9 +98,8 @@
             android:layout_height="match_parent"
             android:textSize="14sp"
             android:maxLines="1"
-            android:inputType="text"
-            android:hint="Enter your password"
-            android:enabled="false"/>
+            android:inputType="textPassword"
+            android:hint="password" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -126,6 +123,3 @@
         android:visibility="invisible"/>
 
 </LinearLayout>
-
-
-<!-- -->

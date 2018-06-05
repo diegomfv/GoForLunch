@@ -34,9 +34,6 @@ import retrofit2.Response;
  * It is used to divide the restaurants by type, what will help us in the future to
  * update the UI according to the type searched by the user
  * */
-
-// TODO: 23/05/2018 We make the thread sleep because, if not, it does the calls in a random order.
-// TODO: 23/05/2018 We may be able to remove it now
 public class RequesterTextSearch {
 
     private static final String TAG = "RequesterTextSearch";
@@ -108,18 +105,18 @@ public class RequesterTextSearch {
 
                             for (int i = 0; i < resultsUsed ; i++) {
 
-                                placeId = RepoStrings.NOT_AVAILABLE;
-                                name = RepoStrings.NOT_AVAILABLE;
-                                type = RepoStrings.NOT_AVAILABLE;
-                                address = RepoStrings.NOT_AVAILABLE;
-                                openUntil = RepoStrings.NOT_AVAILABLE;
-                                distance = RepoStrings.NOT_AVAILABLE;
-                                rating = RepoStrings.NOT_AVAILABLE;
-                                imageUrl = RepoStrings.NOT_AVAILABLE;
-                                phone = RepoStrings.NOT_AVAILABLE;
-                                websiteUrl = RepoStrings.NOT_AVAILABLE;
-                                lat = RepoStrings.NOT_AVAILABLE;
-                                lng = RepoStrings.NOT_AVAILABLE;
+                                placeId = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                name = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                type = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                address = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                openUntil = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                distance = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                rating = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                imageUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                phone = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                websiteUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                lat = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                lng = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
 
                                 if (results[i].getPlace_id() != null) {
                                     placeId = results[i].getPlace_id();
@@ -211,7 +208,7 @@ public class RequesterTextSearch {
                 return RepoStrings.RESTAURANT_TYPES[i];
             }
         }
-        return RepoStrings.NOT_AVAILABLE;
+        return RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
     }
 
     /** This method returns a rating with max. value = 3 if

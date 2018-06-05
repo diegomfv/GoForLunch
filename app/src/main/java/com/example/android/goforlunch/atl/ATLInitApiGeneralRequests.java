@@ -44,7 +44,7 @@ public class ATLInitApiGeneralRequests extends AsyncTaskLoader{
 
         /** We start the request that will fill the database
          * */
-        RequesterNearby requesterNearby = new RequesterNearby(mDb, myPosition);
+        RequesterNearby requesterNearby = new RequesterNearby(mDb, myPosition, mDb.restaurantDao().getAllRestaurantsNotLiveData());
         requesterNearby.doApiRequest();
 
         return null;

@@ -27,6 +27,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
 import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
@@ -142,6 +143,8 @@ public class MainActivity extends AppCompatActivity{
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 
+        Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
+
         navigationView = findViewById(R.id.bottom_navigation_id);
         navigationView.setOnNavigationItemSelectedListener(botNavListener);
 
@@ -239,8 +242,8 @@ public class MainActivity extends AppCompatActivity{
          * where he/she is going. If no restaurant is chosen, no notification should appear.
          * 2nd. At 4pm, the database has to be filled with the visited restaurants.
          * */
-
         // TODO: 29/05/2018 Do here Android Job, fill database with visited restaurant
+
 
 
 
@@ -538,21 +541,20 @@ public class MainActivity extends AppCompatActivity{
 
                         //TODO: 28/05/2018 Ensure that we don't do this if if has been already done (quota is very limited)
 
-                        // TODO: 25/05/2018 Uncomment this
-                        // We delete the database
-//                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
-//                            }
-//                        });
+//                         TODO: 25/05/2018 Uncomment this
+//                         We delete the database
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+                            }
+                        });
 
                         /** We do the API Requests. It will fill the database
                          * */
                         // TODO: 24/05/2018 Allow to do the calls when ready
-                        //callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
-
-                       //Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
+                        callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
+                        Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
                     } else {
                         Log.d(TAG, "onComplete: current location is null");

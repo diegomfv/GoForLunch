@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
@@ -22,11 +23,17 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 09/05/2018.
@@ -40,6 +47,8 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     private TextInputEditText inputEmail;
     private TextInputEditText inputPassword;
 
+    private ImageView imageviewProfilePicture;
+
     private Button buttonStart;
 
     private ProgressBar progressBar;
@@ -47,10 +56,16 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     private String email;
     private String password;
 
+    //List of Emails to store all the emails and check if an user already exists in the database
+    private List<String> listOfEmails;
+
+    private boolean flag = false;
+
     //Firebase
     private FirebaseAuth auth;
     private FirebaseUser user;
     private FirebaseDatabase fireDb;
+    private DatabaseReference dbRefUsers;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +80,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         inputLastName = (TextInputEditText) findViewById(R.id.enter_last_name_id);
         inputEmail = (TextInputEditText) findViewById(R.id.enter_email_id);
         inputPassword = (TextInputEditText) findViewById(R.id.enter_password_id);
+        imageviewProfilePicture = (ImageView) findViewById(R.id.enter_image_id);
         buttonStart = (Button) findViewById(R.id.enter_start_button_id);
         progressBar = (ProgressBar) findViewById(R.id.enter_progressbar);
 
@@ -94,10 +110,39 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                 password = intent.getStringExtra(RepoStrings.SentIntent.PASSWORD);
 
             }
+
+            flag = intent.getBooleanExtra(RepoStrings.SentIntent.FLAG, false);
         }
+
+        Log.d(TAG, "onCreate: flag = " + flag);
 
         inputEmail.setText(email);
         inputPassword.setText(password);
+
+        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        dbRefUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                listOfEmails = new ArrayList<>();
+
+                for (DataSnapshot item :
+                        dataSnapshot.getChildren()) {
+
+                    listOfEmails.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().toLowerCase().trim());
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+            }
+        });
+
+
+
 
         /** When the user
          * clicks the START button two things can happen.
@@ -108,18 +153,18 @@ public class AuthEnterNameActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
 
-                progressBar.setVisibility(View.VISIBLE);
+                if (!flag) {
+                    Log.d(TAG, "onClick: flag = false ->" + flag);
 
-                if (intent == null) {
-                    Log.d(TAG, "onClick: intent == null ->" + intent);
-
-                    /** intent is null, therefore we came from Google of Facebook SignIn and
+                    /** flag is false, therefore we came from Google of Facebook SignIn and
                      * we only have to update the user info
                      * */
                     if (user != null) {
                         Log.d(TAG, "onClick: We came from Google or Facebook login");
 
                         if (checkMinimumRequisites()) {
+
+                            progressBar.setVisibility(View.VISIBLE);
 
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(inputFirstName.getText().toString() + " " + inputLastName.getText().toString())
@@ -159,63 +204,77 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                     }
 
                 } else {
-                    Log.d(TAG, "onClick: We came from email/password login");
-
-                    /** Intent is not null, therefore we came from email/password login. In this
-                     * case we have to create the user and update the info.
+                    Log.d(TAG, "onClick: flag is true -> " + flag);
+                    /** flag is true, therefore we came from email/password login. In this
+                     * case we have to check if the user exists.
+                     * If it does, we doesn't allow the user to continue.
+                     * If it doesn't we have to
+                     * create the user and update the info.
                      * */
-                    if (checkMinimumRequisites()) {
 
-                        //We create the user
-                        auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
-                                .addOnCompleteListener(AuthEnterNameActivity.this, new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        progressBar.setVisibility(View.GONE);
+                    if (userAlreadyExists(listOfEmails, inputEmail.getText().toString().toLowerCase().trim())) {
+                        /** A user with this email already exists, so we don't let the user to continue with the process
+                         * (we cannot create two users with the same email) */
+                        ToastHelper.toastShort(AuthEnterNameActivity.this, "A user with this email already exists.");
 
-                                        // If sign in fails, display a message to the user. If sign in succeeds
-                                        // the auth state listener will be notified and logic to handle the
-                                        // signed in user can be handled in the listener.
-                                        if (!task.isSuccessful()) {
-                                            Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+                    } else {
+                        /** A user with this email DOES NOT exist, so we can continue with the process
+                         * */
 
-                                            //We get the exception and display why it was not succesful
-                                            FirebaseAuthException e = (FirebaseAuthException) task.getException();
-                                            if (e != null) {
-                                                Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                            }
+                        if (checkMinimumRequisites()) {
 
-                                            // TODO: 01/06/2018 Need to delete this
-                                            ToastHelper.toastShort(AuthEnterNameActivity.this, e.getMessage());
+                            progressBar.setVisibility(View.VISIBLE);
 
-                                        } else {
+                            //We create the user
+                            auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
+                                    .addOnCompleteListener(AuthEnterNameActivity.this, new OnCompleteListener<AuthResult>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<AuthResult> task) {
+                                            progressBar.setVisibility(View.GONE);
 
-                                            user = auth.getCurrentUser();
+                                            // If sign in fails, display a message to the user. If sign in succeeds
+                                            // the auth state listener will be notified and logic to handle the
+                                            // signed in user can be handled in the listener.
+                                            if (!task.isSuccessful()) {
+                                                Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
 
-                                            if (user != null) {
+                                                //We get the exception and display why it was not succesful
+                                                FirebaseAuthException e = (FirebaseAuthException) task.getException();
+                                                if (e != null) {
+                                                    Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                                }
 
-                                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                                        .setDisplayName(inputFirstName.getText().toString() + " " + inputLastName.getText().toString())
-                                                        .build();
+                                                // TODO: 01/06/2018 Need to delete this
+                                                ToastHelper.toastShort(AuthEnterNameActivity.this, e.getMessage());
 
-                                                user.updateProfile(profileUpdates)
-                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if (!task.isSuccessful()) {
-                                                                    Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+                                            } else {
 
-                                                                    //We get the exception and display why it was not successful
-                                                                    FirebaseAuthException e = (FirebaseAuthException) task.getException();
+                                                user = auth.getCurrentUser();
 
-                                                                    if (e != null) {
-                                                                        Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                                                    }
+                                                if (user != null) {
 
-                                                                    ToastHelper.toastShort(AuthEnterNameActivity.this, "Something went wrong. Please, sign up again");
+                                                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                                            .setDisplayName(inputFirstName.getText().toString() + " " + inputLastName.getText().toString())
+                                                            .build();
 
-                                                                } else {
-                                                                    Log.d(TAG, "onComplete: task was successful");
+                                                    user.updateProfile(profileUpdates)
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (!task.isSuccessful()) {
+                                                                        Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                                                        //We get the exception and display why it was not successful
+                                                                        FirebaseAuthException e = (FirebaseAuthException) task.getException();
+
+                                                                        if (e != null) {
+                                                                            Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                                                        }
+
+                                                                        ToastHelper.toastShort(AuthEnterNameActivity.this, "Something went wrong. Please, sign up again");
+
+                                                                    } else {
+                                                                        Log.d(TAG, "onComplete: task was successful");
 
                                                                         DatabaseReference fireDbRefNewUser =
                                                                                 fireDb.getReference(RepoStrings.FirebaseReference.USERS);
@@ -225,14 +284,16 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                                         startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
                                                                         finish();
 
+                                                                    }
                                                                 }
-                                                            }
-                                                        });
+                                                            });
+                                                }
                                             }
                                         }
-                                    }
-                                });
+                                    });
+                        }
                     }
+
                 }
             }
         });
@@ -269,7 +330,9 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         }
     }
 
-
+    // TODO: 02/06/2018 Could be probably done with a Static method
+    /** Method that create a map with certain info
+     * */
     public Map<String,Object> createMapWithUserInfo () {
 
         Map<String, Object> map = new HashMap<>();
@@ -289,6 +352,20 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
 
         return map;
+    }
+
+    /** Checks if a value is in a list. It is used to
+     * check if the user email is already in the database.
+     * */
+    public boolean userAlreadyExists(List<String> listOfEmails, String inputString) {
+
+        if (listOfEmails.contains(inputString)) {
+            return true;
+
+        } else {
+            return false;
+
+        }
     }
 
 }

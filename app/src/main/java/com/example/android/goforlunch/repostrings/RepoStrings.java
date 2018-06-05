@@ -8,7 +8,7 @@ public interface RepoStrings {
     // TODO: 25/05/2018 Delete this
     String FAKE_USER_EMAIL = "todd_brown@gmail.com";
 
-    String NOT_AVAILABLE = "NotAvailable";
+    String NOT_AVAILABLE_FOR_STRINGS = "NotAvailable";
 
     /** This string is used in for requests (TextSearch)
      * */
@@ -29,7 +29,8 @@ public interface RepoStrings {
             "Mexican",
             "Spanish",
             "Thai",
-            "Vietnamese"
+            "Vietnamese",
+            "Other"
     };
 
     interface SharedPreferences {
@@ -41,13 +42,15 @@ public interface RepoStrings {
 
         String USER_RESTAURANT_NAME = "restaurant_name";
         String USER_GROUP = "group";
-
+        String USER_GROUP_KEY = "user_group_key";
     }
 
     interface SentIntent {
 
         String EMAIL = "email";
         String PASSWORD = "password";
+
+        String FLAG = "flag";
 
         String PLACE_ID = "place_id";
         String RESTAURANT_NAME = "restaurant_name";

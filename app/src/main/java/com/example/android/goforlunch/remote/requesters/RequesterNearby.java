@@ -12,6 +12,11 @@ import com.example.android.goforlunch.models.modelnearby.MyPlaces;
 import com.example.android.goforlunch.models.modelnearby.Results;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
+import com.example.android.goforlunch.repostrings.RepoStrings;
+
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,12 +37,15 @@ public class RequesterNearby {
     private AppDatabase mDb;
     private LatLngForRetrofit myPosition;
 
-    public RequesterNearby(AppDatabase mDb, LatLngForRetrofit myPosition) {
+    private List<RestaurantEntry> listOfRestaurantsInTheDatabase;
+
+    public RequesterNearby(AppDatabase mDb, LatLngForRetrofit myPosition, List<RestaurantEntry> listOfRestaurantsInTheDatabase) {
         this.mDb = mDb;
         this.myPosition = myPosition;
+        this.listOfRestaurantsInTheDatabase = listOfRestaurantsInTheDatabase;
     }
 
-    public void doApiRequest () {
+    public void doApiRequest() {
 
         GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
         Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", nearbyKey);
@@ -73,96 +81,103 @@ public class RequesterNearby {
                      * */
                     for (int i = 0; i < results.length; i++) {
 
-                        placeId = "nA";
-                        name = "nA";
-                        type = "nA";
-                        address = "nA";
-                        openUntil = "nA";
-                        distance = "nA";
-                        rating = "nA";
-                        imageUrl = "nA";
-                        phone = "nA";
-                        websiteUrl = "nA";
-                        lat = "nA";
-                        lng = "nA";
+                        for (int j = 0; j < listOfRestaurantsInTheDatabase.size(); j++) {
 
+                            if (results[i].getPlace_id().equalsIgnoreCase(listOfRestaurantsInTheDatabase.get(j).getPlaceId())
+                                    || results[i].getName().equalsIgnoreCase(listOfRestaurantsInTheDatabase.get(i).getName())) {
+                                //if the restaurant is already in the database,
+                                // do nothing
 
-                        if (results[i].getPlace_id() != null) {
-                            placeId = results[i].getPlace_id();
-                        }
-
-                        if (results[i].getName() != null) {
-                            name = results[i].getName();
-                        }
-
-                        if (results[i].getRating() != null) {
-
-                            float temp_rating = Float.parseFloat(results[i].getRating());
-
-                            if (temp_rating > 3) {
-                                temp_rating = temp_rating * 3 / 5;
-                                rating = String.valueOf(temp_rating);
                             } else {
-                                rating = results[i].getRating();
+
+                                if (results[i].getPlace_id() != null) {
+                                    placeId = results[i].getPlace_id();
+                                } else {
+                                    placeId = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                }
+
+                                if (results[i].getName() != null) {
+                                    name = results[i].getName();
+                                } else {
+                                    name = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                }
+
+                                if (results[i].getRating() != null) {
+                                    rating = formatToTwoDecimalsAndGetRatingUnder3(results[i].getRating());
+                                } else {
+                                    rating = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                }
+
+                                if (results[i].getVicinity() != null) {
+                                    address = results[i].getVicinity();
+                                } else {
+                                    address = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                }
+
+                                if (results[i].getGeometry() != null) {
+
+                                    Geometry geometry = results[i].getGeometry();
+
+                                    if (geometry.getLocation() != null) {
+
+                                        Location location = geometry.getLocation();
+
+                                        lat = location.getLat();
+                                        lng = location.getLng();
+
+                                    } else {
+                                        lat = null;
+                                        lng = null;
+                                    }
+                                } else {
+                                    lat = null;
+                                    lng = null;
+                                }
+
+                                /** We will fill the following info with
+                                 * the next requests
+                                 * */
+                                //Type info will be "Other" because it will never be filled
+                                //"Other" is the last type of te RestaurantTypes array
+                                type = RepoStrings.RESTAURANT_TYPES[RepoStrings.RESTAURANT_TYPES.length - 1];
+                                openUntil = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                distance = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                imageUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                phone = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                websiteUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+
+                                /** We create an object with all the info
+                                 * */
+                                final RestaurantEntry restaurantEntry = new RestaurantEntry(
+                                        placeId,
+                                        name,
+                                        type,
+                                        address,
+                                        openUntil,
+                                        distance,
+                                        rating,
+                                        imageUrl,
+                                        phone,
+                                        websiteUrl,
+                                        lat,
+                                        lng
+                                );
+
+                                /** We insert the object in the database
+                                 * */
+                                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mDb.restaurantDao().insertRestaurant(restaurantEntry);
+                                    }
+                                });
+
+                                RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
+                                requesterPlaceId.doApiRequest(results[i].getPlace_id());
+
                             }
-
                         }
-
-                        if (results[i].getVicinity() != null) {
-                            address = results[i].getVicinity();
-                        }
-
-                        if (results[i].getGeometry() != null) {
-
-                            Geometry geometry = results[i].getGeometry();
-
-                            if (geometry.getLocation() != null) {
-
-                                Location location = geometry.getLocation();
-
-                                lat = location.getLat();
-                                lng = location.getLng();
-
-                            }
-                        }
-
-                        /** We create an object with all the info
-                         * */
-                        final RestaurantEntry restaurantEntry = new RestaurantEntry(
-                                placeId,
-                                name,
-                                type,
-                                address,
-                                openUntil,
-                                distance,
-                                rating,
-                                imageUrl,
-                                phone,
-                                websiteUrl,
-                                lat,
-                                lng
-                        );
-
-                        /** We insert the object in the database
-                         * */
-                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                mDb.restaurantDao().insertRestaurant(restaurantEntry);
-                            }
-                        });
-
                     }
-// TODO: 22/05/2018 Disabled to avoid to many requests
-//                    for (int i = 0; i < results.length; i++) {
-//
-//                        if (results[i].getPlace_id() != null) {
-//
-//                            RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
-//                            requesterPlaceId.doApiRequest(results[i].getPlace_id());
-//
-//                        }
-//                    }
                 }
             }
 
@@ -173,4 +188,24 @@ public class RequesterNearby {
             }
         });
     }
+
+    /** This method returns a rating with max. value = 3 if
+     * it was higher than 3. Additionally, it formats the rating
+     * so it has only 2 decimals
+     * */
+    private String formatToTwoDecimalsAndGetRatingUnder3(String rating) {
+
+        float temp_rating = Float.parseFloat(rating);
+
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.DOWN);
+
+        if (temp_rating > 3) {
+            temp_rating = temp_rating * 3 / 5;
+            rating = String.valueOf(temp_rating);
+        }
+
+        return df.format(temp_rating);
+    }
+
 }

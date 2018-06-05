@@ -162,4 +162,22 @@ public class User {
 
         }
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", group='" + group + '\'' +
+                ", placeId='" + placeId + '\'' +
+                ", restaurantName='" + restaurantName + '\'' +
+                ", restaurantType='" + restaurantType + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", address='" + address + '\'' +
+                ", rating='" + rating + '\'' +
+                ", phone='" + phone + '\'' +
+                ", websiteUrl='" + websiteUrl + '\'' +
+                '}';
+    }
 }

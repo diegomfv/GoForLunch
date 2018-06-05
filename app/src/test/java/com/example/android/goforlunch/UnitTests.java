@@ -1,5 +1,6 @@
 package com.example.android.goforlunch;
 
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 
 import org.junit.Assert;
@@ -9,9 +10,12 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -96,7 +100,7 @@ public class UnitTests {
         Random rand = new Random();
         int r = rand.nextInt(12) + 1;
 
-        String type = RepoStrings.NOT_AVAILABLE;
+        String type = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
         String urlTypePart = RepoStrings.RESTAURANT_TYPES[r].substring(0,4);
 
         for (int i = 1; i < RepoStrings.RESTAURANT_TYPES.length ; i++) {
@@ -407,7 +411,29 @@ public class UnitTests {
 
     }
 
+    @Test
+    public void getKeyFromValueInHashMap () {
+
+        String value = "Alfa";
+        Object key = "";
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("1", "Alfa");
+        map.put("2", "Beta");
+        map.put("3", "Charlie");
+
+        for (Object o :
+                map.keySet()) {
 
 
+            if (map.get(o).equals(value)) {
+                key = o;
+            }
+        }
+
+        assertTrue(key == "1");
+
+    }
 
 }

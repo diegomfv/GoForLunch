@@ -43,6 +43,10 @@ import java.util.Objects;
 /**
  * Created by Diego Fajardo on 31/05/2018.
  */
+
+// TODO: 02/06/2018  --------------------------- VERY IMPORTANT!!!!!! 
+// TODO: 02/06/2018 Check that sign in works well when we close the app instead of login off
+// TODO: 02/06/2018 Once, it allowed us to start with password account but the current user used gmail account
 public class AuthChooseLoginActivity extends AppCompatActivity{
 
     private static final String TAG = "AuthChooseLoginActivity";
@@ -72,9 +76,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
-
         //auth.signOut();
+        user = auth.getCurrentUser();
 
         Log.d(TAG, "onCreate: user = " + user);
 

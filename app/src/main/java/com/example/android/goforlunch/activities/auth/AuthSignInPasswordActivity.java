@@ -39,7 +39,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
 
     private Button buttonSignIn;
     private Button buttonReset;
-    private Button buttonSignUp;
+    private Button buttonRegister;
 
     private ProgressBar progressBar;
 
@@ -57,18 +57,21 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
 
         buttonSignIn = (Button) findViewById(R.id.signin_button_id);
         buttonReset = (Button) findViewById(R.id.signin_reset_button_id);
-        buttonSignUp = (Button) findViewById(R.id.signin_signup_button_id);
+        buttonRegister = (Button) findViewById(R.id.signin_register_button_id);
 
         // TODO: 01/06/2018 Delete?
         progressBar = (ProgressBar) findViewById(R.id.signin_progressbar_id);
 
-        buttonSignUp.setOnClickListener(new View.OnClickListener() {
+        buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(AuthSignInPasswordActivity.this, AuthSignUpActivity.class);
+                Intent intent = new Intent(AuthSignInPasswordActivity.this, AuthEnterNameActivity.class);
                 intent.putExtra(RepoStrings.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
                 intent.putExtra(RepoStrings.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
+
+                //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
+                intent.putExtra(RepoStrings.SentIntent.FLAG, true);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }

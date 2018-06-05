@@ -70,8 +70,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -282,6 +285,41 @@ public class FragmentRestaurantMapView extends Fragment
             }
         });
 
+        fireDbRefToGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+        fireDbRefToGroups.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                for (DataSnapshot item :
+                        dataSnapshot.getChildren()) {
+
+                    if (item.child(userGroup).toString().equalsIgnoreCase(RepoStrings.FirebaseReference.GROUP_NAME)){
+
+                        item.getKey();
+
+
+
+
+                    }
+
+
+
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+            }
+        });
+
+
+
+
         /** STARTING THE MAP:
          * First, we check that the user has the correct Google Play Services Version.
          * If the user does, we start the map
@@ -326,6 +364,7 @@ public class FragmentRestaurantMapView extends Fragment
             }
 
             listOfMarkerOptions.add(options);
+
         }
         Log.d(TAG, "createMarkerOptions: size: " + listOfMarkerOptions.size());
     }

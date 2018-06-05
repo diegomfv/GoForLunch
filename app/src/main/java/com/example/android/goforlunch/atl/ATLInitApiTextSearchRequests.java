@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
+import com.example.android.goforlunch.remote.requesters.RequesterNearby;
 import com.example.android.goforlunch.remote.requesters.RequesterTextSearch;
 
 /**
@@ -44,10 +45,39 @@ public class ATLInitApiTextSearchRequests extends AsyncTaskLoader {
 
         /** We start the request that will fill the database
          * */
+        startRequestUsingTextSearchService();
+
+        /** We wait a bit to fill the database and immediately after we start the request
+         * to fill nearby places. We do the nearby places request later because if we found a
+         * place that is already in the database, we won't add it.
+         * */
+        // TODO: 05/06/2018 I am worried about RACE CONDITIONS
+        try {
+            Thread.sleep(5000);
+            startRequestUsingNearbyPlacesService();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /** Method that starts the request using TextSearch service
+     * */
+    private void startRequestUsingTextSearchService () {
+
         RequesterTextSearch requesterTextSearch = new RequesterTextSearch(mDb, myPosition);
         requesterTextSearch.doApiRequest();
 
-        return null;
+    }
+
+    /** Method that starts the request using NearbyPlaces
+     * service*/
+    private void startRequestUsingNearbyPlacesService() {
+
+        RequesterNearby requesterNearby = new RequesterNearby(mDb,myPosition, mDb.restaurantDao().getAllRestaurantsNotLiveData());
+        requesterNearby.doApiRequest();
+
     }
 
 }
