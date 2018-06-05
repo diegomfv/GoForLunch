@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <FrameLayout
@@ -9,6 +11,18 @@
         android:layout_height="25dp"
         android:background="@color/colorPrimaryDark">
     </FrameLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/join_fab_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:backgroundTint="@android:color/white"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/ic_arrow_back_accent_col"
+        android:elevation="4dp"
+        app:rippleColor="@color/colorAccentLight"
+        />
 
     <android.support.design.widget.TextInputLayout
     android:layout_width="match_parent"
@@ -41,8 +55,19 @@
         android:padding="10dp"
         android:background="@android:color/white"
         android:textColor="@color/colorAccentDark"
-        android:text="JOIN GROUP"/>
+        android:text="JOIN GROUP"
+        android:layout_marginTop="20dp"/>
 
+    <Button
+        android:id="@+id/join_button_create_group_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:textColor="@color/colorAccentDark"
+        android:text="CREATE NEW GROUP"
+        android:layout_marginTop="20dp"/>
 
 
 

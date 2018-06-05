@@ -35,13 +35,13 @@ public interface RepoStrings {
 
     interface SharedPreferences {
 
-        String USER_ID_KEY = "key";
+        String USER_ID_KEY = "user_key";
 
         String USER_FIRST_NAME = "first_name";
         String USER_LAST_NAME = "last_name";
 
         String USER_RESTAURANT_NAME = "restaurant_name";
-        String USER_GROUP = "group";
+        String USER_GROUP = "group_name";
         String USER_GROUP_KEY = "user_group_key";
     }
 

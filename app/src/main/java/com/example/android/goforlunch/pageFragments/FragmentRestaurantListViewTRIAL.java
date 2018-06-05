@@ -58,7 +58,6 @@ import java.util.Objects;
 public class FragmentRestaurantListViewTRIAL extends Fragment {
 
     // TODO: 28/05/2018 Some names appear over the others
-    // TODO: 29/05/2018 Modify the number of users that go to a place!
 
     private static final String TAG = "PageFragmentRestaurantL";
 
@@ -273,6 +272,8 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                     }
                 }
 
+
+                // TODO: 05/06/2018 Has crashed here because of context = null inside the Adapter (hiding animation)
                 mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
                 mRecyclerView.setAdapter(mAdapter);
 

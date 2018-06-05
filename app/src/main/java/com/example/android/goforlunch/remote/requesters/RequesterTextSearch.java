@@ -42,7 +42,7 @@ public class RequesterTextSearch {
     private AppDatabase mDb;
     private LatLngForRetrofit myPosition;
     private String restaurantType;
-    private static int restaurantCounter = 0;
+    private int MAX_TEXT_SEARCH_RESTAURANTS = 3;
 
     public RequesterTextSearch(AppDatabase mDb, LatLngForRetrofit myPosition) {
         this.mDb = mDb;
@@ -93,14 +93,10 @@ public class RequesterTextSearch {
 
                             com.example.android.goforlunch.models.modelplacesbytextsearch.Results[] results = places.getResults();
 
-                            /** We do not get all the result because there are too many (that is why choose 5)
-                             * */
-                            // TODO: 24/05/2018 Can be changed to more options
-
-                            /** We limit how many results we use
+                            /** We limit how many results we use to avoid being OVER_QUERY_LIMIT
                              * */
                             int resultsUsed;
-                            if (results.length > 5) { resultsUsed = 5; }
+                            if (results.length > MAX_TEXT_SEARCH_RESTAURANTS) { resultsUsed = MAX_TEXT_SEARCH_RESTAURANTS; }
                             else { resultsUsed = results.length; }
 
                             for (int i = 0; i < resultsUsed ; i++) {

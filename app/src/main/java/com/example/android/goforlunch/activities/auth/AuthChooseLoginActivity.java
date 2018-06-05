@@ -86,6 +86,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
             //We delete Shared preferences info
             deleteSharedPreferencesInfo();
 
+
         } else {
 
             if (user.getDisplayName() != null){

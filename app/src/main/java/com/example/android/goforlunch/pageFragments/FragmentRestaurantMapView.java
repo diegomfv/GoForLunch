@@ -285,37 +285,37 @@ public class FragmentRestaurantMapView extends Fragment
             }
         });
 
-        fireDbRefToGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
-        fireDbRefToGroups.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                for (DataSnapshot item :
-                        dataSnapshot.getChildren()) {
-
-                    if (item.child(userGroup).toString().equalsIgnoreCase(RepoStrings.FirebaseReference.GROUP_NAME)){
-
-                        item.getKey();
-
-
-
-
-                    }
-
-
-
-
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-            }
-        });
+//        fireDbRefToGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+//        fireDbRefToGroups.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+//
+//                for (DataSnapshot item :
+//                        dataSnapshot.getChildren()) {
+//
+//                    if (item.child(userGroup).toString().equalsIgnoreCase(RepoStrings.FirebaseReference.GROUP_NAME)){
+//
+//                        item.getKey();
+//
+//
+//
+//
+//                    }
+//
+//
+//
+//
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+//
+//            }
+//        });
 
 
 
@@ -574,6 +574,8 @@ public class FragmentRestaurantMapView extends Fragment
                         @Override
                         public void onInfoWindowClick(Marker marker) {
                             //String clickedMarkerTitle = marker.getTitle();
+                            Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
+                            Log.d(TAG, "onInfoWindowClick: " + listOfRestaurants.size());
                             Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
 
                             for (int i = 0; i < listOfRestaurants.size(); i++) {

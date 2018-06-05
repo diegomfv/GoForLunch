@@ -227,31 +227,19 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: CALLED!");
 
-                dbRefUsers.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(final DataSnapshot dataSnapshot) {
+                DatabaseReference fireRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+                String key = fireRefGroups.push().getKey();
+                Log.d(TAG, "onClick: key!!!! = " + key);
 
-                        Query query = dbRefUsers.orderByChild("group").startAt("Apple");
-                        query.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                Log.d(TAG, "onDataChange: HERE! " + dataSnapshot.toString());
-                            }
+                Map<String,Object> map2 = new HashMap<>();
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+                map2 = new HashMap<>();
+                map2.put(RepoStrings.FirebaseReference.GROUP_NAME, "Alfa");
+                map2.put(RepoStrings.FirebaseReference.GROUP_MEMBERS,"");
+                map2.put(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
 
-                            }
-                        });
+                fireRefGroups.child(key).setValue(map2);
 
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
             }
         });
 
