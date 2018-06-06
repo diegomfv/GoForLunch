@@ -47,6 +47,9 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         mShortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 
+        Log.d(TAG, "RVAdapterList: listOfRestaurantsByType = " + (listOfRestaurantsByType == null));
+        Log.d(TAG, "RVAdapterList: listOfRestaurantsByCoworkers= " + (listOfRestaurantsByCoworkers == null));
+
     }
 
     @NonNull
@@ -103,12 +106,12 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         // TODO: 21/05/2018 Add coworkers joining!
 
         if (listOfRestaurantsByType.get(position).getRating() != null
-            && !listOfRestaurantsByType.get(position).getRating().equals("NotAvailable")) {
+            && !listOfRestaurantsByType.get(position).getRating().equals(RepoStrings.NOT_AVAILABLE_FOR_STRINGS)) {
             holder.ratingBar.setRating(Float.parseFloat(listOfRestaurantsByType.get(position).getRating()));
         }
 
         if (listOfRestaurantsByType.get(position).getImageUrl() != null
-            && !listOfRestaurantsByType.get(position).getImageUrl().equals("NotAvailable")) {
+            && !listOfRestaurantsByType.get(position).getImageUrl().equals(RepoStrings.NOT_AVAILABLE_FOR_STRINGS)) {
             Glide.with(mContext)
                     .load(listOfRestaurantsByType.get(position).getImageUrl())
                     .into(holder.photo);
@@ -118,7 +121,11 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
                     .into(holder.photo);
         }
 
-        holder.coworkersJoining.setText(String.valueOf(Collections.frequency(listOfRestaurantsByCoworkers, listOfRestaurantsByType.get(position).getName())));
+        if (listOfRestaurantsByCoworkers != null) {
+            holder.coworkersJoining.setText(String.valueOf(Collections.frequency(listOfRestaurantsByCoworkers, listOfRestaurantsByType.get(position).getName())));
+        } else {
+            holder.coworkersJoining.setText("?");
+        }
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override

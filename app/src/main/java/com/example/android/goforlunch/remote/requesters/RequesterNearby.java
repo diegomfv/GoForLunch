@@ -109,7 +109,7 @@ public class RequesterNearby {
                                 }
 
                                 if (results[i].getVicinity() != null) {
-                                    address = results[i].getVicinity();
+                                    address = results[i].getVicinity(); // TODO: 06/06/2018 Check if we can format it!
                                 } else {
                                     address = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
                                 }

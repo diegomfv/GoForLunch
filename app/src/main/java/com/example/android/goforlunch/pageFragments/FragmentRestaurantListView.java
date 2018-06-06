@@ -292,15 +292,6 @@ public class FragmentRestaurantListView extends Fragment {
         });
 
 
-
-
-
-
-
-
-
-
-
         Anim.crossFadeShortAnimation(mRecyclerView);
 
         return view;

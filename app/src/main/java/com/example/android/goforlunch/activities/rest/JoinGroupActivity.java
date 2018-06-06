@@ -165,7 +165,7 @@ public class JoinGroupActivity extends AppCompatActivity {
                      * */
                     ToastHelper.toastShort(
                             JoinGroupActivity.this,
-                            "Please, introduce a group name that already exists or a new one");
+                            "Please, introduce a group name that already exists or create a new group");
 
                 } else {
                     /** If input has info
@@ -247,15 +247,24 @@ public class JoinGroupActivity extends AppCompatActivity {
 
                     ToastHelper.toastShort(JoinGroupActivity.this, "A group with that name already exists!");
 
+                } else if (inputGroup.getText().toString().equals("")) {
+                    Log.d(TAG, "onClick: the user did not input anything");
+
+                    ToastHelper.toastShort(JoinGroupActivity.this, "Please, choose a name for the group");
+
+
+                } else if (inputGroup.getText().toString().length() < 4) {
+                    Log.d(TAG, "onClick: the user input a too short group name");
+
+                    ToastHelper.toastShort(JoinGroupActivity.this, "Sorry, the group name is too short");
+
                 } else {
                     Log.d(TAG, "onClick: the groups doesnt exist in the database");
 
                     // TODO: 02/06/2018 Check if there is internet before calling this method
                     alertDialogCreateNewGroup(inputGroup.getText().toString());
 
-
                 }
-
             }
         });
 

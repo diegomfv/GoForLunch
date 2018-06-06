@@ -6,10 +6,9 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -22,45 +21,31 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
-import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.models_delete.PlaceInfo;
-import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.AutocompletePrediction;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBuffer;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -80,7 +65,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -144,9 +128,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     //the map has already markers and, if so, not call a function
     private List<Marker> listOfMarkers;
 
-    //List of Restaurants and their properties
-    private List<RestaurantEntry> listOfRestaurants;
-
     //Retrofit usage
     private LatLngForRetrofit myPosition;
 
@@ -183,6 +164,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         listOfVisitedRestaurantsByTheUsersGroup = new ArrayList<>();
         mapOfListsOfRestaurantsByType = new HashMap<>();
         listOfMarkers = new ArrayList<>();
@@ -208,7 +191,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
          * */
         setHasOptionsMenu(true);
 
-        userGroupKey= sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP_KEY, "");
+        userGroupKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP_KEY, "");
 
         /** We get all the user information
          * */
@@ -218,7 +201,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         if (currentUser != null) {
             usersEmail = currentUser.getEmail();
         }
-
 
         /** We use the mapFragmentViewModel to fill a map with lists of restaurants by type.
          * This way, we will be able to access the information very fast when the user searches
@@ -591,6 +573,9 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                             Log.d(TAG, "onInfoWindowClick: " + mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).size());
                             Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
 
+                            /** REMEMBER mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]) is a list!
+                             *  */
+
                             for (int i = 0; i < mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).size(); i++) {
 
                                 if (mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getName().equals(marker.getTitle())) {
@@ -624,7 +609,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         });
     }
 
-    /** Method taht checks that the map can be filled with the database info (markers) and
+    /** Method that checks that the map can be filled with the database info (markers) and
      * immediately calls fillMapWithMarkers() to fill the map
      * */
     private void fillMapWithAllDatabaseRestaurants() {

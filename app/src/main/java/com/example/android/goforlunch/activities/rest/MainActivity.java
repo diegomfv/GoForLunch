@@ -36,6 +36,7 @@ import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
@@ -112,8 +113,12 @@ public class MainActivity extends AppCompatActivity{
     //Vars
     private boolean mLocationPermissionGranted = false; //used in permissions
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
-    //Flag to know which fragment we are in, avoiding relaunching it
+
+    //Flag to know which fragment we are in avoiding relaunching it
     private int flagToSpecifyCurrentFragment;
+
+    //Counter used to limit the times we try to start requests in case database is empty.
+    private int startRequestsCounter = 0;
 
     //Retrofit usage
     private LatLngForRetrofit myPosition;
@@ -131,16 +136,15 @@ public class MainActivity extends AppCompatActivity{
     private DatabaseReference fireDbRef;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_trial);
+        setContentView(R.layout.activity_main);
 
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        mDb = AppDatabase.getInstance(MainActivity.this);
 
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
@@ -156,10 +160,10 @@ public class MainActivity extends AppCompatActivity{
         navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
         navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
 
-        container = (FrameLayout) findViewById(R.id.fragment_container_id);
+        container = (FrameLayout) findViewById(R.id.main_fragment_container_id);
         progressBar = (ProgressBar) findViewById(R.id.main_progress_bar_id);
 
-        showProgressBar(progressBar, container);
+        //showProgressBar(progressBar, container);
 
         /** We get the user information
          * */
@@ -217,6 +221,7 @@ public class MainActivity extends AppCompatActivity{
                                 Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).toString());
                         editor.apply();
 
+                        // TODO: 06/06/2018 Only returns group_name, user_key and restaurant_name
                         Log.d(TAG, "onDataChange: SharedPreferences = " + sharedPref.getAll().toString());
 
                         /** We fill the object with the info we will need to pass in the intent
@@ -280,7 +285,7 @@ public class MainActivity extends AppCompatActivity{
          * */
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container_id, FragmentRestaurantMapView.newInstance())
+                .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL.newInstance())
                 .commit();
 
         /** We specify that that is the fragment we are showing
@@ -328,7 +333,7 @@ public class MainActivity extends AppCompatActivity{
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentRestaurantMapView.newInstance();
+                                selectedFragment = FragmentRestaurantMapViewTRIAL.newInstance();
                                 flagToSpecifyCurrentFragment = 1;
 
                             }
@@ -360,7 +365,7 @@ public class MainActivity extends AppCompatActivity{
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container_id, selectedFragment)
+                            .replace(R.id.main_fragment_container_id, selectedFragment)
                             .commit();
 
                     //true means that we want to select the clicked item
@@ -543,17 +548,16 @@ public class MainActivity extends AppCompatActivity{
 
                         /** If the database is empty, we start the request
                          * */
-                        if (ifLocalDatabaseIsNotEmpty()
+                        if (checkIfLocalDatabaseIsEmpty()
                                 && myPosition != null) {
                             Log.d(TAG, "onComplete: local database is NOT EMPTY");
 
-                            showProgressBar(progressBar, container);
+                            //showProgressBar(progressBar, container);
                             initRequestProcess();
 
                         } else {
                             Log.d(TAG, "onComplete: local Database IS EMPTY");
-
-                          hideProgressBar(progressBar, container);
+                            //hideProgressBar(progressBar, container);
 
                         }
 //
@@ -570,14 +574,19 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    public boolean ifLocalDatabaseIsNotEmpty() {
+    /** Method that returns true if local database is empty
+     * */
+    public boolean checkIfLocalDatabaseIsEmpty() {
         Log.d(TAG, "ifLocalDatabaseIsNotEmpty: called!");
 
         DatabaseHelper dbH = new DatabaseHelper(MainActivity.this);
-        return !dbH.isTableEmpty("restaurants");
+        return dbH.isTableEmpty("restaurant");
 
     }
 
+    /** Method that starts doing the requests to the servers to get the
+     * restaurants
+     * */
     public void initRequestProcess() {
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
@@ -588,14 +597,40 @@ public class MainActivity extends AppCompatActivity{
                  * */
                 mDb.restaurantDao().deleteAllRowsInRestaurantTable();
 
-                /** We start the requests
-                 * */
-                callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
-
             }
         });
+
+        /** We start the requests
+         * */
+        startRequests();
+
     }
 
+    /** Method that starts the requests if the database is empty. If not,
+     * it tries again (only 10 times more; this way we avoid doing requests
+     * continuously)
+     * */
+    public void startRequests () {
+        Log.d(TAG, "startRequests: called!");
+        // TODO: 06/06/2018 CHECK THIS!
+
+        if (startRequestsCounter != 10) {
+
+            if (checkIfLocalDatabaseIsEmpty()){
+                callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
+
+            } else {
+                startRequests();
+                startRequestsCounter++;
+            }
+        } else {
+
+            startRequestsCounter = 0;
+        }
+    }
+
+    /** Method that allows to show the progress bar
+     * */
     public void showProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
 
         progressBar.setVisibility(View.VISIBLE);
@@ -603,6 +638,8 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    /** Method that hides the progress bar
+     * */
     public void hideProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
 
         progressBar.setVisibility(View.GONE);
@@ -610,6 +647,8 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    /** Method used in fragments to get the DraweLayout
+     * */
     public DrawerLayout getMDrawerLayout() {
         return mDrawerLayout;
     }
@@ -623,14 +662,13 @@ public class MainActivity extends AppCompatActivity{
         Loader<Void> loader = loaderManager.getLoader(id);
 
         if (loader == null) {
-            Log.i(TAG, "loadLoaderUpdateSwitchTable: ");
+            Log.i(TAG, "loadLoaderInitApiGeneralRequests: ");
             loaderManager.initLoader(id, null, loaderInitApiTextSearchRequests);
         } else {
-            Log.i(TAG, "loadLoaderUpdateSwitchTable: ");
+            Log.i(TAG, "loadLoaderInitApiGeneralRequests: ");
             loaderManager.restartLoader(id, null, loaderInitApiTextSearchRequests);
         }
     }
-
 
     /**********************/
     /** LOADER CALLBACKS **/
@@ -650,11 +688,14 @@ public class MainActivity extends AppCompatActivity{
 
                 @Override
                 public void onLoadFinished(Loader loader, Object data) {
+                    Log.d(TAG, "onLoadFinished: called!");
 
-                    if (!ifLocalDatabaseIsNotEmpty()) {
+                    if (!checkIfLocalDatabaseIsEmpty()) {
+                        Log.d(TAG, "onLoadFinished: database IS NOT EMPTY anymore");
                         hideProgressBar(progressBar, container);
 
                     } else {
+                        Log.d(TAG, "onLoadFinished: database IS EMPTY");
 
                         ToastHelper.toastShort(MainActivity.this, "Something went wrong. Database is not filled.");
                     }
