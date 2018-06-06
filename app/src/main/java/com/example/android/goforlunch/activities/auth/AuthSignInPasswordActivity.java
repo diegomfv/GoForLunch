@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;

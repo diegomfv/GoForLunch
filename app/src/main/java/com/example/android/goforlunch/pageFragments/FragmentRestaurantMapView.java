@@ -35,6 +35,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;

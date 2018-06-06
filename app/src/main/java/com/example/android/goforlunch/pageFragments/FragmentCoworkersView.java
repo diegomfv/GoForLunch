@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;

@@ -1,6 +1,7 @@
 package com.example.android.goforlunch;
 
 import com.bumptech.glide.signature.ObjectKey;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 
 import org.junit.Assert;
@@ -451,6 +452,44 @@ public class UnitTests {
         } else {
             assertTrue(false);
         }
+    }
+
+    @Test
+    public void doAMapWithListsAndFillListsWithSpecificTypeElements () {
+
+        Map <String, Object> mapOfLists = new HashMap<>();
+        List<String> list;
+
+        for (int i = 0; i < RepoStrings.RESTAURANT_TYPES.length ; i++) {
+
+            list = new ArrayList<>();
+
+            for (int j = 0; j < RepoStrings.RESTAURANT_TYPES.length; j++) {
+
+                if (RepoStrings.RESTAURANT_TYPES[i].equalsIgnoreCase(RepoStrings.RESTAURANT_TYPES[j])){
+
+                    list.add(RepoStrings.RESTAURANT_TYPES[i]);
+
+                }
+
+            }
+
+            mapOfLists.put(RepoStrings.RESTAURANT_TYPES[i], list);
+
+        }
+
+        System.out.println(mapOfLists.toString());
+
+        System.out.println("mapOfLists = " + mapOfLists.get("Alfa"));
+
+    }
+
+    @Test
+    public void capitalize() {
+
+        String str = "goforlunch";
+        assertTrue(Utils.capitalize(str).equals("Goforlunch"));
+
     }
 
 }

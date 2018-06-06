@@ -1,17 +1,11 @@
 package com.example.android.goforlunch.helpermethods;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-
-import java.util.Map;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -38,4 +32,11 @@ public class Utils {
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
+    /** Method that capitalizes a string
+     * */
+    public static String capitalize (String str) {
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
 }

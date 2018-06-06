@@ -8,7 +8,7 @@ public interface RepoStrings {
     // TODO: 25/05/2018 Delete this
     String FAKE_USER_EMAIL = "todd_brown@gmail.com";
 
-    String NOT_AVAILABLE_FOR_STRINGS = "NotAvailable";
+    String NOT_AVAILABLE_FOR_STRINGS = "";
 
     /** This string is used in for requests (TextSearch)
      * */

@@ -610,8 +610,9 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-
-
+    public DrawerLayout getMDrawerLayout() {
+        return mDrawerLayout;
+    }
 
     /** Method that starts the ATL
      * and starts the requests' process
