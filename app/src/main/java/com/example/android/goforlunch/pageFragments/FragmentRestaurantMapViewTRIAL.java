@@ -83,7 +83,7 @@ import java.util.List;
 
 /** Fragment that displays the Google Map
  * */
-public class FragmentRestaurantMapView extends Fragment
+public class FragmentRestaurantMapViewTRIAL extends Fragment
         implements GoogleApiClient.OnConnectionFailedListener {
 
     // TODO: 21/05/2018 Add Maps Button to restart search
@@ -157,8 +157,8 @@ public class FragmentRestaurantMapView extends Fragment
      * INSTANTIATING THE FRAGMENT *
      *****************************/
 
-    public static FragmentRestaurantMapView newInstance() {
-        FragmentRestaurantMapView fragment = new FragmentRestaurantMapView();
+    public static FragmentRestaurantMapViewTRIAL newInstance() {
+        FragmentRestaurantMapViewTRIAL fragment = new FragmentRestaurantMapViewTRIAL();
         return fragment;
     }
 

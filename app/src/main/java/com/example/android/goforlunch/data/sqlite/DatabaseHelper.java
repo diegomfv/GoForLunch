@@ -36,6 +36,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * METHOD FOR RESETTING AUTOINCREMENT ID from each table
+     * */
+    public void resetAutoIncrement (String table_name) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" + table_name + "'");
+
+    }
 
     /** METHOD USED TO CHECK if a table is empty)
      * Used to avoid the app to insert data

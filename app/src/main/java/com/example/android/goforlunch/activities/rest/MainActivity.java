@@ -21,6 +21,8 @@ import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
@@ -28,36 +30,28 @@ import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
-import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.data.viewmodel.MainViewModel;
+import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.models_delete.PlaceInfo;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTRIAL;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
-import com.example.android.goforlunch.placeautocompleteadapter.PlaceAutocompleteAdapter;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 // TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
@@ -96,6 +90,12 @@ public class MainActivity extends AppCompatActivity{
     private NavigationView mNavigationView;
     private BottomNavigationView navigationView;
 
+    private ProgressBar progressBar;
+    private TextView navUserName;
+    private TextView navUserEmail;
+
+    private FrameLayout container;
+
     //------------------------------------------------
 
     //ERROR that we are going to handle if the user doesn't have the correct version of the
@@ -108,36 +108,35 @@ public class MainActivity extends AppCompatActivity{
     private static final float DEFAULT_ZOOM = 17f;
     private static final float LATITUDE_BOUND = 0.007f;
     private static final float LONGITUDE_BOUND = 0.015f;
-    private static LatLngBounds latLngBounds;
 
     //Vars
     private boolean mLocationPermissionGranted = false; //used in permissions
-    private GoogleMap mMap; //used to create the map
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
-    private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
-    private GoogleApiClient mGoogleApiClient;
-    private PlaceInfo mPlace;
+    //Flag to know which fragment we are in, avoiding relaunching it
+    private int flagToSpecifyCurrentFragment;
 
     //Retrofit usage
     private LatLngForRetrofit myPosition;
 
     //App Local Database
     private AppDatabase mDb;
-    private MainViewModel mainViewModel;
-    private List<RestaurantEntry> restaurants;
 
     //Shared Preferences
     private SharedPreferences sharedPref;
 
     //Firebase
     private FirebaseAuth auth;
+    private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRef;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_trial);
 
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
@@ -145,31 +144,42 @@ public class MainActivity extends AppCompatActivity{
 
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
-        navigationView = findViewById(R.id.bottom_navigation_id);
+        navigationView = findViewById(R.id.main_bottom_navigation_id);
         navigationView.setOnNavigationItemSelectedListener(botNavListener);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_id);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_id);
 
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view_id);
+        mNavigationView = (NavigationView) findViewById(R.id.main_nav_view_id);
         mNavigationView.setNavigationItemSelectedListener(navViewListener);
 
         View headerView = mNavigationView.getHeaderView(0);
-        TextView navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
-        TextView navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
+        navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
+        navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
+
+        container = (FrameLayout) findViewById(R.id.fragment_container_id);
+        progressBar = (ProgressBar) findViewById(R.id.main_progress_bar_id);
+
+        showProgressBar(progressBar, container);
 
         /** We get the user information
          * */
         auth = FirebaseAuth.getInstance();
+        currentUser = auth.getCurrentUser();
         Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
-        if (auth.getCurrentUser() != null) {
+        if (currentUser != null) {
             userName = auth.getCurrentUser().getDisplayName();
             userEmail = auth.getCurrentUser().getEmail();
         }
 
+        /**
+         * We fill the variables for NavigationDrawer
+         * */
         navUserName.setText(userName);
         navUserEmail.setText(userEmail);
 
+        /** If the user hasn't chosen a restaurant yet, we remind him/her to do it
+         * */
         if (Objects.requireNonNull(sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, "")).equals("")) {
             ToastHelper.toastShort(this, "You haven't chosen a group yet!");
         }
@@ -181,7 +191,7 @@ public class MainActivity extends AppCompatActivity{
         mDb = AppDatabase.getInstance(getApplicationContext());
         fireDb = FirebaseDatabase.getInstance();
         fireDbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbRef.addValueEventListener(new ValueEventListener() {
+        fireDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
@@ -191,6 +201,7 @@ public class MainActivity extends AppCompatActivity{
                         dataSnapshot.getChildren()) {
 
                     if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().equals(userEmail)){
+
                         /** We save the user's key in SharedPreferences,
                          * the restaurant and the group
                          * */
@@ -265,30 +276,27 @@ public class MainActivity extends AppCompatActivity{
 //            }
 //        }
 
+        /** We show the MAP fragment
+         * */
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container_id, FragmentRestaurantMapView.newInstance())
+                .commit();
+
+        /** We specify that that is the fragment we are showing
+         * */
+        flagToSpecifyCurrentFragment = 1;
+
+
         //---------------------- GET CURRENT LOCATION --------------------------//
 
-        if (isServicesOK()) {
+        if (isGooglePlayServicesOK()) {
 
             //getLocationPermission() calls getDeviceLocation(). We can then store the Device Location
             //in the database and use it in FragmentRestaurantMapView to display the current location
             getLocationPermission();
 
         }
-
-        // TODO: 21/05/2018 The fragment has to start working after 3,4 seconds.
-        // TODO: 21/05/2018 Create a progress bar that hides everything and, when loaded, make it disappear
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container_id, FragmentRestaurantMapView.newInstance())
-                .commit();
-
-        /** Use header view to change userName displayed in navigation drawer
-         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-         View headerView = navigationView.getHeaderView(0);
-         TextView navUsername = (TextView) headerView.findViewById(R.id.navUsername);
-         navUsername.setText("Your Text Here");
-         * */
-
     }
 
     @Override
@@ -314,15 +322,39 @@ public class MainActivity extends AppCompatActivity{
 
                     switch (item.getItemId()) {
 
-                        // TODO: 20/05/2018 If the user is currently in the fragment, avoid relaunching it (use a flag for example).
                         case R.id.nav_view_map_id:
-                            selectedFragment = FragmentRestaurantMapView.newInstance();
+
+                            if (flagToSpecifyCurrentFragment == 1) {
+                                return true;
+
+                            } else {
+                                selectedFragment = FragmentRestaurantMapView.newInstance();
+                                flagToSpecifyCurrentFragment = 1;
+
+                            }
                             break;
+
                         case R.id.nav_view_list_id:
-                            selectedFragment = FragmentRestaurantListViewTRIAL.newInstance();
+
+                            if (flagToSpecifyCurrentFragment == 2) {
+                                return true;
+
+                            } else {
+                                selectedFragment = FragmentRestaurantListView.newInstance();
+                                flagToSpecifyCurrentFragment = 2;
+
+                            }
                             break;
                         case R.id.nav_view_coworkers_id:
-                            selectedFragment = FragmentCoworkersView.newInstance();
+
+                            if (flagToSpecifyCurrentFragment == 3) {
+                                return true;
+
+                            } else {
+                                selectedFragment = FragmentCoworkersView.newInstance();
+                                flagToSpecifyCurrentFragment = 3;
+
+                            }
                             break;
                     }
 
@@ -401,20 +433,6 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_logout: {
                             Log.d(TAG, "onNavigationItemSelected: log out pressed");
 
-                            /** We delete all the sharedPreferences info
-                             * */
-                            // TODO: 28/05/2018 Should be done in SignInActivity
-                            Map<String,?> map = sharedPref.getAll();
-
-                            for (Map.Entry<String,?> entry :
-                                    map.entrySet()) {
-
-                                SharedPreferences.Editor editor = sharedPref.edit();
-                                editor.putString(entry.getKey(), "");
-                                editor.apply();
-
-                            }
-
                             /** The user signs out
                              *  and goes to AuthSignIn Activity
                              *  */
@@ -430,45 +448,37 @@ public class MainActivity extends AppCompatActivity{
 
                     }
 
-                    // TODO: 28/05/2018 Add item "Choose Group"
-
                     item.setChecked(true);
 
                     return true;
                 }
             };
 
-    /** Getter used to get the NavigationDrawer from inside a fragment
-     * */
-    public DrawerLayout getMDrawerLayout() {
-        return mDrawerLayout;
-    }
-
-
 
     // --------------------------------- NEW CODE ---------------------------------//
 
-    /** Checks if the user has the correct Google Play Services Version
+    /** Checks if the user has the
+     * correct Google Play Services Version
      */
-    public boolean isServicesOK() {
-        Log.d(TAG, "isServicesOK: checking google services version");
+    public boolean isGooglePlayServicesOK() {
+        Log.d(TAG, "isGooglePlayServicesOK: checking google services version");
 
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
 
         if (available == ConnectionResult.SUCCESS) {
             //Everything is fine and the user can make map requests
-            Log.d(TAG, "isServicesOK: Google Play Services is working");
+            Log.d(TAG, "isGooglePlayServicesOK: Google Play Services is working");
             return true;
 
         } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
             //There is an error but we can resolve it
-            Log.d(TAG, "isServicesOK: an error occurred but we can fix it");
+            Log.d(TAG, "isGooglePlayServicesOK: an error occurred but we can fix it");
             Dialog dialog = GoogleApiAvailability.getInstance()
                     .getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
             dialog.show();
 
         } else {
-            Log.d(TAG, "isServicesOK: an error occurred; you cannot make map requests");
+            Log.d(TAG, "isGooglePlayServicesOK: an error occurred; you cannot make map requests");
             ToastHelper.toastLong(MainActivity.this, "You can't make map requests");
 
         }
@@ -481,7 +491,6 @@ public class MainActivity extends AppCompatActivity{
 
         /** We can also check first if the Android Version of the device is equal or higher than Marshmallow:
          *      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { "rest of code" } */
-
 
         String[] permissions = {
                 android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -527,35 +536,27 @@ public class MainActivity extends AppCompatActivity{
                         Log.d(TAG, "onComplete: found location!");
                         Location currentLocation = (Location) task.getResult();
 
-                        LatLng northEast = new LatLng(currentLocation.getLatitude() + LATITUDE_BOUND, currentLocation.getLongitude() + LONGITUDE_BOUND);
-                        LatLng southWest = new LatLng(currentLocation.getLatitude() - LATITUDE_BOUND, currentLocation.getLongitude() - LONGITUDE_BOUND);
-
-                        Log.d(TAG, "onComplete: currentLocation: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
-                        Log.d(TAG, "onComplete: northEast: " + (currentLocation.getLatitude() + LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() + LONGITUDE_BOUND));
-                        Log.d(TAG, "onComplete: southWest: " + (currentLocation.getLatitude() - LATITUDE_BOUND) + ", " + (currentLocation.getLongitude() - LATITUDE_BOUND));
+                        Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
 
                         myPosition = new LatLngForRetrofit(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-                        latLngBounds = new LatLngBounds(
-                                southWest, northEast);
 
-                        //TODO: 28/05/2018 Ensure that we don't do this if if has been already done (quota is very limited)
-
-//                         TODO: 25/05/2018 Uncomment this
-//                         We delete the database
-                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
-                            }
-                        });
-
-                        /** We do the API Requests. It will fill the database
+                        /** If the database is empty, we start the request
                          * */
-                        // TODO: 24/05/2018 Allow to do the calls when ready
-                        callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
-                        Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
+                        if (ifLocalDatabaseIsNotEmpty()
+                                && myPosition != null) {
+                            Log.d(TAG, "onComplete: local database is NOT EMPTY");
 
+                            showProgressBar(progressBar, container);
+                            initRequestProcess();
+
+                        } else {
+                            Log.d(TAG, "onComplete: local Database IS EMPTY");
+
+                          hideProgressBar(progressBar, container);
+
+                        }
+//
                     } else {
                         Log.d(TAG, "onComplete: current location is null");
                     }
@@ -569,7 +570,52 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    public boolean ifLocalDatabaseIsNotEmpty() {
+        Log.d(TAG, "ifLocalDatabaseIsNotEmpty: called!");
 
+        DatabaseHelper dbH = new DatabaseHelper(MainActivity.this);
+        return !dbH.isTableEmpty("restaurants");
+
+    }
+
+    public void initRequestProcess() {
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                /** We delete all the info from the database
+                 * */
+                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+
+                /** We start the requests
+                 * */
+                callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
+
+            }
+        });
+    }
+
+    public void showProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
+
+        progressBar.setVisibility(View.VISIBLE);
+        frameLayout.setVisibility(View.INVISIBLE);
+
+    }
+
+    public void hideProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
+
+        progressBar.setVisibility(View.GONE);
+        frameLayout.setVisibility(View.VISIBLE);
+
+    }
+
+
+
+
+    /** Method that starts the ATL
+     * and starts the requests' process
+     * */
     private void callLoaderInitApiGeneralRequests(int id) {
 
         LoaderManager loaderManager = getSupportLoaderManager();
@@ -604,6 +650,13 @@ public class MainActivity extends AppCompatActivity{
                 @Override
                 public void onLoadFinished(Loader loader, Object data) {
 
+                    if (!ifLocalDatabaseIsNotEmpty()) {
+                        hideProgressBar(progressBar, container);
+
+                    } else {
+
+                        ToastHelper.toastShort(MainActivity.this, "Something went wrong. Database is not filled.");
+                    }
                 }
 
                 @Override
@@ -613,16 +666,3 @@ public class MainActivity extends AppCompatActivity{
             };
 }
 
-/**
- * android:id="@+id/nav_camera"
- android:icon="@drawable/ic_lunch"
- android:title="YOUR LUNCH" />
- <item
- android:id="@+id/nav_gallery"
- android:icon="@drawable/ic_settings"
- android:title="SETTINGS" />
- <item
- android:id="@+id/nav_slideshow"
- android:icon="@drawable/ic_logout"
- android:title="LOG OUT" />
- * **/

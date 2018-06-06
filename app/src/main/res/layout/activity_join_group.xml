@@ -37,7 +37,7 @@
         android:id="@+id/join_autocomplete_enter_group_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="14sp"
+        android:textSize="16sp"
         android:hint="Group"
         android:maxLines="1"
         android:inputType="text"

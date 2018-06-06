@@ -436,4 +436,21 @@ public class UnitTests {
 
     }
 
+    @Test
+    public void doNearbyRequestAfterAllTextSearchRequestResultsAreInTheDatabase () {
+
+        int numberOfTextSearchRequests = 3;
+        int counter = 0;
+
+        for (int i = 0; i < numberOfTextSearchRequests; i++) {
+            counter++;
+        }
+
+        if (counter == numberOfTextSearchRequests) {
+            assertTrue(true);
+        } else {
+            assertTrue(false);
+        }
+    }
+
 }

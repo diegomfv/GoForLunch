@@ -26,6 +26,23 @@ import java.util.List;
  * With LiveDate, we will get notified when there are changes
  * in the database.
  * */
+
+/** A method, annotated with @Insert can return a long.
+ * This is the newly generated ID for the inserted row.
+ * A method, annotated with @Update can return an int.
+ * This is the number of updated rows.
+ *
+ * @Update will try to update all your fields using the value of the primary key in a where clause.
+ * If your entity is not persisted in the database yet,
+ * the update query will not be able to find a row and will not update anything.
+ *
+ * You can use @Insert(onConflict = OnConflictStrategy.REPLACE). This will try
+ * to insert the entity and, if there is an existing row that has the same ID value,
+ * it will delete it and replace it with the entity you are trying to insert.
+ * Be aware that, if you are using auto generated IDs, this means that the the resulting row will
+ * have a different ID than the original that was replaced. If you want to preserve the ID,
+ * then you have to come up with a custom way to do it.*/
+
 @Dao
 public interface RestaurantDao {
 
@@ -42,7 +59,7 @@ public interface RestaurantDao {
     List<RestaurantEntry> getAllRestaurantsNotLiveData();
 
     @Insert
-    void insertRestaurant (RestaurantEntry restaurantEntry);
+    long insertRestaurant (RestaurantEntry restaurantEntry);
 
     @Update (onConflict = OnConflictStrategy.REPLACE) //Replaces the element in case of conflict
     void updateRestaurant (RestaurantEntry restaurantEntry);

@@ -160,7 +160,6 @@ public class JoinGroupActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick: setOfGroups = " + setOfGroups.toString());
                 Log.d(TAG, "onClick: inputGroup = " + inputGroup.getText().toString());
 
-
                 if (inputGroup.getText().toString().equalsIgnoreCase("")) {
                     /** If input has no info
                      * */
@@ -177,7 +176,6 @@ public class JoinGroupActivity extends AppCompatActivity {
                         Log.d(TAG, "onClick: setOfGroups contains group");
                         /** If the group written in the input exists in the set, it means it exists in the database.
                          * If not, it doesn't*/
-
 
                         if (!userGroup.equals(inputGroup.getText().toString())) {
                             Log.d(TAG, "onClick: current user group is different from the inputted");
@@ -215,7 +213,6 @@ public class JoinGroupActivity extends AppCompatActivity {
                             finish();
 
 
-
                         } else {
                             Log.d(TAG, "onClick: user chose same group");
 
@@ -224,7 +221,6 @@ public class JoinGroupActivity extends AppCompatActivity {
                             ToastHelper.toastShort(JoinGroupActivity.this, "You chose the same group as you are in already");
 
                         }
-
 
 
                     } else {

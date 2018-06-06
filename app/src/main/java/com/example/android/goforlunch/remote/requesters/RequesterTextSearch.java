@@ -44,6 +44,11 @@ public class RequesterTextSearch {
     private String restaurantType;
     private int MAX_TEXT_SEARCH_RESTAURANTS = 3;
 
+    //This value allows to start NearbySearches when all the textSearch requests
+    // have been done. The reason is that we won't insert in the database any
+    // restaurant found by nearbySearch if it has already been found by TextSearch.
+    private int counterLastInsertion = 0;
+
     public RequesterTextSearch(AppDatabase mDb, LatLngForRetrofit myPosition) {
         this.mDb = mDb;
         this.myPosition = myPosition;
@@ -164,10 +169,18 @@ public class RequesterTextSearch {
 
                                 /** We insert the object in the database
                                  * */
+
                                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mDb.restaurantDao().insertRestaurant(restaurantEntry);
+
+                                        long result = mDb.restaurantDao().insertRestaurant(restaurantEntry);
+                                        if (result != 0) {
+                                            counterLastInsertion++;
+                                        }
+
+                                        // TODO: 05/06/2018 Use @Query annotation in Room to return a boolean and update a counter
+                                        // TODO: 05/06/2018 Then, call nearbyRequuest function
                                     }
                                 });
 
@@ -177,6 +190,14 @@ public class RequesterTextSearch {
                                     requesterPlaceId.doApiRequest(results[i].getPlace_id());
 
                                 }
+                            }
+
+                            if (counterLastInsertion == MAX_TEXT_SEARCH_RESTAURANTS ){
+                                RequesterNearby requesterNearby = new RequesterNearby(mDb,myPosition,mDb.restaurantDao().getAllRestaurantsNotLiveData());
+                                requesterNearby.doApiRequest();
+
+                                //Counter is restarted
+                                counterLastInsertion = 0;
                             }
                         }
                     }

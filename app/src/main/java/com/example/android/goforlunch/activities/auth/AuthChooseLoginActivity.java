@@ -1,6 +1,5 @@
 package com.example.android.goforlunch.activities.auth;
 
-import android.arch.persistence.room.Database;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,9 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;

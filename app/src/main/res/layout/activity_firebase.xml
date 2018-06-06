@@ -11,26 +11,49 @@
     </FrameLayout>
 
     <Button
-        android:id="@+id/firebase_button_add_restaurants_id"
+        android:id="@+id/firebase_button1_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/top_bar"
         android:text="BUTTON 1"/>
 
     <Button
-        android:id="@+id/firebase_button_add_group_id"
+        android:id="@+id/firebase_button2_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/firebase_button_add_restaurants_id"
-        android:layout_alignTop="@id/firebase_button_add_restaurants_id"
+        android:layout_toRightOf="@id/firebase_button1_id"
+        android:layout_alignTop="@id/firebase_button1_id"
         android:text="BUTTON 2"/>
 
     <Button
-        android:id="@+id/firebase_button_add_place_id"
+        android:id="@+id/firebase_button3_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/firebase_button_add_group_id"
-        android:layout_alignTop="@id/firebase_button_add_restaurants_id"
+        android:layout_toRightOf="@id/firebase_button2_id"
+        android:layout_alignTop="@id/firebase_button1_id"
         android:text="BUTTON 3"/>
+
+    <Button
+        android:id="@+id/firebase_button4_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/firebase_button3_id"
+        android:layout_alignTop="@id/firebase_button1_id"
+        android:text="BUTTON 4"/>
+
+    <Button
+        android:id="@+id/firebase_button5_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/firebase_button1_id"
+        android:text="BUTTON 5"/>
+
+    <Button
+        android:id="@+id/firebase_button6_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/firebase_button5_id"
+        android:layout_below="@id/firebase_button2_id"
+        android:text="BUTTON 6"/>
 
 </RelativeLayout>
