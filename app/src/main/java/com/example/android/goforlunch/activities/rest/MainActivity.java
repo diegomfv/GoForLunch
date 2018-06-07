@@ -172,8 +172,16 @@ public class MainActivity extends AppCompatActivity{
         Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
         if (currentUser != null) {
-            userName = auth.getCurrentUser().getDisplayName();
-            userEmail = auth.getCurrentUser().getEmail();
+            userName = currentUser.getDisplayName();
+            userEmail = currentUser.getEmail();
+
+            String[] nameParts = userName.split(" ");
+
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(RepoStrings.SharedPreferences.USER_FIRST_NAME, nameParts[0]);
+            editor.putString(RepoStrings.SharedPreferences.USER_LAST_NAME, nameParts[1]);
+            editor.apply();
+
         }
 
         /**
@@ -550,13 +558,14 @@ public class MainActivity extends AppCompatActivity{
                          * */
                         if (checkIfLocalDatabaseIsEmpty()
                                 && myPosition != null) {
-                            Log.d(TAG, "onComplete: local database is NOT EMPTY");
+                            Log.d(TAG, "onComplete: local database status (empty) = " + checkIfLocalDatabaseIsEmpty());
+                            Log.d(TAG, "onComplete: myPosition = " + myPosition.toString());
 
                             //showProgressBar(progressBar, container);
                             initRequestProcess();
 
                         } else {
-                            Log.d(TAG, "onComplete: local Database IS EMPTY");
+                            Log.d(TAG, "onComplete: local database status (empty) = " + checkIfLocalDatabaseIsEmpty());
                             //hideProgressBar(progressBar, container);
 
                         }
@@ -585,9 +594,10 @@ public class MainActivity extends AppCompatActivity{
     }
 
     /** Method that starts doing the requests to the servers to get the
-     * restaurants
+     * restaurants. Firstly, it deletes the database
      * */
     public void initRequestProcess() {
+        Log.d(TAG, "initRequestProcess: called!");
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
@@ -600,7 +610,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        /** We start the requests
+        /** After deleting the database, we start the requests
          * */
         startRequests();
 
@@ -608,7 +618,7 @@ public class MainActivity extends AppCompatActivity{
 
     /** Method that starts the requests if the database is empty. If not,
      * it tries again (only 10 times more; this way we avoid doing requests
-     * continuously)
+     * continuously forever)
      * */
     public void startRequests () {
         Log.d(TAG, "startRequests: called!");
@@ -692,7 +702,7 @@ public class MainActivity extends AppCompatActivity{
 
                     if (!checkIfLocalDatabaseIsEmpty()) {
                         Log.d(TAG, "onLoadFinished: database IS NOT EMPTY anymore");
-                        hideProgressBar(progressBar, container);
+                        //hideProgressBar(progressBar, container);
 
                     } else {
                         Log.d(TAG, "onLoadFinished: database IS EMPTY");

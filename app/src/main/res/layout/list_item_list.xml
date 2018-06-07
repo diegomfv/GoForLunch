@@ -42,7 +42,7 @@
             android:id="@+id/cv_timetable_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Open until 2.30am"
+            android:hint="Open until..."
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="10dp"

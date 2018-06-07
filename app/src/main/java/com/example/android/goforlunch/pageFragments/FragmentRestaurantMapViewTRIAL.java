@@ -30,6 +30,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.example.android.goforlunch.R;
@@ -115,6 +117,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     private Toolbar toolbar;
     private RelativeLayout toolbar2;
     private ActionBar actionBar;
+    private ImageButton buttonRefreshMap;
 
     //List of Visited Restaurants by Group (same group as the user) We will use this
     //list to compare it to the markers (to dra them differently if the restaurant
@@ -172,6 +175,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
         toolbar = (Toolbar) view.findViewById(R.id.map_main_toolbar_id);
         toolbar2 = (RelativeLayout) view.findViewById(R.id.map_toolbar_search_id);
+        buttonRefreshMap = (ImageButton) view.findViewById(R.id.map_fragment_refresh_button_id);
 
         mSearchText = (AutoCompleteTextView) view.findViewById(R.id.map_autocomplete_id);
 
@@ -359,8 +363,27 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
             });
         }
 
+
+        /**
+         * Listener for REFRESH button
+         * */
+        buttonRefreshMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: refresh button clicked!");
+
+                ToastHelper.toastShort(getActivity(), "Refresh Button clicked!");
+
+
+                //initRequestProcess();
+            }
+        });
+
+
+
         // TODO: 06/06/2018 CHECK IF THERE IS INTERNET
-        /** STARTING THE MAP:
+        /**
+         * STARTING THE MAP:
          * First, we check that the user has the correct Google Play Services Version.
          * If the user does, we start the map
          * **/
@@ -369,9 +392,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         }
         return view;
     }
-
-
-
 
 
     /**************************
@@ -414,7 +434,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
      * ***********************/
 
     /**
-     * Checks if the user has the correct Google Play Services Version
+     * Checks if the user has the correct
+     * Google Play Services Version
      */
     public boolean isServicesOK() {
         Log.d(TAG, "isGooglePlayServicesOK: checking google services version");
@@ -444,8 +465,9 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: getting location permission");
 
-        /** We can also check first if the Android Version of the device is equal or higher than Marshmallow:
-         *      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { "rest of code" } */
+        /**
+         * We can also check first if the Android Version of the device is equal or higher than Marshmallow:
+         * if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { "rest of code" } */
 
         String[] permissions = {
                 android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -563,7 +585,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
                 }
 
-                /** Listener for when clicking the info window in a map
+                /**
+                 * Listener for when clicking the info window in a map
                  * */
                 if (mMap != null) {
                     mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -609,7 +632,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         });
     }
 
-    /** Method that checks that the map can be filled with the database info (markers) and
+    /**
+     * Method that checks that the map can be filled with the database info (markers) and
      * immediately calls fillMapWithMarkers() to fill the map
      * */
     private void fillMapWithAllDatabaseRestaurants() {
@@ -627,7 +651,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         }
     }
 
-    /** Method that fills the map with Markers using a list
+    /**
+     * Method that fills the map with Markers using a list
      * */
     private void fillMapWithMarkers (List<RestaurantEntry> listOfRestaurantsByType){
 

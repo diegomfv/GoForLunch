@@ -31,6 +31,8 @@ public class PersInfoActivity extends AppCompatActivity{
     // TODO: 29/05/2018 Eliminate that the FirstName view is focused from the beginning
     // TODO: 29/05/2018 Eliminate the group option here
     // TODO: 29/05/2018 Check AutocompleteTextView. Things are missing
+    // TODO: 06/06/2018 Fill the textInputs with first name and last name
+    // TODO: 06/06/2018 Allow to modify the profile picture
 
     private static final String TAG = "PersInfoActivity";
 
@@ -75,6 +77,7 @@ public class PersInfoActivity extends AppCompatActivity{
          *  FirebaseAuth
          * */
         auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
 
         /** We fill the widgets with the user's info
          * */
@@ -82,24 +85,20 @@ public class PersInfoActivity extends AppCompatActivity{
         inputFirstName.setText(sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
         inputLastName.setText(sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
 
-        if (auth.getCurrentUser() != null) {
-            inputEmail.setText(auth.getCurrentUser().getEmail());
+        if (user != null) {
+            inputEmail.setText(user.getEmail());
         }
 
         inputPassword.setText("********");
         inputGroup.setText(sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP,""));
 
-        if (auth != null) {
-            inputEmail.setText(auth.getCurrentUser().getEmail());
-
-        }
 
         buttonSaveChanges.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Clicked! " + view.toString());
 
-                ToastHelper.toastShort(PersInfoActivity.this, "Changes saved!");
+                ToastHelper.toastShort(PersInfoActivity.this, "Not implemented yet!");
             }
         });
 
@@ -108,7 +107,7 @@ public class PersInfoActivity extends AppCompatActivity{
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Clicked! " + view.toString());
 
-                ToastHelper.toastShort(PersInfoActivity.this, "Password changed!");
+                ToastHelper.toastShort(PersInfoActivity.this, "Not implemented yet!");
             }
         });
 

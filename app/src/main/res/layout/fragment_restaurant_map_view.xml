@@ -72,6 +72,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+        android:name="com.google.android.gms.maps.SupportMapFragment">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+
+            <ImageButton
+                android:id="@+id/map_fragment_refresh_button_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:padding="3dp"
+                android:background="@drawable/button_map_border"
+                android:src="@drawable/ic_refresh"
+                android:alpha="0.7"
+                android:elevation="4dp" />
+
+        </RelativeLayout>
+
+    </fragment>
 
 </LinearLayout>

@@ -1,17 +1,26 @@
 package com.example.android.goforlunch.helpermethods;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
+import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
+import com.example.android.goforlunch.repostrings.RepoStrings;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
  */
 
 public class Utils {
+
+    private static final String TAG = "Utils";
 
     public static void menuIconColor(MenuItem menuItem, int color) {
         Drawable drawable = menuItem.getIcon();

@@ -33,6 +33,8 @@ public interface RepoStrings {
             "Other"
     };
 
+    String RESTAURANT_TABLE_NAME = "restaurant";
+
     interface SharedPreferences {
 
         String USER_ID_KEY = "user_key";
