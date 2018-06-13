@@ -232,7 +232,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     /** If another user is in the same group of the current user
                      *  */
-                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).equals(userGroup)) {
+                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).equals(userGroup)) {
 
                         /** If another user is going to the restaurant we are seeing in the screen
                          * */
@@ -241,11 +241,11 @@ public class RestaurantActivity extends AppCompatActivity {
 
                             /** If the user we are going to add to the recyclerView is not the current user
                              * */
-                            if (!Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals(userEmail)) {
+                            if (!Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).equals(userEmail)) {
 
                                 /** We add the other user to the list, and this list will be used in the recyclerview
                                  * */
-                                listOfCoworkers.add(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue().toString());
+                                listOfCoworkers.add(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString());
                             }
                         }
                     }
@@ -305,14 +305,14 @@ public class RestaurantActivity extends AppCompatActivity {
                     map = new HashMap<>();
 
                     // TODO: 28/05/2018 Take care, if sth is null it will be deleted from the database because it won't be added to the map
-                    map.put(RepoStrings.FirebaseReference.PLACE_ID, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, "");
                     map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
                     map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
-                    map.put(RepoStrings.FirebaseReference.ADDRESS, "");
-                    map.put(RepoStrings.FirebaseReference.RATING, "");
-                    map.put(RepoStrings.FirebaseReference.PHONE, "");
-                    map.put(RepoStrings.FirebaseReference.IMAGE_URL, "");
-                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, "");
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
 
                     fireDbRefUserWithKey.updateChildren(map);
 
@@ -337,16 +337,16 @@ public class RestaurantActivity extends AppCompatActivity {
                     map = new HashMap<>();
 
                     // TODO: 28/05/2018 Take care, if sth is null it will be deleted from the database because it won't be added to the map
-                    map.put(RepoStrings.FirebaseReference.PLACE_ID,  checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID,  checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)));
                     map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)));
                     map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)));
-                    map.put(RepoStrings.FirebaseReference.ADDRESS, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)));
-                    map.put(RepoStrings.FirebaseReference.RATING, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)));
-                    map.put(RepoStrings.FirebaseReference.PHONE, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)));
-                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,  checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)));
-                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL,  checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)));
+                    map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL)));
 
-                    Log.d(TAG, "onClick: " + map.get(RepoStrings.FirebaseReference.IMAGE_URL));
+                    Log.d(TAG, "onClick: " + map.get(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL));
 
                     fireDbRefUserWithKey.updateChildren(map);
 

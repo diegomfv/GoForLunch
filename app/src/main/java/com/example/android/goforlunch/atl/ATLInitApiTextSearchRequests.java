@@ -47,18 +47,6 @@ public class ATLInitApiTextSearchRequests extends AsyncTaskLoader {
          * */
         startRequestUsingTextSearchService();
 
-        /** We wait a bit to fill the database and immediately after we start the request
-         * to fill nearby places. We do the nearby places request later because if we found a
-         * place that is already in the database, we won't add it.
-         * */
-        // TODO: 05/06/2018 I am worried about RACE CONDITIONS
-        try {
-            Thread.sleep(5000);
-            startRequestUsingNearbyPlacesService();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return null;
     }
 
@@ -68,15 +56,6 @@ public class ATLInitApiTextSearchRequests extends AsyncTaskLoader {
 
         RequesterTextSearch requesterTextSearch = new RequesterTextSearch(mDb, myPosition);
         requesterTextSearch.doApiRequest();
-
-    }
-
-    /** Method that starts the request using NearbyPlaces
-     * service*/
-    private void startRequestUsingNearbyPlacesService() {
-
-        RequesterNearby requesterNearby = new RequesterNearby(mDb,myPosition, mDb.restaurantDao().getAllRestaurantsNotLiveData());
-        requesterNearby.doApiRequest();
 
     }
 

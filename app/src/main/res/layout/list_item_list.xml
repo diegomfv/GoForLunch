@@ -19,7 +19,7 @@
             android:id="@+id/cv_title_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Le Zinc"
+            android:hint="Restaurant Title Not Available"
             android:textColor="@android:color/black"
             android:textStyle="bold"
             android:layout_alignParentTop="true"
@@ -32,7 +32,7 @@
             android:id="@+id/cv_addressandtype_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="French - 42 rue de Sicilie"
+            android:hint="Other - Not available address"
             android:layout_below="@id/cv_title_id"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="10dp"
@@ -52,7 +52,7 @@
             android:id="@+id/cv_distance_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="120m"
+            android:hint="NAm"
             android:layout_alignBaseline="@id/cv_title_id"
             android:layout_toLeftOf="@id/cv_image_restaurant_id"/>
 

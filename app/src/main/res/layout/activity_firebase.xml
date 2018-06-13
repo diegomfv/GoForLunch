@@ -1,59 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <FrameLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="25dp"
-        android:background="@color/colorPrimaryDark"
-        android:layout_alignParentTop="true">
+        android:background="@color/colorPrimaryDark">
     </FrameLayout>
 
     <Button
         android:id="@+id/firebase_button1_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_bar"
         android:text="BUTTON 1"/>
 
     <Button
         android:id="@+id/firebase_button2_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/firebase_button1_id"
-        android:layout_alignTop="@id/firebase_button1_id"
         android:text="BUTTON 2"/>
 
     <Button
         android:id="@+id/firebase_button3_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/firebase_button2_id"
-        android:layout_alignTop="@id/firebase_button1_id"
         android:text="BUTTON 3"/>
 
     <Button
         android:id="@+id/firebase_button4_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/firebase_button3_id"
-        android:layout_alignTop="@id/firebase_button1_id"
         android:text="BUTTON 4"/>
 
     <Button
         android:id="@+id/firebase_button5_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/firebase_button1_id"
         android:text="BUTTON 5"/>
 
     <Button
         android:id="@+id/firebase_button6_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/firebase_button5_id"
-        android:layout_below="@id/firebase_button2_id"
         android:text="BUTTON 6"/>
 
-</RelativeLayout>
+    <Button
+        android:id="@+id/firebase_button7_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BUTTON 7"/>
+
+    <Button
+        android:id="@+id/firebase_button8_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         android:text="BUTTON 8"/>
+
+    <Button
+        android:id="@+id/firebase_button9_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BUTTON 9"/>
+
+    <Button
+        android:id="@+id/firebase_button10_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BUTTON 10"/>
+
+    <Button
+        android:id="@+id/firebase_button11_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BUTTON 11"/>
+
+</LinearLayout>

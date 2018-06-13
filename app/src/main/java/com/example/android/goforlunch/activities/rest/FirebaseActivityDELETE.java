@@ -1,19 +1,22 @@
 package com.example.android.goforlunch.activities.rest;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.application.App;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
-import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,6 +34,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
+import static com.example.android.goforlunch.helpermethods.Utils.deleteRestaurantUserInfoFromFirebase;
+import static com.example.android.goforlunch.helpermethods.Utils.fillMapUsingRestaurantEntry;
+import static com.example.android.goforlunch.helpermethods.Utils.getStringFromSharedPreferences;
+import static com.example.android.goforlunch.helpermethods.Utils.insertNewRestaurantInGroupInFirebase;
+import static com.example.android.goforlunch.helpermethods.Utils.updateSharedPreferences;
+import static com.example.android.goforlunch.helpermethods.Utils.updateUserInfoInFirebase;
+import static com.example.android.goforlunch.helpermethods.Utils.updateUserRestaurantInfoInFirebase;
+
 /**
  * Created by Diego Fajardo on 07/05/2018.
  */
@@ -47,6 +58,11 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
     private Button button4;
     private Button button5;
     private Button button6;
+    private Button button7;
+    private Button button8;
+    private Button button9;
+    private Button button10;
+    private Button button11;
 
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
@@ -61,10 +77,15 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
     private Random random;
 
+    private SharedPreferences sharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase);
+
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(FirebaseActivityDELETE.this);
+        fireDb = FirebaseDatabase.getInstance();
 
         random = new Random();
 
@@ -96,163 +117,101 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
         }
 
-        fireDb = FirebaseDatabase.getInstance();
-        dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
-//        Map<String,Object> map;
-//        for (int i = 0; i < listOfGroups.size(); i++) {
-//
-//            map = new HashMap<>();
-//            map.put(RepoStrings.FirebaseReference.GROUP_NAME, listOfGroups.get(i));
-//            map.put(RepoStrings.FirebaseReference.GROUP_MEMBERS,"");
-//            map.put(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
-//
-//            dbRefGroups.push().setValue(map);
-//
-//        }
-
-        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        dbRefUsers.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                mapEmailGroup = new HashMap<>();
-
-                if (dataSnapshot.getChildren() != null) {
-
-                    Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-                    Log.d(TAG, "onDataChange: KEY = " + dataSnapshot.getKey());
-
-                    String userEmail;
-                    String userGroup;
-
-                    for (DataSnapshot item :
-                            dataSnapshot.getChildren()) {
-                        Log.d(TAG, "onDataChange: DATASNAPSHOT = " + item.toString());
-
-                        userEmail = item.child("email").getValue().toString();
-                        userGroup = item.child("group").getValue().toString();
-
-                        mapEmailGroup.put(userEmail, userGroup);
-
-                    }
-
-                    Log.d(TAG, "onDataChange: " + mapEmailGroup);
-
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-            }
-        });
-
         button1 = findViewById(R.id.firebase_button1_id);
         button2 = findViewById(R.id.firebase_button2_id);
         button3 = findViewById(R.id.firebase_button3_id);
         button4 = findViewById(R.id.firebase_button4_id);
         button5 = findViewById(R.id.firebase_button5_id);
         button6 = findViewById(R.id.firebase_button6_id);
+        button7 = findViewById(R.id.firebase_button7_id);
+        button8 = findViewById(R.id.firebase_button8_id);
+        button9 = findViewById(R.id.firebase_button9_id);
+        button10 = findViewById(R.id.firebase_button10_id);
+        button11 = findViewById(R.id.firebase_button11_id);
 
+        /**
+         * INSERT RANDOM USERS IN DATABASE
+         * */
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: CALLED!");
 
-                Map<String,Object> map;
-
                 for (int i = 0; i < 45; i++) {
 
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                    map = new HashMap<>();
-                    map.put(RepoStrings.FirebaseReference.FIRST_NAME,listOfNames.get(i).getFirstName());
-                    map.put(RepoStrings.FirebaseReference.LAST_NAME,listOfNames.get(i).getLastName());
-                    map.put(RepoStrings.FirebaseReference.EMAIL,listOfEmails.get(i));
-                    map.put(RepoStrings.FirebaseReference.GROUP,listOfGroups.get(random.nextInt(4)));
-                    map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
-                    map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME,"");
-                    map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
-                    map.put(RepoStrings.FirebaseReference.ADDRESS, "");
-                    map.put(RepoStrings.FirebaseReference.RATING,"");
-                    map.put(RepoStrings.FirebaseReference.PHONE,"");
-                    map.put(RepoStrings.FirebaseReference.IMAGE_URL,"");
-                    map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
+                    String key = dbRefUsers.push().getKey();
 
-                    dbRefUsers.push().setValue(map);
+                    updateUserInfoInFirebase(fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key),
+                            listOfNames.get(i).getFirstName(),
+                            listOfNames.get(i).getLastName(),
+                            listOfEmails.get(i),
+                            listOfGroups.get(random.nextInt(4)),
+                            "",
+                            "");
+
+                    RestaurantEntry restaurantEntry = new RestaurantEntry(
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                    );
+
+                    Map <String, Object> map = Utils.fillMapUsingRestaurantEntry(restaurantEntry);
+                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                    updateUserRestaurantInfoInFirebase(dbRefUsers, map);
                 }
             }
         });
 
+        /** INSERT GROUPS IN DATABASE
+         * */
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick: CALLED!");
+                Log.d(TAG, "onClick: button 2 CALLED!");
 
-                DatabaseReference dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                        for (DataSnapshot item:
-                             dataSnapshot.getChildren()) {
-                            Log.d(TAG, "onDataChange: in the foreach loop");
-
-                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).equals("brad_berry@gmail.com")){
-                                Log.d(TAG, "onDataChange: in the if statement");
-                                ToastHelper.toastShort(FirebaseActivityDELETE.this, item.getKey());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
-                    }
-                });
-
+                dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
                 Map<String, Object> map;
-                map = new HashMap<>();
-                map.put(RepoStrings.FirebaseReference.FIRST_NAME,"");
-                map.put(RepoStrings.FirebaseReference.LAST_NAME,"");
-                map.put(RepoStrings.FirebaseReference.EMAIL,"");
-                map.put(RepoStrings.FirebaseReference.GROUP,"");
-                map.put(RepoStrings.FirebaseReference.PLACE_ID,"");
-                map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME,"");
-                map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE,"");
-                map.put(RepoStrings.FirebaseReference.ADDRESS, "");
-                map.put(RepoStrings.FirebaseReference.RATING,"");
-                map.put(RepoStrings.FirebaseReference.PHONE,"");
-                map.put(RepoStrings.FirebaseReference.IMAGE_URL,"");
-                map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
 
-                dbRef.push().setValue(map);
+                for (int i = 0; i < listOfGroups.size(); i++) {
 
+                    map = new HashMap<>();
+                    map.put(RepoStrings.FirebaseReference.GROUP_NAME, listOfGroups.get(i));
+                    map.put(RepoStrings.FirebaseReference.GROUP_MEMBERS, "");
+                    map.put(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
+
+                    dbRefGroups.push().setValue(map);
+                }
             }
         });
+
+        /** GETTING THE KEY WHEN USER IS PUSHED AND INSERTING INFO!
+         * **/
 
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick: CALLED!");
+                Log.d(TAG, "onClick: button 3 CALLED!");
 
-                DatabaseReference fireRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
-                String key = fireRefGroups.push().getKey();
-                Log.d(TAG, "onClick: key!!!! = " + key);
+                DatabaseReference dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                String key = dbRefUsers.push().getKey();
 
-                Map<String,Object> map2 = new HashMap<>();
-
-                map2 = new HashMap<>();
-                map2.put(RepoStrings.FirebaseReference.GROUP_NAME, "Alfa");
-                map2.put(RepoStrings.FirebaseReference.GROUP_MEMBERS,"");
-                map2.put(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
-
-                fireRefGroups.child(key).setValue(map2);
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key);
+                updateUserInfoInFirebase(dbRefUsers, "Alfa", "Beta", "", "", "", "");
 
             }
         });
+
+        /** INSERTING NEW RESTAURANTS IN ALL GROUPS (NOT USED)*/
 
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -288,7 +247,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                                     for (DataSnapshot item :
                                             dataSnapshot.getChildren()) {
 
-                                        if (item.child(RepoStrings.FirebaseReference.GROUP).getValue().toString()
+                                        if (item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString()
                                                 .equalsIgnoreCase(listOfMapKeys.get(i))){
 
                                             Map <String, Object> newRestaurant = new HashMap<>();
@@ -358,39 +317,162 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                //DatabaseHelper dbH = new DatabaseHelper(FirebaseActivityDELETE.this);
-                ///dbH.resetAutoIncrement("restaurant");
+                String userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
-                startActivity(new Intent(FirebaseActivityDELETE.this, AndroidDatabaseManager.class));
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.GROUP_NAME);
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.getValue());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                    }
+                });
+
+
 
             }
         });
 
+        /** INSERTING RESTAURANT IN GROUPS AND DELETING RESTAURANT FROM USER'S INFO*/
+
+        button7.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: button7 clicked!");
+
+                final String userKey = "-LEqJnfBmv5WGhGQGoC9";
+                final String userGroupKey = "-LEqJw9D1D6YwXUrdJb0";
+
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        /** Getting user's restaurant info
+                         * */
+                        Map <String, Object> map = Utils.getUserRestaurantInfoFromDataSnapshot(dataSnapshot);
+
+                        /** Inserting a new restaurant in the group
+                         * */
+                        dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS + "/" + userGroupKey + "/" + RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+                        insertNewRestaurantInGroupInFirebase(dbRefGroups, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
+
+                        /** Deleting user info from database
+                         * */
+                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        deleteRestaurantUserInfoFromFirebase(dbRefUsers);
+                        ToastHelper.toastShort(FirebaseActivityDELETE.this, "User Restaurant Deleted");
 
 
-        /** com.google.firebase.database.DatabaseException: Serializing Arrays is not supported, please use Lists instead */
+                    }
 
-        /**
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
 
-         "requests" : {
-         "-KSVYZwUQPfyosiyRVdr" : {
-         "interests" : { "x": true },
-         "live" : true,
-         "uIds" : {
-         "user1": true,
-         "user2": true
-         }
-         },
-         "-KSl1L60g0tW5voyv0VU" : {
-         "interests" : { "y": true },
-         "live" : true,
-         "uIds" : {
-         "user2": true
-         }
-         }
-         }
+                    }
+                });
 
-         */
+
+
+
+
+            }
+        });
+
+        button8.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: button 8 clicked!");
+
+                String userKey = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY);
+                String userRestaurant = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_RESTAURANT_NAME);
+                String userGroupKey = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP_KEY);
+                String userGroup = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP);
+
+                Log.d(TAG, "onClick: userKey: " + userKey);
+                Log.d(TAG, "onClick: userRestaurant: " + userRestaurant);
+                Log.d(TAG, "onClick: userGroupKey: " + userGroupKey);
+                Log.d(TAG, "onClick: userGroup: " + userGroup);
+
+            }
+        });
+
+        button9.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: button 9 clicked!");
+
+                final String userGroup = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP);
+                Log.d(TAG, "onClick: userGroup: " + userGroup);
+
+                dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+                dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        for (DataSnapshot item :
+                                dataSnapshot.getChildren()) {
+                            Log.d(TAG, "onDataChange: groupKey = " + item.getKey());
+
+                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue()).equals(userGroup)){
+                                updateSharedPreferences(sharedPref ,RepoStrings.SharedPreferences.USER_GROUP_KEY, item.getKey());
+                                Log.d(TAG, "onDataChange: groupKeySharedPref " + getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP_KEY));
+                            }
+
+
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                    }
+                });
+
+
+
+            }
+        });
+
+        button10.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: button10");
+
+                startActivity(new Intent(FirebaseActivityDELETE.this, AndroidDatabaseManager.class));
+            }
+        });
+
+
+        button11.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: button11");
+                Log.d(TAG, "onClick: " + sharedPref.getAll().toString());
+
+                AppDatabase appDatabase = AppDatabase.getInstance(FirebaseActivityDELETE.this);
+                RestaurantEntry restaurant = appDatabase.restaurantDao().getRestaurantByName("Filini Restaurant");
+
+                Map<String, Object> map = fillMapUsingRestaurantEntry(restaurant);
+
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + "-LEqJnfBmv5WGhGQGoC9" + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                Utils.updateUserRestaurantInfoInFirebase(dbRefUsers, map);
+
+            }
+        });
 
     }
+
 }

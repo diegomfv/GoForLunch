@@ -38,6 +38,7 @@ public class RequesterDistance {
     }
 
     public void doApiRequest(final String placeId) {
+        Log.d(TAG, "doApiRequest: ");
 
         GooglePlaceWebAPIService clientMatrix = Common.getGoogleDistanceMatrixApiService();
         Call<MatrixDistance> callMatrix = clientMatrix.fetchDistance("imperial", "place_id:" + placeId, myPosition, distanceKey);

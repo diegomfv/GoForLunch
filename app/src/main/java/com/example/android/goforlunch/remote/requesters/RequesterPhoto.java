@@ -31,6 +31,7 @@ public class RequesterPhoto {
     }
 
     public void doApiRequest (final String placeId, String photoReference) {
+        Log.d(TAG, "doApiRequest: ");
 
         GooglePlaceWebAPIService clientPhoto = Common.getGooglePlacePhotoApiService();
         Call<String> callPhoto = clientPhoto.fetchDataPhoto(maxWidth, photoReference, photoKey);

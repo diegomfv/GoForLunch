@@ -1,19 +1,12 @@
 package com.example.android.goforlunch.activities.rest;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -25,26 +18,22 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
-import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
-import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.job.AddRestaurantToGroupDailyJob;
+import com.example.android.goforlunch.job.AlertJobCreator;
+import com.example.android.goforlunch.job.NotificationDailyJob;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -53,6 +42,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Map;
 import java.util.Objects;
 
 // TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
@@ -73,6 +63,8 @@ import java.util.Objects;
 // TODO: 29/05/2018 Elective Functionality, add Google and Facebook logins (password is done)
 // TODO: 29/05/2018 Check deprecated problem RVAdapter
 // TODO: 29/05/2018 General clean up
+// TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
+// TODO: 13/06/2018 Remember to not allow doing queries in the main thread!
 
 public class MainActivity extends AppCompatActivity{
 
@@ -80,11 +72,6 @@ public class MainActivity extends AppCompatActivity{
 
     //Loaders id
     private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;
-
-    //Values to store user's info
-    private String userName = "anonymous";
-    private String userEmail = "anon@anonymous.com";
-    private User user;
 
     //Widgets
     private DrawerLayout mDrawerLayout;
@@ -96,6 +83,8 @@ public class MainActivity extends AppCompatActivity{
     private TextView navUserEmail;
 
     private FrameLayout container;
+
+    int jobId;
 
     //------------------------------------------------
 
@@ -123,18 +112,25 @@ public class MainActivity extends AppCompatActivity{
     //Retrofit usage
     private LatLngForRetrofit myPosition;
 
-    //App Local Database
-    private AppDatabase mDb;
-
-    //Shared Preferences
+     //Shared Preferences
     private SharedPreferences sharedPref;
 
     //Firebase
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
-    private DatabaseReference fireDbRef;
+    private DatabaseReference fireDbRefUsers;
+    private DatabaseReference fireDbRefGroups;
 
+
+    private String userFirstName;
+    private String userLastName;
+    private String userEmail;
+    private String userIdKey;
+    private String userGroup;
+    private String userGroupKey;
+
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,7 +140,7 @@ public class MainActivity extends AppCompatActivity{
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        mDb = AppDatabase.getInstance(MainActivity.this);
+        fireDb = FirebaseDatabase.getInstance();
 
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
@@ -172,122 +168,85 @@ public class MainActivity extends AppCompatActivity{
         Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
         if (currentUser != null) {
-            userName = currentUser.getDisplayName();
+
             userEmail = currentUser.getEmail();
 
-            String[] nameParts = userName.split(" ");
+            if (userEmail != null) {
 
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString(RepoStrings.SharedPreferences.USER_FIRST_NAME, nameParts[0]);
-            editor.putString(RepoStrings.SharedPreferences.USER_LAST_NAME, nameParts[1]);
-            editor.apply();
+                fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-        }
+                        for (DataSnapshot item :
+                                dataSnapshot.getChildren()) {
 
-        /**
-         * We fill the variables for NavigationDrawer
-         * */
-        navUserName.setText(userName);
-        navUserEmail.setText(userEmail);
+                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
-        /** If the user hasn't chosen a restaurant yet, we remind him/her to do it
-         * */
-        if (Objects.requireNonNull(sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, "")).equals("")) {
-            ToastHelper.toastShort(this, "You haven't chosen a group yet!");
-        }
+                                userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                                userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                                userIdKey = item.getKey();
+                                userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
+                                userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                                Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userIdKey);
+                                Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP_KEY, userGroupKey);
 
-        /** 1. We store the key of the user in Shared Preferences
-         *  2. Once we have the key, we store the Restaurant of the user to use all the info
-         *  for an intent to Restaurant Activity
-         * */
-        mDb = AppDatabase.getInstance(getApplicationContext());
-        fireDb = FirebaseDatabase.getInstance();
-        fireDbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-                Log.d(TAG, "onDataChange: userEmail = " + userEmail);
+                                updateNavDrawerTextViews();
+                                chooseGroupReminder();
 
-                for (DataSnapshot item :
-                        dataSnapshot.getChildren()) {
+                                //checkAddRestaurantDailyJob ();
+                                //checkNotifications ();
 
-                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().equals(userEmail)){
-
-                        /** We save the user's key in SharedPreferences,
-                         * the restaurant and the group
-                         * */
-                        SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString(
-                                RepoStrings.SharedPreferences.USER_ID_KEY,
-                                item.getKey());
-                        editor.putString(
-                                RepoStrings.SharedPreferences.USER_RESTAURANT_NAME,
-                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
-                        editor.putString(
-                                RepoStrings.SharedPreferences.USER_GROUP,
-                                Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).toString());
-                        editor.apply();
-
-                        // TODO: 06/06/2018 Only returns group_name, user_key and restaurant_name
-                        Log.d(TAG, "onDataChange: SharedPreferences = " + sharedPref.getAll().toString());
-
-                        /** We fill the object with the info we will need to pass in the intent
-                         * */
-                        User.Builder builder = new User.Builder();
-                        builder.setFirstName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.FIRST_NAME).getValue()).toString());
-                        builder.setLastName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.LAST_NAME).getValue()).toString());
-                        builder.setEmail(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString());
-                        builder.setGroup(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).toString());
-                        builder.setPlaceId(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.PLACE_ID).getValue()).toString());
-                        builder.setRestaurantName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
-                        builder.setRestaurantType(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString());
-                        builder.setImageUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.IMAGE_URL).getValue()).toString());
-                        builder.setAddress(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.ADDRESS).getValue()).toString());
-                        builder.setRating(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RATING).getValue()).toString());
-                        builder.setPhone(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.PHONE).getValue()).toString());
-                        builder.setWebsiteUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.WEBSITE_URL).getValue()).toString());
-
-                        user = builder.create();
-
-                        break;
+                            }
+                        }
                     }
-                }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                    }
+                });
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-            }
-        });
-
-        /** There are two types of background jobs.
-         * 1st. If notifications are enabled, the user has to be told at 1.00pm the restaurant
-         * where he/she is going. If no restaurant is chosen, no notification should appear.
-         * 2nd. At 4pm, the database has to be filled with the visited restaurants.
-         * */
-        // TODO: 29/05/2018 Do here Android Job, fill database with visited restaurant
+        }
 
 
-
-
-
-        // TODO: 29/05/2018 Do here Android Job, notification to the user
-        /** We check if notifications are enabled. If they are and the user has chosen a restaurant,
-         * a notification should be triggered at 1.00pm
-         * */
-//        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-//        if (sharedPref.getBoolean(getString(R.string.pref_key_notifications), false)) {
-//            /** If they are enabled, we check if a job is running
-//             * */
+//        /** There are two types of background jobs.
+//         * 1st. If notifications are enabled, the user has to be told at 1.00pm the restaurant
+//         * where he/she is going. If no restaurant is chosen, no notification should appear.
+//         * 2nd. At 4pm, the database has to be filled with the visited restaurants.
+//         * */
+//        // TODO: 29/05/2018 Do here Android Job, fill database with visited restaurant
+//
+//        cancelJob(jobId);
+//
+//        JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
+//        jobId = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
+//
+//        ToastHelper.toastShort(MainActivity.this, "AddRestaurantToGroupDailyJob created!");
 //
 //
-//            if(job is already running) {
-//                //do nothing
-//            } else {
-//                //prepare the alarm
-//            }
-//        }
+//
+//
+//
+//
+//        // TODO: 29/05/2018 Do here Android Job, notification to the user
+//        /** We check if notifications are enabled. If they are and the user has chosen a restaurant,
+//         * a notification should be triggered at 1.00pm
+//         * */
+////        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+////        if (sharedPref.getBoolean(getString(R.string.pref_key_notifications), false)) {
+////            /** If they are enabled, we check if a job is running
+////             * */
+////
+////
+////            if(job is already running) {
+////                //do nothing
+////            } else {
+////                //prepare the alarm
+////            }
+////        }
 
         /** We show the MAP fragment
          * */
@@ -301,16 +260,17 @@ public class MainActivity extends AppCompatActivity{
         flagToSpecifyCurrentFragment = 1;
 
 
+    }
         //---------------------- GET CURRENT LOCATION --------------------------//
 
-        if (isGooglePlayServicesOK()) {
-
-            //getLocationPermission() calls getDeviceLocation(). We can then store the Device Location
-            //in the database and use it in FragmentRestaurantMapView to display the current location
-            getLocationPermission();
-
-        }
-    }
+//        if (isGooglePlayServicesOK()) {
+//
+//            //getLocationPermission() calls getDeviceLocation(). We can then store the Device Location
+//            //in the database and use it in FragmentRestaurantMapView to display the current location
+//            getLocationPermission();
+//
+//        }
+//    }
 
     @Override
     public void onBackPressed() {
@@ -321,10 +281,83 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
+
+    //checkAddRestaurantDailyJob ();
+    //checkNotifications ();
+
+    private void checkAddRestaurantDailyJob (SharedPreferences sharedPref) {
+
+        if (sharedPref.getBoolean(getResources().getString(R.string.key_addRestaurantIsOn), true)){
+            //do nothing since alarm is currently running
+
+        } else {
+
+            JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
+            jobId = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
+            ToastHelper.toastShort(MainActivity.this, "AddRestaurantToGroupDailyJob created!");
+
+        }
+    }
+
+
+    private void checkNotifications () {
+
+        if (sharedPref.getBoolean(getResources().getString(R.string.pref_key_notifications), true)){
+            //do nothing since alarm is currently running
+
+        } else {
+
+            JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
+            jobId = NotificationDailyJob.scheduleNotificationDailyJob();
+            ToastHelper.toastShort(MainActivity.this, "An alarm has been set at 1pm!");
+
+        }
+
+    }
+
+    /*****************************************
+     * METHOD USED TO CANCEL NOTIFICATIONS ***
+     * **************************************/
+
+    private void cancelJob(int JobId) {
+        JobManager.instance().cancel(JobId);
+    }
+
+
+    private boolean updateNavDrawerTextViews() {
+
+        /**
+         * We fill the variables for NavigationDrawer
+         * */
+        navUserName.setText(userFirstName + " " + userLastName);
+        navUserEmail.setText(userEmail);
+
+        return true;
+    }
+
+    private boolean chooseGroupReminder() {
+
+        if (userGroup == null || userGroup.equalsIgnoreCase("")) {
+            ToastHelper.toastShort(this, "You haven't chosen a group yet!");
+        }
+        return true;
+    }
+
+    // TODO: 13/06/2018 Modify this!
+    private boolean internetConnectionIsOK () {
+
+        return true;
+    }
+
+
+
+
+
+
+
     /*****************
      * LISTENERS *****
      * **************/
-
 
     private BottomNavigationView.OnNavigationItemSelectedListener botNavListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -394,26 +427,43 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
 
-                            if (user == null) {
-                                ToastHelper.toastShort(MainActivity.this, "An error occurred. Restaurant Entry is null");
+                            fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userIdKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                            fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                            } else if (user.getRestaurantName().equals("")) {
-                                ToastHelper.toastShort(MainActivity.this, "You have not chosen a restaurant yet!");
+                                    if (internetConnectionIsOK()) {
 
-                            } else {
+                                        if (userEmail == null && userEmail.equalsIgnoreCase("")) {
+                                            ToastHelper.toastShort(MainActivity.this, "An error occurred. Restaurant Entry is null");
 
-                                Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
-                                intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, user.getImageUrl());
-                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, user.getRestaurantName());
-                                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, user.getRestaurantType());
-                                intent.putExtra(RepoStrings.SentIntent.ADDRESS, user.getAddress());
-                                intent.putExtra(RepoStrings.SentIntent.RATING, user.getRating());
-                                intent.putExtra(RepoStrings.SentIntent.PHONE, user.getPhone());
-                                intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, user.getWebsiteUrl());
+                                        } else if (userGroup == null && userGroup.equalsIgnoreCase("")) {
+                                            ToastHelper.toastShort(MainActivity.this, "You have not chosen a restaurant yet!");
 
-                                startActivity(intent);
+                                        } else {
 
-                            }
+                                            Map<String, Object> map = Utils.getUserRestaurantInfoFromDataSnapshot(dataSnapshot);
+                                            Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
+                                            startActivity(Utils.fillIntentUsingMapInfo(intent, map));
+
+                                        }
+                                    } else {
+                                        ToastHelper.toastNoInternet(MainActivity.this);
+
+                                    }
+
+
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+
+
+                                }
+                            });
 
                             return true;
                         }
@@ -470,174 +520,171 @@ public class MainActivity extends AppCompatActivity{
 
     // --------------------------------- NEW CODE ---------------------------------//
 
-    /** Checks if the user has the
-     * correct Google Play Services Version
-     */
-    public boolean isGooglePlayServicesOK() {
-        Log.d(TAG, "isGooglePlayServicesOK: checking google services version");
-
-        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
-
-        if (available == ConnectionResult.SUCCESS) {
-            //Everything is fine and the user can make map requests
-            Log.d(TAG, "isGooglePlayServicesOK: Google Play Services is working");
-            return true;
-
-        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
-            //There is an error but we can resolve it
-            Log.d(TAG, "isGooglePlayServicesOK: an error occurred but we can fix it");
-            Dialog dialog = GoogleApiAvailability.getInstance()
-                    .getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
-            dialog.show();
-
-        } else {
-            Log.d(TAG, "isGooglePlayServicesOK: an error occurred; you cannot make map requests");
-            ToastHelper.toastLong(MainActivity.this, "You can't make map requests");
-
-        }
-        return false;
-    }
-
-
-    private void getLocationPermission() {
-        Log.d(TAG, "getLocationPermission: getting location permission");
-
-        /** We can also check first if the Android Version of the device is equal or higher than Marshmallow:
-         *      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { "rest of code" } */
-
-        String[] permissions = {
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-        };
-
-        if (ContextCompat.checkSelfPermission(
-                MainActivity.this, FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            if (ContextCompat.checkSelfPermission(
-                   MainActivity.this, COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mLocationPermissionGranted = true;
-
-            }
-
-        } else {
-            ActivityCompat.requestPermissions(MainActivity.this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
-
-        }
-
-        if (mLocationPermissionGranted) {
-            getDeviceLocation();
-        }
-    }
-
-
-    private void getDeviceLocation() {
-
-        Log.d(TAG, "getDeviceLocation: getting device's location");
-
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
-
-        try {
-
-            Task location = mFusedLocationProviderClient.getLastLocation();
-            location.addOnCompleteListener(new OnCompleteListener() {
-                @Override
-                public void onComplete(@NonNull Task task) {
-
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        //&& task.getResult() != null -- allows you to avoid crash if the app
-                        // did not get the location from the device (= currentLocation = null)
-                        Log.d(TAG, "onComplete: found location!");
-                        Location currentLocation = (Location) task.getResult();
-
-                        Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
-
-                        myPosition = new LatLngForRetrofit(currentLocation.getLatitude(), currentLocation.getLongitude());
-
-
-                        /** If the database is empty, we start the request
-                         * */
-                        if (checkIfLocalDatabaseIsEmpty()
-                                && myPosition != null) {
-                            Log.d(TAG, "onComplete: local database status (empty) = " + checkIfLocalDatabaseIsEmpty());
-                            Log.d(TAG, "onComplete: myPosition = " + myPosition.toString());
-
-                            //showProgressBar(progressBar, container);
-                            initRequestProcess();
-
-                        } else {
-                            Log.d(TAG, "onComplete: local database status (empty) = " + checkIfLocalDatabaseIsEmpty());
-                            //hideProgressBar(progressBar, container);
-
-                        }
+//    /** Checks if the user has the
+//     * correct Google Play Services Version
+//     */
+//    public boolean isGooglePlayServicesOK() {
+//        Log.d(TAG, "isGooglePlayServicesOK: checking google services version");
 //
-                    } else {
-                        Log.d(TAG, "onComplete: current location is null");
-                    }
-
-                }
-            });
-
-        } catch (SecurityException e) {
-            Log.d(TAG, "getDeviceLocation: SecurityException " + e.getMessage());
-        }
-
-    }
-
-    /** Method that returns true if local database is empty
-     * */
-    public boolean checkIfLocalDatabaseIsEmpty() {
-        Log.d(TAG, "ifLocalDatabaseIsNotEmpty: called!");
-
-        DatabaseHelper dbH = new DatabaseHelper(MainActivity.this);
-        return dbH.isTableEmpty("restaurant");
-
-    }
-
-    /** Method that starts doing the requests to the servers to get the
-     * restaurants. Firstly, it deletes the database
-     * */
-    public void initRequestProcess() {
-        Log.d(TAG, "initRequestProcess: called!");
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                /** We delete all the info from the database
-                 * */
-                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
-
-            }
-        });
-
-        /** After deleting the database, we start the requests
-         * */
-        startRequests();
-
-    }
-
-    /** Method that starts the requests if the database is empty. If not,
-     * it tries again (only 10 times more; this way we avoid doing requests
-     * continuously forever)
-     * */
-    public void startRequests () {
-        Log.d(TAG, "startRequests: called!");
-        // TODO: 06/06/2018 CHECK THIS!
-
-        if (startRequestsCounter != 10) {
-
-            if (checkIfLocalDatabaseIsEmpty()){
-                callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
-
-            } else {
-                startRequests();
-                startRequestsCounter++;
-            }
-        } else {
-
-            startRequestsCounter = 0;
-        }
-    }
+//        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
+//
+//        if (available == ConnectionResult.SUCCESS) {
+//            //Everything is fine and the user can make map requests
+//            Log.d(TAG, "isGooglePlayServicesOK: Google Play Services is working");
+//            return true;
+//
+//        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
+//            //There is an error but we can resolve it
+//            Log.d(TAG, "isGooglePlayServicesOK: an error occurred but we can fix it");
+//            Dialog dialog = GoogleApiAvailability.getInstance()
+//                    .getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
+//            dialog.show();
+//
+//        } else {
+//            Log.d(TAG, "isGooglePlayServicesOK: an error occurred; you cannot make map requests");
+//            ToastHelper.toastLong(MainActivity.this, "You can't make map requests");
+//
+//        }
+//        return false;
+//    }
+//
+//    private void getLocationPermission() {
+//        Log.d(TAG, "getLocationPermission: getting location permission");
+//
+//        /** We can also check first if the Android Version of the device is equal or higher than Marshmallow:
+//         *      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { "rest of code" } */
+//
+//        String[] permissions = {
+//                android.Manifest.permission.ACCESS_FINE_LOCATION,
+//                android.Manifest.permission.ACCESS_COARSE_LOCATION
+//        };
+//
+//        if (ContextCompat.checkSelfPermission(
+//                MainActivity.this, FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//
+//            if (ContextCompat.checkSelfPermission(
+//                   MainActivity.this, COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//                mLocationPermissionGranted = true;
+//
+//            }
+//
+//        } else {
+//            ActivityCompat.requestPermissions(MainActivity.this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+//
+//        }
+//
+//        if (mLocationPermissionGranted) {
+//            getDeviceLocation();
+//        }
+//    }
+//
+//
+//    private void getDeviceLocation() {
+//
+//        Log.d(TAG, "getDeviceLocation: getting device's location");
+//
+//        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
+//
+//        try {
+//
+//            Task location = mFusedLocationProviderClient.getLastLocation();
+//            location.addOnCompleteListener(new OnCompleteListener() {
+//                @Override
+//                public void onComplete(@NonNull Task task) {
+//
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        //&& task.getResult() != null -- allows you to avoid crash if the app
+//                        // did not get the location from the device (= currentLocation = null)
+//                        Log.d(TAG, "onComplete: found location!");
+//                        Location currentLocation = (Location) task.getResult();
+//
+//                        Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
+//                        myPosition = new LatLngForRetrofit(currentLocation.getLatitude(), currentLocation.getLongitude());
+//
+//                        /** If the database is empty, we start the request
+//                         * */
+//                        if (localDatabaseIsEmpty()
+//                                && myPosition != null) {
+//                            Log.d(TAG, "onComplete: local database status (empty) = " + localDatabaseIsEmpty());
+//                            Log.d(TAG, "onComplete: myPosition = " + myPosition.toString());
+//
+//                            //showProgressBar(progressBar, container);
+//                            initRequestProcess();
+//
+//                        } else {
+//                            Log.d(TAG, "onComplete: local database status (empty) = " + localDatabaseIsEmpty());
+//                            //hideProgressBar(progressBar, container);
+//
+//                        }
+////
+//                    } else {
+//                        Log.d(TAG, "onComplete: current location is null");
+//                    }
+//
+//                }
+//            });
+//
+//        } catch (SecurityException e) {
+//            Log.d(TAG, "getDeviceLocation: SecurityException " + e.getMessage());
+//        }
+//
+//    }
+//
+//    /** Method that returns true if local database is empty
+//     * */
+//    public boolean localDatabaseIsEmpty() {
+//        Log.d(TAG, "ifLocalDatabaseIsNotEmpty: called!");
+//
+//        DatabaseHelper dbH = new DatabaseHelper(MainActivity.this);
+//        return dbH.isTableEmpty("restaurant");
+//
+//    }
+//
+//    /** Method that starts doing the requests to the servers to get the
+//     * restaurants. Firstly, it deletes the database
+//     * */
+//    public void initRequestProcess() {
+//        Log.d(TAG, "initRequestProcess: called!");
+//
+//        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                /** We delete all the info from the database
+//                 * */
+//                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+//
+//            }
+//        });
+//
+//        /** After deleting the database, we start the requests
+//         * */
+//        startRequests();
+//
+//    }
+//
+//    /** Method that starts the requests if the database is empty. If not,
+//     * it tries again (only 10 times more; this way we avoid doing requests
+//     * continuously forever)
+//     * */
+//    public void startRequests () {
+//        Log.d(TAG, "startRequests: called!");
+//        // TODO: 06/06/2018 CHECK THIS!
+//
+//        if (startRequestsCounter != 10) {
+//
+//            if (localDatabaseIsEmpty()){
+//                callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
+//
+//            } else {
+//                startRequests();
+//                startRequestsCounter++;
+//            }
+//        } else {
+//
+//            startRequestsCounter = 0;
+//        }
+//    }
 
     /** Method that allows to show the progress bar
      * */
@@ -663,58 +710,58 @@ public class MainActivity extends AppCompatActivity{
         return mDrawerLayout;
     }
 
-    /** Method that starts the ATL
-     * and starts the requests' process
-     * */
-    private void callLoaderInitApiGeneralRequests(int id) {
-
-        LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<Void> loader = loaderManager.getLoader(id);
-
-        if (loader == null) {
-            Log.i(TAG, "loadLoaderInitApiGeneralRequests: ");
-            loaderManager.initLoader(id, null, loaderInitApiTextSearchRequests);
-        } else {
-            Log.i(TAG, "loadLoaderInitApiGeneralRequests: ");
-            loaderManager.restartLoader(id, null, loaderInitApiTextSearchRequests);
-        }
-    }
-
-    /**********************/
-    /** LOADER CALLBACKS **/
-    /**********************/
-
-    /** This LoaderCallback
-     * uses ATLInitApi
-     * */
-    private LoaderManager.LoaderCallbacks loaderInitApiTextSearchRequests =
-            new LoaderManager.LoaderCallbacks() {
-
-                @Override
-                public Loader onCreateLoader(int id, Bundle args) {
-                    Log.d(TAG, "onCreateLoader: is called");
-                    return new ATLInitApiTextSearchRequests(MainActivity.this, mDb, myPosition);
-                }
-
-                @Override
-                public void onLoadFinished(Loader loader, Object data) {
-                    Log.d(TAG, "onLoadFinished: called!");
-
-                    if (!checkIfLocalDatabaseIsEmpty()) {
-                        Log.d(TAG, "onLoadFinished: database IS NOT EMPTY anymore");
-                        //hideProgressBar(progressBar, container);
-
-                    } else {
-                        Log.d(TAG, "onLoadFinished: database IS EMPTY");
-
-                        ToastHelper.toastShort(MainActivity.this, "Something went wrong. Database is not filled.");
-                    }
-                }
-
-                @Override
-                public void onLoaderReset(Loader loader) {
-
-                }
-            };
+//    /** Method that starts the ATL
+//     * and starts the requests' process
+//     * */
+//    private void callLoaderInitApiGeneralRequests(int id) {
+//
+//        LoaderManager loaderManager = getSupportLoaderManager();
+//        Loader<Void> loader = loaderManager.getLoader(id);
+//
+//        if (loader == null) {
+//            Log.i(TAG, "loadLoaderInitApiGeneralRequests: ");
+//            loaderManager.initLoader(id, null, loaderInitApiTextSearchRequests);
+//        } else {
+//            Log.i(TAG, "loadLoaderInitApiGeneralRequests: ");
+//            loaderManager.restartLoader(id, null, loaderInitApiTextSearchRequests);
+//        }
+//    }
+//
+//    /**********************/
+//    /** LOADER CALLBACKS **/
+//    /**********************/
+//
+//    /** This LoaderCallback
+//     * uses ATLInitApi
+//     * */
+//    private LoaderManager.LoaderCallbacks loaderInitApiTextSearchRequests =
+//            new LoaderManager.LoaderCallbacks() {
+//
+//                @Override
+//                public Loader onCreateLoader(int id, Bundle args) {
+//                    Log.d(TAG, "onCreateLoader: is called");
+//                    return new ATLInitApiTextSearchRequests(MainActivity.this, mDb, myPosition);
+//                }
+//
+//                @Override
+//                public void onLoadFinished(Loader loader, Object data) {
+//                    Log.d(TAG, "onLoadFinished: called!");
+//
+//                    if (!localDatabaseIsEmpty()) {
+//                        Log.d(TAG, "onLoadFinished: database IS NOT EMPTY anymore");
+//                        //hideProgressBar(progressBar, container);
+//
+//                    } else {
+//                        Log.d(TAG, "onLoadFinished: database IS EMPTY");
+//
+//                        ToastHelper.toastShort(MainActivity.this, "Something went wrong. Database is not filled.");
+//                    }
+//                }
+//
+//                @Override
+//                public void onLoaderReset(Loader loader) {
+//
+//                }
+//            };
 }
 

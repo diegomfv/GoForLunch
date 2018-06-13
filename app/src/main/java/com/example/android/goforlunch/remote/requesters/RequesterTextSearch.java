@@ -55,6 +55,7 @@ public class RequesterTextSearch {
     }
 
     public void doApiRequest () {
+        Log.d(TAG, "doApiRequest: ");
 
         GooglePlaceWebAPIService client = Common.getGooglePlaceTextSearchApiService();
 
@@ -169,7 +170,6 @@ public class RequesterTextSearch {
 
                                 /** We insert the object in the database
                                  * */
-
                                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                                     @Override
                                     public void run() {
@@ -178,13 +178,11 @@ public class RequesterTextSearch {
                                         if (result != 0) {
                                             counterLastInsertion++;
                                         }
-
-                                        // TODO: 05/06/2018 Use @Query annotation in Room to return a boolean and update a counter
-                                        // TODO: 05/06/2018 Then, call nearbyRequuest function
                                     }
                                 });
 
                                 if (results[i].getPlace_id() != null) {
+                                    Log.d(TAG, "onResponse: requester PlaceId is called!");
 
                                     RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
                                     requesterPlaceId.doApiRequest(results[i].getPlace_id());
@@ -193,11 +191,22 @@ public class RequesterTextSearch {
                             }
 
                             if (counterLastInsertion == MAX_TEXT_SEARCH_RESTAURANTS ){
-                                RequesterNearby requesterNearby = new RequesterNearby(mDb,myPosition,mDb.restaurantDao().getAllRestaurantsNotLiveData());
-                                requesterNearby.doApiRequest();
+                                Log.d(TAG, "onResponse: counterLastInsertion is called");
+
+                                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.d(TAG, "run: instantiating Requester Nearby");
+
+                                        RequesterNearby requesterNearby = new RequesterNearby(mDb,myPosition);
+                                        requesterNearby.getDataAndDoApiRequest();
+
+                                    }
+                                });
 
                                 //Counter is restarted
                                 counterLastInsertion = 0;
+                                Log.d(TAG, "onResponse: counterLastInsertion restarted!");
                             }
                         }
                     }

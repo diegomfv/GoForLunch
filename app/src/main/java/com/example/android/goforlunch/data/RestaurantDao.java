@@ -55,6 +55,9 @@ public interface RestaurantDao {
     @Query("SELECT * FROM restaurant WHERE placeId = :placeId")
     RestaurantEntry getRestaurantById(String placeId);
 
+    @Query("SELECT * FROM restaurant WHERE name = :name")
+    RestaurantEntry getRestaurantByName(String name);
+
     @Query("SELECT * FROM restaurant ORDER BY distance")
     List<RestaurantEntry> getAllRestaurantsNotLiveData();
 

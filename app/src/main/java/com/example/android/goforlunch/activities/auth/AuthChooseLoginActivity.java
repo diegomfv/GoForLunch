@@ -225,7 +225,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                                     dataSnapshot.getChildren()) {
 
                                                 if (Objects.requireNonNull(user.getEmail()).equalsIgnoreCase(
-                                                        Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString())) {
+                                                        Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
                                                     Log.d(TAG, "onDataChange: user already exists");
 
                                                     // TODO: 02/06/2018 Check this, might be able to be deleted
@@ -339,19 +339,19 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
         Map<String, Object> map = new HashMap<>();
 
-        map.put(RepoStrings.FirebaseReference.FIRST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
-        map.put(RepoStrings.FirebaseReference.LAST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
-        map.put((RepoStrings.FirebaseReference.EMAIL), user.getEmail());
-        map.put(RepoStrings.FirebaseReference.GROUP, "");
+        map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
+        map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
+        map.put((RepoStrings.FirebaseReference.USER_EMAIL), user.getEmail());
+        map.put(RepoStrings.FirebaseReference.USER_GROUP, "");
 
-        map.put(RepoStrings.FirebaseReference.PLACE_ID, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, "");
         map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
         map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
-        map.put(RepoStrings.FirebaseReference.ADDRESS, "");
-        map.put(RepoStrings.FirebaseReference.RATING, "");
-        map.put(RepoStrings.FirebaseReference.PHONE, "");
-        map.put(RepoStrings.FirebaseReference.IMAGE_URL, "");
-        map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
 
         return map;
     }

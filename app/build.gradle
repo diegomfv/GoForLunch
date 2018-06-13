@@ -88,6 +88,9 @@ dependencies {
     //Name Machine
     implementation 'org.ajbrown:name-machine:1.0.0'
 
+    //Job Scheduler
+    implementation 'com.evernote:android-job:1.2.5'
+
 }
 
 //Firebase plugin

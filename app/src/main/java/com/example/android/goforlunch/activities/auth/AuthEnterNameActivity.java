@@ -130,7 +130,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                 for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
-                    listOfEmails.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.EMAIL).getValue()).toString().toLowerCase().trim());
+                    listOfEmails.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().toLowerCase().trim());
 
                 }
             }
@@ -337,19 +337,19 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
         Map<String, Object> map = new HashMap<>();
 
-        map.put((RepoStrings.FirebaseReference.FIRST_NAME), inputFirstName.getText().toString());
-        map.put((RepoStrings.FirebaseReference.LAST_NAME), inputLastName.getText().toString());
-        map.put((RepoStrings.FirebaseReference.EMAIL), inputEmail.getText().toString().toLowerCase().trim());
-        map.put((RepoStrings.FirebaseReference.GROUP), "");
+        map.put((RepoStrings.FirebaseReference.USER_FIRST_NAME), inputFirstName.getText().toString());
+        map.put((RepoStrings.FirebaseReference.USER_LAST_NAME), inputLastName.getText().toString());
+        map.put((RepoStrings.FirebaseReference.USER_EMAIL), inputEmail.getText().toString().toLowerCase().trim());
+        map.put((RepoStrings.FirebaseReference.USER_GROUP), "");
 
-        map.put(RepoStrings.FirebaseReference.PLACE_ID, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, "");
         map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
         map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
-        map.put(RepoStrings.FirebaseReference.ADDRESS, "");
-        map.put(RepoStrings.FirebaseReference.RATING, "");
-        map.put(RepoStrings.FirebaseReference.PHONE, "");
-        map.put(RepoStrings.FirebaseReference.IMAGE_URL, "");
-        map.put(RepoStrings.FirebaseReference.WEBSITE_URL, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, "");
+        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
 
         return map;
     }

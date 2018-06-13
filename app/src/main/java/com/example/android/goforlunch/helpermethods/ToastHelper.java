@@ -19,4 +19,8 @@ abstract public class ToastHelper {
         Toast.makeText(context, string, Toast.LENGTH_LONG).show();
     }
 
+    public static void toastNoInternet (Context context) {
+        Toast.makeText(context, "There is no internet connection", Toast.LENGTH_SHORT).show();
+    }
+
 }

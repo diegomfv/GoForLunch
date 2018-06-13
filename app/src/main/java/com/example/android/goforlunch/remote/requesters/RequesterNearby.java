@@ -37,156 +37,206 @@ public class RequesterNearby {
     private AppDatabase mDb;
     private LatLngForRetrofit myPosition;
 
-    private List<RestaurantEntry> listOfRestaurantsInTheDatabase;
+    private static int requestCounter = 0;
 
-    public RequesterNearby(AppDatabase mDb, LatLngForRetrofit myPosition, List<RestaurantEntry> listOfRestaurantsInTheDatabase) {
+    public RequesterNearby(AppDatabase mDb, LatLngForRetrofit myPosition) {
         this.mDb = mDb;
         this.myPosition = myPosition;
-        this.listOfRestaurantsInTheDatabase = listOfRestaurantsInTheDatabase;
     }
 
-    public void doApiRequest() {
+    public void getDataAndDoApiRequest () {
+        Log.d(TAG, "getDataAndDoApiRequest: ");
 
-        GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
-        Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", nearbyKey);
-        callNearby.enqueue(new Callback<MyPlaces>() {
-
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
-            public void onResponse(Call<MyPlaces> call, Response<MyPlaces> response) {
-                Log.d(TAG, "onResponse: correct call");
-                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+            public void run() {
 
-                MyPlaces myPlaces = response.body();
+                doApiRequest(mDb.restaurantDao().getAllRestaurantsNotLiveData());
 
-                Log.d(TAG, "onResponse: " + myPlaces.toString());
+            }
+        });
 
-                if (myPlaces.getResults() != null) {
+    }
 
-                    String placeId;
-                    String name;
-                    String type;
-                    String address;
-                    String openUntil;
-                    String distance;
-                    String rating;
-                    String imageUrl;
-                    String phone;
-                    String websiteUrl;
-                    String lat;
-                    String lng;
+    public void doApiRequest(final List<RestaurantEntry> listOfRestaurantsInDatabase) {
+        Log.d(TAG, "doApiRequest: ");
 
-                    Results[] results = myPlaces.getResults();
+        if (listOfRestaurantsInDatabase.size() > 0) {
 
-                    /** Iterating through the results array
-                     * */
-                    for (int i = 0; i < results.length; i++) {
+            GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
+            Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", nearbyKey);
+            callNearby.enqueue(new Callback<MyPlaces>() {
 
-                        for (int j = 0; j < listOfRestaurantsInTheDatabase.size(); j++) {
+                @Override
+                public void onResponse(Call<MyPlaces> call, Response<MyPlaces> response) {
+                    Log.d(TAG, "onResponse: correct call");
+                    Log.d(TAG, "onResponse: url = " + call.request().url().toString());
 
-                            if (results[i].getPlace_id().equalsIgnoreCase(listOfRestaurantsInTheDatabase.get(j).getPlaceId())
-                                    || results[i].getName().equalsIgnoreCase(listOfRestaurantsInTheDatabase.get(i).getName())) {
-                                //if the restaurant is already in the database,
-                                // do nothing
+                    MyPlaces myPlaces = response.body();
 
-                            } else {
+                    Log.d(TAG, "onResponse: " + myPlaces.toString());
 
-                                if (results[i].getPlace_id() != null) {
-                                    placeId = results[i].getPlace_id();
+                    if (myPlaces.getResults() != null) {
+
+                        String placeId;
+                        String name;
+                        String type;
+                        String address;
+                        String openUntil;
+                        String distance;
+                        String rating;
+                        String imageUrl;
+                        String phone;
+                        String websiteUrl;
+                        String lat;
+                        String lng;
+
+                        Results[] results = myPlaces.getResults();
+
+                        /** Iterating through the results array
+                         * */
+                        for (int i = 0; i < results.length; i++) {
+
+                            for (int j = 0; j < listOfRestaurantsInDatabase.size(); j++) {
+
+                                // TODO: 07/06/2018 This is failing. Probably listOfRestaurantsInTheDatabase is 0 or null
+
+                                if (listOfRestaurantsInDatabase.get(j).getPlaceId().equalsIgnoreCase(results[i].getPlace_id())) {
+                                    Log.d(TAG, "onResponse: places Id are equal, so the restaurant is already in the database");
+                                    //do nothing
+
                                 } else {
-                                    placeId = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                }
+                                    Log.d(TAG, "onResponse: the restaurant IS NOT in the database");
 
-                                if (results[i].getName() != null) {
-                                    name = results[i].getName();
-                                } else {
-                                    name = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                }
+                                    if (results[i].getPlace_id() != null) {
+                                        placeId = results[i].getPlace_id();
+                                    } else {
+                                        placeId = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    }
 
-                                if (results[i].getRating() != null) {
-                                    rating = formatToTwoDecimalsAndGetRatingUnder3(results[i].getRating());
-                                } else {
-                                    rating = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                }
+                                    if (results[i].getName() != null) {
+                                        name = results[i].getName();
+                                    } else {
+                                        name = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    }
 
-                                if (results[i].getVicinity() != null) {
-                                    address = results[i].getVicinity(); // TODO: 06/06/2018 Check if we can format it!
-                                } else {
-                                    address = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                }
+                                    if (results[i].getRating() != null) {
+                                        rating = formatToTwoDecimalsAndGetRatingUnder3(results[i].getRating());
+                                    } else {
+                                        rating = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    }
 
-                                if (results[i].getGeometry() != null) {
+                                    if (results[i].getVicinity() != null) {
+                                        address = results[i].getVicinity(); // TODO: 06/06/2018 Check if we can format it!
+                                    } else {
+                                        address = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    }
 
-                                    Geometry geometry = results[i].getGeometry();
+                                    if (results[i].getGeometry() != null) {
 
-                                    if (geometry.getLocation() != null) {
+                                        Geometry geometry = results[i].getGeometry();
 
-                                        Location location = geometry.getLocation();
+                                        if (geometry.getLocation() != null) {
 
-                                        lat = location.getLat();
-                                        lng = location.getLng();
+                                            Location location = geometry.getLocation();
 
+                                            lat = location.getLat();
+                                            lng = location.getLng();
+
+                                        } else {
+                                            lat = null;
+                                            lng = null;
+                                        }
                                     } else {
                                         lat = null;
                                         lng = null;
                                     }
-                                } else {
-                                    lat = null;
-                                    lng = null;
+
+                                    /** We will fill the following info with
+                                     * the next requests
+                                     * */
+                                    //Type info will be "Other" because it will never be filled
+                                    //"Other" is the last type of te RestaurantTypes array
+                                    type = RepoStrings.RESTAURANT_TYPES[RepoStrings.RESTAURANT_TYPES.length - 1];
+                                    openUntil = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    distance = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    imageUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    phone = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                                    websiteUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+
+                                    /** We create an object with all the info
+                                     * */
+                                    final RestaurantEntry restaurantEntry = new RestaurantEntry(
+                                            placeId,
+                                            name,
+                                            type,
+                                            address,
+                                            openUntil,
+                                            distance,
+                                            rating,
+                                            imageUrl,
+                                            phone,
+                                            websiteUrl,
+                                            lat,
+                                            lng
+                                    );
+
+                                    /** We insert the object in the database
+                                     * */
+                                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Log.d(TAG, "run: requesterNearby: inserted an element");
+
+                                            long insertion = mDb.restaurantDao().insertRestaurant(restaurantEntry);
+                                            Log.d(TAG, "run: " + insertion);
+                                        }
+                                    });
+
+                                    RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
+                                    requesterPlaceId.doApiRequest(results[i].getPlace_id());
+
                                 }
-
-                                /** We will fill the following info with
-                                 * the next requests
-                                 * */
-                                //Type info will be "Other" because it will never be filled
-                                //"Other" is the last type of te RestaurantTypes array
-                                type = RepoStrings.RESTAURANT_TYPES[RepoStrings.RESTAURANT_TYPES.length - 1];
-                                openUntil = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                distance = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                imageUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                phone = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-                                websiteUrl = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-
-                                /** We create an object with all the info
-                                 * */
-                                final RestaurantEntry restaurantEntry = new RestaurantEntry(
-                                        placeId,
-                                        name,
-                                        type,
-                                        address,
-                                        openUntil,
-                                        distance,
-                                        rating,
-                                        imageUrl,
-                                        phone,
-                                        websiteUrl,
-                                        lat,
-                                        lng
-                                );
-
-                                /** We insert the object in the database
-                                 * */
-                                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mDb.restaurantDao().insertRestaurant(restaurantEntry);
-                                    }
-                                });
-
-                                RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
-                                requesterPlaceId.doApiRequest(results[i].getPlace_id());
-
                             }
                         }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<MyPlaces> call, Throwable t) {
-                Log.d(TAG, "onFailure: there was an error");
-                Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+                @Override
+                public void onFailure(Call<MyPlaces> call, Throwable t) {
+                    Log.d(TAG, "onFailure: there was an error");
+                    Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+                }
+            });
+
+        } else {
+            Log.d(TAG, "doApiRequest: try again doApiRequest");
+
+            if (requestCounter != 5) {
+                Log.d(TAG, "doApiRequest: requestCounter != 5");
+
+                /** If we have not the data yet, we try again
+                 * */
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        doApiRequest(listOfRestaurantsInDatabase);
+                    }
+                });
+
+                requestCounter++;
+
+            } else {
+                Log.d(TAG, "doApiRequest: requestCounter = 5");
+
+                /** If we have not the data yet but we tried it 5 times,
+                 * we stop and don't do the requests
+                 * */
+
+                requestCounter = 0;
+
             }
-        });
+        }
     }
 
     /** This method returns a rating with max. value = 3 if

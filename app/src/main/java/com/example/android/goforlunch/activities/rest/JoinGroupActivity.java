@@ -195,12 +195,12 @@ public class JoinGroupActivity extends AppCompatActivity {
 
                             fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                             fireDbRefUsers.child(userKey)
-                                    .child(RepoStrings.FirebaseReference.GROUP)
+                                    .child(RepoStrings.FirebaseReference.USER_GROUP)
                                     .setValue(inputGroup.getText().toString());
 
                             Log.d(TAG, "onClick: SharedPreferences -> " + sharedPreferences.getAll().toString());
 
-                            /** We get the push key of the new user GROUP and put it in SharedPref
+                            /** We get the push key of the new user USER_GROUP and put it in SharedPref
                              * */
                             String userGroupsKey = getKeyFromValueInHashMap(mapOfKeyGroups, userGroup).toString();
                             editor.putString(RepoStrings.SharedPreferences.USER_GROUP_KEY, userGroupsKey);
@@ -216,7 +216,7 @@ public class JoinGroupActivity extends AppCompatActivity {
                         } else {
                             Log.d(TAG, "onClick: user chose same group");
 
-                            /** The user chose THE SAME GROUP as he/she already was in
+                            /** The user chose THE SAME USER_GROUP as he/she already was in
                              * */
                             ToastHelper.toastShort(JoinGroupActivity.this, "You chose the same group as you are in already");
 

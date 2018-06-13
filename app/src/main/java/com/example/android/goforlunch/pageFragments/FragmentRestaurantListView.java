@@ -276,7 +276,7 @@ public class FragmentRestaurantListView extends Fragment {
                 for (DataSnapshot item :
                         dataSnapshot.getChildren()) {
 
-                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP).getValue()).equals(userGroup)) {
+                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).equals(userGroup)) {
 
                         //mapOfCoworkersPerRestaurant.put(item.child(RepoStrings.))
 

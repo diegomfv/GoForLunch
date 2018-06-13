@@ -45,6 +45,9 @@ public interface RepoStrings {
         String USER_RESTAURANT_NAME = "restaurant_name";
         String USER_GROUP = "group_name";
         String USER_GROUP_KEY = "user_group_key";
+
+        String ADD_RESTAURANT_JOB_KEY = "job_dd_restaurant";
+        String NOTIFICATIONS_KEY = "job_notifications";
     }
 
     interface SentIntent {
@@ -68,31 +71,29 @@ public interface RepoStrings {
     interface FirebaseReference {
 
         String USERS = "users";
-        String FIRST_NAME = "first_name";
-        String LAST_NAME = "last_name";
-        String EMAIL = "email";
-        String GROUP = "group";
-        String PLACE_ID = "place_id";
+        String USER_FIRST_NAME = "user_first_name";
+        String USER_LAST_NAME = "user_last_name";
+        String USER_EMAIL = "user_email";
+        String USER_GROUP = "user_group";
+        String USER_GROUP_KEY = "user_group_key";
+        String USER_RESTAURANT_INFO = "user_restaurant_info";
+
+        String RESTAURANT_PLACE_ID = "place_id";
         String RESTAURANT_NAME = "restaurant_name";
         String RESTAURANT_TYPE = "restaurant_type";
-        String ADDRESS = "address";
-        String PHONE = "phone";
-        String RATING = "rating";
-        String IMAGE_URL = "image_url";
-        String WEBSITE_URL = "website_url";
+        String RESTAURANT_ADDRESS = "address";
+        String RESTAURANT_PHONE = "phone";
+        String RESTAURANT_RATING = "rating";
+        String RESTAURANT_IMAGE_URL = "image_url";
+        String RESTAURANT_WEBSITE_URL = "website_url";
 
         String GROUPS = "groups";
         String GROUP_NAME = "group_name";
         String GROUP_MEMBERS = "group_members";
         String GROUP_RESTAURANTS_VISITED = "group_restaurants_visited";
 
-        String USER_ID = "user_id";
 
     }
-
-
-
-
 
 }
 
