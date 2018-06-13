@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.application.App;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -34,7 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import static com.example.android.goforlunch.helpermethods.Utils.deleteRestaurantUserInfoFromFirebase;
+import static com.example.android.goforlunch.helpermethods.Utils.deleteRestaurantsUserInfoFromFirebase;
 import static com.example.android.goforlunch.helpermethods.Utils.fillMapUsingRestaurantEntry;
 import static com.example.android.goforlunch.helpermethods.Utils.getStringFromSharedPreferences;
 import static com.example.android.goforlunch.helpermethods.Utils.insertNewRestaurantInGroupInFirebase;
@@ -367,7 +366,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                         /** Deleting user info from database
                          * */
                         dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                        deleteRestaurantUserInfoFromFirebase(dbRefUsers);
+                        deleteRestaurantsUserInfoFromFirebase(dbRefUsers);
                         ToastHelper.toastShort(FirebaseActivityDELETE.this, "User Restaurant Deleted");
 
 

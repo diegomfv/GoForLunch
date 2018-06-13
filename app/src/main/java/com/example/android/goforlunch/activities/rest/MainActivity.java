@@ -84,7 +84,8 @@ public class MainActivity extends AppCompatActivity{
 
     private FrameLayout container;
 
-    int jobId;
+    private int jobIdAddRestaurant;
+    private int jobIdNotifications;
 
     //------------------------------------------------
 
@@ -120,17 +121,14 @@ public class MainActivity extends AppCompatActivity{
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRefUsers;
-    private DatabaseReference fireDbRefGroups;
 
-
+    //Variables
     private String userFirstName;
     private String userLastName;
     private String userEmail;
     private String userIdKey;
     private String userGroup;
     private String userGroupKey;
-
-    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,9 +192,18 @@ public class MainActivity extends AppCompatActivity{
 
                                 updateNavDrawerTextViews();
                                 chooseGroupReminder();
+                                checkAddRestaurantDailyJob(sharedPref);
 
-                                //checkAddRestaurantDailyJob ();
-                                //checkNotifications ();
+                                /** We show the MAP fragment
+                                 * */
+                                getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL.newInstance())
+                                        .commit();
+
+                                /** We specify that that is the fragment we are showing
+                                 * */
+                                flagToSpecifyCurrentFragment = 1;
 
                             }
                         }
@@ -210,67 +217,17 @@ public class MainActivity extends AppCompatActivity{
                 });
             }
         }
-
-
-//        /** There are two types of background jobs.
-//         * 1st. If notifications are enabled, the user has to be told at 1.00pm the restaurant
-//         * where he/she is going. If no restaurant is chosen, no notification should appear.
-//         * 2nd. At 4pm, the database has to be filled with the visited restaurants.
-//         * */
-//        // TODO: 29/05/2018 Do here Android Job, fill database with visited restaurant
-//
-//        cancelJob(jobId);
-//
-//        JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
-//        jobId = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
-//
-//        ToastHelper.toastShort(MainActivity.this, "AddRestaurantToGroupDailyJob created!");
-//
-//
-//
-//
-//
-//
-//        // TODO: 29/05/2018 Do here Android Job, notification to the user
-//        /** We check if notifications are enabled. If they are and the user has chosen a restaurant,
-//         * a notification should be triggered at 1.00pm
-//         * */
-////        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-////        if (sharedPref.getBoolean(getString(R.string.pref_key_notifications), false)) {
-////            /** If they are enabled, we check if a job is running
-////             * */
-////
-////
-////            if(job is already running) {
-////                //do nothing
-////            } else {
-////                //prepare the alarm
-////            }
-////        }
-
-        /** We show the MAP fragment
-         * */
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL.newInstance())
-                .commit();
-
-        /** We specify that that is the fragment we are showing
-         * */
-        flagToSpecifyCurrentFragment = 1;
-
-
     }
-        //---------------------- GET CURRENT LOCATION --------------------------//
 
-//        if (isGooglePlayServicesOK()) {
-//
-//            //getLocationPermission() calls getDeviceLocation(). We can then store the Device Location
-//            //in the database and use it in FragmentRestaurantMapView to display the current location
-//            getLocationPermission();
-//
-//        }
-//    }
+    /** We use onResume() to check if the notifications
+     * are on or off
+     * */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkNotifications(sharedPref);
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -281,50 +238,64 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
+    /**
+     * This method creates a new job to add restaurants to the database if it
+     * has not been created yet
+     * */
+    private void checkAddRestaurantDailyJob (SharedPreferences sharedPreferences) {
+        Log.d(TAG, "checkAddRestaurantDailyJob: called!");
 
-    //checkAddRestaurantDailyJob ();
-    //checkNotifications ();
-
-    private void checkAddRestaurantDailyJob (SharedPreferences sharedPref) {
-
-        if (sharedPref.getBoolean(getResources().getString(R.string.key_addRestaurantIsOn), true)){
+        if (sharedPreferences.getBoolean(getResources().getString(R.string.key_addRestaurantIsOn), true)){
             //do nothing since alarm is currently running
 
         } else {
 
             JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
-            jobId = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
+            jobIdAddRestaurant = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
             ToastHelper.toastShort(MainActivity.this, "AddRestaurantToGroupDailyJob created!");
 
+            /** We change sharedPref in the Database
+             * */
+            sharedPref.edit().putBoolean(getResources().getString(R.string.key_addRestaurantIsOn), true).apply();
         }
     }
 
+    /**
+     * This method creates a new job that will create notifications to tell
+     * the user where he/she is going to have lunch
+     * **/
+    private void checkNotifications (SharedPreferences sharedPreferences) {
+        Log.d(TAG, "checkNotifications: called!");
 
-    private void checkNotifications () {
-
-        if (sharedPref.getBoolean(getResources().getString(R.string.pref_key_notifications), true)){
+        if (sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), true)){
             //do nothing since alarm is currently running
 
         } else {
 
+            /** We cancel the job to avoid creating more than one
+             * */
+            cancelJob(jobIdNotifications);
+
+            /** We create the alarm for notifications using Evernote Android Job Library
+             * */
             JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
-            jobId = NotificationDailyJob.scheduleNotificationDailyJob();
+            jobIdNotifications = NotificationDailyJob.scheduleNotificationDailyJob();
+
             ToastHelper.toastShort(MainActivity.this, "An alarm has been set at 1pm!");
-
         }
-
     }
 
-    /*****************************************
-     * METHOD USED TO CANCEL NOTIFICATIONS ***
-     * **************************************/
-
+    /** Method used to cancel notifications
+     * */
     private void cancelJob(int JobId) {
+        Log.d(TAG, "cancelJob: called!");
         JobManager.instance().cancel(JobId);
     }
 
-
+    /** Method used to update the NavDrawer info
+     * */
     private boolean updateNavDrawerTextViews() {
+        Log.d(TAG, "updateNavDrawerTextViews: called!");
 
         /**
          * We fill the variables for NavigationDrawer
@@ -335,7 +306,10 @@ public class MainActivity extends AppCompatActivity{
         return true;
     }
 
+    /** Method used to remind the user to choose a group
+     * */
     private boolean chooseGroupReminder() {
+        Log.d(TAG, "chooseGroupReminder: called!");
 
         if (userGroup == null || userGroup.equalsIgnoreCase("")) {
             ToastHelper.toastShort(this, "You haven't chosen a group yet!");
@@ -343,17 +317,20 @@ public class MainActivity extends AppCompatActivity{
         return true;
     }
 
+    /** Method used in fragments to get the DrawerLayout
+     * */
+    public DrawerLayout getMDrawerLayout() {
+        return mDrawerLayout;
+    }
+
+    /** Method used to check if there is internet connection
+     * */
     // TODO: 13/06/2018 Modify this!
     private boolean internetConnectionIsOK () {
+        Log.d(TAG, "internetConnectionIsOK: called!");
 
         return true;
     }
-
-
-
-
-
-
 
     /*****************
      * LISTENERS *****
@@ -363,6 +340,7 @@ public class MainActivity extends AppCompatActivity{
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Log.d(TAG, "onNavigationItemSelected: called!");
 
                     Fragment selectedFragment = null;
 
@@ -516,6 +494,26 @@ public class MainActivity extends AppCompatActivity{
                     return true;
                 }
             };
+
+
+    /** Method that allows to show the progress bar
+     * */
+    public void showProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
+
+        progressBar.setVisibility(View.VISIBLE);
+        frameLayout.setVisibility(View.INVISIBLE);
+
+    }
+
+    /** Method that hides the progress bar
+     * */
+    public void hideProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
+
+        progressBar.setVisibility(View.GONE);
+        frameLayout.setVisibility(View.VISIBLE);
+
+    }
+
 
 
     // --------------------------------- NEW CODE ---------------------------------//
@@ -686,29 +684,9 @@ public class MainActivity extends AppCompatActivity{
 //        }
 //    }
 
-    /** Method that allows to show the progress bar
-     * */
-    public void showProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
 
-        progressBar.setVisibility(View.VISIBLE);
-        frameLayout.setVisibility(View.INVISIBLE);
 
-    }
 
-    /** Method that hides the progress bar
-     * */
-    public void hideProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
-
-        progressBar.setVisibility(View.GONE);
-        frameLayout.setVisibility(View.VISIBLE);
-
-    }
-
-    /** Method used in fragments to get the DraweLayout
-     * */
-    public DrawerLayout getMDrawerLayout() {
-        return mDrawerLayout;
-    }
 
 //    /** Method that starts the ATL
 //     * and starts the requests' process

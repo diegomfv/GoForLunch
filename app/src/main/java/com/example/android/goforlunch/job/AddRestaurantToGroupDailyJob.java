@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.evernote.android.job.DailyJob;
 import com.evernote.android.job.JobRequest;
-import com.example.android.goforlunch.activities.rest.FirebaseActivityDELETE;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repostrings.RepoStrings;
@@ -18,10 +17,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.android.goforlunch.helpermethods.Utils.deleteRestaurantUserInfoFromFirebase;
+import static com.example.android.goforlunch.helpermethods.Utils.deleteRestaurantsUserInfoFromFirebase;
 import static com.example.android.goforlunch.helpermethods.Utils.insertNewRestaurantInGroupInFirebase;
 
 /**
@@ -69,7 +67,7 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
                 /** Deleting user info from database
                  * */
                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                deleteRestaurantUserInfoFromFirebase(dbRefUsers);
+                deleteRestaurantsUserInfoFromFirebase(dbRefUsers);
                 ToastHelper.toastShort(getContext(), "User Restaurant Deleted");
 
             }

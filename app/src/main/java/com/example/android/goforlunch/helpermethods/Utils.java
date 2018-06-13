@@ -78,7 +78,7 @@ public class Utils {
      * Method that deletes
      * all the restaurant info from a user in Firebase
      * */
-    public static boolean deleteRestaurantUserInfoFromFirebase (DatabaseReference dbRef) {
+    public static boolean deleteRestaurantsUserInfoFromFirebase(DatabaseReference dbRef) {
 
         Map<String, Object> map = new HashMap<>();
         map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
