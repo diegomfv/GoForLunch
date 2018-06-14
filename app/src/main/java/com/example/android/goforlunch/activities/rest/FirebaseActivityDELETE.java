@@ -15,7 +15,7 @@ import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,13 +33,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import static com.example.android.goforlunch.helpermethods.Utils.deleteRestaurantsUserInfoFromFirebase;
-import static com.example.android.goforlunch.helpermethods.Utils.fillMapUsingRestaurantEntry;
 import static com.example.android.goforlunch.helpermethods.Utils.getStringFromSharedPreferences;
-import static com.example.android.goforlunch.helpermethods.Utils.insertNewRestaurantInGroupInFirebase;
 import static com.example.android.goforlunch.helpermethods.Utils.updateSharedPreferences;
-import static com.example.android.goforlunch.helpermethods.Utils.updateUserInfoInFirebase;
-import static com.example.android.goforlunch.helpermethods.Utils.updateUserRestaurantInfoInFirebase;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
@@ -141,32 +136,27 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                     String key = dbRefUsers.push().getKey();
 
-                    updateUserInfoInFirebase(fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key),
+                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key);
+                    UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
                             listOfNames.get(i).getFirstName(),
                             listOfNames.get(i).getLastName(),
                             listOfEmails.get(i),
                             listOfGroups.get(random.nextInt(4)),
                             "",
+                            false,
                             "");
 
-                    RestaurantEntry restaurantEntry = new RestaurantEntry(
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            ""
-                    );
-
-                    Map <String, Object> map = Utils.fillMapUsingRestaurantEntry(restaurantEntry);
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                    updateUserRestaurantInfoInFirebase(dbRefUsers, map);
+                    UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "");
+
                 }
             }
         });
@@ -205,7 +195,14 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                 String key = dbRefUsers.push().getKey();
 
                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key);
-                updateUserInfoInFirebase(dbRefUsers, "Alfa", "Beta", "", "", "", "");
+                UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
+                        "Alfa",
+                        "Beta",
+                        "",
+                        "",
+                        "",
+                        false,
+                        "");
 
             }
         });
@@ -356,17 +353,17 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                         /** Getting user's restaurant info
                          * */
-                        Map <String, Object> map = Utils.getUserRestaurantInfoFromDataSnapshot(dataSnapshot);
+                        Map <String, Object> map = UtilsFirebase.fillMapUsingDataSnapshot(dataSnapshot);
 
                         /** Inserting a new restaurant in the group
                          * */
                         dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS + "/" + userGroupKey + "/" + RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
-                        insertNewRestaurantInGroupInFirebase(dbRefGroups, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
+                        UtilsFirebase.insertNewRestaurantInGroupInFirebase(dbRefGroups, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
 
                         /** Deleting user info from database
                          * */
                         dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                        deleteRestaurantsUserInfoFromFirebase(dbRefUsers);
+                        UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
                         ToastHelper.toastShort(FirebaseActivityDELETE.this, "User Restaurant Deleted");
 
 
@@ -464,10 +461,10 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                 AppDatabase appDatabase = AppDatabase.getInstance(FirebaseActivityDELETE.this);
                 RestaurantEntry restaurant = appDatabase.restaurantDao().getRestaurantByName("Filini Restaurant");
 
-                Map<String, Object> map = fillMapUsingRestaurantEntry(restaurant);
+                Map<String, Object> map = UtilsFirebase.fillMapUsingRestaurantEntry(restaurant);
 
                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + "-LEqJnfBmv5WGhGQGoC9" + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                Utils.updateUserRestaurantInfoInFirebase(dbRefUsers, map);
+                UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
 
             }
         });

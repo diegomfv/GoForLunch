@@ -14,6 +14,8 @@ import android.widget.Button;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -34,8 +36,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -61,6 +61,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private FirebaseAuth auth;
     private FirebaseUser user;
     private FirebaseDatabase fireDb;
+    private DatabaseReference dbRefUsers;
 
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
@@ -70,19 +71,20 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
-        editor = sharedPref.edit();
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
-        //auth.signOut();
+        auth.signOut();
         user = auth.getCurrentUser();
 
+        Log.d(TAG, "onCreate: SHARED_PREFERENCES = " + sharedPref.getAll().toString());
         Log.d(TAG, "onCreate: user = " + user);
 
         if (user == null) {
             Log.d(TAG, "onCreate: user is null");
             //We delete Shared preferences info
-            deleteSharedPreferencesInfo();
+            Utils.deleteSharedPreferencesInfo(sharedPref);
+            // TODO: 13/06/2018 Remove all info in SharedPref
 
 
         } else {
@@ -194,7 +196,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                             if (user != null) {
                                 Log.d(TAG, "onComplete: user != null");
 
-                                if (user.getDisplayName() == null) {
+                                if (user.getDisplayName() == null && user.getDisplayName().equalsIgnoreCase("")) {
                                     Log.d(TAG, "onComplete: user.getDisplayName() == null");
                                     /** If the user has not chosen yet a first name and last name we
                                      * launch AuthEnterNameActivity
@@ -204,13 +206,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
                                 } else {
                                     Log.d(TAG, "onComplete: user.getDisplayName() = " + user.getDisplayName());
-                                    /** If the user has already set a first name and last name we can fill SharedPreferences with
-                                     * the user's info, create the user in the database and launch MainActivity
-                                     * */
-                                    fillSharedPreferencesWithFirstNameAndLastName();
-
-                                    /** Two options. The user already exists
-                                     * in Firebase Realtime Database or not.
+                                     /** Two options. The user already exists
+                                     * in Firebase Database or not.
                                      * */
                                     fireDb = FirebaseDatabase.getInstance();
                                     DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
@@ -238,7 +235,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
                                                 } else {
 
-
                                                 }
                                             }
 
@@ -247,8 +243,35 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                                  * */
                                                 Log.d(TAG, "onDataChange: user didn't exist");
 
-                                                DatabaseReference dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                                                dbRef.push().setValue(createMapWithUserInfo());
+                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                                String userKey = dbRefUsers.push().getKey();
+
+                                                String [] names = getFirstNameAndLastName();
+
+                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                                                UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
+                                                        names[0],
+                                                        names[1],
+                                                        user.getEmail().toLowerCase(),
+                                                        "",
+                                                        "",
+                                                        false,
+                                                        "");
+
+                                                dbRefUsers = fireDb.getReference(
+                                                        RepoStrings.FirebaseReference.USERS
+                                                                + "/" + userKey
+                                                                + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                                UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "");
+
                                                 Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
                                                 startActivity(intent);
                                                 finish();
@@ -278,83 +301,19 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                 });
     }
 
-    /** Method that deletes all the sharedPreferences info
+
+    /** Method used to get the first name and last name of the user
      * */
-    public void deleteSharedPreferencesInfo() {
-        Log.d(TAG, "deleteSharedPreferencesInfo: called!");
-
-        if (sharedPref.getAll().size() > 0) {
-
-            Map<String, ?> map = sharedPref.getAll();
-
-            for (Map.Entry<String, ?> entry :
-                    map.entrySet()) {
-
-                editor.putString(entry.getKey(), "");
-                editor.apply();
-
-            }
-        }
-
-        // TODO: 02/06/2018 Delete this!
-        Map<String, ?> prefsMap = sharedPref.getAll();
-        for (Map.Entry<String, ?> entry: prefsMap.entrySet()) {
-            Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
-                    entry.getValue().toString());
-        }
-    }
-
-
-    /** Method that fills SharedPreferences with user's info
-     * */
-    public void fillSharedPreferencesWithFirstNameAndLastName() {
-        Log.d(TAG, "fillSharedPreferencesWithFirstNameAndLastName: called!");
+    private String[] getFirstNameAndLastName () {
 
         String names = user.getDisplayName();
 
         if (names != null) {
-            String[] tokens = names.split(" ");
+            return names.split(" ");
 
-            sharedPref = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
-            editor.putString(
-                    RepoStrings.SharedPreferences.USER_FIRST_NAME,
-                    Objects.requireNonNull(tokens[0]));
-            editor.putString(
-                    RepoStrings.SharedPreferences.USER_LAST_NAME,
-                    Objects.requireNonNull(tokens[1]));
-            editor.apply();
-
-            // TODO: 02/06/2018 Delete this!
-            Map<String, ?> prefsMap = sharedPref.getAll();
-            for (Map.Entry<String, ?> entry: prefsMap.entrySet()) {
-                Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
-                        entry.getValue().toString());
-            }
-
-
+        } else {
+            return null;
         }
     }
-
-    public Map<String,Object> createMapWithUserInfo () {
-
-        Map<String, Object> map = new HashMap<>();
-
-        map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
-        map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
-        map.put((RepoStrings.FirebaseReference.USER_EMAIL), user.getEmail());
-        map.put(RepoStrings.FirebaseReference.USER_GROUP, "");
-
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
-
-        return map;
-    }
-
 
 }

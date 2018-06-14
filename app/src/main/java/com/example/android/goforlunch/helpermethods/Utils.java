@@ -14,13 +14,17 @@ import android.view.inputmethod.InputMethodManager;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -74,115 +78,6 @@ public class Utils {
         return sharedPref.getString(key, "");
     }
 
-    /**
-     * Method that deletes
-     * all the restaurant info from a user in Firebase
-     * */
-    public static boolean deleteRestaurantsUserInfoFromFirebase(DatabaseReference dbRef) {
-
-        Map<String, Object> map = new HashMap<>();
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
-
-        dbRef.updateChildren(map);
-        return true;
-    }
-
-    /** Method that updates
-     *  user's info in Firebase
-     * */
-    public static boolean updateUserInfoInFirebase (DatabaseReference dbRef,
-                                                    String firstName,
-                                                    String lastName,
-                                                    String email,
-                                                    String group,
-                                                    String groupKey,
-                                                    String userRestaurantInfo) {
-
-        Map <String, Object> map = new HashMap<>();
-        map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, firstName);
-        map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, lastName);
-        map.put(RepoStrings.FirebaseReference.USER_EMAIL, email);
-        map.put(RepoStrings.FirebaseReference.USER_GROUP, group);
-        map.put(RepoStrings.FirebaseReference.USER_GROUP_KEY, groupKey);
-        map.put(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO, userRestaurantInfo);
-
-        dbRef.updateChildren(map);
-        return true;
-    }
-
-    /** Method that returns
-     * all user restaurant info
-     * */
-    public static Map<String,Object> getUserRestaurantInfoFromDataSnapshot (DataSnapshot dataSnapshot) {
-
-        Map <String, Object> map = new HashMap<>();
-
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_RATING).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_PHONE).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue().toString());
-
-        return map;
-    }
-
-    /**
-     * Method that inserts
-     * Restaurant info into user's info in Firebase
-     * */
-    public static boolean updateUserRestaurantInfoInFirebase (DatabaseReference dbRef,
-                                                              Map <String, Object> map) {
-
-        dbRef.updateChildren(map);
-        return true;
-    }
-
-    /** Method to fill a map with RestaurantEntry info
-     * */
-    public static Map<String, Object> fillMapUsingRestaurantEntry (RestaurantEntry restaurant) {
-
-        Map<String, Object> map = new HashMap<>();
-
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, restaurant.getName());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, restaurant.getType());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, restaurant.getAddress());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, restaurant.getRating());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, restaurant.getPlaceId());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, restaurant.getPhone());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, restaurant.getImageUrl());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, restaurant.getWebsiteUrl());
-
-        return map;
-    }
-
-
-
-    /**
-     * Method that inserts
-     * a new restaurant visited into the group
-     * */
-    public static boolean insertNewRestaurantInGroupInFirebase (DatabaseReference dbRef,
-                                                               String restaurantName) {
-
-        Map<String, Object> map = new HashMap<>();
-        map.put(restaurantName, true);
-
-        dbRef.updateChildren(map);
-        return true;
-   }
-
-
-
    /** Method to fill an intent with Restaurant Entry info
     * */
    public static Intent fillIntentUsingMapInfo (Intent intent, Map <String, Object> map) {
@@ -205,5 +100,32 @@ public class Utils {
    }
 
 
+   /***/
+    /** Method that deletes all the sharedPreferences info
+     * */
+    public static boolean deleteSharedPreferencesInfo(SharedPreferences sharedPref) {
+        Log.d(TAG, "deleteSharedPreferencesInfo: called!");
+
+        if (sharedPref.getAll().size() > 0) {
+
+            Map<String, ?> map = sharedPref.getAll();
+
+            for (Map.Entry<String, ?> entry :
+                    map.entrySet()) {
+
+                updateSharedPreferences(sharedPref, entry.getKey(), "");
+
+            }
+        }
+
+        // TODO: 02/06/2018 Delete this!
+        Map<String, ?> prefsMap = sharedPref.getAll();
+        for (Map.Entry<String, ?> entry: prefsMap.entrySet()) {
+            Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
+                    entry.getValue().toString());
+        }
+
+        return true;
+    }
 
 }

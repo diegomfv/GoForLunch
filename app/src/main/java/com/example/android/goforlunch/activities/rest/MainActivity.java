@@ -21,7 +21,6 @@ import android.widget.TextView;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
-import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.job.AddRestaurantToGroupDailyJob;
@@ -31,7 +30,6 @@ import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
-import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.firebase.auth.FirebaseAuth;
@@ -126,7 +124,7 @@ public class MainActivity extends AppCompatActivity{
     private String userFirstName;
     private String userLastName;
     private String userEmail;
-    private String userIdKey;
+    private String userKey;
     private String userGroup;
     private String userGroupKey;
 
@@ -169,7 +167,7 @@ public class MainActivity extends AppCompatActivity{
 
             userEmail = currentUser.getEmail();
 
-            if (userEmail != null) {
+            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
                 fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                 fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -184,15 +182,14 @@ public class MainActivity extends AppCompatActivity{
 
                                 userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
                                 userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
-                                userIdKey = item.getKey();
+                                userKey = item.getKey();
                                 userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
                                 userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
-                                Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userIdKey);
-                                Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP_KEY, userGroupKey);
+                                Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
 
                                 updateNavDrawerTextViews();
                                 chooseGroupReminder();
-                                checkAddRestaurantDailyJob(sharedPref);
+                                //checkAddRestaurantDailyJob(sharedPref);
 
                                 /** We show the MAP fragment
                                  * */
@@ -225,7 +222,7 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onResume() {
         super.onResume();
-        checkNotifications(sharedPref);
+        //checkNotifications(sharedPref);
     }
 
 
@@ -246,9 +243,11 @@ public class MainActivity extends AppCompatActivity{
         Log.d(TAG, "checkAddRestaurantDailyJob: called!");
 
         if (sharedPreferences.getBoolean(getResources().getString(R.string.key_addRestaurantIsOn), true)){
+            Log.d(TAG, "checkAddRestaurantDailyJob: do nothing!");
             //do nothing since alarm is currently running
 
         } else {
+            Log.d(TAG, "checkAddRestaurantDailyJob: create job!");
 
             JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
             jobIdAddRestaurant = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
@@ -268,9 +267,11 @@ public class MainActivity extends AppCompatActivity{
         Log.d(TAG, "checkNotifications: called!");
 
         if (sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), true)){
+            Log.d(TAG, "checkNotifications: do nothing!");
             //do nothing since alarm is currently running
 
         } else {
+            Log.d(TAG, "checkNotifications: cancel job and create alarm");
 
             /** We cancel the job to avoid creating more than one
              * */
@@ -405,40 +406,36 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
 
-                            fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userIdKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                            fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
                             fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
                                     if (internetConnectionIsOK()) {
+                                        Log.d(TAG, "onDataChange: Internet is OK");
 
-                                        if (userEmail == null && userEmail.equalsIgnoreCase("")) {
-                                            ToastHelper.toastShort(MainActivity.this, "An error occurred. Restaurant Entry is null");
-
-                                        } else if (userGroup == null && userGroup.equalsIgnoreCase("")) {
-                                            ToastHelper.toastShort(MainActivity.this, "You have not chosen a restaurant yet!");
+                                        if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
+                                            ToastHelper.toastShort(MainActivity.this, "You haven not chosen a restaurant yet!");
 
                                         } else {
 
-                                            Map<String, Object> map = Utils.getUserRestaurantInfoFromDataSnapshot(dataSnapshot);
+                                            Map<String, Object> map = Utils.fillMapUsingDataSnapshot(dataSnapshot);
                                             Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
                                             startActivity(Utils.fillIntentUsingMapInfo(intent, map));
 
                                         }
+
                                     } else {
+                                        Log.d(TAG, "onDataChange: There is no internet!");
                                         ToastHelper.toastNoInternet(MainActivity.this);
 
                                     }
-
-
                                 }
 
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
                                     Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-
 
                                 }
                             });

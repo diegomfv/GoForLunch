@@ -153,12 +153,18 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
-    private DatabaseReference fireDbRefToUsersGroupsRestaurantsVisited;
+    private DatabaseReference dbRefUsers;
+    private DatabaseReference dbRefGroups;
 
     //Local Database
     private AppDatabase mDb;
 
-    private String usersEmail;
+    //Variables
+    private String userFirstName;
+    private String userLastName;
+    private String userEmail;
+    private String userIdKey;
+    private String userGroup;
     private String userGroupKey;
 
     /******************************
@@ -180,10 +186,9 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
         mDb = AppDatabase.getInstance(getActivity());
+        fireDb = FirebaseDatabase.getInstance();
 
-        listOfVisitedRestaurantsByTheUsersGroup = new ArrayList<>();
         mapOfListsOfRestaurantsByType = new HashMap<>();
         listOfMarkers = new ArrayList<>();
 
@@ -210,16 +215,69 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
          * */
         setHasOptionsMenu(true);
 
-        userGroupKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP_KEY, "");
-
         /** We get all the user information
          * */
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
 
         if (currentUser != null) {
-            usersEmail = currentUser.getEmail();
+            userEmail = currentUser.getEmail();
+
+            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        for (DataSnapshot item :
+                                dataSnapshot.getChildren()) {
+
+                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
+
+                                userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                                userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                                userIdKey = item.getKey();
+                                userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
+                                userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                                Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userIdKey);
+
+                                dbRefGroups = fireDb.getReference(
+                                        RepoStrings.FirebaseReference.GROUPS
+                                                + "/" + userGroupKey
+                                                + "/" + RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+                                dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                                        listOfVisitedRestaurantsByTheUsersGroup = Utils.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
+                                        fillMapWithAllDatabaseRestaurants();
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                                    }
+                                });
+
+
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                    }
+                });
+            }
         }
+
 
         /** We use the mapFragmentViewModel to fill a map with lists of restaurants by type.
          * This way, we will be able to access the information very fast when the user searches
@@ -280,49 +338,11 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                     Log.d(TAG, "onChanged: THERE IS NO DATA IN THE DATABASE!");
 
                 }
-
-            }
-        });
-
-        // TODO: 06/06/2018 CHECK IF THIS IS CALLED WHEN WE RETURN TO THE ACTIVITY
-        /** We use the user's group to get all restaurants visited by that group and
-         * differentiate the pins */
-        fireDb = FirebaseDatabase.getInstance();
-        fireDbRefToUsersGroupsRestaurantsVisited = fireDb.getReference(
-                RepoStrings.FirebaseReference.GROUPS + "/" + userGroupKey + "/" + RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
-
-        fireDbRefToUsersGroupsRestaurantsVisited.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.getChildren());
-
-                if (userGroupKey.equalsIgnoreCase("")) {
-                    Log.d(TAG, "onDataChange: THE USER HAS NOT CHOSEN A USER_GROUP YET!");
-                    //do nothing because the user has not chosen a group yet
-
-                } else {
-                    Log.d(TAG, "onDataChange: THE USER HAS ALREADY A USER_GROUP");
-
-                    /** We add all the restaurants to a list
-                     * */
-                    for (DataSnapshot item :
-                            dataSnapshot.getChildren()) {
-
-                        listOfVisitedRestaurantsByTheUsersGroup.add(Objects.requireNonNull(item.getValue()).toString());
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
             }
         });
 
         /** AutoCompleteTextView code. It allows to modify the pins in the map
          * according to the information we got from the databases
-         *
          * */
         mSearchText = (AutoCompleteTextView) view.findViewById(R.id.map_autocomplete_id);
 
@@ -390,10 +410,19 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
             });
         }
 
-
         /**
-         * Listener for REFRESH button
-         * */
+         * STARTING THE MAP:
+         * First, we check that the user has the correct Google Play Services Version.
+         * If the user does, we start the map
+         * **/
+        if (isGooglePlayServicesOK()) {
+            getLocationPermission();
+        }
+
+        /*************************
+         * LISTENERS *************
+         * **********************/
+
         buttonRefreshMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -417,53 +446,10 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
         // TODO: 06/06/2018 CHECK IF THERE IS INTERNET
 
-
-        /**
-         * STARTING THE MAP:
-         * First, we check that the user has the correct Google Play Services Version.
-         * If the user does, we start the map
-         * **/
-        if (isGooglePlayServicesOK()) {
-            getLocationPermission();
-        }
         return view;
     }
 
 
-    /**************************
-     * MENU METHODS ***********
-     * ***********************/
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-        getActivity().getMenuInflater().inflate(R.menu.map_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-
-            case android.R.id.home: {
-                Log.d(TAG, "onOptionsItemSelected: home clicked");
-                if (((MainActivity) getActivity()) != null) {
-                    ((MainActivity) getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
-                }
-                return true;
-            }
-
-            case R.id.map_search_button_id: {
-                Log.d(TAG, "onOptionsItemSelected: search button clicked");
-
-                toolbar.setVisibility(View.GONE);
-                Anim.crossFadeShortAnimation(toolbar2);
-                return true;
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     /**************************
      * METHODS ****************
@@ -680,17 +666,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     }
 
     /**
-     * Method that returns true if local database is empty
-     * */
-    public boolean localDatabaseIsEmpty() {
-        Log.d(TAG, "localDatabaseIsNotEmpty: called!");
-
-        DatabaseHelper dbH = new DatabaseHelper(getActivity());
-        return dbH.isTableEmpty("restaurant");
-
-    }
-
-    /**
      * Method that starts doing the requests to the servers to get the
      * restaurants. Firstly, it deletes the database
      * */
@@ -751,9 +726,16 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
             if (mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]) != null) {
                 Log.d(TAG, "fillMapWithAllDatabaseRestaurants: ALL type of restaurants IS NOT NULL");
 
-                /** RepoStrings.RESTAURANT_TYPES[0] refers to "All" types of restaurants
-                 * */
-                fillMapWithMarkers(mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]));
+                if (listOfVisitedRestaurantsByTheUsersGroup != null) {
+
+                    /** RepoStrings.RESTAURANT_TYPES[0] refers to "All" types of restaurants
+                     * */
+                    fillMapWithMarkers(mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]));
+
+                } else {
+                    Log.d(TAG, "fillMapWithAllDatabaseRestaurants: listOfVisitedRestaurantsByTheUsersGroup = null");
+
+                }
 
             } else {
                 Log.d(TAG, "fillMapWithAllDatabaseRestaurants: ALL type of restaurants IS NULL");
@@ -832,6 +814,56 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
     }
+
+    /**************************
+     * MENU METHODS ***********
+     * ***********************/
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        getActivity().getMenuInflater().inflate(R.menu.map_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case android.R.id.home: {
+                Log.d(TAG, "onOptionsItemSelected: home clicked");
+                if (((MainActivity) getActivity()) != null) {
+                    ((MainActivity) getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
+                }
+                return true;
+            }
+
+            case R.id.map_search_button_id: {
+                Log.d(TAG, "onOptionsItemSelected: search button clicked");
+
+                toolbar.setVisibility(View.GONE);
+                Anim.crossFadeShortAnimation(toolbar2);
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+
+    /**
+     * Method that returns true if local database is empty
+     * */
+    public boolean localDatabaseIsEmpty() {
+        Log.d(TAG, "localDatabaseIsNotEmpty: called!");
+
+        DatabaseHelper dbH = new DatabaseHelper(getActivity());
+        return dbH.isTableEmpty("restaurant");
+
+    }
+
+
 
     /**
      * This method allows us to get a request permission result

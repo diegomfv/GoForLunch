@@ -15,6 +15,8 @@ import android.widget.ProgressBar;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -30,9 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -59,6 +59,8 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     //List of Emails to store all the emails and check if an user already exists in the database
     private List<String> listOfEmails;
 
+    //true, we came from Google or Facebook
+    //false, we came from password sign up or sign in
     private boolean flag = false;
 
     //Firebase
@@ -66,6 +68,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     private FirebaseUser user;
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
+    private DatabaseReference dbRefNewUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -189,10 +192,34 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                             } else {
                                                 Log.d(TAG, "onComplete: task was successful");
 
-                                                DatabaseReference fireDbRefNewUser =
-                                                        fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                                dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
 
-                                                fireDbRefNewUser.push().setValue(createMapWithUserInfo());
+                                                String userKey = dbRefNewUser.push().getKey();
+
+                                                dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
+                                                        + "/" + userKey);
+                                                UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
+                                                        inputFirstName.getText().toString(),
+                                                        inputLastName.getText().toString(),
+                                                        inputEmail.getText().toString().toLowerCase().trim(),
+                                                        "",
+                                                        "",
+                                                        false,
+                                                        "");
+
+                                                dbRefNewUser = fireDb.getReference(
+                                                        RepoStrings.FirebaseReference.USERS
+                                                                + "/" + userKey
+                                                                + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                                UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "",
+                                                        "");
 
                                                 startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
                                                 finish();
@@ -238,7 +265,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                             if (!task.isSuccessful()) {
                                                 Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
 
-                                                //We get the exception and display why it was not succesful
+                                                //We get the exception and display why it was not successful
                                                 FirebaseAuthException e = (FirebaseAuthException) task.getException();
                                                 if (e != null) {
                                                     Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
@@ -276,10 +303,34 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                                     } else {
                                                                         Log.d(TAG, "onComplete: task was successful");
 
-                                                                        DatabaseReference fireDbRefNewUser =
-                                                                                fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                                                        dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
 
-                                                                        fireDbRefNewUser.push().setValue(createMapWithUserInfo());
+                                                                        String userKey = dbRefNewUser.push().getKey();
+
+                                                                        dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
+                                                                                + "/" + userKey);
+                                                                        UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
+                                                                                inputFirstName.getText().toString(),
+                                                                                inputLastName.getText().toString(),
+                                                                                inputEmail.getText().toString().toLowerCase().trim(),
+                                                                                "",
+                                                                                "",
+                                                                                false,
+                                                                                "");
+
+                                                                        dbRefNewUser = fireDb.getReference(
+                                                                                RepoStrings.FirebaseReference.USERS
+                                                                                        + "/" + userKey
+                                                                                        + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                                                        UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefNewUser,
+                                                                                "",
+                                                                                "",
+                                                                                "",
+                                                                                "",
+                                                                                "",
+                                                                                "",
+                                                                                "",
+                                                                                "");
 
                                                                         startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
                                                                         finish();
@@ -330,31 +381,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         }
     }
 
-    // TODO: 02/06/2018 Could be probably done with a Static method
-    /** Method that create a map with certain info
-     * */
-    public Map<String,Object> createMapWithUserInfo () {
-
-        Map<String, Object> map = new HashMap<>();
-
-        map.put((RepoStrings.FirebaseReference.USER_FIRST_NAME), inputFirstName.getText().toString());
-        map.put((RepoStrings.FirebaseReference.USER_LAST_NAME), inputLastName.getText().toString());
-        map.put((RepoStrings.FirebaseReference.USER_EMAIL), inputEmail.getText().toString().toLowerCase().trim());
-        map.put((RepoStrings.FirebaseReference.USER_GROUP), "");
-
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
-
-        return map;
-    }
-
-    /** Checks if a value is in a list. It is used to
+        /** Checks if a value is in a list. It is used to
      * check if the user email is already in the database.
      * */
     public boolean userAlreadyExists(List<String> listOfEmails, String inputString) {

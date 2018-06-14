@@ -1,5 +1,7 @@
 package com.example.android.goforlunch;
 
+import android.util.Log;
+
 import com.bumptech.glide.signature.ObjectKey;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repostrings.RepoStrings;
@@ -12,6 +14,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -489,6 +492,35 @@ public class UnitTests {
 
         String str = "goforlunch";
         assertTrue(Utils.capitalize(str).equals("Goforlunch"));
+
+    }
+
+    @Test
+    public void removeASpecificItemFromList () {
+
+        List <String> listOfNames = new ArrayList<>();
+
+        listOfNames.add("Alfa");
+        listOfNames.add("Beta");
+        listOfNames.add("Charlie");
+        listOfNames.add("Delta");
+        listOfNames.add("Echo");
+
+        Random rand = new Random();
+
+        String specificName = listOfNames.get(rand.nextInt(5));
+        System.out.println(specificName);
+
+        for (Iterator<String> iterator = listOfNames.iterator(); iterator.hasNext();) {
+
+            String string = iterator.next();
+
+            if (string.equalsIgnoreCase(specificName)) {
+                iterator.remove();
+            }
+        }
+
+        System.out.println(listOfNames.toString());
 
     }
 

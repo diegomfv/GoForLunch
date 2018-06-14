@@ -8,7 +8,7 @@ import android.util.Log;
 import com.evernote.android.job.DailyJob;
 import com.evernote.android.job.JobRequest;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -18,9 +18,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static com.example.android.goforlunch.helpermethods.Utils.deleteRestaurantsUserInfoFromFirebase;
-import static com.example.android.goforlunch.helpermethods.Utils.insertNewRestaurantInGroupInFirebase;
 
 /**
  * Created by Diego Fajardo on 07/06/2018.
@@ -57,17 +54,17 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
                 // TODO: 13/06/2018 Might not be necessary to check internet connection
                 /** Getting user's restaurant info
                  * */
-                Map<String, Object> map = Utils.getUserRestaurantInfoFromDataSnapshot(dataSnapshot);
+                Map<String, Object> map = UtilsFirebase.fillMapUsingDataSnapshot(dataSnapshot);
 
                 /** Inserting a new restaurant in the group
                  * */
                 dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS + "/" + userGroupKey + "/" + RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
-                insertNewRestaurantInGroupInFirebase(dbRefGroups, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
+                UtilsFirebase.insertNewRestaurantInGroupInFirebase(dbRefGroups, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
 
                 /** Deleting user info from database
                  * */
                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                deleteRestaurantsUserInfoFromFirebase(dbRefUsers);
+                UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
                 ToastHelper.toastShort(getContext(), "User Restaurant Deleted");
 
             }

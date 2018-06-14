@@ -18,6 +18,7 @@ import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 
 import java.util.List;
+import java.util.function.ToDoubleBiFunction;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -95,6 +96,7 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
                 @Override
                 public void onClick(View view) {
 
+                    // TODO: 13/06/2018 Put this inside a method
                     Intent intent = new Intent(mContext, RestaurantActivity.class);
                     intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfCoworkers.get(holder.getAdapterPosition()).getPlaceId());
                     intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getImageUrl());

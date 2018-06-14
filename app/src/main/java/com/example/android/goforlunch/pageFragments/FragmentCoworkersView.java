@@ -1,6 +1,8 @@
 package com.example.android.goforlunch.pageFragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,10 +23,12 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,7 +37,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -56,13 +59,20 @@ public class FragmentCoworkersView extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
 
     //Firabase
-    private FirebaseDatabase fireDb;
-    private DatabaseReference fireDbRefUsers;
-    private DatabaseReference fireDbRefGroups;
     private FirebaseAuth auth;
+    private FirebaseUser currentUser;
+    private FirebaseDatabase fireDb;
+    private DatabaseReference dbRefUsers;
+    private DatabaseReference dbRefGroups;
 
-    private String usersEmail;
+    private String userFirstName;
+    private String userLastName;
+    private String userKey;
+    private String userGroupKey;
+    private String userEmail;
     private String userGroup;
+
+    private SharedPreferences sharedPref;
 
     //List of Coworkers
     private List<User> listOfCoworkers;
@@ -79,7 +89,7 @@ public class FragmentCoworkersView extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreateView: Map");
 
@@ -87,15 +97,20 @@ public class FragmentCoworkersView extends Fragment {
          * */
         setHasOptionsMenu(true);
 
+        fireDb = FirebaseDatabase.getInstance();
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+
         View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
 
         toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
-        if (((AppCompatActivity)getActivity()) != null) {
-            ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        if (((AppCompatActivity) getActivity()) != null) {
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         }
 
-        if (((AppCompatActivity)getActivity()) != null) {
-            actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        if (((AppCompatActivity) getActivity()) != null) {
+            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
                 actionBar.setDisplayHomeAsUpEnabled(true);
@@ -109,80 +124,77 @@ public class FragmentCoworkersView extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        /** We get the group of the user
+        /** We get the user information
          * */
         auth = FirebaseAuth.getInstance();
+        currentUser = auth.getCurrentUser();
+        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
-        if (auth.getCurrentUser() != null) {
-            usersEmail = auth.getCurrentUser().getEmail();
-        } else {
-            // TODO: 24/05/2018 Remove this
-            usersEmail = RepoStrings.FAKE_USER_EMAIL;
+        if (currentUser != null) {
+
+            userEmail = currentUser.getEmail();
+
+            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
+                        userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
+                        userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
+                        userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
+                        userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+
+                        /** We fill the list of the coworkers using the group of the user
+                         *  */
+                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                        dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                                listOfCoworkers.clear();
+                                listOfCoworkers = UtilsFirebase.fillListWithUsersFromDataSnapshot(dataSnapshot, userEmail, userGroup);
+                                if (getActivity() != null) {
+                                    mAdapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
+                                    mRecyclerView.setAdapter(mAdapter);
+                                }
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+                    }
+                });
+
+            }
         }
 
-        /** We get the group of the user and fill a list with the coworkers. We will pass
-         * that list to the RecyclerView
+        /** We set a listener for listening for changes in the database
          * */
-        fireDb = FirebaseDatabase.getInstance();
-        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbRefUsers.addValueEventListener(new ValueEventListener() {
+        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        dbRefUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                for (DataSnapshot item :
-                        dataSnapshot.getChildren()) {
-                    Log.d(TAG, "onDataChange: in the foreach loop");
-
-                    if (usersEmail != null) {
-                        Log.d(TAG, "onDataChange: users email is not null: " + usersEmail);
-
-                        /** If the usersEmail of the user in the list is the same as the current user,
-                         * then it is the user we are looking for and we save the user's group to
-                         * build a list */
-                        if (item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().equals(usersEmail)) {
-                            userGroup = item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
-                            Log.d(TAG, "onDataChange: userGroup = " + userGroup);
-                            break;
-                        }
-                    }
-                }
-
-                /** If user's group is different than null, then we get all the users from the database
-                 * that are in the same group and fill a list with them
-                 * */
-                if (userGroup != null) {
-                    Log.d(TAG, "onDataChange: userGroup is not null: " + userGroup);
+                if (userGroup != null || !userGroup.equalsIgnoreCase("")) {
 
                     listOfCoworkers.clear();
-
-                    for (DataSnapshot item :
-                            dataSnapshot.getChildren()) {
-
-                        if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).equals(userGroup)) {
-
-                            if(!Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).equals(usersEmail)) {
-
-                                User.Builder builder = new User.Builder();
-
-                                builder.setFirstName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString());
-                                builder.setLastName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString());
-                                builder.setEmail(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString());
-                                builder.setGroup(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString());
-                                builder.setPlaceId(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID).getValue()).toString());
-                                builder.setRestaurantName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
-                                builder.setRestaurantType(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString());
-                                builder.setImageUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL).getValue()).toString());
-                                builder.setAddress(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue()).toString());
-                                builder.setRating(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_RATING).getValue()).toString());
-                                builder.setPhone(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_PHONE).getValue()).toString());
-                                builder.setWebsiteUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue()).toString());
-
-                                listOfCoworkers.add(builder.create());
-
-                            }
-                        }
-                    }
+                    listOfCoworkers = UtilsFirebase.fillListWithUsersFromDataSnapshot(dataSnapshot, userEmail, userGroup);
 
                     if (getActivity() != null) {
                         mAdapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
@@ -195,6 +207,7 @@ public class FragmentCoworkersView extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
             }
         });
 
@@ -205,7 +218,6 @@ public class FragmentCoworkersView extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
 
             case android.R.id.home: {
@@ -220,8 +232,5 @@ public class FragmentCoworkersView extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
-
-
-
 
 }

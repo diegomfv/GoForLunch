@@ -24,28 +24,12 @@
         app:rippleColor="@color/colorAccentLight"
         />
 
-    <android.support.design.widget.TextInputLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/join_recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="10dp">
-
-    <com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView
-        android:id="@+id/join_autocomplete_enter_group_id"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="16sp"
-        android:hint="Group"
-        android:maxLines="1"
-        android:inputType="text"
-        android:imeOptions="actionSearch"
-        android:completionThreshold="0"
-        android:maxLength="12" />
-
-    </android.support.design.widget.TextInputLayout>
+        android:layout_margin="30dp"
+        />
 
     <Button
         android:id="@+id/join_button_join_group_id"

@@ -76,6 +76,7 @@ public interface RepoStrings {
         String USER_EMAIL = "user_email";
         String USER_GROUP = "user_group";
         String USER_GROUP_KEY = "user_group_key";
+        String USER_NOTIFICATIONS = "user_notifications";
         String USER_RESTAURANT_INFO = "user_restaurant_info";
 
         String RESTAURANT_PLACE_ID = "place_id";
