@@ -77,4 +77,10 @@
         android:layout_height="wrap_content"
         android:text="BUTTON 11"/>
 
+    <Button
+        android:id="@+id/firebase_button12_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BUTTON 12"/>
+
 </LinearLayout>

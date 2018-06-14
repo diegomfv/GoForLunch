@@ -48,6 +48,7 @@ import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
@@ -252,7 +253,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                                        listOfVisitedRestaurantsByTheUsersGroup = Utils.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
+                                        listOfVisitedRestaurantsByTheUsersGroup = UtilsFirebase.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
                                         fillMapWithAllDatabaseRestaurants();
 
                                     }
@@ -856,7 +857,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
      * Method that returns true if local database is empty
      * */
     public boolean localDatabaseIsEmpty() {
-        Log.d(TAG, "localDatabaseIsNotEmpty: called!");
+        Log.d(TAG, "localDatabaseIsEmpty: called!");
 
         DatabaseHelper dbH = new DatabaseHelper(getActivity());
         return dbH.isTableEmpty("restaurant");

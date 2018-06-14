@@ -1,8 +1,10 @@
 package com.example.android.goforlunch.activities.rest;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
@@ -13,15 +15,27 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthEnterNameActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Diego Fajardo on 09/05/2018.
@@ -51,17 +65,32 @@ public class PersInfoActivity extends AppCompatActivity{
     private List<String> listOfGroups;
     private String[] arrayOfGroups;
 
+    //Variables
+    private String userFirstName;
+    private String userLastName;
+    private String userEmail;
+    private String userKey;
+    private String userGroup;
+    private String userGroupKey;
+
     //Firebase
     private FirebaseAuth auth;
-    private FirebaseUser user;
+    private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
-    private DatabaseReference fireDbRefGroups;
-    private DatabaseReference fireDbRefUsers;
+    private DatabaseReference dbRefGroups;
+    private DatabaseReference dbRefUsers;
+
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pers_info);
+
+        fireDb = FirebaseDatabase.getInstance();
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
+
+        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
         iv_userImage = (ImageView) findViewById(R.id.pers_enter_image_id);
         inputFirstName = (TextInputEditText) findViewById(R.id.pers_enter_first_name_id);
@@ -73,32 +102,103 @@ public class PersInfoActivity extends AppCompatActivity{
         buttonChangePassword = (Button) findViewById(R.id.pers_enter_change_password_id);
         progressBar = (ProgressBar) findViewById(R.id.pers_enter_progressbar);
 
-        /** Instantiation of
-         *  FirebaseAuth
+        /** We get the user information
          * */
         auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
+        currentUser = auth.getCurrentUser();
+        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
-        /** We fill the widgets with the user's info
-         * */
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
-        inputFirstName.setText(sharedPref.getString(RepoStrings.SharedPreferences.USER_FIRST_NAME, ""));
-        inputLastName.setText(sharedPref.getString(RepoStrings.SharedPreferences.USER_LAST_NAME, ""));
+        if (currentUser != null) {
 
-        if (user != null) {
-            inputEmail.setText(user.getEmail());
+            userEmail = currentUser.getEmail();
+
+            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
+                        userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
+                        userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
+                        userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
+                        userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+
+                        /** We fill the widgets with the user's info
+                         * */
+                        inputFirstName.setText(userFirstName);
+                        inputLastName.setText(userLastName);
+                        inputEmail.setText(userEmail);
+                        inputGroup.setText(userGroup);
+                        inputPassword.setText("******");
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
         }
-
-        inputPassword.setText("********");
-        inputGroup.setText(sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP,""));
-
 
         buttonSaveChanges.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Clicked! " + view.toString());
 
-                ToastHelper.toastShort(PersInfoActivity.this, "Not implemented yet!");
+                if (inputFirstName.getText().toString().trim().length() == 0) {
+                    ToastHelper.toastShort(PersInfoActivity.this, "Please insert your first name");
+
+                } else if (inputLastName.getText().toString().trim().length() == 0) {
+                    ToastHelper.toastShort(PersInfoActivity.this, "Please, insert your last name");
+
+                } else {
+
+                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                            .setDisplayName(
+                                    Utils.capitalize(inputFirstName.getText().toString().trim())
+                                            + " "
+                                            + Utils.capitalize(inputLastName.getText().toString().trim()))
+                            .build();
+
+                    currentUser.updateProfile(profileUpdates)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (!task.isSuccessful()) {
+                                        Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                        //We get the exception and display why it was not successful
+                                        FirebaseAuthException e = (FirebaseAuthException) task.getException();
+
+                                        if (e != null) {
+                                            Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                        }
+
+                                        ToastHelper.toastShort(PersInfoActivity.this, "Something went wrong. Please, try again");
+
+                                    } else {
+                                        Log.d(TAG, "onComplete: task was successful");
+
+                                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+
+                                        Map<String, Object> map = new HashMap<>();
+                                        map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
+                                        map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
+                                        UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
+
+                                        ToastHelper.toastShort(PersInfoActivity.this, "Your information has been updated");
+
+                                        startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                                        finish();
+
+                                    }
+                                }
+                            });
+                }
             }
         });
 
@@ -110,13 +210,5 @@ public class PersInfoActivity extends AppCompatActivity{
                 ToastHelper.toastShort(PersInfoActivity.this, "Not implemented yet!");
             }
         });
-
-
-
-
-
-
-
     }
-
 }

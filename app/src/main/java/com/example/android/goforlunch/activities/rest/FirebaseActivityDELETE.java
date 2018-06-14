@@ -16,6 +16,8 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
+import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
+import com.example.android.goforlunch.remote.requesters.RequesterTextSearch;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,6 +59,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
     private Button button9;
     private Button button10;
     private Button button11;
+    private Button button12;
 
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
@@ -122,6 +125,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
         button9 = findViewById(R.id.firebase_button9_id);
         button10 = findViewById(R.id.firebase_button10_id);
         button11 = findViewById(R.id.firebase_button11_id);
+        button12 = findViewById(R.id.firebase_button12_id);
 
         /**
          * INSERT RANDOM USERS IN DATABASE
@@ -143,7 +147,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                             listOfEmails.get(i),
                             listOfGroups.get(random.nextInt(4)),
                             "",
-                            false,
+                            "",
                             "");
 
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
@@ -175,7 +179,6 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                     map = new HashMap<>();
                     map.put(RepoStrings.FirebaseReference.GROUP_NAME, listOfGroups.get(i));
-                    map.put(RepoStrings.FirebaseReference.GROUP_MEMBERS, "");
                     map.put(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
 
                     dbRefGroups.push().setValue(map);
@@ -201,7 +204,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                         "",
                         "",
                         "",
-                        false,
+                        "",
                         "");
 
             }
@@ -469,6 +472,32 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             }
         });
 
+        button12.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: button12 clicked!");
+
+                LatLngForRetrofit myPosition = new LatLngForRetrofit(51.456961, -2.606416);
+                AppDatabase mDb = AppDatabase.getInstance(FirebaseActivityDELETE.this);
+                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+
+                startRequestUsingTextSearchService(mDb, myPosition);
+
+            }
+        });
+
+
     }
+
+    /** Method that starts the request using TextSearch service
+     * */
+    private void startRequestUsingTextSearchService (AppDatabase mDb, LatLngForRetrofit myPosition) {
+
+        RequesterTextSearch requesterTextSearch = new RequesterTextSearch(mDb, myPosition);
+        requesterTextSearch.doApiRequest();
+
+    }
+
+
 
 }

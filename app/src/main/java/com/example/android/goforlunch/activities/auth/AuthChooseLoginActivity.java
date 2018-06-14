@@ -255,7 +255,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                                         user.getEmail().toLowerCase(),
                                                         "",
                                                         "",
-                                                        false,
+                                                        "",
                                                         "");
 
                                                 dbRefUsers = fireDb.getReference(

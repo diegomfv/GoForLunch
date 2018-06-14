@@ -90,7 +90,6 @@ public interface RepoStrings {
 
         String GROUPS = "groups";
         String GROUP_NAME = "group_name";
-        String GROUP_MEMBERS = "group_members";
         String GROUP_RESTAURANTS_VISITED = "group_restaurants_visited";
 
 

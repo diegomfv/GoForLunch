@@ -170,7 +170,10 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                             progressBar.setVisibility(View.VISIBLE);
 
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(inputFirstName.getText().toString() + " " + inputLastName.getText().toString())
+                                    .setDisplayName(
+                                            Utils.capitalize(inputFirstName.getText().toString().trim())
+                                            + " "
+                                            + Utils.capitalize(inputLastName.getText().toString().trim()))
                                     .build();
 
                             user.updateProfile(profileUpdates)
@@ -199,12 +202,12 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                 dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
                                                         + "/" + userKey);
                                                 UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
-                                                        inputFirstName.getText().toString(),
-                                                        inputLastName.getText().toString(),
+                                                        Utils.capitalize(inputFirstName.getText().toString().trim()),
+                                                        Utils.capitalize(inputLastName.getText().toString().trim()),
                                                         inputEmail.getText().toString().toLowerCase().trim(),
                                                         "",
                                                         "",
-                                                        false,
+                                                        "",
                                                         "");
 
                                                 dbRefNewUser = fireDb.getReference(
@@ -281,7 +284,10 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                 if (user != null) {
 
                                                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                                            .setDisplayName(inputFirstName.getText().toString() + " " + inputLastName.getText().toString())
+                                                            .setDisplayName(
+                                                                    Utils.capitalize(inputFirstName.getText().toString().trim())
+                                                                    + " "
+                                                                    + Utils.capitalize(inputLastName.getText().toString().trim()))
                                                             .build();
 
                                                     user.updateProfile(profileUpdates)
@@ -310,12 +316,12 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                                         dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
                                                                                 + "/" + userKey);
                                                                         UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
-                                                                                inputFirstName.getText().toString(),
-                                                                                inputLastName.getText().toString(),
+                                                                                Utils.capitalize(inputFirstName.getText().toString().trim()),
+                                                                                Utils.capitalize(inputLastName.getText().toString().trim()),
                                                                                 inputEmail.getText().toString().toLowerCase().trim(),
                                                                                 "",
                                                                                 "",
-                                                                                false,
+                                                                                "",
                                                                                 "");
 
                                                                         dbRefNewUser = fireDb.getReference(

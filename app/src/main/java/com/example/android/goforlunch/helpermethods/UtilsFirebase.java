@@ -56,7 +56,7 @@ public class UtilsFirebase {
                                                     String email,
                                                     String group,
                                                     String groupKey,
-                                                    boolean notifications,
+                                                    String notifications,
                                                     String userRestaurantInfo) {
 
         Map <String, Object> map = new HashMap<>();
@@ -258,11 +258,5 @@ public class UtilsFirebase {
 
         return null;
     }
-
-
-
-
-
-
 
 }

@@ -67,8 +67,8 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(AuthSignInPasswordActivity.this, AuthEnterNameActivity.class);
-                intent.putExtra(RepoStrings.SentIntent.EMAIL,inputEmail.getText().toString().toLowerCase());
-                intent.putExtra(RepoStrings.SentIntent.PASSWORD,inputPassword.getText().toString().toLowerCase());
+                intent.putExtra(RepoStrings.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
+                intent.putExtra(RepoStrings.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
 
                 //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
                 intent.putExtra(RepoStrings.SentIntent.FLAG, true);

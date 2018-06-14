@@ -38,8 +38,6 @@
 
 
 
-
-
         </activity>
 
         <activity android:name=".activities.auth.AuthSignInPasswordActivity"
@@ -65,10 +63,8 @@
             </intent-filter>
 
 
-
         </activity>
         <activity android:name=".activities.rest.MainActivity" />
-        <activity android:name=".activities.auth.AuthGettingUserInfo" />
 
     </application>
 
