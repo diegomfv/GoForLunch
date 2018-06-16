@@ -196,6 +196,7 @@ public class RequesterNearby {
                                     RequesterPlaceId requesterPlaceId = new RequesterPlaceId(mDb, myPosition);
                                     requesterPlaceId.doApiRequest(results[i].getPlace_id());
 
+                                    break;
                                 }
                             }
                         }

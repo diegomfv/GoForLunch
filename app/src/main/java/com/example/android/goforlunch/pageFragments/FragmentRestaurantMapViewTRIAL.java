@@ -41,7 +41,6 @@ import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.atl.ATLInitApiTextSearchRequests;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
@@ -170,7 +169,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     private String userGroupKey;
 
     //Fragment that displays the map and progress bar
-    private View mapView;
+    private RelativeLayout mapFragmentRelativeLayout;
     private ProgressBar progressBar;
 
     /******************************
@@ -195,8 +194,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         mDb = AppDatabase.getInstance(getActivity());
         fireDb = FirebaseDatabase.getInstance();
 
-        mapView = (View) view.findViewById(R.id.map);
-        progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+        mapFragmentRelativeLayout = (RelativeLayout) view.findViewById(R.id.map_fragment_parent_relative_layout);
+        progressBar = (ProgressBar) view.findViewById(R.id.map_progress_bar);
 
         listOfVisitedRestaurantsByTheUsersGroup = new ArrayList<>();
         listOfAllRestaurantsInDatabase = new ArrayList<>();
@@ -427,7 +426,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                 Log.d(TAG, "onClick: refresh button clicked!");
 
                 ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Starting requests process");
-                //showProgressBar
                 callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
 
             }
@@ -645,7 +643,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
             if (listOfAllRestaurantsInDatabase != null
                     && !listOfAllRestaurantsInDatabase.isEmpty()) {
-                Log.d(TAG, "fillMapWithMarkers: listOfRestaurants IS NOT NULL and IS NOT EMPTY");
+                Log.d(TAG, "displayPinsInMap: listOfRestaurants IS NOT NULL and IS NOT EMPTY");
 
                 /** We delete all the elements of the listOfMarkers
                  * */
@@ -661,7 +659,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                             Double.parseDouble(listOfAllRestaurantsInDatabase.get(i).getLongitude()));
 
                     if (listOfVisitedRestaurantsByTheUsersGroup.contains(listOfAllRestaurantsInDatabase.get(i).getName())) {
-                        Log.d(TAG, "onTextChanged: The place has been visited by somebody before");
+                        Log.d(TAG, "displayPinsInMap: The place has been visited by somebody before");
 
                         options = new MarkerOptions()
                                 .position(latLng)
@@ -669,7 +667,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                                 .snippet(listOfAllRestaurantsInDatabase.get(i).getAddress())
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)); //Different colour
                     } else {
-                        Log.d(TAG, "onTextChanged: The place has not been visited yet");
+                        Log.d(TAG, "displayPinsInMap: The place has not been visited yet");
 
                         options = new MarkerOptions()
                                 .position(latLng)
@@ -737,8 +735,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-
-
     /**
      * Method that returns true if local database is empty
      * */
@@ -749,8 +745,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         return dbH.isTableEmpty("restaurant");
 
     }
-
-
 
     /**
      * This method allows us to get a request permission result
@@ -821,16 +815,22 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                 @Override
                 public Loader onCreateLoader(int id, Bundle args) {
                     Log.d(TAG, "onCreateLoader: is called");
+
+                    Utils.showProgressBar(progressBar, mapFragmentRelativeLayout);
                     return new ATLInitApiTextSearchRequests(getActivity(), mDb, myPosition);
                 }
 
                 @Override
                 public void onLoadFinished(Loader loader, Object data) {
                     Log.d(TAG, "onLoadFinished: called!");
+                    Utils.hideProgressBar(progressBar, mapFragmentRelativeLayout);
 
                     if (!localDatabaseIsEmpty()) {
                         Log.d(TAG, "onLoadFinished: database IS NOT EMPTY anymore");
-                        //hideProgressBar(progressBar, container);
+
+                        /** We display the pins in the map
+                         * */
+                        displayPinsInMap(listOfAllRestaurantsInDatabase, listOfVisitedRestaurantsByTheUsersGroup);
 
                     } else {
                         Log.d(TAG, "onLoadFinished: database IS EMPTY");

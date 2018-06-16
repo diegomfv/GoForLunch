@@ -76,19 +76,27 @@ public class RequesterPlaceId {
                      * (API Documentation)
                      * */
                     if (result.getOpening_hours() != null) {
-                        Opening_hours opening_hours = result.getOpening_hours();
-                        if (opening_hours.getPeriods() != null) {
 
-                            // TODO: 25/05/2018 ------------------------
+                        Opening_hours opening_hours = result.getOpening_hours();
+
+                        if (opening_hours.getPeriods() != null) {
 
                             Periods[] periods = opening_hours.getPeriods();
 
                             for (int i = 0; i < periods.length ; i++) {
 
                                 Close close = periods[i].getClose();
-                                if (close.getDay() != null
-                                        && close.getDay().equals(day)){
-                                    openTill = formatTime(close.getTime());
+
+                                if (null == close.getDay()) {
+                                    //do nothing
+
+                                } else {
+
+                                    if (close.getDay().equalsIgnoreCase(day)) {
+
+                                        openTill = formatTime(close.getTime());
+
+                                    }
                                 }
                             }
                         }

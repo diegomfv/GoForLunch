@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.activities.rest.MainActivity;
@@ -52,8 +54,6 @@ public class Utils {
 
     }
 
-
-
     /**
      * Method that hides the keyboard
      */
@@ -73,21 +73,6 @@ public class Utils {
      * */
     public static String capitalize (String str) {
         return str.substring(0, 1).toUpperCase() + str.substring(1);
-    }
-
-    /** Method to insert
-     * info to Shared Preferences
-     * */
-    public static boolean updateSharedPreferences(SharedPreferences sharedPref, String key, String value) {
-        sharedPref.edit().putString(key,value).apply();
-        return true;
-    }
-
-    /** Method to get
-     * info (a String) from Shared Preferences
-     * */
-    public static String getStringFromSharedPreferences (SharedPreferences sharedPref, String key) {
-        return sharedPref.getString(key, "");
     }
 
    /** Method to fill an intent with Restaurant Entry info
@@ -111,6 +96,20 @@ public class Utils {
 
    }
 
+    /** Method to insert
+     * info to Shared Preferences
+     * */
+    public static boolean updateSharedPreferences(SharedPreferences sharedPref, String key, String value) {
+        sharedPref.edit().putString(key,value).apply();
+        return true;
+    }
+
+    /** Method to get
+     * info (a String) from Shared Preferences
+     * */
+    public static String getStringFromSharedPreferences (SharedPreferences sharedPref, String key) {
+        return sharedPref.getString(key, "");
+    }
 
    /***/
     /** Method that deletes all the sharedPreferences info
@@ -136,6 +135,22 @@ public class Utils {
             Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
                     entry.getValue().toString());
         }
+
+        return true;
+    }
+
+    public static boolean showProgressBar (ProgressBar progressBar, View view) {
+
+        progressBar.setVisibility(View.VISIBLE);
+        view.setVisibility(View.GONE);
+
+        return true;
+    }
+
+    public static boolean hideProgressBar (ProgressBar progressBar, View view) {
+
+        progressBar.setVisibility(View.GONE);
+        view.setVisibility(View.VISIBLE);
 
         return true;
     }
