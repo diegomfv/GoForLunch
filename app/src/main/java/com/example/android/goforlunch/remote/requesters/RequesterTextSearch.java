@@ -189,31 +189,6 @@ public class RequesterTextSearch {
 
                                 }
                             }
-
-                            if (counterLastInsertion == MAX_TEXT_SEARCH_RESTAURANTS ){
-                                Log.d(TAG, "onResponse: counterLastInsertion is called");
-
-                                try {
-                                    Thread.sleep(3000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-
-                                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Log.d(TAG, "run: instantiating Requester Nearby");
-
-                                        RequesterNearby requesterNearby = new RequesterNearby(mDb,myPosition);
-                                        requesterNearby.getDataAndDoApiRequest();
-
-                                    }
-                                });
-
-                                //Counter is restarted
-                                counterLastInsertion = 0;
-                                Log.d(TAG, "onResponse: counterLastInsertion restarted!");
-                            }
                         }
                     }
                 }

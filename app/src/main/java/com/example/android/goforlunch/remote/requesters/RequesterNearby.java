@@ -36,32 +36,19 @@ public class RequesterNearby {
     private static String nearbyKey = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
     private AppDatabase mDb;
     private LatLngForRetrofit myPosition;
+    private List<RestaurantEntry> listOfRestaurantsInDatabase;
 
-    private static int requestCounter = 0;
-
-    public RequesterNearby(AppDatabase mDb, LatLngForRetrofit myPosition) {
+    public RequesterNearby(AppDatabase mDb, LatLngForRetrofit myPosition, List<RestaurantEntry> listOfRestaurantsInDatabase) {
         this.mDb = mDb;
         this.myPosition = myPosition;
+        this.listOfRestaurantsInDatabase = listOfRestaurantsInDatabase;
     }
 
-    public void getDataAndDoApiRequest () {
-        Log.d(TAG, "getDataAndDoApiRequest: ");
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                doApiRequest(mDb.restaurantDao().getAllRestaurantsNotLiveData());
-
-            }
-        });
-
-    }
-
-    public void doApiRequest(final List<RestaurantEntry> listOfRestaurantsInDatabase) {
+    public void doApiRequest() {
         Log.d(TAG, "doApiRequest: ");
 
         if (listOfRestaurantsInDatabase.size() > 0) {
+            Log.d(TAG, "doApiRequest: listOfRestaurantsInDatabase.size() > 0");
 
             GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
             Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", nearbyKey);
@@ -211,32 +198,8 @@ public class RequesterNearby {
             });
 
         } else {
-            Log.d(TAG, "doApiRequest: try again doApiRequest");
+            Log.d(TAG, "doApiRequest: listOfRestaurantsInDatabase.size() == 0 !!!");
 
-            if (requestCounter != 5) {
-                Log.d(TAG, "doApiRequest: requestCounter != 5");
-
-                /** If we have not the data yet, we try again
-                 * */
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        doApiRequest(listOfRestaurantsInDatabase);
-                    }
-                });
-
-                requestCounter++;
-
-            } else {
-                Log.d(TAG, "doApiRequest: requestCounter = 5");
-
-                /** If we have not the data yet but we tried it 5 times,
-                 * we stop and don't do the requests
-                 * */
-
-                requestCounter = 0;
-
-            }
         }
     }
 

@@ -46,25 +46,29 @@ public class ATLInitApiTextSearchRequests extends AsyncTaskLoader {
             startRequestUsingTextSearchService();
         }
 
-        /** We wait 5 seconds for the process to finish. In onLoadFinished
-         * we will remove the progress bar
-         * */
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         return null;
     }
 
-    /** Method that starts the request using TextSearch service
+     /** Method that starts the requests
      * */
     private void startRequestUsingTextSearchService () {
 
         RequesterTextSearch requesterTextSearch = new RequesterTextSearch(mDb, myPosition);
         requesterTextSearch.doApiRequest();
 
-    }
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
+        RequesterNearby requesterNearby = new RequesterNearby(mDb,myPosition, mDb.restaurantDao().getAllRestaurantsNotLiveData());
+        requesterNearby.doApiRequest();
+
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
