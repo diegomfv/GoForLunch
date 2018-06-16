@@ -71,6 +71,9 @@ dependencies {
     //Google Sign In
     implementation 'com.google.android.gms:play-services-auth:15.0.1'
 
+    //Facebook sign in
+    implementation 'com.facebook.android:facebook-login:[4,5)'
+
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
 

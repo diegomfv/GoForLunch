@@ -10,7 +10,9 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -41,6 +43,16 @@ public class Utils {
         drawable.mutate();
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     }
+
+    public static void loadImageWithGlide (Context context, Object object, ImageView view) {
+
+        Glide.with(context)
+                .load(object)
+                .into(view);
+
+    }
+
+
 
     /**
      * Method that hides the keyboard

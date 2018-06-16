@@ -158,6 +158,9 @@ public class FragmentCoworkersView extends Fragment {
 
                                 listOfCoworkers.clear();
                                 listOfCoworkers = UtilsFirebase.fillListWithUsersFromDataSnapshot(dataSnapshot, userEmail, userGroup);
+
+                                // TODO: 16/06/2018 Iterate through the list of coworkers to delete the currentUser
+
                                 if (getActivity() != null) {
                                     mAdapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
                                     mRecyclerView.setAdapter(mAdapter);

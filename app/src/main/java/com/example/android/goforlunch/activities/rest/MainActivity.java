@@ -15,9 +15,11 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
@@ -30,8 +32,10 @@ import com.example.android.goforlunch.job.NotificationDailyJob;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
 import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -50,16 +54,13 @@ import java.util.Objects;
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 31/05/2018 Update user info in onStart()!
 // TODO: 29/05/2018 Check if there is internet connection
-// TODO: 29/05/2018 Allow the camera access for profile pictures
 // TODO: 29/05/2018 Allow to get a picture from facebook or google
 // TODO: 29/05/2018 Add filter in Map
 // TODO: 29/05/2018 Change that the RV is not setting the adapter each time the word changes in Search Bar
 // TODO: 29/05/2018 Use Storage for user's picture (might use FirebaseAuth instead). Profile picture got from facebook or google
 // TODO: 29/05/2018 Enable notifications at 4pm
 // TODO: 29/05/2018 Enable notifications if restaurant is chosen
-// TODO: 29/05/2018 Modify Requests (Nearby + Distance)
 // TODO: 29/05/2018 Translations
-// TODO: 29/05/2018 Elective Functionality, add Google and Facebook logins (password is done)
 // TODO: 29/05/2018 Check deprecated problem RVAdapter
 // TODO: 29/05/2018 General clean up
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity{
     private ProgressBar progressBar;
     private TextView navUserName;
     private TextView navUserEmail;
+    private ImageView navUserProfilePicture;
 
     private FrameLayout container;
 
@@ -152,6 +154,7 @@ public class MainActivity extends AppCompatActivity{
         View headerView = mNavigationView.getHeaderView(0);
         navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
         navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
+        navUserProfilePicture = (ImageView) headerView.findViewById(R.id.nav_drawer_image_id);
 
         container = (FrameLayout) findViewById(R.id.main_fragment_container_id);
         progressBar = (ProgressBar) findViewById(R.id.main_progress_bar_id);
@@ -304,6 +307,13 @@ public class MainActivity extends AppCompatActivity{
          * */
         navUserName.setText(userFirstName + " " + userLastName);
         navUserEmail.setText(userEmail);
+
+        if (currentUser.getPhotoUrl() != null) {
+            Log.d(TAG, "updateNavDrawerTextViews: " + currentUser.getPhotoUrl());
+            Glide.with(navUserProfilePicture)
+                    .load(currentUser.getPhotoUrl())
+                    .into(navUserProfilePicture);
+        }
 
         return true;
     }
@@ -476,6 +486,7 @@ public class MainActivity extends AppCompatActivity{
                              *  and goes to AuthSignIn Activity
                              *  */
                             auth.signOut();
+                            LoginManager.getInstance().logOut();
 
                             Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

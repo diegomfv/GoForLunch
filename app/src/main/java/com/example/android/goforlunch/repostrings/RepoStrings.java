@@ -17,20 +17,20 @@ public interface RepoStrings {
     /** This array stores the different types of restaurants available for filtering
      * */
     String[] RESTAURANT_TYPES = {
-            "All",
-            "American",
-            "Chinese",
-            "English",
-            "French",
-            "German",
-            "Indian",
-            "Italian",
-            "Japanese",
-            "Mexican",
-            "Spanish",
-            "Thai",
-            "Vietnamese",
-            "Other"
+            "All", //0
+            "American", //1
+            "Chinese", //2
+            "English", //3
+            "French", //4
+            "German", //5
+            "Indian", //6
+            "Italian", //7
+            "Japanese",//8
+            "Mexican", //9
+            "Spanish", //10
+            "Thai", //11
+            "Vietnamese", //12
+            "Other" //13
     };
 
     String RESTAURANT_TABLE_NAME = "restaurant";

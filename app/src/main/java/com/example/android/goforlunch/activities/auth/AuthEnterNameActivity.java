@@ -1,10 +1,22 @@
 package com.example.android.goforlunch.activities.auth;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +26,7 @@ import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.activities.rest.PersInfoActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
@@ -31,6 +44,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,12 +57,14 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
     private static final String TAG = "AuthEnterNameAndGroupAc";
 
+    public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
+
     private TextInputEditText inputFirstName;
     private TextInputEditText inputLastName;
     private TextInputEditText inputEmail;
     private TextInputEditText inputPassword;
 
-    private ImageView imageviewProfilePicture;
+    private ImageView iv_userImage;
 
     private Button buttonStart;
 
@@ -55,6 +72,8 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
     private String email;
     private String password;
+
+    private Uri userProfilePictureUri;
 
     //List of Emails to store all the emails and check if an user already exists in the database
     private List<String> listOfEmails;
@@ -83,7 +102,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         inputLastName = (TextInputEditText) findViewById(R.id.enter_last_name_id);
         inputEmail = (TextInputEditText) findViewById(R.id.enter_email_id);
         inputPassword = (TextInputEditText) findViewById(R.id.enter_password_id);
-        imageviewProfilePicture = (ImageView) findViewById(R.id.enter_image_id);
+        iv_userImage = (ImageView) findViewById(R.id.enter_image_id);
         buttonStart = (Button) findViewById(R.id.enter_start_button_id);
         progressBar = (ProgressBar) findViewById(R.id.enter_progressbar);
 
@@ -144,8 +163,20 @@ public class AuthEnterNameActivity extends AppCompatActivity{
             }
         });
 
+        iv_userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: imageView clicked!");
 
+                if (checkPermissionREAD_EXTERNAL_STORAGE(AuthEnterNameActivity.this)) {
 
+                    Intent intent = new Intent(Intent.ACTION_PICK);
+                    intent.setType("image/*");
+                    startActivityForResult(intent,0);
+
+                }
+            }
+        });
 
         /** When the user
          * clicks the START button two things can happen.
@@ -174,6 +205,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                             Utils.capitalize(inputFirstName.getText().toString().trim())
                                             + " "
                                             + Utils.capitalize(inputLastName.getText().toString().trim()))
+                                    .setPhotoUri(userProfilePictureUri)
                                     .build();
 
                             user.updateProfile(profileUpdates)
@@ -288,6 +320,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                                     Utils.capitalize(inputFirstName.getText().toString().trim())
                                                                     + " "
                                                                     + Utils.capitalize(inputLastName.getText().toString().trim()))
+                                                            .setPhotoUri(userProfilePictureUri)
                                                             .build();
 
                                                     user.updateProfile(profileUpdates)
@@ -400,5 +433,101 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
         }
     }
+
+    /** Method that checks if we have permission to read external storage
+     * **/
+    public boolean checkPermissionREAD_EXTERNAL_STORAGE (
+            final Context context) {
+        int currentAPIVersion = Build.VERSION.SDK_INT;
+        if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(
+                        (Activity) context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    showDialog("External storage", context,
+                            Manifest.permission.READ_EXTERNAL_STORAGE);
+
+                } else {
+                    ActivityCompat
+                            .requestPermissions(
+                                    (Activity) context,
+                                    new String[] { Manifest.permission.READ_EXTERNAL_STORAGE },
+                                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                }
+                return false;
+            } else {
+                return true;
+            }
+
+        } else {
+            return true;
+        }
+    }
+
+    /** Method used to display a dialog
+     * */
+    public void showDialog(final String msg, final Context context,
+                           final String permission) {
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+        alertBuilder.setCancelable(true);
+        alertBuilder.setTitle("Permission necessary");
+        alertBuilder.setMessage(msg + " permission is necessary");
+        alertBuilder.setPositiveButton(android.R.string.yes,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions((Activity) context,
+                                new String[] { permission },
+                                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                    }
+                });
+        AlertDialog alert = alertBuilder.create();
+        alert.show();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // do your stuff
+                } else {
+                    ToastHelper.toastShort(AuthEnterNameActivity.this, "GET_ACCOUNTS Denied");
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions,
+                        grantResults);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                iv_userImage.setImageBitmap(selectedImage);
+
+                /** We store the Uri value. We will use it if the user saves changes
+                 * */
+                userProfilePictureUri = imageUri;
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                ToastHelper.toastShort(AuthEnterNameActivity.this, "Something went wrong");
+            }
+
+        } else {
+            ToastHelper.toastShort(AuthEnterNameActivity.this, "You have not picked an image");
+        }
+
+    }
+
 
 }

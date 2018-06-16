@@ -77,7 +77,7 @@ public interface RestaurantDao {
     LiveData<RestaurantEntry> getRestaurantByPlaceId (String placeId);
 
     @Query("DELETE FROM restaurant")
-    void deleteAllRowsInRestaurantTable();
+    int deleteAllRowsInRestaurantTable();
 
     @Query("UPDATE restaurant SET phone = :phone, website_url = :websiteUrl, open_until = :openUntil WHERE placeId = :placeId")
     void updateRestaurant (String placeId, String phone, String websiteUrl, String openUntil);

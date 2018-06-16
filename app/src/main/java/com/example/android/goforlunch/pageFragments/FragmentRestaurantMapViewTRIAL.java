@@ -33,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.example.android.goforlunch.R;
@@ -113,9 +114,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     //Loaders id
     private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;
 
-    //Counter used to limit the times we try to start requests in case database is empty.
-    private int startRequestsCounter = 0;
-
     //vars
     private boolean mLocationPermissionGranted = false; //used in permissions
     private GoogleMap mMap; //used to create the map
@@ -134,17 +132,20 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     // has already been visited by somebody of the group
     private List<String> listOfVisitedRestaurantsByTheUsersGroup;
 
-    //This map will store all the restaurants in the database in lists ordered by type
-    private Map<String, List<RestaurantEntry>> mapOfListsOfRestaurantsByType;
+    //List that consists of all the restaurants in the database
+    private List<RestaurantEntry> listOfAllRestaurantsInDatabase;
 
-    //Markers. Used to store the markers of the map. It will be used to check if
+    //List used in AutocompleteTextView to limit the restaurants showed in the map
+    private List<RestaurantEntry> listOfRestaurantsByType;
+
+    //List used to store the markers of the map. It will be used to check if
     //the map has already markers and, if so, not call a function
     private List<Marker> listOfMarkers;
 
-    //Retrofit usage
+    //Used for Retrofit
     private LatLngForRetrofit myPosition;
 
-    //Database
+    //ViewModel to get info from the database
     private MainViewModel mapFragmentViewModel;
 
     //SharedPreferences
@@ -168,6 +169,10 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     private String userGroup;
     private String userGroupKey;
 
+    //Fragment that displays the map and progress bar
+    private View mapView;
+    private ProgressBar progressBar;
+
     /******************************
      * STATIC METHOD FOR **********
      * INSTANTIATING THE FRAGMENT *
@@ -190,7 +195,12 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         mDb = AppDatabase.getInstance(getActivity());
         fireDb = FirebaseDatabase.getInstance();
 
-        mapOfListsOfRestaurantsByType = new HashMap<>();
+        mapView = (View) view.findViewById(R.id.map);
+        progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+
+        listOfVisitedRestaurantsByTheUsersGroup = new ArrayList<>();
+        listOfAllRestaurantsInDatabase = new ArrayList<>();
+        listOfRestaurantsByType = new ArrayList<>();
         listOfMarkers = new ArrayList<>();
 
         toolbar = (Toolbar) view.findViewById(R.id.map_main_toolbar_id);
@@ -254,7 +264,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                                         Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
                                         listOfVisitedRestaurantsByTheUsersGroup = UtilsFirebase.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
-                                        fillMapWithAllDatabaseRestaurants();
 
                                     }
 
@@ -264,8 +273,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
                                     }
                                 });
-
-
                             }
                         }
                     }
@@ -293,47 +300,10 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                 if (restaurantEntries != null) {
                     Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
 
-                    /** We fill the mapOfRestaurants with the information from the local database
+                    /** We fill the listOfAllRestaurantsInDatabase with the info
                      * */
-                    mapOfListsOfRestaurantsByType = new HashMap<>();
-                    List<RestaurantEntry> temporaryList;
-
-                    for (int i = 0; i < RepoStrings.RESTAURANT_TYPES.length; i++) {
-
-                        temporaryList = new ArrayList<>();
-
-                        for (int j = 0; j < restaurantEntries.size(); j++) {
-
-                            if (i == 0) {
-                                temporaryList.addAll(restaurantEntries);
-                                break;
-
-                            } else {
-
-                                if (restaurantEntries.get(j).getType().equals(RepoStrings.RESTAURANT_TYPES[i])) {
-                                    temporaryList.add(restaurantEntries.get(j));
-
-                                }
-                            }
-                        }
-
-                        mapOfListsOfRestaurantsByType.put(RepoStrings.RESTAURANT_TYPES[i], temporaryList);
-
-                    }
-
-                    Log.d(TAG, "onChanged: mapOfListsOfRestaurantsByType = " + mapOfListsOfRestaurantsByType.toString());
-                    Log.d(TAG, "onChanged: mapOfListsOfRestaurantsByType.get(\"All\") = " + mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]));
-
-                    for (int i = 0; i < mapOfListsOfRestaurantsByType.size(); i++) {
-
-                        Log.d(TAG, "onChanged: mapOfListsOfRestaurantsByType = " + mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[i]));
-
-                    }
-
-                        /** We fill the Map with pins from all the restaurants
-                         * */
-                        fillMapWithAllDatabaseRestaurants();
-
+                    listOfAllRestaurantsInDatabase = restaurantEntries;
+                    displayPinsInMap(listOfAllRestaurantsInDatabase, listOfVisitedRestaurantsByTheUsersGroup);
 
                 } else {
                     Log.d(TAG, "onChanged: THERE IS NO DATA IN THE DATABASE!");
@@ -343,7 +313,7 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
         });
 
         /** AutoCompleteTextView code. It allows to modify the pins in the map
-         * according to the information we got from the databases
+         * according to the information we got from the database
          * */
         mSearchText = (AutoCompleteTextView) view.findViewById(R.id.map_autocomplete_id);
 
@@ -367,29 +337,56 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                     Log.d(TAG, "onTextChanged: " + charSequence);
 
                     String type = Utils.capitalize(charSequence.toString());
-                    List<RestaurantEntry> listOfRestaurantsByTypeInputted;
 
                     if (mMap != null) {
+                        Log.d(TAG, "onTextChanged: map IS NOT NULL");
 
-                        // TODO: 06/06/2018 Might fail because of the lower case
-                        if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(type)
-                                && mapOfListsOfRestaurantsByType.get(type) != null) {
-                            Log.d(TAG, "onTextChanged: THE TYPE INPUTTED IS IN THE MAP");
+                        if (listOfAllRestaurantsInDatabase.size() > 0) {
+                            Log.d(TAG, "onTextChanged: listOfAllRestaurantsInDatabase.size() > 0 ");
 
-                            /** We first clear the google map and the list of markers
-                             * */
-                            mMap.clear();
-                            listOfMarkers.clear();
+                            // TODO: 06/06/2018 Might fail because of the lower case
+                            if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(type)) {
+                                Log.d(TAG, "onTextChanged: THE TYPE INPUTTED IS IN THE MAP");
 
-                            /** We get the list from the mapOfListsOfRestaurantsByType
-                             * which coincides with the type inputted */
-                            listOfRestaurantsByTypeInputted = mapOfListsOfRestaurantsByType.get(type);
+                                /** We first clear the google map, the list of markers
+                                 * and the listOfRestaurantsByType
+                                 * */
+                                mMap.clear();
+                                listOfMarkers.clear();
 
-                            /** We check if the restaurants has been visited in the user's group.
-                             * If so, we modify the pin colour (done in the method)
-                             * */
-                            fillMapWithMarkers(listOfRestaurantsByTypeInputted);
+                                /** We create the listOfRestaurantsByType getting the listOfAllRestaurantsInDatabase
+                                 * that match the type specified in the AutoCompleteTextView
+                                 * */
+                                for (int j = 0; j < listOfAllRestaurantsInDatabase.size(); j++) {
+
+                                    if (listOfAllRestaurantsInDatabase.get(j).getType().equalsIgnoreCase(type)) {
+                                        listOfRestaurantsByType.add(listOfAllRestaurantsInDatabase.get(j));
+
+                                    }
+                                }
+
+                                /** We display the pins in the map using the list created recently
+                                 * */
+                                displayPinsInMap (listOfRestaurantsByType, listOfVisitedRestaurantsByTheUsersGroup);
+
+                            } else {
+
+                                /** We display all the restaurants in the map
+                                 * */
+                                displayPinsInMap (listOfAllRestaurantsInDatabase, listOfVisitedRestaurantsByTheUsersGroup);
+
+                            }
+
+                        } else {
+                            Log.d(TAG, "onTextChanged: listOfAllRestaurantsInDatabase.size() == 0 ");
+                            ToastHelper.toastShort(getActivity(), "There are no restaurants in the database. Please, start request process");
+
                         }
+
+                    } else {
+                        Log.d(TAG, "onTextChanged: MAP IS NULL");
+                        ToastHelper.toastShort(getActivity(), "Map is not ready...");
+
                     }
                 }
 
@@ -430,7 +427,8 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                 Log.d(TAG, "onClick: refresh button clicked!");
 
                 ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Starting requests process");
-                initRequestProcess();
+                //showProgressBar
+                callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
 
             }
         });
@@ -449,7 +447,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
         return view;
     }
-
 
 
     /**************************
@@ -517,6 +514,74 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     }
 
     /**
+     * Method used to initialise the map
+     */
+    private void initMap() {
+        Log.d(TAG, "initMap: initializing map");
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
+                .findFragmentById(R.id.map);
+
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                Log.d(TAG, "onMapReady: map is ready");
+                ToastHelper.toastShort(getActivity(), "Map is ready");
+                mMap = googleMap;
+
+                if (mLocationPermissionGranted) {
+                    getDeviceLocation();
+
+                    if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                            getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+
+                    mMap.setMyLocationEnabled(true); //displays the blue marker at your location
+                    //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
+
+                }
+
+                /**
+                 * Listener for when clicking the info window in a map
+                 * */
+                if (mMap != null) {
+                    mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                        @Override
+                        public void onInfoWindowClick(Marker marker) {
+                            Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
+
+                            for (int i = 0; i < listOfAllRestaurantsInDatabase.size(); i++) {
+
+                                if (marker.getTitle().equalsIgnoreCase(listOfAllRestaurantsInDatabase.get(i).getName())) {
+
+                                    Intent intent = new Intent(getActivity(), RestaurantActivity.class);
+
+                                    Map <String,Object> map = new HashMap<>();
+                                    map.put(RepoStrings.SentIntent.RESTAURANT_NAME, listOfAllRestaurantsInDatabase.get(i).getName());
+                                    map.put(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfAllRestaurantsInDatabase.get(i).getType());
+                                    map.put(RepoStrings.SentIntent.ADDRESS, listOfAllRestaurantsInDatabase.get(i).getAddress());
+                                    map.put(RepoStrings.SentIntent.RATING, listOfAllRestaurantsInDatabase.get(i).getRating());
+                                    map.put(RepoStrings.SentIntent.PHONE, listOfAllRestaurantsInDatabase.get(i).getPhone());
+                                    map.put(RepoStrings.SentIntent.WEBSITE_URL, listOfAllRestaurantsInDatabase.get(i).getWebsiteUrl());
+                                    map.put(RepoStrings.SentIntent.IMAGE_URL, listOfAllRestaurantsInDatabase.get(i).getImageUrl());
+
+                                    Utils.fillIntentUsingMapInfo(intent, map);
+
+                                    startActivity(intent);
+                                    break;
+
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /**
      * Method used to get the user's location
      */
     private void getDeviceLocation() {
@@ -551,15 +616,13 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                             Log.d(TAG, "onComplete: local database status (empty) = " + localDatabaseIsEmpty());
                             Log.d(TAG, "onComplete: myPosition = " + myPosition.toString());
 
-                            //showProgressBar(progressBar, container);
-                            initRequestProcess();
+                            callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
 
                         } else {
                             Log.d(TAG, "onComplete: local database status (empty) = " + localDatabaseIsEmpty());
-                            //hideProgressBar(progressBar, container);
 
                         }
-//
+
                     } else {
                         Log.d(TAG, "onComplete: current location is null");
                     }
@@ -573,192 +636,15 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
     }
 
     /**
-     * Method used to initialise the map
-     */
-    private void initMap() {
-        Log.d(TAG, "initMap: initializing map");
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
-                .findFragmentById(R.id.map);
-
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                Log.d(TAG, "onMapReady: map is ready");
-                ToastHelper.toastShort(getActivity(), "Map is ready");
-                mMap = googleMap;
-
-                if (mLocationPermissionGranted) {
-                    getDeviceLocation();
-
-                    if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                            getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-
-                    mMap.setMyLocationEnabled(true); //displays the blue marker at your location
-                    //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
-
-                    if (listOfMarkers.isEmpty()) {
-                        Log.d(TAG, "onMapReady: there are no markers in the map");
-
-                        /** We call this just in case
-                         * */
-                        mMap.clear();
-
-                        /** If listOfMarkers is empty, there are not markers in the map, so we
-                         * fill it with new ones
-                         * */
-                        fillMapWithAllDatabaseRestaurants();
-
-                    } else {
-                        Log.d(TAG, "onMapReady: map has already markers");
-                    }
-
-
-                }
-
-                /**
-                 * Listener for when clicking the info window in a map
-                 * */
-                if (mMap != null) {
-                    mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                        @Override
-                        public void onInfoWindowClick(Marker marker) {
-                            Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
-                            Log.d(TAG, "onInfoWindowClick: " + mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).size());
-                            Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
-
-                            /** REMEMBER mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]) is a list!
-                             *  */
-
-                            for (int i = 0; i < mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).size(); i++) {
-
-                                if (mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getName().equals(marker.getTitle())) {
-
-                                    Intent intent = new Intent(getActivity(), RestaurantActivity.class);
-
-                                    intent.putExtra(RepoStrings.SentIntent.IMAGE_URL,
-                                            mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getImageUrl());
-                                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME,
-                                            mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getName());
-                                    intent.putExtra(RepoStrings.SentIntent.ADDRESS,
-                                            mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getAddress());
-                                    intent.putExtra(RepoStrings.SentIntent.RATING,
-                                            mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getRating());
-                                    intent.putExtra(RepoStrings.SentIntent.PHONE,
-                                            mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getPhone());
-                                    intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL,
-                                            mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getWebsiteUrl());
-                                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE,
-                                            mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]).get(i).getType());
-
-                                    startActivity(intent);
-                                    break;
-
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }
-
-    /**
-     * Method that starts doing the requests to the servers to get the
-     * restaurants. Firstly, it deletes the database
-     * */
-    public void initRequestProcess() {
-        Log.d(TAG, "initRequestProcess: called!");
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                /** We delete all the info from the database
-                 * */
-                mDb.restaurantDao().deleteAllRowsInRestaurantTable();
-
-            }
-        });
-
-        /** After deleting the database, we start the requests
-         * */
-        startRequests();
-
-    }
-
-    /**
-     * Method that starts the requests if the database is empty. If not,
-     * it tries again (only 10 times more; this way we avoid doing requests
-     * continuously forever)
-     * */
-    public void startRequests () {
-        Log.d(TAG, "startRequests: called!");
-        // TODO: 06/06/2018 CHECK THIS!
-
-        if (startRequestsCounter != 10) {
-
-            if (localDatabaseIsEmpty()){
-                //callLoaderInitApiGeneralRequests(ID_LOADER_INIT_GENERAL_API_REQUESTS);
-
-            } else {
-                startRequests();
-                startRequestsCounter++;
-            }
-        } else {
-
-            startRequestsCounter = 0;
-        }
-    }
-
-    /**
-     * Method that checks that the map can be filled with the database info (markers) and
-     * immediately calls fillMapWithMarkers() to fill the map
-     * */
-    private void fillMapWithAllDatabaseRestaurants() {
-        Log.d(TAG, "fillMapWithAllDatabaseRestaurants: called!");
-
-        if (mapOfListsOfRestaurantsByType != null) {
-            Log.d(TAG, "fillMapWithAllDatabaseRestaurants: mapOfListsOfRestaurantsByType IS NOT NULL");
-
-            if (mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]) != null) {
-                Log.d(TAG, "fillMapWithAllDatabaseRestaurants: ALL type of restaurants IS NOT NULL");
-
-                if (listOfVisitedRestaurantsByTheUsersGroup != null) {
-
-                    /** RepoStrings.RESTAURANT_TYPES[0] refers to "All" types of restaurants
-                     * */
-                    fillMapWithMarkers(mapOfListsOfRestaurantsByType.get(RepoStrings.RESTAURANT_TYPES[0]));
-
-                } else {
-                    Log.d(TAG, "fillMapWithAllDatabaseRestaurants: listOfVisitedRestaurantsByTheUsersGroup = null");
-
-                }
-
-            } else {
-                Log.d(TAG, "fillMapWithAllDatabaseRestaurants: ALL type of restaurants IS NULL");
-
-            }
-
-        } else {
-            Log.d(TAG, "fillMapWithAllDatabaseRestaurants: mapOfListsOfRestaurantsByType IS NULL");
-
-        }
-    }
-
-    /**
      * Method that fills the map with Markers using a list
      * */
-    private void fillMapWithMarkers (List<RestaurantEntry> listOfRestaurantsByType){
+    private void displayPinsInMap (List<RestaurantEntry> listOfAllRestaurantsInDatabase, List<String> listOfVisitedRestaurantsByTheUsersGroup) {
 
         if (mMap != null) {
             Log.d(TAG, "fillMapWithMarkers: the Map is not null");
 
-            if (listOfRestaurantsByType != null
-                    && !listOfRestaurantsByType.isEmpty()) {
+            if (listOfAllRestaurantsInDatabase != null
+                    && !listOfAllRestaurantsInDatabase.isEmpty()) {
                 Log.d(TAG, "fillMapWithMarkers: listOfRestaurants IS NOT NULL and IS NOT EMPTY");
 
                 /** We delete all the elements of the listOfMarkers
@@ -766,29 +652,29 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                 listOfMarkers.clear();
                 mMap.clear();
 
-                for (int i = 0; i < listOfRestaurantsByType.size(); i++) {
+                for (int i = 0; i < listOfAllRestaurantsInDatabase.size(); i++) {
 
                     MarkerOptions options;
 
                     LatLng latLng = new LatLng(
-                            Double.parseDouble(listOfRestaurantsByType.get(i).getLatitude()),
-                            Double.parseDouble(listOfRestaurantsByType.get(i).getLongitude()));
+                            Double.parseDouble(listOfAllRestaurantsInDatabase.get(i).getLatitude()),
+                            Double.parseDouble(listOfAllRestaurantsInDatabase.get(i).getLongitude()));
 
-                    if (listOfVisitedRestaurantsByTheUsersGroup.contains(listOfRestaurantsByType.get(i).getName())) {
+                    if (listOfVisitedRestaurantsByTheUsersGroup.contains(listOfAllRestaurantsInDatabase.get(i).getName())) {
                         Log.d(TAG, "onTextChanged: The place has been visited by somebody before");
 
                         options = new MarkerOptions()
                                 .position(latLng)
-                                .title(listOfRestaurantsByType.get(i).getName())
-                                .snippet(listOfRestaurantsByType.get(i).getAddress())
+                                .title(listOfAllRestaurantsInDatabase.get(i).getName())
+                                .snippet(listOfAllRestaurantsInDatabase.get(i).getAddress())
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)); //Different colour
                     } else {
                         Log.d(TAG, "onTextChanged: The place has not been visited yet");
 
                         options = new MarkerOptions()
                                 .position(latLng)
-                                .title(listOfRestaurantsByType.get(i).getName())
-                                .snippet(listOfRestaurantsByType.get(i).getAddress())
+                                .title(listOfAllRestaurantsInDatabase.get(i).getName())
+                                .snippet(listOfAllRestaurantsInDatabase.get(i).getAddress())
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
                     }
@@ -948,7 +834,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
                     } else {
                         Log.d(TAG, "onLoadFinished: database IS EMPTY");
-
                         ToastHelper.toastShort(getActivity(), "Something went wrong. Database is not filled.");
                     }
                 }

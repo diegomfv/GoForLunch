@@ -4,6 +4,8 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
 
+
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -24,6 +26,12 @@
     <string name="i_rating" translatable="false">rating</string>
     <string name="i_phone" translatable="false">phone</string>
     <string name="i_website" translatable="false">website</string>
+
+
+    <!-- FACEBOOK SIGN IN -->
+    <string name="facebook_app_id">622449801446185</string>
+    <string name="fb_login_protocol_scheme">fb622449801446185</string>
+
 
 </resources>
 

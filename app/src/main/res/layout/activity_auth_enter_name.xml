@@ -22,7 +22,8 @@
         app:civ_border_color="#FF000000"
         android:src="@drawable/homer_simpson"
         android:layout_gravity="center_horizontal"
-        android:clickable="true">
+        android:clickable="true"
+        android:focusable="true">
     </de.hdodenhof.circleimageview.CircleImageView>
 
     <android.support.design.widget.TextInputLayout

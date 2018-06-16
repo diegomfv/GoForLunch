@@ -39,6 +39,8 @@ import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.repostrings.RepoStrings;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -77,9 +79,6 @@ public class FragmentRestaurantListView extends Fragment {
     //This list will have as many elements repeated as coworkers going to the restaurant
     private List<String> listOfRestaurantsByCoworker;
 
-    //Map of Restaurants and number of coworkers
-    private Map<String, Integer> mapOfCoworkersPerRestaurant;
-
     //Widgets
     private AutoCompleteTextView mSearchText;
 
@@ -94,12 +93,20 @@ public class FragmentRestaurantListView extends Fragment {
 
     //SharedPreferences
     private SharedPreferences sharedPref;
-    private String userGroup;
 
-    // TODO: 29/05/2018 Use these variables to get the necessary info to display the number of coworkers that are going to a specific place
-    //Firebase Database
+    //Firebase
+    private FirebaseAuth auth;
+    private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
-    private DatabaseReference fireDbRefUsers;
+    private DatabaseReference dbRefUsers;
+
+    //Variables
+    private String userFirstName;
+    private String userLastName;
+    private String userEmail;
+    private String userKey;
+    private String userGroup;
+    private String userGroupKey;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -123,53 +130,16 @@ public class FragmentRestaurantListView extends Fragment {
          * */
         setHasOptionsMenu(true);
 
-        /** SharedPreferences
-         * */
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        userGroup = sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP, "");
+        fireDb = FirebaseDatabase.getInstance();
+
+        Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
         listOfRestaurants = new ArrayList<>();
         listOfRestaurantsByType = new ArrayList<>();
+        listOfRestaurantsByCoworker = new ArrayList<>();
 
         mDb = AppDatabase.getInstance(getActivity());
-
-        mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
-        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
-            @Override
-            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
-                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
-
-                if (restaurantEntries != null) {
-                    Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
-
-                    listOfRestaurants = restaurantEntries;
-
-                    /** We fill the list with the Restaurants in the database
-                     * */
-                    mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
-                    mRecyclerView.setAdapter(mAdapter);
-
-                    /** We fill the map with the name of the restaurants
-                     * */
-                    mapOfCoworkersPerRestaurant = new TreeMap<>();
-
-                    for (int i = 0; i < restaurantEntries.size(); i++) {
-
-                        if (restaurantEntries.get(i).getName() != null
-                                && !restaurantEntries.get(i).getName().equals("")) {
-
-                            mapOfCoworkersPerRestaurant.put(restaurantEntries.get(i).getName(), 0);
-
-                        }
-                    }
-
-                    Log.d(TAG, "onChanged: map.size() = " + mapOfCoworkersPerRestaurant.size());
-
-                } else {
-                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
-                }
-            }
-        });
 
         toolbar = (Toolbar) view.findViewById(R.id.list_main_toolbar_id);
         toolbar2 = (RelativeLayout) view.findViewById(R.id.list_toolbar_search_id);
@@ -180,6 +150,114 @@ public class FragmentRestaurantListView extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
         mRecyclerView.setAdapter(mAdapter);
+
+        /** We get the user information
+         * */
+        auth = FirebaseAuth.getInstance();
+        currentUser = auth.getCurrentUser();
+        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+        if (currentUser != null) {
+
+            userEmail = currentUser.getEmail();
+
+            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        for (DataSnapshot item :
+                                dataSnapshot.getChildren()) {
+
+                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
+
+                                userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                                userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                                userKey = item.getKey();
+                                userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
+                                userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                    }
+                });
+            }
+        }
+
+        mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
+        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
+
+                if (restaurantEntries != null) {
+                    Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+
+                    /** We fill the list with the Restaurants in the database
+                     * */
+                    listOfRestaurants = restaurantEntries;
+
+                    /** We modify the adapter and set it in the RV
+                     * */
+                    mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
+                    mRecyclerView.setAdapter(mAdapter);
+
+                } else {
+                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                }
+            }
+        });
+
+
+        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        dbRefUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                listOfRestaurantsByCoworker.clear();
+
+                for (DataSnapshot item :
+                        dataSnapshot.getChildren()) {
+
+                    if (item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null
+                            && !item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")
+                            && !item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
+
+                        /** We create a list with all the restaurants that the users are going to.
+                         * If several coworkers are going to the same restaurant, it will appear in the UI
+                         * */
+
+                        Log.d(TAG, "onDataChange: " + item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString());
+                        listOfRestaurantsByCoworker.add(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                                .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
+
+                    }
+                }
+
+                /** We modify the adapter and set it in the RV
+                 * */
+                mAdapter = new RVAdapterList(getActivity(), listOfRestaurants, listOfRestaurantsByCoworker);
+                mRecyclerView.setAdapter(mAdapter);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+            }
+        });
 
         mSearchText = (AutoCompleteTextView) view.findViewById(R.id.list_autocomplete_id);
 
@@ -261,36 +339,6 @@ public class FragmentRestaurantListView extends Fragment {
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
-
-        /** We get the Coworkers per Restaurant
-         */
-        fireDb = FirebaseDatabase.getInstance();
-        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbRefUsers.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                mapOfCoworkersPerRestaurant = new TreeMap<>();
-
-                for (DataSnapshot item :
-                        dataSnapshot.getChildren()) {
-
-                    if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).equals(userGroup)) {
-
-                        //mapOfCoworkersPerRestaurant.put(item.child(RepoStrings.))
-
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-            }
-        });
-
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 

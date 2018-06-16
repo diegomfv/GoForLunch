@@ -124,7 +124,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         if (listOfRestaurantsByCoworkers != null) {
             holder.coworkersJoining.setText(String.valueOf(Collections.frequency(listOfRestaurantsByCoworkers, listOfRestaurantsByType.get(position).getName())));
         } else {
-            holder.coworkersJoining.setText("?");
+            holder.coworkersJoining.setText("0");
         }
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {

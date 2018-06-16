@@ -40,12 +40,20 @@ public class ATLInitApiTextSearchRequests extends AsyncTaskLoader {
         Log.d(TAG, "loadInBackground: is called");
 
         /** We delete all the info on the table
+         * and start the request that will fill the database
          * */
-        mDb.restaurantDao().deleteAllRowsInRestaurantTable();
+        if (mDb.restaurantDao().deleteAllRowsInRestaurantTable() > 0) {
+            startRequestUsingTextSearchService();
+        }
 
-        /** We start the request that will fill the database
+        /** We wait 5 seconds for the process to finish. In onLoadFinished
+         * we will remove the progress bar
          * */
-        startRequestUsingTextSearchService();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return null;
     }

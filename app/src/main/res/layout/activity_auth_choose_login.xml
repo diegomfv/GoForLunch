@@ -39,16 +39,13 @@
 
     <!-- There is also a facebook login button in "facebook for developers" -->
 
-    <Button
+    <com.facebook.login.widget.LoginButton
         android:id="@+id/choose_facebook_sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:padding="10dp"
-        android:background="@drawable/button_border"
-        android:textColor="@color/colorAccentDark"
-        android:text="Sign In (Facebook)"/>
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp" />
 
     <Button
         android:id="@+id/choose_sign_in_password_button_id"
