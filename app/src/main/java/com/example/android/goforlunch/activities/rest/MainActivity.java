@@ -52,12 +52,7 @@ import java.util.Objects;
 // TODO: 28/05/2018 Check if distance is too far, delete from the database!
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
-// TODO: 31/05/2018 Update user info in onStart()!
 // TODO: 29/05/2018 Check if there is internet connection
-// TODO: 29/05/2018 Allow to get a picture from facebook or google
-// TODO: 29/05/2018 Add filter in Map
-// TODO: 29/05/2018 Change that the RV is not setting the adapter each time the word changes in Search Bar
-// TODO: 29/05/2018 Use Storage for user's picture (might use FirebaseAuth instead). Profile picture got from facebook or google
 // TODO: 29/05/2018 Enable notifications at 4pm
 // TODO: 29/05/2018 Enable notifications if restaurant is chosen
 // TODO: 29/05/2018 Translations

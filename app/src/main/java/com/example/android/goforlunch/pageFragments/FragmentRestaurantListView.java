@@ -282,9 +282,9 @@ public class FragmentRestaurantListView extends Fragment {
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     Log.d(TAG, "onTextChanged: " + charSequence);
 
-                    // TODO: 29/05/2018 Might be a way of doing it more efficiently
-                    // TODO: 29/05/2018 Eg, only change after 4 letters
                     // TODO: 29/05/2018 Hide keyboard when magnifying class is clicked
+
+                    // TODO: 17/06/2018 Might be possible to do this with notifyDataSetChanged
 
                     String type = charSequence.toString();
 

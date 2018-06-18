@@ -88,9 +88,6 @@ import java.util.Objects;
  * */
 public class FragmentRestaurantMapViewTRIAL extends Fragment {
 
-    // TODO: 21/05/2018 Add Maps Button to restart search
-    // TODO: 29/05/2018 When coming back, no markers are added
-
     /**************************
      * LOG ********************
      * ***********************/
@@ -400,7 +397,6 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     Log.d(TAG, "onItemClick: ITEM CLICKED");
-
                     Utils.hideKeyboard(getActivity());
 
                 }
@@ -832,9 +828,14 @@ public class FragmentRestaurantMapViewTRIAL extends Fragment {
                          * */
                         displayPinsInMap(listOfAllRestaurantsInDatabase, listOfVisitedRestaurantsByTheUsersGroup);
 
+                        loader.stopLoading();
+
                     } else {
                         Log.d(TAG, "onLoadFinished: database IS EMPTY");
                         ToastHelper.toastShort(getActivity(), "Something went wrong. Database is not filled.");
+
+                        loader.stopLoading();
+
                     }
                 }
 

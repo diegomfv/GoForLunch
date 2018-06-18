@@ -65,7 +65,7 @@ public class AppExecutors {
     /** The mainThread executor uses the "MainThreadExecutor" class which essentially will pause
      * executors using a handle associated with the main looper. When we are in an activity, we don't need
      * this main thread executor because we can use the run on UI Thread method. When we are in a
-     * different class and we do not have the runOnUIThread() method, we can accesss the main thread
+     * different class and we do not have the runOnUIThread() method, we can access the main thread
      * using this executor (It is difficult to imagine an example when we need this, see example
      * UDACITY, Android Development, Android Architecture Components */
 

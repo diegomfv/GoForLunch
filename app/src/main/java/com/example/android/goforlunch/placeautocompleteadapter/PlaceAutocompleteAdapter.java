@@ -191,7 +191,7 @@ public class PlaceAutocompleteAdapter
 
     /**
      * Submits an autocomplete query to the Places Geo Data Autocomplete API.
-     * Results are returned as frozen AutocompletePrediction objects, ready to be cached.
+     * Result are returned as frozen AutocompletePrediction objects, ready to be cached.
      * objects to store the Place ID and description that the API returns.
      * Returns an empty list if no results were found.
      * Returns null if the API client is not available or the query did not complete
@@ -200,7 +200,7 @@ public class PlaceAutocompleteAdapter
      * from the API, which may include a network request.
      *
      * @param constraint Autocomplete query string
-     * @return Results from the autocomplete API or null if the query was not successful.
+     * @return Result from the autocomplete API or null if the query was not successful.
      * @see Places#GEO_DATA_API#getAutocomplete(CharSequence)
      * @see AutocompletePrediction#freeze()
      */

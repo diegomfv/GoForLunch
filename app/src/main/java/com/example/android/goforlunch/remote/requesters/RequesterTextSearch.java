@@ -9,6 +9,7 @@ import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.Geometry;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.Location;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.PlacesByTextSearch;
+import com.example.android.goforlunch.models.modelplacesbytextsearch.Result;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.example.android.goforlunch.repostrings.RepoStrings;
@@ -97,7 +98,7 @@ public class RequesterTextSearch {
                             String lat;
                             String lng;
 
-                            com.example.android.goforlunch.models.modelplacesbytextsearch.Results[] results = places.getResults();
+                            Result[] results = places.getResults();
 
                             /** We limit how many results we use to avoid being OVER_QUERY_LIMIT
                              * */

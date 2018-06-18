@@ -1,65 +1,47 @@
 package com.example.android.goforlunch.models.modelplacesbytextsearch;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
 /**
  * Created by Diego Fajardo on 23/05/2018.
  */
 public class PlacesByTextSearch {
 
-    private String next_page_token;
-
-    private Results[] results;
-
-    private String[] html_attributions;
-
+    @SerializedName("html_attributions")
+    @Expose
+    private List<Object> htmlAttributions = null;
+    @SerializedName("results")
+    @Expose
+    private List<Result> results = null;
+    @SerializedName("status")
+    @Expose
     private String status;
 
-    public String getNext_page_token ()
-    {
-        return next_page_token;
+    public List<Object> getHtmlAttributions() {
+        return htmlAttributions;
     }
 
-    public void setNext_page_token (String next_page_token)
-    {
-        this.next_page_token = next_page_token;
+    public void setHtmlAttributions(List<Object> htmlAttributions) {
+        this.htmlAttributions = htmlAttributions;
     }
 
-    public Results[] getResults ()
-    {
+    public List<Result> getResults() {
         return results;
     }
 
-    public void setResults (Results[] results)
-    {
+    public void setResults(List<Result> results) {
         this.results = results;
     }
 
-    public String[] getHtml_attributions ()
-    {
-        return html_attributions;
-    }
-
-    public void setHtml_attributions (String[] html_attributions)
-    {
-        this.html_attributions = html_attributions;
-    }
-
-    public String getStatus ()
-    {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus (String status)
-    {
+    public void setStatus(String status) {
         this.status = status;
     }
-
-    @Override
-    public String toString()
-    {
-        return "ClassPojo [next_page_token = "+next_page_token+", results = "+results+", html_attributions = "+html_attributions+", status = "+status+"]";
-    }
-
-
-
 
 }
