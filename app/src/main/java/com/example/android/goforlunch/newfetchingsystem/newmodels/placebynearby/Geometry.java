@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.models.modelnearby;
+package com.example.android.goforlunch.newfetchingsystem.newmodels.placebynearby;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -24,6 +24,10 @@ public class ZZZNotes {
      *
      * https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CmRaAAAAExdLn8t_pFqhiZ8IX-zb02rY_Gsnh2A7HRCzH43lQOESJL3-04ffP9jxveMqaStl6OZnfUCeI4Er6vsvuX_xXMdr-9LGQT8tvaDDNxYxcjbXqLB_I2Fn8f5M8M-B4dEwEhAnlcHgFb1sImXp0bPb4huUGhR6aoz0Ojsa1q2N6u32Kih6qiiznw&key=AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU
      *
+     * https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJo8eWxtqNcUgRqzOCyl2ECWg&key=AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU
+     *
+     * https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=place_id:&destinations=&key=AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc
+     *
      * */
 
 

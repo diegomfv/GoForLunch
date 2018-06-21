@@ -8,7 +8,7 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.Geometry;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.Location;
-import com.example.android.goforlunch.models.modelplacesbytextsearch.PlacesByTextSearch;
+import com.example.android.goforlunch.models.modelplacesbytextsearch.PlaceByTextSearch;
 import com.example.android.goforlunch.models.modelplacesbytextsearch.Result;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
@@ -58,29 +58,29 @@ public class RequesterTextSearch {
     public void doApiRequest () {
         Log.d(TAG, "doApiRequest: ");
 
-        GooglePlaceWebAPIService client = Common.getGooglePlaceTextSearchApiService();
+        GooglePlaceWebAPIService client = Common.getGooglePlaceTextSearchService();
 
         for (int j = 1; j < RepoStrings.RESTAURANT_TYPES.length ; j++) {
 
             restaurantType = RepoStrings.RESTAURANT_TYPES[j];
 
-            Call<PlacesByTextSearch> callTextSearch = client.fetchDataTextSearch(
+            Call<PlaceByTextSearch> callTextSearch = client.fetchDataTextSearch(
                     restaurantType + RepoStrings.ADD_RESTAURANT_STRING,
                     myPosition,
                     20,
                     textSearchKey);
 
-            callTextSearch.enqueue(new Callback<PlacesByTextSearch>() {
+            callTextSearch.enqueue(new Callback<PlaceByTextSearch>() {
 
                 @Override
-                public void onResponse(Call<PlacesByTextSearch> call, Response<PlacesByTextSearch> response) {
+                public void onResponse(Call<PlaceByTextSearch> call, Response<PlaceByTextSearch> response) {
                     Log.d(TAG, "onResponse: correct call");
                     Log.d(TAG, "onResponse: url = " + call.request().url().toString());
                     Log.d(TAG, "onResponse: TYPE -> " + call.request().url().toString().substring(65,69));
 
                     if (response.body() != null) {
 
-                        PlacesByTextSearch places = response.body();
+                        PlaceByTextSearch places = response.body();
                         Log.d(TAG, "onResponse: " + places.toString());
 
                         if (places.getResults() != null) {
@@ -195,7 +195,7 @@ public class RequesterTextSearch {
                 }
 
                 @Override
-                public void onFailure(Call<PlacesByTextSearch> call, Throwable t) {
+                public void onFailure(Call<PlaceByTextSearch> call, Throwable t) {
                     Log.d(TAG, "onFailure: there was an error");
                     Log.d(TAG, "onFailure: url = " + call.request().url().toString());
 

@@ -1,39 +1,34 @@
 package com.example.android.goforlunch.models.modelnearby;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Diego Fajardo on 11/05/2018.
  */
 public class Northeast {
 
-    private String lng;
+    @SerializedName("lat")
+    @Expose
+    private Double lat;
+    @SerializedName("lng")
+    @Expose
+    private Double lng;
 
-    private String lat;
-
-    public String getLng ()
-    {
-        return lng;
-    }
-
-    public void setLng (String lng)
-    {
-        this.lng = lng;
-    }
-
-    public String getLat ()
-    {
+    public Double getLat() {
         return lat;
     }
 
-    public void setLat (String lat)
-    {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
-    @Override
-    public String toString()
-    {
-        return "ClassPojo [lng = "+lng+", lat = "+lat+"]";
+    public Double getLng() {
+        return lng;
     }
 
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
 
 }

@@ -1,10 +1,10 @@
-package com.example.android.goforlunch.models.modelnearby;
+package com.example.android.goforlunch.newfetchingsystem.newmodels.placebyid;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by Diego Fajardo on 11/05/2018.
+ * Created by Diego Fajardo on 19/06/2018.
  */
 public class Viewport {
 

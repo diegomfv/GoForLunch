@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.models.modelplacesbytextsearch;
+package com.example.android.goforlunch.newfetchingsystem.newmodels.placetextsearch;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -6,13 +6,16 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
- * Created by Diego Fajardo on 23/05/2018.
+ * Created by Diego Fajardo on 19/06/2018.
  */
 public class PlacesByTextSearch {
 
     @SerializedName("html_attributions")
     @Expose
     private List<Object> htmlAttributions = null;
+    @SerializedName("next_page_token")
+    @Expose
+    private String nextPageToken;
     @SerializedName("results")
     @Expose
     private List<Result> results = null;
@@ -26,6 +29,14 @@ public class PlacesByTextSearch {
 
     public void setHtmlAttributions(List<Object> htmlAttributions) {
         this.htmlAttributions = htmlAttributions;
+    }
+
+    public String getNextPageToken() {
+        return nextPageToken;
+    }
+
+    public void setNextPageToken(String nextPageToken) {
+        this.nextPageToken = nextPageToken;
     }
 
     public List<Result> getResults() {

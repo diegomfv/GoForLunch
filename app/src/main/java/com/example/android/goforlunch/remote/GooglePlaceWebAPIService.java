@@ -2,9 +2,9 @@ package com.example.android.goforlunch.remote;
 
 import com.example.android.goforlunch.models.modeldistance.MatrixDistance;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.models.modelnearby.MyPlaces;
+import com.example.android.goforlunch.models.modelnearby.PlaceByNearby;
 import com.example.android.goforlunch.models.modelplacebyid.PlaceById;
-import com.example.android.goforlunch.models.modelplacesbytextsearch.PlacesByTextSearch;
+import com.example.android.goforlunch.models.modelplacesbytextsearch.PlaceByTextSearch;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -16,7 +16,7 @@ import retrofit2.http.Query;
 public interface GooglePlaceWebAPIService {
 
     @GET("json")
-    Call<MyPlaces> fetchDataNearby(
+    Call<PlaceByNearby> fetchDataNearby(
             @Query("location") LatLngForRetrofit latLngForRetrofit,
             @Query("rankby") String rankby,
             @Query("type") String type,
@@ -25,7 +25,7 @@ public interface GooglePlaceWebAPIService {
 
     //encoded true avoids Retrofit to change "+" for 2%B in the url
     @GET("json")
-    Call<PlacesByTextSearch> fetchDataTextSearch(
+    Call<PlaceByTextSearch> fetchDataTextSearch(
             @Query(value = "query", encoded = true) String query,
             @Query("location") LatLngForRetrofit latLngForRetrofit,
             @Query("radius") int radius,
@@ -34,7 +34,7 @@ public interface GooglePlaceWebAPIService {
 
 
     @GET("json")
-    Call<PlaceById> fetchDataPlaceId(
+    Call<PlaceById> fetchDataPlaceId (
             @Query("placeid") String placeId,
             @Query("key") String key
     );
@@ -49,7 +49,7 @@ public interface GooglePlaceWebAPIService {
     @GET("json")
     Call<MatrixDistance> fetchDistance(
             @Query("units") String units,
-            @Query("origins") String placeId,
+            @Query("origins") String origins,
             @Query("destinations") LatLngForRetrofit latLngForRetrofit,
             @Query("key") String key
     );

@@ -16,7 +16,7 @@ import retrofit2.Response;
  */
 
 /** Class that allows doing requests to Google Places API. Specifically, this class
- * does Place Photos Requests to get the pictures from the specific place
+ * does Place Photo Requests to get the pictures from the specific place
  * */
 public class RequesterPhoto {
 
@@ -33,12 +33,11 @@ public class RequesterPhoto {
     public void doApiRequest (final String placeId, String photoReference) {
         Log.d(TAG, "doApiRequest: ");
 
-        GooglePlaceWebAPIService clientPhoto = Common.getGooglePlacePhotoApiService();
+        GooglePlaceWebAPIService clientPhoto = Common.getGooglePlacePhotoService();
         Call<String> callPhoto = clientPhoto.fetchDataPhoto(maxWidth, photoReference, photoKey);
         callPhoto.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-
                 Log.d(TAG, "onResponse: correct call");
                 Log.d(TAG, "onResponse: url = " + call.request().url().toString());
 
@@ -56,7 +55,6 @@ public class RequesterPhoto {
 
             @Override
             public void onFailure(final Call<String> call, Throwable t) {
-
                 Log.d(TAG, "onFailure: there was an error");
                 Log.d(TAG, "onResponse: url = " + call.request().url().toString());
 

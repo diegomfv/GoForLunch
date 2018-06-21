@@ -43,7 +43,7 @@ public class RequesterPlaceId {
     public void doApiRequest(final String placeId) {
         Log.d(TAG, "doApiRequest: ");
 
-        GooglePlaceWebAPIService clientPlaceId = Common.getGooglePlaceIdApiService();
+        GooglePlaceWebAPIService clientPlaceId = Common.getGooglePlaceIdService();
         Call<PlaceById> callPlaceId = clientPlaceId.fetchDataPlaceId(placeId, placeIdKey);
         callPlaceId.enqueue(new Callback<PlaceById>() {
             @Override

@@ -7,28 +7,28 @@ import retrofit2.Retrofit;
  */
 public class Common {
 
-    public static GooglePlaceWebAPIService getGoogleNearbyAPIService() {
+    public static GooglePlaceWebAPIService getGoogleNearbyService() {
 
         return RetrofitClient.getNearbyClient().create(GooglePlaceWebAPIService.class);
     }
 
-    public static GooglePlaceWebAPIService getGooglePlaceTextSearchApiService () {
+    public static GooglePlaceWebAPIService getGooglePlaceTextSearchService() {
 
         return RetrofitClient.getPlaceByTextSearch().create(GooglePlaceWebAPIService.class);
 
     }
 
-    public static GooglePlaceWebAPIService getGooglePlaceIdApiService() {
+    public static GooglePlaceWebAPIService getGooglePlaceIdService() {
 
         return RetrofitClient.getPlaceByIdClient().create(GooglePlaceWebAPIService.class);
     }
 
-    public static GooglePlaceWebAPIService getGooglePlacePhotoApiService() {
+    public static GooglePlaceWebAPIService getGooglePlacePhotoService() {
 
         return RetrofitClient.getPhotos().create(GooglePlaceWebAPIService.class);
     }
 
-    public static GooglePlaceWebAPIService getGoogleDistanceMatrixApiService() {
+    public static GooglePlaceWebAPIService getGoogleDistanceMatrixService() {
 
         return RetrofitClient.getDistanceMatrix().create(GooglePlaceWebAPIService.class);
     }

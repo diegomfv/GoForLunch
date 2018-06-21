@@ -8,8 +8,8 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.models.modelnearby.Geometry;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.models.modelnearby.Location;
-import com.example.android.goforlunch.models.modelnearby.MyPlaces;
-import com.example.android.goforlunch.models.modelnearby.Results;
+import com.example.android.goforlunch.models.modelnearby.PlaceByNearby;
+import com.example.android.goforlunch.models.modelnearby.Result;
 import com.example.android.goforlunch.remote.Common;
 import com.example.android.goforlunch.remote.GooglePlaceWebAPIService;
 import com.example.android.goforlunch.repostrings.RepoStrings;
@@ -50,20 +50,20 @@ public class RequesterNearby {
         if (listOfRestaurantsInDatabase.size() > 0) {
             Log.d(TAG, "doApiRequest: listOfRestaurantsInDatabase.size() > 0");
 
-            GooglePlaceWebAPIService client = Common.getGoogleNearbyAPIService();
-            Call<MyPlaces> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", nearbyKey);
-            callNearby.enqueue(new Callback<MyPlaces>() {
+            GooglePlaceWebAPIService client = Common.getGoogleNearbyService();
+            Call<PlaceByNearby> callNearby = client.fetchDataNearby(myPosition, "distance", "restaurant", nearbyKey);
+            callNearby.enqueue(new Callback<PlaceByNearby>() {
 
                 @Override
-                public void onResponse(Call<MyPlaces> call, Response<MyPlaces> response) {
+                public void onResponse(Call<PlaceByNearby> call, Response<PlaceByNearby> response) {
                     Log.d(TAG, "onResponse: correct call");
                     Log.d(TAG, "onResponse: url = " + call.request().url().toString());
 
-                    MyPlaces myPlaces = response.body();
+                    PlaceByNearby placeByNearby = response.body();
 
-                    Log.d(TAG, "onResponse: " + myPlaces.toString());
+                    Log.d(TAG, "onResponse: " + placeByNearby.toString());
 
-                    if (myPlaces.getResults() != null) {
+                    if (placeByNearby.getResults() != null) {
 
                         String placeId;
                         String name;
@@ -78,17 +78,17 @@ public class RequesterNearby {
                         String lat;
                         String lng;
 
-                        Results[] results = myPlaces.getResults();
+                        List<Result> results = placeByNearby.getResults();
 
                         /** Iterating through the results array
                          * */
-                        for (int i = 0; i < results.length; i++) {
+                        for (int i = 0; i < results.size(); i++) {
 
                             for (int j = 0; j < listOfRestaurantsInDatabase.size(); j++) {
 
                                 // TODO: 07/06/2018 This is failing. Probably listOfRestaurantsInTheDatabase is 0 or null
 
-                                if (listOfRestaurantsInDatabase.get(j).getPlaceId().equalsIgnoreCase(results[i].getPlace_id())) {
+                                if (listOfRestaurantsInDatabase.get(j).getPlaceId().equalsIgnoreCase(results.get(i).getPlaceId())) {
                                     Log.d(TAG, "onResponse: places Id are equal, so the restaurant is already in the database");
                                     //do nothing
 
@@ -191,7 +191,7 @@ public class RequesterNearby {
                 }
 
                 @Override
-                public void onFailure(Call<MyPlaces> call, Throwable t) {
+                public void onFailure(Call<PlaceByNearby> call, Throwable t) {
                     Log.d(TAG, "onFailure: there was an error");
                     Log.d(TAG, "onResponse: url = " + call.request().url().toString());
                 }

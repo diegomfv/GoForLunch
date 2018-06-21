@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.remote;
+package com.example.android.goforlunch.newfetchingsystem.newremotes;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
