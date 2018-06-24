@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -95,12 +96,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -141,8 +142,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     private boolean mLocationPermissionGranted = false; //used in permissions
     private GoogleMap mMap; //used to create the map
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
-
-
 
     //List with all the restaurants in the database
     private List<RestaurantEntry> listOfAllRestaurantsInDatabase;
@@ -223,6 +222,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     private Storage storage;
     private String mainPath;
     private String imageDirPath;
+    private boolean accessInternalStorageGranted;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -246,7 +246,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
-        /**Butternife binding
+        /**Butterknife binding
          * */
         ButterKnife.bind(this, view);
 
@@ -666,12 +666,15 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             } break;
 
             case RepoConstants.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
+                accessInternalStorageGranted = false;
 
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission NOT granted");
+                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission GRANTED");
+                    accessInternalStorageGranted = true;
 
                 } else {
-                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission granted");
+                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission NOT GRANTED");
+                    accessInternalStorageGranted = false;
                 }
 
             } break;
@@ -779,9 +782,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         }
     }
 
-
-
-
     /******************************************************
      * INTERNAL STORAGE
      *****************************************************/
@@ -799,9 +799,10 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     /** Saves an image in the internal storage using a background thread
      * */
-    public void saveImageInInternalStorage (final String filePath, final Bitmap bitmap) {
+    public void saveImageInInternalStorage (final String filePath, Response<ResponseBody> responseBody) {
         Log.d(TAG, "saveImageInInternalStorage: called!");
 
+        final Bitmap bitmap = BitmapFactory.decodeStream(responseBody.body().byteStream());
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -825,19 +826,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             disposable.dispose();
         }
     }
-
-    //****************************************************
-    // INTERNAL STORAGE
-    //****************************************************
-
-    /** Used to read an image from the internal storage and convert it to bitmap so that
-     * it the image can be stored in a RestaurantEntry and be displayed later using glide
-     * in the recyclerView
-     * */
-    private Observable<byte[]> getObservableImageFromInternalStorage (String filePath) {
-        return Observable.just(storage.readFile(filePath));
-    }
-
 
     //****************************************************
     // FETCH DATA, MODIFY DATA from LOCAL DATABASE
@@ -888,7 +876,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     //********************************
 
     /** Method that fetches all the restaurants from the database
-     * and displays the proper pins in the map
+     * and displays pins in the map
      * */
     private void getAllRestaurantsAndDisplayPins () {
 
@@ -935,9 +923,11 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     // OBSERVERS
     //********************************
 
-    /** Observer that helps update the pins in the map
+    /** This observer returns all the restaurants in the database
+     * and allows updating the UI with the info.
      * */
     private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToUpdateMap() {
+        Log.d(TAG, "getMaybeObserverToUpdateMap: ");
 
         return new MaybeObserver<List<RestaurantEntry>>() {
             @Override
@@ -950,7 +940,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             public void onSuccess(List<RestaurantEntry> restaurantEntryList) {
                 Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
 
-                // TODO: 21/06/2018 Update this method!
                 updateMapWithPins(restaurantEntryList,
                         listOfVisitedRestaurantsByTheUsersGroup);
 
@@ -970,7 +959,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         };
     }
 
-    /** Observer that starts the request process if the database is empty
+    /** This Observer that starts the request process if the database is empty
      * */
     private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToStartRequestProcess() {
 
@@ -992,11 +981,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                             listOfVisitedRestaurantsByTheUsersGroup);
                 }
 
-
-                // TODO: 21/06/2018 Update this method!
-                updateMapWithPins(restaurantEntryList,
-                        listOfVisitedRestaurantsByTheUsersGroup);
-
             }
 
             @Override
@@ -1013,7 +997,13 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         };
     }
 
+    /** This obsever will get a list. It is a list with all the restaurants
+     * of the database. We will use it to filter (the nearby places that we will
+     * get in the result that are not in the database yet will have a type = "Other"
+     * We will get rid of the rest.
+     * */
     private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToFilterNearbyPlaces () {
+        Log.d(TAG, "getMaybeObserverToFilterNearbyPlaces: called!");
 
         return new MaybeObserver<List<RestaurantEntry>>() {
             @Override
@@ -1026,6 +1016,9 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             public void onSuccess(List<RestaurantEntry> restaurantEntryList) {
                 Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
 
+                /* The list here (restaurantEntryList) is a list with all the restaurants
+                * of the database.
+                * */
                 nearbyDisposable =
                         GoogleServiceStreams.streamFetchPlacesNearby(
                                 myPosition,
@@ -1056,7 +1049,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     /** Observer called after starting the Http request process.
      * It inserts restaurants by type in the database
      * */
-    private DisposableObserver<PlacesByTextSearch> getAllRestaurantsDisposableObserver (final int type) {
+    private DisposableObserver<PlacesByTextSearch> getTextSearchDisposableObserver(final int type) {
+        Log.d(TAG, "getTextSearchDisposableObserver: called!");
 
         return new DisposableObserver<PlacesByTextSearch>() {
             @Override
@@ -1114,10 +1108,11 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * get a place by Id
      * */
     private DisposableObserver<PlaceById> getPlaceByIdDisposableObserver () {
+        Log.d(TAG, "getPlaceByIdDisposableObserver: called!");
 
         return new DisposableObserver<PlaceById>() {
             @Override
-            public void onNext(PlaceById placeById) {
+            public void onNext(final PlaceById placeById) {
                 Log.d(TAG, "onNext: " + placeById.toString());
 
                 final com.example.android.goforlunch.newfetchingsystem.newmodels.placebyid.Result result = placeById.getResult();
@@ -1132,6 +1127,9 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
                 Log.d(TAG, "onNext: This is reached !!!!!!!!!!!!!!!!!!");
 
+
+                /* START DISTANCE MATRIX REQUEST */
+
                 distanceMatrixDisposable =
                         GoogleServiceStreams.streamFetchDistanceMatrix(
                                 "imperial",
@@ -1142,44 +1140,66 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
                 Log.d(TAG, "onNext: result.getPhotos() = " + result.getPhotos());
 
+
+                /* START PHOTO REQUEST */
+
                 if (null != result.getPhotos()) {
                     Log.d(TAG, "onNext: result.getPhotos != null");
 
-                    // TODO: 24/06/2018 do here
+                    for (int i = 0; i < result.getPhotos().size(); i++) {
 
+                        if (null != result.getPhotos().get(i)) {
+                            Log.d(TAG, "onNext: photo number " + i + " of placeId " + result.getPlaceId() + " is not null");
 
-                    GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
-                    Call<String> callPhoto = googleService.fetchDataPhoto(
-                            "400",
-                            result.getPhotos().get(0).getPhotoReference(),
-                            RepoStrings.Keys.PHOTO_KEY);
-                    callPhoto.enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(Call<String> call, final Response<String> response) {
-                            Log.d(TAG, "onResponse: correct call");
-                            Log.d(TAG, "onResponse: url = " + call.request().url().toString());
-
-                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
+                            Call<ResponseBody> callPhoto = googleService.fetchDataPhoto( "400",
+                                    result.getPhotos().get(0).getPhotoReference(),
+                                    RepoStrings.Keys.PHOTO_KEY);
+                            callPhoto.enqueue(new Callback<ResponseBody>() {
                                 @Override
-                                public void run() {
-                                    updateRestaurantPhotoUsingPlaceId(result.getPlaceId(), response.body());
+                                public void onResponse(final Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+
+                                    Log.d(TAG, "onResponse: saving url in database");
+                                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Log.d(TAG, "run: saving url...");
+                                            localDatabase.restaurantDao()
+                                                    .updateRestaurantImageUrl(result.getPlaceId(), call.request().url().toString());
+
+                                        }
+                                    });
+
+                                    Log.d(TAG, "onResponse: saving image in storage");
+                                    saveImageInInternalStorage(result.getPlaceId(), response);
+
+                                }
+
+                                @Override
+                                public void onFailure(final Call<ResponseBody> call, Throwable t) {
+                                    Log.d(TAG, "onFailure: url = " + call.request().url().toString());
+
+                                    /** We also save the url if onFailure is called*/
+
+                                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Log.d(TAG, "run: saving url...");
+                                            localDatabase.restaurantDao()
+                                                    .updateRestaurantImageUrl(result.getPlaceId(), call.request().url().toString());
+
+                                        }
+                                    });
+
                                 }
                             });
 
+                            /** We only store one photoUrl in the database, that's why we break the loop
+                             * */
+                            break;
                         }
-
-                        @Override
-                        public void onFailure(final Call<String> call, Throwable t) {
-                            Log.e(TAG, "onFailure: url = " + call.request().url().toString());
-                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    updateRestaurantPhotoUsingPlaceId(result.getPlaceId(), call.request().url().toString());
-                                }
-                            });
-                        }
-                    });
-
+                    }
                 }
             }
 
@@ -1200,6 +1220,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * to the restaurant
      * */
     private DisposableObserver<DistanceMatrix> getDistanceMatrixDisposableObserver (final String placeId) {
+        Log.d(TAG, "getDistanceMatrixDisposableObserver: called!");
 
         return new DisposableObserver<DistanceMatrix>() {
             @Override
@@ -1229,6 +1250,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * in the database
      * */
     private DisposableObserver<PlacesByNearby> getPlacesByNearbyAndFilter (final List<RestaurantEntry> restaurantEntryList) {
+        Log.d(TAG, "getPlacesByNearbyAndFilter: called!");
 
         return new DisposableObserver<PlacesByNearby>() {
             @Override
@@ -1237,6 +1259,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
                 List<String> listOfPlaceIds = new ArrayList<>();
 
+                /* We get the placeIds of all the restaurants in the database.
+                * */
                 for (int i = 0; i < restaurantEntryList.size(); i++) {
                     listOfPlaceIds.add(restaurantEntryList.get(i).getPlaceId());
                 }
@@ -1245,6 +1269,10 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
                 for (int i = 0; i < listOfResults.size(); i++) {
 
+                    /* If the restaurant in not yet in the database (if the placeId is not
+                    * in the list we just created...), then we add it to the database
+                    * with type = "Other" (= 13)
+                    * */
                     if (!listOfPlaceIds.contains(listOfResults.get(i).getPlaceId())) {
 
                         insertRestaurantEntryInDatabase(new RestaurantEntry(
@@ -1262,6 +1290,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                                 Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
                                 Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString())));
 
+                        /* We fetch the specific information from the place
+                        * */
                         placeIdDisposable =
                                 GoogleServiceStreams.streamFetchPlaceById(
                                         listOfResults.get(i).getPlaceId(),
@@ -1270,6 +1300,12 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
                     }
                 }
+
+                /* We update here the UI because all the restaurants that we got from the Http Requests
+                are already in the database
+                * */
+                getAllRestaurantsAndDisplayPins();
+
             }
 
             @Override
@@ -1288,8 +1324,16 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     // RETROFIT: Http Requests
     //********************************
 
+    /** Method used to start the Http requests to fetch the restaurants'info from Google databases
+     * */
     private void startHttpRequestProcess() {
+        Log.d(TAG, "startHttpRequestProcess: called!");
 
+        /* We will use first the Places API "Text Search" requests.
+        We use a loop to do one call per different type. The queries will be similar to
+        "Mexican+Restaurant". This way, we can obtain the type of the restaurant according
+        to the restaurants we get in the response
+        * */
         for (int i = 1; i < arrayOfTypes.length - 1; i++) { //-1 because we don't want to fetch "type OTHER" restaurants
 
             this.textSearchDisposable =
@@ -1300,7 +1344,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                             RepoStrings.Keys.TEXTSEARCH_KEY)
                             .subscribeOn(Schedulers.io())
                             .observeOn(Schedulers.io())
-                            .subscribeWith(getAllRestaurantsDisposableObserver(
+                            .subscribeWith(getTextSearchDisposableObserver(
                                     getTypeAsStringAndReturnTypeAsInt(arrayOfTypes[i])));
 
         }
@@ -1316,6 +1360,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * */
     public void updateMapWithPins(List<RestaurantEntry> restaurantEntryList,
                                   List<String> listOfVisitedRestaurantsByTheUsersGroup) {
+        Log.d(TAG, "updateMapWithPins: called!");
 
         if (mMap != null) {
             Log.d(TAG, "fillMapWithMarkers: the Map is not null");
@@ -1364,6 +1409,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             }
 
         } else {
+            Log.d(TAG, "updateMapWithPins: the map IS NULL!");
             ToastHelper.toastShort(getActivity(), "The map is not ready...");
         }
 
@@ -1373,7 +1419,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * HELPER METHODS
      * *****************/
 
-    /** Method that transforms a restaurant type from String to an int
+    /** Method that transforms a restaurant type from String type to int type
      * */
     public int getTypeAsStringAndReturnTypeAsInt (String type) {
 

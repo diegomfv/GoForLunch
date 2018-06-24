@@ -103,6 +103,9 @@ public interface RestaurantDao {
     @Query("UPDATE restaurant SET distance = :distanceValue WHERE placeId = :place_id")
     int updateRestaurantDistance(String place_id, String distanceValue);
 
+    @Query("UPDATE restaurant SET image_url = :imageUrl WHERE placeId = placeId")
+    int updateRestaurantImageUrl (String place_id, String imageUrl);
+
     // -------------------
     // DELETE
     // -------------------

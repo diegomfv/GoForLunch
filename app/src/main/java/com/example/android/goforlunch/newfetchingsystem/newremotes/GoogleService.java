@@ -7,6 +7,7 @@ import com.example.android.goforlunch.newfetchingsystem.newmodels.placebynearby.
 import com.example.android.goforlunch.newfetchingsystem.newmodels.placetextsearch.PlacesByTextSearch;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -47,10 +48,19 @@ public interface GoogleService {
     );
 
     @GET("photo")
-    Call<String> fetchDataPhoto(
+    Observable<ResponseBody> fetchDataPhotoRxJava(
             @Query("maxwidth") String maxWidth,
             @Query("photoreference") String photoReference,
             @Query("key") String key
     );
+
+    @GET("photo")
+    Call<ResponseBody> fetchDataPhoto(
+            @Query("maxwidth") String maxWidth,
+            @Query("photoreference") String photoReference,
+            @Query("key") String key
+    );
+
+
 
 }

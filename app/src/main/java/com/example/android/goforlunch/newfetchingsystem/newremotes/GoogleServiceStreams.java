@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 /**
  * Created by Diego Fajardo on 19/06/2018.
@@ -81,19 +82,19 @@ public class GoogleServiceStreams {
                 .timeout(10, TimeUnit.SECONDS);
     }
 
-//    public static Observable<String> streamFetchPhoto(
-//            String maxWidth,
-//            String photoReference,
-//            String key) {
-//
-//        GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
-//
-//        return googleService.fetchDataPhoto(maxWidth, photoReference, key)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(Schedulers.io())
-//                .timeout(10, TimeUnit.SECONDS);
-//
-//    }
+    public static Observable<ResponseBody> streamFetchPhoto(
+            String maxWidth,
+            String photoReference,
+            String key) {
+
+        GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
+
+        return googleService.fetchDataPhotoRxJava(maxWidth, photoReference, key)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .timeout(10, TimeUnit.SECONDS);
+
+    }
 
 }
 
