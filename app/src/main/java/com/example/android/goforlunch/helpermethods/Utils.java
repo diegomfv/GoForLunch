@@ -12,25 +12,11 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
-import com.example.android.goforlunch.activities.rest.MainActivity;
-import com.example.android.goforlunch.activities.rest.RestaurantActivity;
-import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.repostrings.RepoStrings;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
+import com.example.android.goforlunch.repository.RepoStrings;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -82,6 +68,7 @@ public class Utils {
        if (map != null) {
            intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
            intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, map.get(RepoStrings.FirebaseReference.RESTAURANT_TYPE).toString());
+           intent.putExtra(RepoStrings.SentIntent.PLACE_ID, map.get(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID).toString());
            intent.putExtra(RepoStrings.SentIntent.ADDRESS, map.get(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).toString());
            intent.putExtra(RepoStrings.SentIntent.RATING, map.get(RepoStrings.FirebaseReference.RESTAURANT_RATING).toString());
            intent.putExtra(RepoStrings.SentIntent.PHONE, map.get(RepoStrings.FirebaseReference.RESTAURANT_PHONE).toString());
@@ -154,5 +141,24 @@ public class Utils {
 
         return true;
     }
+
+    public static String checkToAvoidNull (String string) {
+        if (null != string) {
+            return string;
+        } else {
+            return RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+        }
+    }
+
+    /** Method that formats the date that we get from the request to insert it in
+     * the database with the new format (the one that will be displayed)
+     * */
+    public static String formatTime (String time) {
+
+        time = time.substring(0, 2) + "." + time.substring(2, time.length());
+        return "Open until " + time;
+
+    }
+
 
 }

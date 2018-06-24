@@ -50,7 +50,7 @@ import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -86,6 +86,7 @@ import java.util.Objects;
 
 /** Fragment that displays the Google Map
  * */
+
 public class FragmentRestaurantMapView extends Fragment {
 
     // TODO: 21/05/2018 Add Maps Button to restart search
@@ -968,3 +969,5 @@ public class FragmentRestaurantMapView extends Fragment {
 //        super.onPause();
 //    }
 //}
+
+

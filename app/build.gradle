@@ -117,6 +117,9 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
 
+    //Android-storage library
+    implementation 'com.snatik:storage:2.1.0'
+
 }
 
 //Firebase plugin

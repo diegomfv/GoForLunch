@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.repostrings;
+package com.example.android.goforlunch.repository;
 
 /**
  * Created by Diego Fajardo on 23/05/2018.
@@ -34,6 +34,16 @@ public interface RepoStrings {
     };
 
     String RESTAURANT_TABLE_NAME = "restaurant";
+
+    interface Keys {
+
+        String NEARBY_KEY = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
+        String MATRIX_DISTANCE_KEY = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
+        String PHOTO_KEY = "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU";
+        String PLACEID_KEY = "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU";
+        String TEXTSEARCH_KEY = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
+
+    }
 
     interface SharedPreferences {
 
@@ -92,6 +102,11 @@ public interface RepoStrings {
         String GROUP_NAME = "group_name";
         String GROUP_RESTAURANTS_VISITED = "group_restaurants_visited";
 
+    }
+
+    interface Directories {
+
+        String IMAGE_DIR = "imageDir";
 
     }
 

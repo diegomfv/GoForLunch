@@ -1,10 +1,7 @@
 package com.example.android.goforlunch;
 
-import android.util.Log;
-
-import com.bumptech.glide.signature.ObjectKey;
 import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.example.android.goforlunch.repository.RepoStrings;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,13 +10,10 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;

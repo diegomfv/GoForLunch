@@ -4,6 +4,7 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.graphics.Bitmap;
 
 /**
  * Created by Diego Fajardo on 19/05/2018.
@@ -15,12 +16,14 @@ public class RestaurantEntry {
     private int id;
     private String placeId;
     private String name;
-    private String type;
+    private int type;
     private String address;
     @ColumnInfo(name = "open_until")
     private String openUntil;
     private String distance;
     private String rating;
+    @ColumnInfo(name = "image_bitmap")
+    private Bitmap imageBitmap;
     @ColumnInfo(name = "image_url")
     private String imageUrl;
     private String phone;
@@ -32,8 +35,8 @@ public class RestaurantEntry {
     /** Used for when inserting info in the table
      * */
     @Ignore  // Use the Ignore annotation so Room knows that it has to use the other constructor instead
-    public RestaurantEntry(String placeId, String name, String type, String address, String openUntil, String distance, String rating,
-                           String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
+    public RestaurantEntry(String placeId, String name, int type, String address, String openUntil, String distance, String rating,
+                           Bitmap imageBitmap, String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.placeId = placeId;
         this.name = name;
         this.type = type;
@@ -41,6 +44,7 @@ public class RestaurantEntry {
         this.openUntil = openUntil;
         this.distance = distance;
         this.rating = rating;
+        this.imageBitmap = imageBitmap;
         this.imageUrl = imageUrl;
         this.phone = phone;
         this.websiteUrl = websiteUrl;
@@ -50,8 +54,8 @@ public class RestaurantEntry {
 
     /** Used for when reading from the table
      * */
-    public RestaurantEntry(int id, String placeId, String name, String type, String address, String openUntil, String distance, String rating,
-                           String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
+    public RestaurantEntry(int id, String placeId, String name, int type, String address, String openUntil, String distance, String rating,
+                           Bitmap imageBitmap, String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.id = id;
         this.placeId = placeId;
         this.name = name;
@@ -60,6 +64,7 @@ public class RestaurantEntry {
         this.openUntil = openUntil;
         this.distance = distance;
         this.rating = rating;
+        this.imageBitmap = imageBitmap;
         this.imageUrl = imageUrl;
         this.phone = phone;
         this.websiteUrl = websiteUrl;
@@ -91,11 +96,11 @@ public class RestaurantEntry {
         this.name = name;
     }
 
-    public String getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
 
@@ -131,13 +136,19 @@ public class RestaurantEntry {
         this.rating = rating;
     }
 
+    public Bitmap getImageBitmap() {
+        return imageBitmap;
+    }
+
+    public void setImageBitmap(Bitmap imageBitmap) {
+        this.imageBitmap = imageBitmap;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public String getPhone() {
         return phone;
@@ -182,7 +193,8 @@ public class RestaurantEntry {
                 ", openUntil='" + openUntil + '\'' +
                 ", distance='" + distance + '\'' +
                 ", rating='" + rating + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
+                ", imageBitmap='" + imageBitmap + '\'' +
+                ", imageUrl=" + imageUrl + '\'' +
                 ", phone='" + phone + '\'' +
                 ", websiteUrl='" + websiteUrl + '\'' +
                 ", latitude='" + latitude + '\'' +

@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 

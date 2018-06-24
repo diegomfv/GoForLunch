@@ -26,12 +26,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.example.android.goforlunch.repository.RepoStrings;
 import com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;

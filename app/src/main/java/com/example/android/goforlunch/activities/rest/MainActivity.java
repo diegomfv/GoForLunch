@@ -32,9 +32,8 @@ import com.example.android.goforlunch.job.NotificationDailyJob;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL;
-import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL2;
+import com.example.android.goforlunch.repository.RepoStrings;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,6 +46,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Map;
 import java.util.Objects;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 // TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
 // TODO: 28/05/2018 Check if distance is too far, delete from the database!
@@ -69,9 +71,15 @@ public class MainActivity extends AppCompatActivity{
     private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;
 
     //Widgets
-    private DrawerLayout mDrawerLayout;
-    private NavigationView mNavigationView;
-    private BottomNavigationView navigationView;
+
+    @BindView(R.id.main_drawer_layout_id)
+    DrawerLayout mDrawerLayout;
+
+    @BindView(R.id.main_nav_view_id)
+    NavigationView mNavigationView;
+
+    @BindView(R.id.main_bottom_navigation_id)
+    BottomNavigationView bottomNavigationView;
 
     private ProgressBar progressBar;
     private TextView navUserName;
@@ -131,6 +139,8 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
+
         //---------------------- CODE FIRST WRITTEN --------------------------//
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -138,12 +148,7 @@ public class MainActivity extends AppCompatActivity{
 
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
-        navigationView = findViewById(R.id.main_bottom_navigation_id);
-        navigationView.setOnNavigationItemSelectedListener(botNavListener);
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.main_drawer_layout_id);
-
-        mNavigationView = (NavigationView) findViewById(R.id.main_nav_view_id);
+        bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
         mNavigationView.setNavigationItemSelectedListener(navViewListener);
 
         View headerView = mNavigationView.getHeaderView(0);
@@ -194,7 +199,7 @@ public class MainActivity extends AppCompatActivity{
                                  * */
                                 getSupportFragmentManager()
                                         .beginTransaction()
-                                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL.newInstance())
+                                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL2.newInstance())
                                         .commit();
 
                                 /** We specify that that is the fragment we are showing
@@ -359,7 +364,7 @@ public class MainActivity extends AppCompatActivity{
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentRestaurantMapViewTRIAL.newInstance();
+                                selectedFragment = FragmentRestaurantMapViewTRIAL2.newInstance();
                                 flagToSpecifyCurrentFragment = 1;
 
                             }

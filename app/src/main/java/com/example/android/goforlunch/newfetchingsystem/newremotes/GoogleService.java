@@ -5,11 +5,6 @@ import com.example.android.goforlunch.newfetchingsystem.newmodels.placebyid.Plac
 import com.example.android.goforlunch.newfetchingsystem.newmodels.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.newfetchingsystem.newmodels.placebynearby.PlacesByNearby;
 import com.example.android.goforlunch.newfetchingsystem.newmodels.placetextsearch.PlacesByTextSearch;
-import com.example.android.rxjavafetchingrestaurants.models.distancematrix.DistanceMatrix;
-import com.example.android.rxjavafetchingrestaurants.models.placebyid.PlaceById;
-import com.example.android.rxjavafetchingrestaurants.models.placebynearby.LatLngForRetrofit;
-import com.example.android.rxjavafetchingrestaurants.models.placebynearby.PlacesByNearby;
-import com.example.android.rxjavafetchingrestaurants.models.placetextsearch.PlacesByTextSearch;
 
 import io.reactivex.Observable;
 import retrofit2.Call;

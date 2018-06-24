@@ -1,7 +1,12 @@
 package com.example.android.goforlunch.activities.rest;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,12 +27,13 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
-import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,10 +41,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.snatik.storage.Storage;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -45,15 +62,28 @@ import java.util.Map;
 
 public class RestaurantActivity extends AppCompatActivity {
 
-    private static final String TAG = "RestaurantActivity";
+    private static final String TAG = RestaurantActivity.class.getSimpleName();
+
+    private Context context;
 
     //Widgets
+    @BindView(R.id.restaurant_fab_id)
     private FloatingActionButton fab;
-    private BottomNavigationView navigationView;
-    private ImageView ivRestPicture;
-    private TextView tvRestName;
-    private TextView tvRestAddress;
-    private RatingBar rbRestRating;
+
+    @BindView(R.id.restaurant_selector_id)
+    BottomNavigationView navigationView;
+
+    @BindView(R.id.restaurant_image_id)
+    ImageView ivRestPicture;
+
+    @BindView(R.id.restaurant_title_id)
+    TextView tvRestName;
+
+    @BindView(R.id.restaurant_address_id)
+    TextView tvRestAddress;
+
+    @BindView(R.id.restaurant_rating_id)
+    RatingBar rbRestRating;
 
     //Variables
     private String userFirstName;
@@ -73,7 +103,9 @@ public class RestaurantActivity extends AppCompatActivity {
     private List<String> listOfCoworkers;
 
     //RecyclerView
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.restaurant_recycler_view_id)
+    RecyclerView mRecyclerView;
+
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -86,33 +118,44 @@ public class RestaurantActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPref;
 
+    //Glide
+    private RequestManager glide;
+
+    //Internal Storage
+    private Storage storage;
+    private String mainPath;
+    private String imageDirPath;
+    private boolean accessToInternalStorageGranted = false;
+
+    // Disposable
+    private Disposable getImageFromInternalStorageDisposable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant);
 
-        fireDb = FirebaseDatabase.getInstance();
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(RestaurantActivity.this);
+        ButterKnife.bind(this);
 
+        context = RestaurantActivity.this;
+
+        fireDb = FirebaseDatabase.getInstance();
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        glide = Glide.with(context);
+
+        this.configureInternalStorage(context);
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
         /** Instantiation of the fab and set onClick listener*/
-        fab = findViewById(R.id.restaurant_fab_id);
         fab.setOnClickListener(mFabListener);
 
         listOfCoworkers = new ArrayList<>();
 
-        navigationView = (BottomNavigationView) findViewById(R.id.restaurant_selector_id);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
 
-        ivRestPicture = (ImageView) findViewById(R.id.restaurant_image_id);
-        tvRestName = (TextView) findViewById(R.id.restaurant_title_id);
-        tvRestAddress = (TextView) findViewById(R.id.restaurant_address_id);
-        rbRestRating = (RatingBar) findViewById(R.id.restaurant_rating_id);
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.restaurant_recycler_view_id);
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(RestaurantActivity.this);
+        mLayoutManager = new LinearLayoutManager(context);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         /** We get the intent to display the information
@@ -120,7 +163,6 @@ public class RestaurantActivity extends AppCompatActivity {
         Intent intent = getIntent();
         fillUIUsingIntent(intent);
         intentRestaurantName = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME);
-
 
         /** We get the user information
          * */
@@ -175,7 +217,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
                 /** We use the list in the adapter
                  * */
-                mAdapter = new RVAdapterRestaurant(RestaurantActivity.this, listOfCoworkers);
+                mAdapter = new RVAdapterRestaurant(context, listOfCoworkers);
                 mRecyclerView.setAdapter(mAdapter);
 
             }
@@ -190,6 +232,19 @@ public class RestaurantActivity extends AppCompatActivity {
 
         Anim.crossFadeShortAnimation(mRecyclerView);
 
+
+    }
+
+    /** disposeWhenDestroy() avoids memory leaks
+     * */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.disposeWhenDestroy();
+    }
+
+    private void disposeWhenDestroy () {
+        dispose(this.getImageFromInternalStorageDisposable);
 
     }
 
@@ -218,7 +273,7 @@ public class RestaurantActivity extends AppCompatActivity {
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
                     UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
 
-                    ToastHelper.toastShort(RestaurantActivity.this, "Not Going to the restaurant!");
+                    ToastHelper.toastShort(context, "Not Going to the restaurant!");
                 }
 
             } else {
@@ -261,16 +316,16 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: callButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: phone = " + phoneToastString);
                             if (phoneToastString.equals("")) {
-                                ToastHelper.toastShort(RestaurantActivity.this, "Phone is not available");
+                                ToastHelper.toastShort(context, "Phone is not available");
                             } else {
-                                ToastHelper.toastShort(RestaurantActivity.this, "Calling to " + phoneToastString);
+                                ToastHelper.toastShort(context, "Calling to " + phoneToastString);
                             }
 
                         } break;
 
                         case R.id.restaurant_view_like_id: {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
-                            ToastHelper.toastShort(RestaurantActivity.this, likeToastString);
+                            ToastHelper.toastShort(context, likeToastString);
 
                         } break;
 
@@ -278,7 +333,7 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: websiteButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: web URL = " + webUrlToastString);
                             if (webUrlToastString.equals("")) {
-                                ToastHelper.toastShort(RestaurantActivity.this, "Website is not available");
+                                ToastHelper.toastShort(context, "Website is not available");
                             } else {
 
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlToastString));
@@ -311,6 +366,20 @@ public class RestaurantActivity extends AppCompatActivity {
         }
     }
 
+    /******************************************************
+     * RX JAVA
+     *****************************************************/
+
+    /** Method used to avoid memory leaks
+     * */
+    private void dispose (Disposable disposable) {
+        if (disposable != null
+                && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+    }
+
+
     /** Method used to set the Fab button state
      * */
     private boolean setFabButtonState (String intentRestaurantName) {
@@ -332,6 +401,31 @@ public class RestaurantActivity extends AppCompatActivity {
         return true;
 
     }
+
+    /** Method that sets the directory variables and creates the directory that will
+     * store images if needed
+     * */
+    private void configureInternalStorage (Context context) {
+        Log.d(TAG, "configureInternalStorage: ");
+
+        //If we don't have storage permissions, we don't continue
+        if (ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ToastHelper.toastShort(context, "You don't have access to Internal Storage");
+            return;
+
+        } else {
+            Log.d(TAG, "configureInternalStorage: access to Internal storage granted");
+            accessToInternalStorageGranted = true;
+            storage = new Storage(context);
+            mainPath = storage.getInternalFilesDirectory() + File.separator;
+            imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
+
+            ToastHelper.toastShort(context, "Access to internal storage granted");
+
+        }
+    }
+
 
 
     /** Method used to fill the UI using the intent
@@ -391,21 +485,97 @@ public class RestaurantActivity extends AppCompatActivity {
         phoneToastString = intent.getStringExtra(RepoStrings.SentIntent.PHONE);
         webUrlToastString = intent.getStringExtra(RepoStrings.SentIntent.WEBSITE_URL);
 
-        if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) == null
-                || intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL).equals("")) {
-
-            Glide.with(RestaurantActivity.this)
-                    .load(R.drawable.lunch_image)
-                    .into(ivRestPicture);
+        if(accessToInternalStorageGranted) {
+            loadImage(intent);
 
         } else {
+            loadImageWithUrl(intent);
 
-            Glide.with(RestaurantActivity.this)
-                    .load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL))
-                    .into(ivRestPicture);
         }
 
         return true;
     }
 
+    /** Method that tries to load an image using the storage.
+     * If there is no file, it tries to load
+     * the image with the url
+     * */
+    private void loadImage (Intent intent) {
+        Log.d(TAG, "loadImage: called!");
+
+        //if file exists in the directory -> load with storage
+        if (storage.isFileExist(
+                imageDirPath + File.separator + intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID))) {
+            Log.d(TAG, "loadImage: file does exist in the directory");
+            getAndDisplayImageFromInternalStorage(intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID));
+
+        } else {
+            Log.d(TAG, "loadImage: file does not exist in the directory");
+            loadImageWithUrl(intent);
+
+
+        }
+    }
+
+    /** Method that tries to load an image with a url.
+     * If it is null or equal to "", it loads
+     * an standard picture
+     * */
+    private void loadImageWithUrl (Intent intent) {
+
+        if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) == null
+                || intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL).equals("")) {
+
+            glide.load(R.drawable.lunch_image).into(ivRestPicture);
+
+        } else {
+
+            glide.load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL)).into(ivRestPicture);
+        }
+
+
+    }
+
+    /** Used to read an image from the internal storage and convert it to bitmap so that
+     * it the image can be stored in a RestaurantEntry and be displayed later using glide
+     * in the recyclerView
+     * */
+    private Observable<byte[]> getObservableImageFromInternalStorage (String filePath) {
+        return Observable.just(storage.readFile(filePath));
+    }
+
+    /** Loads an image using glide. The observable emits the image in a background thread
+     * and the image is loaded using glide in the main thread
+     * */
+    public void getAndDisplayImageFromInternalStorage(String filePath) {
+        Log.d(TAG, "loadImageFromInternalStorage: called!");
+
+        getImageFromInternalStorageDisposable = getObservableImageFromInternalStorage(imageDirPath + File.separator + filePath)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<byte[]>() {
+                    @Override
+                    public void onNext(byte[] bytes) {
+                        Log.d(TAG, "onNext: ");
+
+                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
+
+                        glide.load(bm).into(ivRestPicture);
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
+
+                    }
+                });
+
+    }
 }

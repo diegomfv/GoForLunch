@@ -14,14 +14,10 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
-import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.pojo.User;
-import com.example.android.goforlunch.repostrings.RepoStrings;
+import com.example.android.goforlunch.repository.RepoStrings;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.ToDoubleBiFunction;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.

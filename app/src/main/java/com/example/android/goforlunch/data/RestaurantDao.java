@@ -10,6 +10,8 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+import io.reactivex.Maybe;
+
 /**
  * Created by Diego Fajardo on 19/05/2018.
  */
@@ -46,6 +48,10 @@ import java.util.List;
 @Dao
 public interface RestaurantDao {
 
+    // -------------------
+    // READ
+    // -------------------
+
     @Query("SELECT * FROM restaurant ORDER BY distance")
     LiveData<List<RestaurantEntry>> getAllRestaurants();
 
@@ -61,11 +67,45 @@ public interface RestaurantDao {
     @Query("SELECT * FROM restaurant ORDER BY distance")
     List<RestaurantEntry> getAllRestaurantsNotLiveData();
 
+    @Query("SELECT * FROM restaurant WHERE placeId = :placeId")
+    LiveData<RestaurantEntry> getRestaurantByPlaceId (String placeId);
+
+    @Query("SELECT * FROM restaurant ORDER BY distance")
+    Maybe<List<RestaurantEntry>> getAllRestaurantsRxJava();
+
+    @Query("SELECT * FROM restaurant WHERE type = :type")
+    Maybe<List<RestaurantEntry>> getAllRestaurantsByTypeRxJava(String type);
+
+
+    // -------------------
+    // INSERT
+    // -------------------
+
     @Insert
     long insertRestaurant (RestaurantEntry restaurantEntry);
 
+    // -------------------
+    // UPDATE
+    // -------------------
+
     @Update (onConflict = OnConflictStrategy.REPLACE) //Replaces the element in case of conflict
-    void updateRestaurant (RestaurantEntry restaurantEntry);
+    int updateRestaurantGeneralInfo(RestaurantEntry restaurantEntry);
+
+    @Query("UPDATE restaurant SET type = :type WHERE name = :name")
+    int updateRestaurantType (String name, int type);
+
+    @Query("UPDATE restaurant SET phone = :phone, website_url = :websiteUrl, open_until = :openUntil WHERE placeId = :placeId")
+    int updateRestaurantGeneralInfo(String placeId, String phone, String websiteUrl, String openUntil);
+
+    @Query("UPDATE restaurant SET image_url = :photoUrl WHERE placeId = :placeId")
+    int updateRestaurantPhoto(String placeId, String photoUrl);
+
+    @Query("UPDATE restaurant SET distance = :distanceValue WHERE placeId = :place_id")
+    int updateRestaurantDistance(String place_id, String distanceValue);
+
+    // -------------------
+    // DELETE
+    // -------------------
 
     @Delete
     void deleteRestaurant (RestaurantEntry restaurantEntry);
@@ -73,18 +113,17 @@ public interface RestaurantDao {
     @Delete
     int deleteAll (RestaurantEntry[] restaurantEntries);
 
-    @Query("SELECT * FROM restaurant WHERE placeId = :placeId")
-    LiveData<RestaurantEntry> getRestaurantByPlaceId (String placeId);
-
     @Query("DELETE FROM restaurant")
     int deleteAllRowsInRestaurantTable();
 
-    @Query("UPDATE restaurant SET phone = :phone, website_url = :websiteUrl, open_until = :openUntil WHERE placeId = :placeId")
-    void updateRestaurant (String placeId, String phone, String websiteUrl, String openUntil);
 
-    @Query("UPDATE restaurant SET image_url = :photoUrl WHERE placeId = :placeId")
-    void updateRestaurantPhoto (String placeId, String photoUrl);
 
-    @Query("UPDATE restaurant SET distance = :distanceValue WHERE placeId = :place_id")
-    void updateRestaurantDistance(String place_id, String distanceValue);
+
+
+
+
+
+
+
+
 }
