@@ -17,7 +17,6 @@ import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.remote.requesters.RequesterTextSearch;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -293,7 +292,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                         long value = mDb.restaurantDao().insertRestaurant(new RestaurantEntry(
                                 RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
                                 RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                               13,
                                 RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
                                 RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
                                 RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
@@ -481,7 +480,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                 AppDatabase mDb = AppDatabase.getInstance(FirebaseActivityDELETE.this);
                 mDb.restaurantDao().deleteAllRowsInRestaurantTable();
 
-                startRequestUsingTextSearchService(mDb, myPosition);
+                //startRequestUsingTextSearchService(mDb, myPosition);
 
             }
         });
@@ -489,14 +488,14 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
     }
 
-    /** Method that starts the request using TextSearch service
-     * */
-    private void startRequestUsingTextSearchService (AppDatabase mDb, LatLngForRetrofit myPosition) {
-
-        RequesterTextSearch requesterTextSearch = new RequesterTextSearch(mDb, myPosition);
-        requesterTextSearch.doApiRequest();
-
-    }
+//    /** Method that starts the request using TextSearch service
+//     * */
+//    private void startRequestUsingTextSearchService (AppDatabase mDb, LatLngForRetrofit myPosition) {
+//
+//        RequesterTextSearch requesterTextSearch = new RequesterTextSearch(mDb, myPosition);
+//        requesterTextSearch.doApiRequest();
+//
+//    }
 
 
 

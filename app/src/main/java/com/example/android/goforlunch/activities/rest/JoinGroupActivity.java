@@ -35,7 +35,7 @@ import static junit.framework.Assert.assertTrue;
  */
 public class JoinGroupActivity extends AppCompatActivity {
 
-    private static final String TAG = "JoinGroupActivity";
+    private static final String TAG = JoinGroupActivity.class.getSimpleName();
 
     private FloatingActionButton fab;
     private Button buttonJoinGroup;

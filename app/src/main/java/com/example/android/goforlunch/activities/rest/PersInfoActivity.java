@@ -61,7 +61,7 @@ public class PersInfoActivity extends AppCompatActivity{
     // TODO: 06/06/2018 Fill the textInputs with first name and last name
     // TODO: 06/06/2018 Allow to modify the profile picture
 
-    private static final String TAG = "PersInfoActivity";
+    private static final String TAG = PersInfoActivity.class.getSimpleName();
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 

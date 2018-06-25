@@ -22,8 +22,6 @@ public class RestaurantEntry {
     private String openUntil;
     private String distance;
     private String rating;
-    @ColumnInfo(name = "image_bitmap")
-    private Bitmap imageBitmap;
     @ColumnInfo(name = "image_url")
     private String imageUrl;
     private String phone;
@@ -36,7 +34,7 @@ public class RestaurantEntry {
      * */
     @Ignore  // Use the Ignore annotation so Room knows that it has to use the other constructor instead
     public RestaurantEntry(String placeId, String name, int type, String address, String openUntil, String distance, String rating,
-                           Bitmap imageBitmap, String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
+                           String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.placeId = placeId;
         this.name = name;
         this.type = type;
@@ -44,7 +42,6 @@ public class RestaurantEntry {
         this.openUntil = openUntil;
         this.distance = distance;
         this.rating = rating;
-        this.imageBitmap = imageBitmap;
         this.imageUrl = imageUrl;
         this.phone = phone;
         this.websiteUrl = websiteUrl;
@@ -55,7 +52,7 @@ public class RestaurantEntry {
     /** Used for when reading from the table
      * */
     public RestaurantEntry(int id, String placeId, String name, int type, String address, String openUntil, String distance, String rating,
-                           Bitmap imageBitmap, String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
+                           String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.id = id;
         this.placeId = placeId;
         this.name = name;
@@ -64,7 +61,6 @@ public class RestaurantEntry {
         this.openUntil = openUntil;
         this.distance = distance;
         this.rating = rating;
-        this.imageBitmap = imageBitmap;
         this.imageUrl = imageUrl;
         this.phone = phone;
         this.websiteUrl = websiteUrl;
@@ -136,14 +132,6 @@ public class RestaurantEntry {
         this.rating = rating;
     }
 
-    public Bitmap getImageBitmap() {
-        return imageBitmap;
-    }
-
-    public void setImageBitmap(Bitmap imageBitmap) {
-        this.imageBitmap = imageBitmap;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
@@ -193,7 +181,6 @@ public class RestaurantEntry {
                 ", openUntil='" + openUntil + '\'' +
                 ", distance='" + distance + '\'' +
                 ", rating='" + rating + '\'' +
-                ", imageBitmap='" + imageBitmap + '\'' +
                 ", imageUrl=" + imageUrl + '\'' +
                 ", phone='" + phone + '\'' +
                 ", websiteUrl='" + websiteUrl + '\'' +

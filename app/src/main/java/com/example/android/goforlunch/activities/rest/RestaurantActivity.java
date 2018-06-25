@@ -68,7 +68,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
     //Widgets
     @BindView(R.id.restaurant_fab_id)
-    private FloatingActionButton fab;
+    FloatingActionButton fab;
 
     @BindView(R.id.restaurant_selector_id)
     BottomNavigationView navigationView;
@@ -327,6 +327,10 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
                             ToastHelper.toastShort(context, likeToastString);
 
+                            // TODO: 25/06/2018 Delete!
+                            List<File> files = getListFiles(new File(mainPath));
+                            Log.d(TAG, "onNavigationItemSelected: " + files.toString());
+
                         } break;
 
                         case R.id.restaurant_view_website_id: {
@@ -485,7 +489,7 @@ public class RestaurantActivity extends AppCompatActivity {
         phoneToastString = intent.getStringExtra(RepoStrings.SentIntent.PHONE);
         webUrlToastString = intent.getStringExtra(RepoStrings.SentIntent.WEBSITE_URL);
 
-        if(accessToInternalStorageGranted) {
+        if (accessToInternalStorageGranted) {
             loadImage(intent);
 
         } else {
@@ -522,6 +526,7 @@ public class RestaurantActivity extends AppCompatActivity {
      * an standard picture
      * */
     private void loadImageWithUrl (Intent intent) {
+        Log.d(TAG, "loadImageWithUrl: called!");
 
         if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) == null
                 || intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL).equals("")) {
@@ -559,7 +564,6 @@ public class RestaurantActivity extends AppCompatActivity {
                         Log.d(TAG, "onNext: ");
 
                         Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
-
                         glide.load(bm).into(ivRestPicture);
 
                     }
@@ -576,6 +580,21 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     }
                 });
+    }
 
+    // TODO: 25/06/2018 Delete!
+    private List<File> getListFiles(File parentDir) {
+        ArrayList<File> inFiles = new ArrayList<File>();
+        File[] files = parentDir.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                inFiles.addAll(getListFiles(file));
+            } else {
+                if(file.getName().endsWith(".csv")){
+                    inFiles.add(file);
+                }
+            }
+        }
+        return inFiles;
     }
 }

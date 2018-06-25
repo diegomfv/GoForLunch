@@ -2,7 +2,6 @@ package com.example.android.goforlunch.pageFragments;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -47,15 +46,15 @@ import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.newfetchingsystem.newmodels.distancematrix.DistanceMatrix;
-import com.example.android.goforlunch.newfetchingsystem.newmodels.placebyid.PlaceById;
-import com.example.android.goforlunch.newfetchingsystem.newmodels.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.newfetchingsystem.newmodels.placebynearby.PlacesByNearby;
-import com.example.android.goforlunch.newfetchingsystem.newmodels.placetextsearch.PlacesByTextSearch;
-import com.example.android.goforlunch.newfetchingsystem.newmodels.placetextsearch.Result;
-import com.example.android.goforlunch.newfetchingsystem.newremotes.AllGoogleServices;
-import com.example.android.goforlunch.newfetchingsystem.newremotes.GoogleService;
-import com.example.android.goforlunch.newfetchingsystem.newremotes.GoogleServiceStreams;
+import com.example.android.goforlunch.remote.newmodels.distancematrix.DistanceMatrix;
+import com.example.android.goforlunch.remote.newmodels.placebyid.PlaceById;
+import com.example.android.goforlunch.remote.newmodels.placebynearby.LatLngForRetrofit;
+import com.example.android.goforlunch.remote.newmodels.placebynearby.PlacesByNearby;
+import com.example.android.goforlunch.remote.newmodels.placetextsearch.PlacesByTextSearch;
+import com.example.android.goforlunch.remote.newmodels.placetextsearch.Result;
+import com.example.android.goforlunch.remote.newremotes.AllGoogleServices;
+import com.example.android.goforlunch.remote.newremotes.GoogleService;
+import com.example.android.goforlunch.remote.newremotes.GoogleServiceStreams;
 import com.example.android.goforlunch.repository.RepoConstants;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
@@ -96,6 +95,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
@@ -117,11 +117,13 @@ import static com.example.android.goforlunch.repository.RepoStrings.Keys.NEARBY_
  * */
 public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
+    // TODO: 25/06/2018 Solve issue with storage... Probably response.bofy() is always null
+
     /**************************
      * LOG ********************
      * ***********************/
 
-    private static final String TAG = "PageFragmentRestaurantM";
+    private static final String TAG = FragmentRestaurantMapViewTRIAL2.class.getSimpleName();
 
     /**************************
      * VARIABLES **************
@@ -214,6 +216,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     private Disposable placeIdDisposable;
     private Disposable distanceMatrixDisposable;
     private Disposable nearbyDisposable;
+    private Disposable deleteDisposable;
 
     //Observers
     private MaybeObserver restaurantsObserver;
@@ -230,6 +233,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      *****************************/
 
     public static FragmentRestaurantMapViewTRIAL2 newInstance() {
+        Log.d(TAG, "newInstance: called!");
         FragmentRestaurantMapViewTRIAL2 fragment = new FragmentRestaurantMapViewTRIAL2();
         return fragment;
     }
@@ -241,7 +245,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         Log.i(TAG, "onCreateView: Map");
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
@@ -338,16 +341,13 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             }
         }
 
-        /** Configuration process
-         * */
+        /** Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
-        this.configureInternalStorage(getActivity());
+        this.getPermissionsProcess();
 
-        /**
-         * STARTING THE MAP:
+        /* STARTING THE MAP:
          * First, we check that the user has the correct Google Play Services Version.
-         * If the user does, we start the map
-         * **/
+         * If the user does, we start the map*/
         if (isGooglePlayServicesOK()) {
             getLocationPermission();
         }
@@ -360,9 +360,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: refresh button clicked!");
-
-                ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Starting requests process");
-                startHttpRequestProcess();
+                ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Deleting db and starting request process");
+                deleteAllRestaurantsAndStartRequestProcess();
 
             }
         });
@@ -373,7 +372,24 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: database button clicked!");
 
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(TAG, "run: ");
+                        
+                        listOfAllRestaurantsInDatabase = localDatabase.restaurantDao().getAllRestaurantsNotLiveDataOrderPlaceId();
+
+                        for (int i = 0; i < listOfAllRestaurantsInDatabase.size() ; i++) {
+                            Log.i(TAG, "run:"
+                                    + "PLACE ID: " + listOfAllRestaurantsInDatabase.get(i).getPlaceId()
+                                    + " NAME: " + listOfAllRestaurantsInDatabase.get(i).getName()
+                                    + " TYPE: " + arrayOfTypes[listOfAllRestaurantsInDatabase.get(i).getType()]);
+                        }
+                    }
+                });
+
                 startActivity(new Intent(getActivity(), AndroidDatabaseManager.class));
+                
             }
         });
 
@@ -384,11 +400,13 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * */
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy: called!");
         super.onDestroy();
         this.disposeWhenDestroy();
     }
 
     private void disposeWhenDestroy () {
+        Log.d(TAG, "disposeWhenDestroy: called!");
         dispose(this.autocompleteTextViewDisposable);
         dispose(this.textSearchDisposable);
         dispose(this.placeIdDisposable);
@@ -398,8 +416,101 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     }
 
     /**************************
+     * REQUEST PERMISSIONS ****
+     * ***********************/
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: called");
+        mLocationPermissionGranted = false;
+
+        switch (requestCode) {
+
+            /* Location Permission request code */
+            case RepoConstants.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_: {
+                if (grantResults.length > 0) {
+
+                    for (int i = 0; i < grantResults.length; i++) {
+
+                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionGranted = false;
+                            ToastHelper.toastShort(getActivity(), "Location Permission NOT granted");
+
+                            Log.d(TAG, "onRequestPermissionsResult: permission failed");
+                            return;
+                        }
+
+                    }
+                    //if everything is ok (all permissions are granted),
+                    // we want to initialise the map
+                    Log.d(TAG, "onRequestPermissionsResult: permission granted");
+                    mLocationPermissionGranted = true;
+                    ToastHelper.toastShort(getActivity(), "Location Permission GRANTED");
+                }
+            } break;
+
+            /* Write to storage request code */
+            case RepoConstants.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
+                accessInternalStorageGranted = false;
+
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission GRANTED");
+                    accessInternalStorageGranted = true;
+
+                    storage = new Storage(getActivity());
+                    mainPath = storage.getInternalFilesDirectory() + File.separator;
+                    imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
+
+                    if (!storage.isDirectoryExists(imageDirPath)) {
+                        Log.d(TAG, "configureInternalStorage: imageDir does not exist. Creating directory...");
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d(TAG, "run: creating directory...");
+                                boolean isCreated = storage.createDirectory(imageDirPath);
+                                Log.d(TAG, "run: directory created = " + isCreated);
+                            }
+                        });
+
+                    } else {
+                        Log.d(TAG, "configureInternalStorage: imageDir already exists!");
+                        //do nothing
+
+                    }
+
+                    /* After storage permission process, we ask for device location permissions
+                     * */
+                    if (isGooglePlayServicesOK()) {
+                        getLocationPermission();
+                    }
+
+
+                } else {
+                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission NOT GRANTED");
+                    accessInternalStorageGranted = false;
+
+                    /* After storage permission process, we ask for device location permissions
+                     * */
+                    if (isGooglePlayServicesOK()) {
+                        getLocationPermission();
+                    }
+                }
+
+            } break;
+        }
+    }
+
+    /**************************
      * MAP RELATED METHODS ****
      * ***********************/
+
+    /** This method starts both, internal storage permission process and
+     * device location permission process
+     * */
+    public void getPermissionsProcess () {
+        Log.d(TAG, "getPermissionsProcess: called!");
+        this.getInternalStorageAccessPermission();
+    }
 
     /**
      * Checks if the user has the correct
@@ -500,28 +611,38 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                         public void onInfoWindowClick(Marker marker) {
                             Log.d(TAG, "onInfoWindowClick: " + marker.getTitle());
 
-                            for (int i = 0; i < listOfAllRestaurantsInDatabase.size(); i++) {
+                            if (listOfAllRestaurantsInDatabase.size() > 0) {
 
-                                if (marker.getTitle().equalsIgnoreCase(listOfAllRestaurantsInDatabase.get(i).getName())) {
+                                for (int i = 0; i < listOfAllRestaurantsInDatabase.size(); i++) {
 
-                                    Intent intent = new Intent(getActivity(), RestaurantActivity.class);
+                                    if (marker.getTitle().equalsIgnoreCase(listOfAllRestaurantsInDatabase.get(i).getName())) {
 
-                                    Map <String,Object> map = new HashMap<>();
-                                    map.put(RepoStrings.SentIntent.RESTAURANT_NAME, listOfAllRestaurantsInDatabase.get(i).getName());
-                                    map.put(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfAllRestaurantsInDatabase.get(i).getType());
-                                    map.put(RepoStrings.SentIntent.ADDRESS, listOfAllRestaurantsInDatabase.get(i).getAddress());
-                                    map.put(RepoStrings.SentIntent.RATING, listOfAllRestaurantsInDatabase.get(i).getRating());
-                                    map.put(RepoStrings.SentIntent.PHONE, listOfAllRestaurantsInDatabase.get(i).getPhone());
-                                    map.put(RepoStrings.SentIntent.WEBSITE_URL, listOfAllRestaurantsInDatabase.get(i).getWebsiteUrl());
-                                    map.put(RepoStrings.SentIntent.IMAGE_URL, listOfAllRestaurantsInDatabase.get(i).getImageBitmap());
+                                        Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
-                                    Utils.fillIntentUsingMapInfo(intent, map);
+                                        Map <String,Object> map = new HashMap<>();
+                                        map.put(RepoStrings.SentIntent.RESTAURANT_NAME, listOfAllRestaurantsInDatabase.get(i).getName());
+                                        map.put(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfAllRestaurantsInDatabase.get(i).getType());
+                                        map.put(RepoStrings.SentIntent.PLACE_ID, listOfAllRestaurantsInDatabase.get(i).getPlaceId());
+                                        map.put(RepoStrings.SentIntent.ADDRESS, listOfAllRestaurantsInDatabase.get(i).getAddress());
+                                        map.put(RepoStrings.SentIntent.RATING, listOfAllRestaurantsInDatabase.get(i).getRating());
+                                        map.put(RepoStrings.SentIntent.PHONE, listOfAllRestaurantsInDatabase.get(i).getPhone());
+                                        map.put(RepoStrings.SentIntent.WEBSITE_URL, listOfAllRestaurantsInDatabase.get(i).getWebsiteUrl());
+                                        map.put(RepoStrings.SentIntent.IMAGE_URL, listOfAllRestaurantsInDatabase.get(i).getImageUrl());
 
-                                    startActivity(intent);
-                                    break;
+                                        Utils.fillIntentUsingMapInfo(intent, map);
 
+                                        startActivity(intent);
+                                        break;
+
+                                    }
                                 }
+                            } else {
+                                Log.d(TAG, "onInfoWindowClick: listOfAllRestaurantsInDatabase is EMPTY");
+                                ToastHelper.toastShort(getActivity(), "Please, wait till the system updates...");
+
                             }
+
+
                         }
                     });
                 }
@@ -573,9 +694,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         }
     }
 
-
-
-
     /**
      * Method used to move the camera in the map
      */
@@ -592,6 +710,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(TAG, "onCreateOptionsMenu: called!");
 
         getActivity().getMenuInflater().inflate(R.menu.map_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
@@ -599,6 +718,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG, "onOptionsItemSelected: called!");
 
         switch (item.getItemId()) {
 
@@ -632,67 +752,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     }
 
-    /**************************
-     * REQUEST PERMISSIONS ****
-     * ***********************/
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult: called");
-        mLocationPermissionGranted = false;
-
-        switch (requestCode) {
-
-            case RepoConstants.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_: {
-                if (grantResults.length > 0) {
-
-                    for (int i = 0; i < grantResults.length; i++) {
-
-                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                            mLocationPermissionGranted = false;
-                            ToastHelper.toastShort(getActivity(), "Location Permission NOT granted");
-
-                            Log.d(TAG, "onRequestPermissionsResult: permission failed");
-                            return;
-                        }
-
-                    }
-                    //if everything is ok (all permissions are granted),
-                    // we want to initialise the map
-                    Log.d(TAG, "onRequestPermissionsResult: permission granted");
-                    mLocationPermissionGranted = true;
-                    ToastHelper.toastShort(getActivity(), "Location Permission GRANTED");
-                }
-            } break;
-
-            case RepoConstants.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
-                accessInternalStorageGranted = false;
-
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission GRANTED");
-                    accessInternalStorageGranted = true;
-
-                } else {
-                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission NOT GRANTED");
-                    accessInternalStorageGranted = false;
-                }
-
-            } break;
-        }
-    }
-
-//    // TODO: 10/05/2018 Explain better
-//    /** stopAutoManage() is used to avoid the app to crash when coming back to the
-//     * fragment*/
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//    }
-//}
-
-    // TODO: 21/06/2018
-    // TODO: 21/06/2018
-
     /********************
      * CONFIGURATION
      * *****************/
@@ -701,6 +760,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * */
     private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView,
                                                 Disposable disposable) {
+        Log.d(TAG, "configureAutocompleteTextView: called!");
 
         ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
                 getActivity(),
@@ -723,16 +783,20 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                     @Override
                     public void onNext(String type) {
                         Log.d(TAG, "onNext: type = " + type);
-                        Log.d(TAG, "onNext: int = " + getTypeAsStringAndReturnTypeAsInt(type));
+                        Log.d(TAG, "onNext: typeAsInt = " + Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
 
-                        if (Arrays.asList(arrayOfTypes).contains(type)) {
-                            getRestaurantsByTypeAndDisplayPins(getTypeAsStringAndReturnTypeAsInt(type));
+                        if (Arrays.asList(arrayOfTypes).contains(type)
+                                && Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes) != 0) {
+                            Log.d(TAG, "onNext: getting restaurant by type");
+                            getRestaurantsByTypeAndDisplayPins(Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
 
                         } else {
-                            updateMapWithPins(
-                                    listOfAllRestaurantsInDatabase,
-                                    listOfVisitedRestaurantsByTheUsersGroup);
+                            Log.d(TAG, "onNext: getting all restaurants");
+                            getAllRestaurantsAndDisplayPins();
                         }
+
+                        Utils.hideKeyboard(getActivity());
+
                     }
 
                     @Override
@@ -751,42 +815,15 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     }
 
-    /** Method that sets the directory variables and creates the directory that will
-     * store images if needed
-     * */
-    private void configureInternalStorage (Context context) {
-        Log.d(TAG, "configureInternalStorage: ");
-
-        // TODO: 24/06/2018 Do here the request
-        getInternalStorageAccessPermission();
-
-        storage = new Storage(context);
-        mainPath = storage.getInternalFilesDirectory() + File.separator;
-        imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
-
-        if (!storage.isDirectoryExists(imageDirPath)) {
-            Log.d(TAG, "configureInternalStorage: imageDir does not exist. Creating directory...");
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "run: creating directory...");
-                    boolean isCreated = storage.createDirectory(imageDirPath);
-                    Log.d(TAG, "run: directory created = " + isCreated);
-                }
-            });
-
-        } else {
-            Log.d(TAG, "configureInternalStorage: imageDir already exists!");
-            //do nothing
-
-        }
-    }
-
     /******************************************************
      * INTERNAL STORAGE
      *****************************************************/
 
+    /** Method that launches a dialog asking for storage permissions if they have not been
+     * granted before
+     * */
     private void getInternalStorageAccessPermission () {
+        Log.d(TAG, "getInternalStorageAccessPermission: called!");
 
         if (ActivityCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -797,7 +834,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         }
     }
 
-    /** Saves an image in the internal storage using a background thread
+    /** Saves an image in the
+     * internal storage using a background thread
      * */
     public void saveImageInInternalStorage (final String filePath, Response<ResponseBody> responseBody) {
         Log.d(TAG, "saveImageInInternalStorage: called!");
@@ -821,6 +859,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     /** Method used to avoid memory leaks
      * */
     private void dispose (Disposable disposable) {
+        Log.d(TAG, "dispose: called!");
         if (disposable != null
                 && !disposable.isDisposed()) {
             disposable.dispose();
@@ -836,12 +875,14 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     /** Method that returns all restaurants in the database
      * */
     private Maybe<List<RestaurantEntry>> getAllRestaurantsInDatabase () {
+        Log.d(TAG, "getAllRestaurantsInDatabase: called!");
         return localDatabase.restaurantDao().getAllRestaurantsRxJava();
     }
 
     /** Method that returns all restaurants in database of a specific type
      * */
     private Maybe<List<RestaurantEntry>> getRestaurantsByType(int type) {
+        Log.d(TAG, "getRestaurantsByType: called!");
         if (type == 0) {
             return localDatabase.restaurantDao().getAllRestaurantsRxJava();
         } else {
@@ -854,21 +895,30 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     /** Method to insert a restaurant in the database
      * */
     private long insertRestaurantEntryInDatabase (RestaurantEntry restaurantEntry) {
+        Log.d(TAG, "insertRestaurantEntryInDatabase: called!");
         return localDatabase.restaurantDao().insertRestaurant(restaurantEntry);
     }
 
     /** Update methods
      * */
     private int updateGeneralRestaurantInfoUsingPlaceId(String placeId, String phone, String websiteUrl, String openUntil) {
+        Log.d(TAG, "updateGeneralRestaurantInfoUsingPlaceId: called!");
         return localDatabase.restaurantDao().updateRestaurantGeneralInfo(placeId, phone, websiteUrl, openUntil);
     }
 
     public int updateDistanceToRestaurantUsingPlaceId (String placeId, String distanceValue) {
+        Log.d(TAG, "updateDistanceToRestaurantUsingPlaceId: called!");
         return localDatabase.restaurantDao().updateRestaurantDistance(placeId, distanceValue);
     }
 
     public int updateRestaurantPhotoUsingPlaceId(String placeId, String photoUrl) {
+        Log.d(TAG, "updateRestaurantPhotoUsingPlaceId: called!");
         return localDatabase.restaurantDao().updateRestaurantPhoto(placeId, photoUrl);
+    }
+
+    private int deleteAllRestaurants () {
+        Log.d(TAG, "deleteAllRestaurants: called!");
+        return localDatabase.restaurantDao().deleteAllRowsInRestaurantTable();
     }
 
     //********************************
@@ -879,6 +929,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * and displays pins in the map
      * */
     private void getAllRestaurantsAndDisplayPins () {
+        Log.d(TAG, "getAllRestaurantsAndDisplayPins: called!");
 
         restaurantsObserver = getAllRestaurantsInDatabase()
                 .subscribeOn(Schedulers.io())
@@ -891,6 +942,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * and displays the proper pins in the map
      * */
     private void getRestaurantsByTypeAndDisplayPins(final int type) {
+        Log.d(TAG, "getRestaurantsByTypeAndDisplayPins: called!");
 
         restaurantsObserver = getRestaurantsByType(type)
                 .subscribeOn(Schedulers.io())
@@ -903,19 +955,31 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * request process
      * */
     private void initRequestProcessIfNecessary() {
+        Log.d(TAG, "initRequestProcessIfNecessary: called!");
 
         restaurantsObserver = getAllRestaurantsInDatabase()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(getMaybeObserverToStartRequestProcess());
+                .subscribeWith(getMaybeObserverThatStartsRequestProcessIfNecessary());
     }
 
     private void getAllRestaurantsAndFilter () {
+        Log.d(TAG, "getAllRestaurantsAndFilter: called!");
 
         restaurantsObserver = getAllRestaurantsInDatabase()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribeWith(getMaybeObserverToFilterNearbyPlaces());
+
+    }
+
+    private void deleteAllRestaurantsAndStartRequestProcess () {
+        Log.d(TAG, "deleteAllRestaurantsAndStartRequestProcess: called!");
+
+        deleteDisposable = Observable.just(deleteAllRestaurants())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribeWith(getObserverThatCallsInitRequestProcessIfNecessary());
 
     }
 
@@ -961,7 +1025,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     /** This Observer that starts the request process if the database is empty
      * */
-    private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToStartRequestProcess() {
+    private MaybeObserver<List<RestaurantEntry>> getMaybeObserverThatStartsRequestProcessIfNecessary() {
+        Log.d(TAG, "getMaybeObserverThatStartsRequestProcessIfNecessary: called!");
 
         return new MaybeObserver<List<RestaurantEntry>>() {
             @Override
@@ -975,8 +1040,13 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                 Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
 
                 if (restaurantEntryList.size() == 0) {
+                    Log.d(TAG, "onSuccess: localDB is EMPTY. Starting request process..");
                     startHttpRequestProcess();
                 } else {
+                    Log.d(TAG, "onSuccess: localDB currently filled. Updating UI..");
+
+                    /* We update the UI
+                    * */
                     updateMapWithPins(restaurantEntryList,
                             listOfVisitedRestaurantsByTheUsersGroup);
                 }
@@ -997,7 +1067,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         };
     }
 
-    /** This obsever will get a list. It is a list with all the restaurants
+    /** This observer will get a list. It is a list with all the restaurants
      * of the database. We will use it to filter (the nearby places that we will
      * get in the result that are not in the database yet will have a type = "Other"
      * We will get rid of the rest.
@@ -1046,6 +1116,35 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         };
     }
 
+    private DisposableObserver<Integer> getObserverThatCallsInitRequestProcessIfNecessary() {
+        Log.d(TAG, "getObserverThatCallsInitRequestProcessIfNecessary: called!");
+
+        return new DisposableObserver<Integer>() {
+            @Override
+            public void onNext(Integer integer) {
+                Log.d(TAG, "onNext: ");
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "onError: ");
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+
+                /* We call here initRequestProcessIfNecessary() to start the request process.
+                Since the database is now empty, it will always start the process
+                * */
+                initRequestProcessIfNecessary();
+
+            }
+        };
+    }
+
     /** Observer called after starting the Http request process.
      * It inserts restaurants by type in the database
      * */
@@ -1069,7 +1168,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                             "",
                             "",
                             Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
-                            null,
                             "",
                             "",
                             "",
@@ -1085,8 +1183,10 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                 }
 
                 if (type == 12) {
-                    // if type is 12, then is type = Vietnamese which is the last one (before Other)
-                    // This guarantees all restaurants are already in the database
+                    /* if type is 12, then is type = Vietnamese which is the last one (before Other)
+                    This guarantees all restaurants are already in the database. We proceed to
+                    start with nearby requests
+                    */
                     getAllRestaurantsAndFilter();
 
                 }
@@ -1115,7 +1215,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             public void onNext(final PlaceById placeById) {
                 Log.d(TAG, "onNext: " + placeById.toString());
 
-                final com.example.android.goforlunch.newfetchingsystem.newmodels.placebyid.Result result = placeById.getResult();
+                final com.example.android.goforlunch.remote.newmodels.placebyid.Result result = placeById.getResult();
 
                 String closingTime = checkClosingTime(result);
 
@@ -1125,11 +1225,9 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                         Utils.checkToAvoidNull(result.getWebsite()),
                         closingTime);
 
-                Log.d(TAG, "onNext: This is reached !!!!!!!!!!!!!!!!!!");
-
 
                 /* START DISTANCE MATRIX REQUEST */
-
+                Log.d(TAG, "onNext: starting distance matrix request: " + result.getPlaceId());
                 distanceMatrixDisposable =
                         GoogleServiceStreams.streamFetchDistanceMatrix(
                                 "imperial",
@@ -1142,7 +1240,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
 
                 /* START PHOTO REQUEST */
-
+                Log.d(TAG, "onNext: starting photo request: " + result.getPlaceId());
                 if (null != result.getPhotos()) {
                     Log.d(TAG, "onNext: result.getPhotos != null");
 
@@ -1159,29 +1257,45 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                                 @Override
                                 public void onResponse(final Call<ResponseBody> call, Response<ResponseBody> response) {
                                     Log.d(TAG, "onResponse: url = " + call.request().url().toString());
+                                    Log.d(TAG, "onResponse: response = " + response.toString());
 
+                                    if (null != response.body()) {
+                                        Log.d(TAG, "onResponse: response.body() = " + response.body().toString());
+                                    } else  {
+                                        Log.d(TAG, "onResponse: response.body is null");
+                                    }
+
+                                    /* We save the image url in the database
+                                    * */
                                     Log.d(TAG, "onResponse: saving url in database");
                                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                                         @Override
                                         public void run() {
                                             Log.d(TAG, "run: saving url...");
-                                            localDatabase.restaurantDao()
-                                                    .updateRestaurantImageUrl(result.getPlaceId(), call.request().url().toString());
+                                            updateRestaurantPhotoUsingPlaceId(result.getPlaceId(), call.request().url().toString());
 
                                         }
                                     });
 
-                                    Log.d(TAG, "onResponse: saving image in storage");
-                                    saveImageInInternalStorage(result.getPlaceId(), response);
-
+                                    /* We store the image in the internal storage
+                                    * */
+                                    if (accessInternalStorageGranted) {
+                                        Log.d(TAG, "onResponse: saving image in storage");
+                                        if (null != response.body()) {
+                                            Log.d(TAG, "onResponse: response.body() IS NOT NULL");
+                                            saveImageInInternalStorage(result.getPlaceId(), response);
+                                        } else {
+                                            Log.d(TAG, "onResponse: response.body() is null");
+                                        }
+                                    }
                                 }
 
                                 @Override
                                 public void onFailure(final Call<ResponseBody> call, Throwable t) {
                                     Log.d(TAG, "onFailure: url = " + call.request().url().toString());
 
-                                    /** We also save the url if onFailure is called*/
-
+                                    /* We also save the url if onFailure is called
+                                    * */
                                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                                         @Override
                                         public void run() {
@@ -1195,7 +1309,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                                 }
                             });
 
-                            /** We only store one photoUrl in the database, that's why we break the loop
+                            /* We only store one photoUrl in the database.
+                            That's why we break the loop
                              * */
                             break;
                         }
@@ -1265,7 +1380,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                     listOfPlaceIds.add(restaurantEntryList.get(i).getPlaceId());
                 }
 
-                List<com.example.android.goforlunch.newfetchingsystem.newmodels.placebynearby.Result> listOfResults = placesByNearby.getResults();
+                List<com.example.android.goforlunch.remote.newmodels.placebynearby.Result> listOfResults = placesByNearby.getResults();
 
                 for (int i = 0; i < listOfResults.size(); i++) {
 
@@ -1283,7 +1398,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                                 "",
                                 "",
                                 Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
-                                null,
                                 "",
                                 "",
                                 "",
@@ -1329,7 +1443,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     private void startHttpRequestProcess() {
         Log.d(TAG, "startHttpRequestProcess: called!");
 
-        /* We will use first the Places API "Text Search" requests.
+        /* We will use firstly the Places API "Text Search" requests.
         We use a loop to do one call per different type. The queries will be similar to
         "Mexican+Restaurant". This way, we can obtain the type of the restaurant according
         to the restaurants we get in the response
@@ -1345,7 +1459,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                             .subscribeOn(Schedulers.io())
                             .observeOn(Schedulers.io())
                             .subscribeWith(getTextSearchDisposableObserver(
-                                    getTypeAsStringAndReturnTypeAsInt(arrayOfTypes[i])));
+                                    Utils.getTypeAsStringAndReturnTypeAsInt(arrayOfTypes[i], arrayOfTypes)));
 
         }
 
@@ -1356,20 +1470,37 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * UPDATE UI
      * *****************/
 
-    /** Method that updates the map with pins
+    /** Method that updates the map with pins.
+     * Additionally, it fills the listOfAllRestaurantsInDatabase
      * */
     public void updateMapWithPins(List<RestaurantEntry> restaurantEntryList,
                                   List<String> listOfVisitedRestaurantsByTheUsersGroup) {
         Log.d(TAG, "updateMapWithPins: called!");
 
+        /* We update a list of restaurants with all the restaurants of the database
+        * */
+        // TODO: 25/06/2018 Did't find another place to be sure the database was completely
+        // TODO: 25/06/2018 filled before updating the list
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: updating \"listOfAllRestaurantsInDatabase\"...");
+                listOfAllRestaurantsInDatabase = localDatabase
+                        .restaurantDao()
+                        .getAllRestaurantsNotLiveDataOrderDistance();
+            }
+        });
+
+        /* We update the map's pins
+        * */
         if (mMap != null) {
-            Log.d(TAG, "fillMapWithMarkers: the Map is not null");
+            Log.d(TAG, "updateMapWithPins: the map is not null");
 
             if (restaurantEntryList != null
                     && !restaurantEntryList.isEmpty()) {
                 Log.d(TAG, "displayPinsInMap: listOfRestaurants IS NOT NULL and IS NOT EMPTY");
 
-                /** We delete all the elements of the listOfMarkers
+                /* We delete all the elements of the listOfMarkers and clear the map
                  * */
                 listOfMarkers.clear();
                 mMap.clear();
@@ -1401,7 +1532,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
                     }
 
-                    /** We fill the listOfMarkers and the map with the markers
+                    /* We fill the listOfMarkers and the map with the markers
                      * */
                     listOfMarkers.add(mMap.addMarker(options));
 
@@ -1415,18 +1546,13 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     }
 
-    /********************
-     * HELPER METHODS
-     * *****************/
-
-    /** Method that transforms a restaurant type from String type to int type
-     * */
-    public int getTypeAsStringAndReturnTypeAsInt (String type) {
-
-        if (Arrays.asList(arrayOfTypes).contains(type)) {
-            return Arrays.asList(arrayOfTypes).indexOf(type);
-        } else return 0;
-
-    }
+//    // TODO: 10/05/2018 Explain better
+//    /** stopAutoManage() is used to avoid the app to crash when coming back to the
+//     * fragment*/
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//    }
+//}
 
 }

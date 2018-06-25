@@ -54,7 +54,7 @@ import java.util.Objects;
  */
 public class AuthEnterNameActivity extends AppCompatActivity{
 
-    private static final String TAG = "AuthEnterNameAndGroupAc";
+    private static final String TAG = AuthEnterNameActivity.class.getSimpleName();
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 

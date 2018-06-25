@@ -65,7 +65,7 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity{
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     //Loaders id
     private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;

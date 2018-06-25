@@ -30,7 +30,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 // TODO: 01/06/2018 and display them using TextInputAutocompleteTextView
 public class AuthSignInPasswordActivity extends AppCompatActivity {
 
-    private static final String TAG = "AuthSignInPasswordActiv";
+    private static final String TAG = AuthSignInPasswordActivity.class.getSimpleName();
 
     private FirebaseAuth auth;
 

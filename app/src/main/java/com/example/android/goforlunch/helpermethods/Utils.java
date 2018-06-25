@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.repository.RepoStrings;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -157,6 +158,17 @@ public class Utils {
 
         time = time.substring(0, 2) + "." + time.substring(2, time.length());
         return "Open until " + time;
+
+    }
+
+    /** Method that transforms a restaurant type from String type to int type
+     * */
+    public static int getTypeAsStringAndReturnTypeAsInt (String type, String[] arrayOfTypes) {
+        Log.d(TAG, "getTypeAsStringAndReturnTypeAsInt: called!");
+
+        if (Arrays.asList(arrayOfTypes).contains(type)) {
+            return Arrays.asList(arrayOfTypes).indexOf(type);
+        } else return 0;
 
     }
 

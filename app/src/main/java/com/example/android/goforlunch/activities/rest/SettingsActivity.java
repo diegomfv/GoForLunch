@@ -15,6 +15,8 @@ import com.example.android.goforlunch.R;
 
 public class SettingsActivity extends AppCompatActivity {
 
+    private static final String TAG = SettingsActivity.class.getSimpleName();
+
     //Widgets
     private Toolbar toolbar;
     private ActionBar actionBar;

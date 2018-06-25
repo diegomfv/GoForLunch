@@ -45,7 +45,7 @@ import java.util.List;
 // TODO: 28/05/2018 Remove the user from the list!
 public class FragmentCoworkersView extends Fragment {
 
-    private static final String TAG = "PageFragmentCoworkersVi";
+    private static final String TAG = FragmentCoworkersView.class.getSimpleName();
 
     //Variables to store views related to the articles upload
     private TextView mErrorMessageDisplay;

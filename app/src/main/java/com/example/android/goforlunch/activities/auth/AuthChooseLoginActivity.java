@@ -54,7 +54,7 @@ import java.util.Objects;
 // TODO: 02/06/2018 Once, it allowed us to start with password account but the current user used gmail account
 public class AuthChooseLoginActivity extends AppCompatActivity{
 
-    private static final String TAG = "AuthChooseLoginActivity";
+    private static final String TAG = AuthChooseLoginActivity.class.getSimpleName();
 
     //Google Sign In Request Code
     private static int RC_SIGN_IN = 101;

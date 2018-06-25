@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.ToDoubleBiFunction;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -61,7 +62,10 @@ public class FragmentRestaurantListView extends Fragment {
     // TODO: 28/05/2018 Some names appear over the others
     // TODO: 29/05/2018 Modify the number of users that go to a place!
 
-    private static final String TAG = "PageFragmentRestaurantL";
+    private static final String TAG = FragmentRestaurantListView.class.getSimpleName();
+
+    //Array of restaurant types (got from Resources, strings)
+    private String[] arrayOfTypes;
 
     //Widgets
     private TextView mErrorMessageDisplay;
@@ -138,6 +142,10 @@ public class FragmentRestaurantListView extends Fragment {
         listOfRestaurantsByCoworker = new ArrayList<>();
 
         mDb = AppDatabase.getInstance(getActivity());
+
+        /** We get an array of restaurant types from RESOURCES
+         * */
+        this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
 
         toolbar = (Toolbar) view.findViewById(R.id.list_main_toolbar_id);
         toolbar2 = (RelativeLayout) view.findViewById(R.id.list_toolbar_search_id);
@@ -266,6 +274,13 @@ public class FragmentRestaurantListView extends Fragment {
                     RepoStrings.RESTAURANT_TYPES
             );
 
+            // TODO: 24/06/2018 CHANGE THIS!!!!!!
+            // TODO: 24/06/2018
+            // TODO: 24/06/2018
+            // TODO: 24/06/2018
+            // TODO: 24/06/2018
+
+
             // TODO: 29/05/2018 Hide the keyboard when the item is clicked or enter is pressed
             // TODO: 28/05/2018 Change the position of the displayed text in the Adapter
             mSearchText.setAdapter(autocompleteAdapter);
@@ -284,15 +299,16 @@ public class FragmentRestaurantListView extends Fragment {
 
                     // TODO: 17/06/2018 Might be possible to do this with notifyDataSetChanged
 
-                    String type = charSequence.toString();
+                    String typeAsString = charSequence.toString();
+                    int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(typeAsString, arrayOfTypes);
 
-                    if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(type)) {
+                    if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(typeAsString)) {
 
                         listOfRestaurantsByType = new ArrayList<>();
 
                         for (int j = 0; j < listOfRestaurants.size(); j++) {
 
-                            if (listOfRestaurants.get(j).getType().equals(type)) {
+                            if (listOfRestaurants.get(j).getType() == typeAsInt) {
                                 listOfRestaurantsByType.add(listOfRestaurants.get(j));
                             }
                         }

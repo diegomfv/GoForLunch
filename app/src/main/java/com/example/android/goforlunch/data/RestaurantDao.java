@@ -11,6 +11,7 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 import io.reactivex.Maybe;
+import io.reactivex.MaybeObserver;
 
 /**
  * Created by Diego Fajardo on 19/05/2018.
@@ -65,7 +66,10 @@ public interface RestaurantDao {
     RestaurantEntry getRestaurantByName(String name);
 
     @Query("SELECT * FROM restaurant ORDER BY distance")
-    List<RestaurantEntry> getAllRestaurantsNotLiveData();
+    List<RestaurantEntry> getAllRestaurantsNotLiveDataOrderDistance();
+
+    @Query("SELECT * FROM restaurant ORDER BY placeId")
+    List<RestaurantEntry> getAllRestaurantsNotLiveDataOrderPlaceId();
 
     @Query("SELECT * FROM restaurant WHERE placeId = :placeId")
     LiveData<RestaurantEntry> getRestaurantByPlaceId (String placeId);
@@ -103,7 +107,7 @@ public interface RestaurantDao {
     @Query("UPDATE restaurant SET distance = :distanceValue WHERE placeId = :place_id")
     int updateRestaurantDistance(String place_id, String distanceValue);
 
-    @Query("UPDATE restaurant SET image_url = :imageUrl WHERE placeId = placeId")
+    @Query("UPDATE restaurant SET image_url = :imageUrl WHERE placeId = :place_id")
     int updateRestaurantImageUrl (String place_id, String imageUrl);
 
     // -------------------

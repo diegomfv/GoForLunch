@@ -10,6 +10,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -28,6 +29,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    //Multidex
+    implementation 'com.android.support:multidex:1.0.3'
 
     //Glide
     implementation 'com.github.bumptech.glide:glide:4.6.1'
@@ -58,9 +62,6 @@ dependencies {
 
     //Firebase: enables all services
     implementation 'com.google.firebase:firebase-core:15.0.2'
-
-    //Firebase: firestore
-    implementation 'com.google.firebase:firebase-crash:15.0.2'
 
     //Firebase Realtime Database
     implementation 'com.google.firebase:firebase-database:15.0.0'

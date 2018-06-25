@@ -1,6 +1,6 @@
 package com.example.android.goforlunch.helpermethods;
 
-import com.example.android.goforlunch.newfetchingsystem.newmodels.placebyid.Result;
+import com.example.android.goforlunch.remote.newmodels.placebyid.Result;
 import com.example.android.goforlunch.repository.RepoStrings;
 
 import java.util.Calendar;
