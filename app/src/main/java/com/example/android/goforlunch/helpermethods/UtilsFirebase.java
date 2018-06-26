@@ -22,9 +22,7 @@ import java.util.Objects;
 
 public class UtilsFirebase {
 
-    private static final String TAG = "UtilsFirebase";
-
-
+    private static final String TAG = UtilsFirebase.class.getSimpleName();
 
     /**
      * Method that deletes
@@ -209,8 +207,8 @@ public class UtilsFirebase {
                         .child(RepoStrings.FirebaseReference.RESTAURANT_RATING).getValue()).toString());
                 builder.setRestaurantName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
                         .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
-                builder.setRestaurantType(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString());
+                builder.setRestaurantType(setTypeIfPossible(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString()));
                 builder.setWebsiteUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
                         .child(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue()).toString());
 
@@ -267,4 +265,21 @@ public class UtilsFirebase {
         return null;
     }
 
+
+    /** Method that returns a type as int if the type as String can be converted to an integer
+     * */
+    private static int setTypeIfPossible (String typeAsString) {
+        Log.d(TAG, "setTypeIfPossible: called!");
+        Log.d(TAG, "setTypeIfPossible: " + typeAsString);
+
+        if (Utils.isInteger(typeAsString)) {
+            Log.d(TAG, "setTypeIfPossible: isInteger -> " + typeAsString);
+            return Integer.valueOf(typeAsString);
+
+        } else {
+            Log.d(TAG, "setTypeIfPossible: is not an integer, returning 13");
+            return 13; //Other
+
+        }
+    }
 }

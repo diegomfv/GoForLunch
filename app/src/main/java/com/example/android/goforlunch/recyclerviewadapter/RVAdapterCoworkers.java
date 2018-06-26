@@ -14,10 +14,14 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repository.RepoStrings;
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by Diego Fajardo on 06/05/2018.
@@ -71,25 +75,25 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
         if (listOfCoworkers.get(position).getRestaurantName() == null
                 || listOfCoworkers.get(position).getRestaurantName().equals("")) {
 
-            holder.textview.setText(listOfCoworkers.get(position).getFirstName()
-                    + " "
-                    + listOfCoworkers.get(position).getLastName()
-                    + " has not decided yet...");
-            holder.textview.setTextColor(mContext.getResources().getColor(android.R.color.darker_gray));
+            holder.textView.setText(mContext.getResources()
+                    .getString(
+                            R.string.avCowHasNotDecided,
+                            listOfCoworkers.get(position).getFirstName(),
+                            listOfCoworkers.get(position).getLastName()));
+
+            holder.textView.setTextColor(mContext.getResources().getColor(android.R.color.darker_gray));
             holder.cardView.setOnClickListener(null);
 
         } else {
 
-            holder.textview.setText(listOfCoworkers.get(position).getFirstName()
-                    + " "
-                    + listOfCoworkers.get(position).getLastName()
-                    + " is eating "
-                    + listOfCoworkers.get(position).getRestaurantType()
-                    + "("
-                    + listOfCoworkers.get(position).getRestaurantName()
-                    + ")"
-            );
-            holder.textview.setTextColor(mContext.getResources().getColor(android.R.color.black));
+            holder.textView.setText(mContext.getResources()
+                    .getString(R.string.avCowHasDecided,
+                            listOfCoworkers.get(position).getFirstName(),
+                            listOfCoworkers.get(position).getLastName(),
+                            Utils.transformTypeToString(mContext, listOfCoworkers.get(position).getRestaurantType()),
+                            listOfCoworkers.get(position).getRestaurantName()));
+
+            holder.textView.setTextColor(mContext.getResources().getColor(android.R.color.black));
 
             holder.cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -121,19 +125,68 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
         return listOfCoworkers.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private CardView cardView;
-        private TextView textview;
+        @BindView(R.id.coworkers_cardview_id)
+        CardView cardView;
+
+        @BindView(R.id.cv_coworkers_textview_id)
+        TextView textView;
 
         public ViewHolder(View itemView) {
             super(itemView);
-
-            cardView = itemView.findViewById(R.id.coworkers_cardview_id);
-            textview = itemView.findViewById(R.id.cv_coworkers_textview_id);
+            ButterKnife.bind(this, itemView);
 
         }
+
+        /** Method that updates the info displayed in an item of the recyclerView
+         * */
+        public void updateItem(int position) {
+            Log.d(TAG, "updateItem: called!");
+
+            textView.setText(setInfo(position));
+            textView.setTextColor(setColor(position));
+
+
+        }
+
+        public String setInfo(int position) {
+
+            if (listOfCoworkers.get(position).getRestaurantName() == null
+                    || listOfCoworkers.get(position).getRestaurantName().equals("")) {
+
+                return mContext.getResources()
+                        .getString(
+                                R.string.avCowHasNotDecided,
+                                listOfCoworkers.get(position).getFirstName(),
+                                listOfCoworkers.get(position).getLastName());
+
+            } else {
+
+                return mContext.getResources()
+                        .getString(R.string.avCowHasDecided,
+                                listOfCoworkers.get(position).getFirstName(),
+                                listOfCoworkers.get(position).getLastName(),
+                                Utils.transformTypeToString(mContext, listOfCoworkers.get(position).getRestaurantType()),
+                                listOfCoworkers.get(position).getRestaurantName());
+
+            }
+        }
+
+        private int setColor (int position) {
+
+            if (listOfCoworkers.get(position).getRestaurantName() == null
+                    || listOfCoworkers.get(position).getRestaurantName().equals("")) {
+                return mContext.getResources().getColor(android.R.color.darker_gray);
+
+            } else {
+                return mContext.getResources().getColor(android.R.color.black);
+
+            }
+        }
     }
+
+
 
 
     // ------------------------- METHODS -------------------------------

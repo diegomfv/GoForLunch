@@ -12,7 +12,7 @@ public class User {
     //placeId is the restaurantName placeId
     private String placeId;
     private String restaurantName;
-    private String restaurantType;
+    private int restaurantType;
     private String imageUrl;
     private String address;
     private String rating;
@@ -58,7 +58,7 @@ public class User {
         return restaurantName;
     }
 
-    public String getRestaurantType() {
+    public int getRestaurantType() {
         return restaurantType;
     }
 
@@ -90,7 +90,7 @@ public class User {
         private String group;
         private String placeId;
         private String restaurantName;
-        private String restaurantType;
+        private int restaurantType;
         private String imageUrl;
         private String address;
         private String rating;
@@ -127,7 +127,7 @@ public class User {
             return this;
         }
 
-        public Builder setRestaurantType(String restaurantType) {
+        public Builder setRestaurantType(int restaurantType) {
             this.restaurantType = restaurantType;
             return this;
         }

@@ -518,4 +518,34 @@ public class UnitTests {
 
     }
 
+    @Test
+    public void getIntegerFromStringIfPossible () {
+
+        String str = "12";
+
+        if (str == null) {
+           System.out.println("str is null");
+        }
+        int length = str.length();
+        if (length == 0) {
+            System.out.println("str.length = 0");
+        }
+        int i = 0;
+        if (str.charAt(0) == '-') {
+            if (length == 1) {
+                System.out.println("str negative with no number");
+            }
+            i = 1;
+        }
+        for (; i < length; i++) {
+            char c = str.charAt(i);
+            if (c < '0' || c > '9') {
+                System.out.println("str is not a number");
+            }
+        }
+
+        System.out.println(Integer.parseInt(str));
+
+
+    }
 }
