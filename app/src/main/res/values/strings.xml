@@ -9,13 +9,31 @@
 
     <string name="action_settings">Settings</string>
 
-    <string-array name="notAv">NotAvailable</string-array>
+
+    <!-- GENERAL MESSAGES -->
+    <string name="noInternet">Internet: NOT available</string>
+    <string name="storageNotGranted">Storage Access: NOT granted</string>
+    <string name="storageGranted">Storage Access: GRANTED</string>
+
+
+    <!-- MAIN ACTIVITY -->
+    <string name="mainBottomMapView">Map View</string>
+    <string name="mainBottomListView">List View</string>
+    <string name="mainBottomWorkmates">Workmates</string>
+
+
+    <!-- FRAGMENTS -->
+    <string name="autoCompleteSearchText">Search</string>
+    <string name="toolbarImHungry">I\'m hungry</string>
+    <string name="toolbarAvailableWorkmates">Available Workmates</string>
+
+
 
     <!-- PREFERENCES FRAGMENT -->
     <string name="pref_summaryOff">Notifications are disabled</string>
     <string name="pref_summaryOn">Notifications are enabled</string>
     <string name="pref_key_notifications">Notifications</string>
-    <string name="key_addRestaurantIsOn">addRestaurant</string>
+    <string name="key_addRestaurantIsOn" translatable="false">addRestaurant</string>
 
     <!-- INTENT RECYCLER VIEW -> USER_RESTAURANT_NAME IMAGE_LOAD_TYPE -->
     <string name="i_image_url" translatable="false">image_url</string>
@@ -30,7 +48,7 @@
     <string name="facebook_app_id">622449801446185</string>
     <string name="fb_login_protocol_scheme">fb622449801446185</string>
 
-    <!-- RESTAURANT TYPES SIGN IN -->
+    <!-- RESTAURANT TYPES -->
     <string name="typeAll">All</string>
     <string name="typeAmerican">American</string>
     <string name="typeChinese">Chinese</string>
@@ -63,8 +81,44 @@
         <item>@string/typeOther</item>       <!-- 13  -->
     </string-array>
 
+    <!-- NAVIGATION DRAWER -->
+    <string name="navDrawerYourLunch">YOUR LUNCH</string>
+    <string name="navDrawerJoinGroup">JOIN GROUP</string>
+    <string name="navDrawerPersInfo">PERSONAL INFO</string>
+    <string name="navDrawerSystem">SYSTEM</string>
+    <string name="navDrawerSettings">SETTINGS</string>
+    <string name="navDrawerLogOut">LOG OUT</string>
 
+    <string name="navDrawerToastNotGroupYet">You haven\'t chosen a group yet!</string>
 
+    <!-- AUTH SIGN IN ACTIVITY -->
+    <string name="signInEmail">Email</string>
+    <string name="signInPassword">Password</string>
+    <string name="signInButtonSignIn">SIGN IN</string>
+    <string name="signInButtonResetPassword">RESET PASSWORD</string>
+    <string name="signInButtonRegister">REGISTER</string>
+
+    <!-- AUTH ENTER NAME ACTIVITY -->
+    <string name="enterNameFirstName">First Name</string>
+    <string name="enterNameLastName">Last Name</string>
+    <string name="enterNameEmail">Email</string>
+    <string name="enterNamePassword">Password</string>
+    <string name="enterNameStart">START</string>
+
+    <!-- JOIN GROUP ACTIVITY -->
+    <string name="joinGroupJoinGroup">JOIN GROUP</string>
+    <string name="joinGroupCreateNewGroup">CREATE NEW GROUP</string>
+
+    <!-- RESTAURANT ACTIVITY -->
+    <string name="restaurantBottomCall">CALL</string>
+    <string name="restaurantBottomLike">LIKE</string>
+    <string name="restaurantBottomWebsite">WEBSITE</string>
+
+    <string name="restaurantNotGoing">Not going to the restaurant..</string>
+    <string name="restaurantGoing">Going to </string>
+    <string name="restaurantCallingTo">Calling to</string>
+    <string name="restaurantPhoneNotAvailable">Phone not available</string>
+    <string name="restaurantWebsiteNotAvailable">Website not available</string>
 
 
 </resources>

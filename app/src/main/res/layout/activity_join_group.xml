@@ -39,7 +39,7 @@
         android:padding="10dp"
         android:background="@android:color/white"
         android:textColor="@color/colorAccentDark"
-        android:text="JOIN GROUP"
+        android:text="@string/joinGroupJoinGroup"
         android:layout_marginTop="20dp"/>
 
     <Button
@@ -50,7 +50,7 @@
         android:padding="10dp"
         android:background="@android:color/white"
         android:textColor="@color/colorAccentDark"
-        android:text="CREATE NEW GROUP"
+        android:text="@string/joinGroupCreateNewGroup"
         android:layout_marginTop="20dp"/>
 
 </LinearLayout>

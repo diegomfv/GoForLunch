@@ -26,9 +26,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView;
@@ -97,7 +101,12 @@ public class PersInfoActivity extends AppCompatActivity{
     private DatabaseReference dbRefGroups;
     private DatabaseReference dbRefUsers;
 
+    private AppDatabase localDatabase;
+
     private SharedPreferences sharedPref;
+
+    //Glide
+    private RequestManager glide;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,7 +114,11 @@ public class PersInfoActivity extends AppCompatActivity{
         setContentView(R.layout.activity_pers_info);
 
         fireDb = FirebaseDatabase.getInstance();
+        auth = FirebaseAuth.getInstance();
+        localDatabase = AppDatabase.getInstance(PersInfoActivity.this);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
+
+        glide = Glide.with(PersInfoActivity.this);
 
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
@@ -121,7 +134,6 @@ public class PersInfoActivity extends AppCompatActivity{
 
         /** We get the user information
          * */
-        auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
         Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
@@ -153,7 +165,7 @@ public class PersInfoActivity extends AppCompatActivity{
                         inputGroup.setText(userGroup);
                         inputPassword.setText("******");
 
-                        Utils.loadImageWithGlide(PersInfoActivity.this, userProfilePictureUri, iv_userImage);
+                        glide.load(userProfilePictureUri).into(iv_userImage);
 
                         //iv_userImage.setImageURI(userProfilePictureUri);
 
@@ -161,6 +173,7 @@ public class PersInfoActivity extends AppCompatActivity{
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: called!");
 
                     }
                 });
@@ -254,6 +267,7 @@ public class PersInfoActivity extends AppCompatActivity{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: called!");
 
         if (resultCode == RESULT_OK) {
             try {
@@ -261,7 +275,7 @@ public class PersInfoActivity extends AppCompatActivity{
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
 
-                Utils.loadImageWithGlide(PersInfoActivity.this, selectedImage, iv_userImage);
+                glide.load(selectedImage).into(iv_userImage);
 
                 /** We store the Uri value. We will use it if the user saves changes
                  * */
@@ -282,6 +296,8 @@ public class PersInfoActivity extends AppCompatActivity{
      * **/
     public boolean checkPermissionREAD_EXTERNAL_STORAGE (
             final Context context) {
+        Log.d(TAG, "checkPermissionREAD_EXTERNAL_STORAGE: called!");
+
         int currentAPIVersion = Build.VERSION.SDK_INT;
         if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(context,
@@ -313,6 +329,8 @@ public class PersInfoActivity extends AppCompatActivity{
      * */
     public void showDialog(final String msg, final Context context,
                            final String permission) {
+        Log.d(TAG, "showDialog: called!");
+
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setCancelable(true);
         alertBuilder.setTitle("Permission necessary");
@@ -333,6 +351,8 @@ public class PersInfoActivity extends AppCompatActivity{
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: called!");
+
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -345,5 +365,11 @@ public class PersInfoActivity extends AppCompatActivity{
                 super.onRequestPermissionsResult(requestCode, permissions,
                         grantResults);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: called!");
+        super.onDestroy();
     }
 }

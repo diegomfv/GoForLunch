@@ -13,7 +13,7 @@ import android.util.Log;
 /** Room database point of entry
  * */
 
-/** version -> should be updated when we update our database
+/** version -> should be updated when we updateItem our database
  * exportSchema -> writes the database info to a folder */
 
 /** Room cannot automatically map complex extractors like DATE. In this cases,

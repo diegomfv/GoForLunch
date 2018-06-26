@@ -144,7 +144,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
 		 mainLayout.addView(submitQuery);
 		
 		final TextView help = new TextView(AndroidDatabaseManager.this);
-		help.setText("Click on the row below to update values or delete the tuple");
+		help.setText("Click on the row below to updateItem values or delete the tuple");
 		help.setPadding(0,5,0,5);
 		
                 // the spinner which gives user a option to add new row , drop or delete table
@@ -758,11 +758,11 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
 		
 		
 	}
-	//displays alert dialog from which use can update or delete a row 
+	//displays alert dialog from which use can updateItem or delete a row
 	public void updateDeletePopup(int row)
 	{
 		Cursor c2= indexInfo.maincursor;
-	// a spinner which gives options to update or delete the row which user has selected
+	// a spinner which gives options to updateItem or delete the row which user has selected
   	  ArrayList<String> spinnerArray = new ArrayList<String>();
   	    spinnerArray.add("Click Here to Change this row");
   	    spinnerArray.add("Update this row");
@@ -805,7 +805,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
   	    
   	  paramcrudtext.setMargins(0, 20, 0, 0);
   	  
-  	  //spinner which displays update , delete options
+  	  //spinner which displays updateItem , delete options
           final Spinner crud_dropdown = new Spinner(getApplicationContext());
           
           ArrayAdapter<String> crudadapter = new ArrayAdapter<String>(AndroidDatabaseManager.this,
@@ -896,8 +896,8 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
 								//get spinner value
 								String spinner_value = crud_dropdown.getSelectedItem().toString();
 
-								//it he spinner value is update this row get the values from 
-								//edit text fields generate a update query and execute it
+								//it he spinner value is updateItem this row get the values from
+								//edit text fields generate a updateItem query and execute it
 								if(spinner_value.equalsIgnoreCase("Update this row"))
 								{
 									indexInfo.index = 10;
@@ -1158,7 +1158,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
              tableRow.setVisibility(View.VISIBLE);
              currentrow=currentrow+1;
              //we create listener for each table row when clicked a alert dialog will be displayed 
-             //from where user can update or delete the row 
+             //from where user can updateItem or delete the row
              tableRow.setOnClickListener(new OnClickListener(){
                  public void onClick(View v) {
                	  
@@ -1185,7 +1185,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
 			 indexInfo.index=currentrow;
 
 
-		 // when user clicks on the previous button update the table with the previous 10 tuples from the database
+		 // when user clicks on the previous button updateItem the table with the previous 10 tuples from the database
 			previous.setOnClickListener(new OnClickListener()
 		    {
 		        @Override
@@ -1237,7 +1237,7 @@ public class AndroidDatabaseManager extends Activity implements OnItemClickListe
 		        } 
 		    });
 
-		 // when user clicks on the next button update the table with the next 10 tuples from the database
+		 // when user clicks on the next button updateItem the table with the next 10 tuples from the database
 		 next.setOnClickListener(new OnClickListener()
 		    {
 		        @Override

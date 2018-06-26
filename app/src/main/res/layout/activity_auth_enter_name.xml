@@ -42,7 +42,7 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="First name" />
+            android:hint="@string/enterNameFirstName" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -62,7 +62,7 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="Last name" />
+            android:hint="@string/enterNameLastName" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -81,7 +81,7 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="email" />
+            android:hint="@string/enterNameEmail" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -100,7 +100,7 @@
             android:textSize="14sp"
             android:maxLines="1"
             android:inputType="textPassword"
-            android:hint="password" />
+            android:hint="@string/enterNamePassword" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -113,7 +113,7 @@
         android:padding="10dp"
         android:background="@android:color/white"
         android:textColor="@color/colorAccentDark"
-        android:text="START!"/>
+        android:text="@string/enterNameStart"/>
 
     <ProgressBar
         android:id="@+id/enter_progressbar"

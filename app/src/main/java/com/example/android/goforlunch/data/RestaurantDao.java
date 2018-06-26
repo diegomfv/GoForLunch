@@ -22,7 +22,7 @@ import io.reactivex.MaybeObserver;
 
 /** LiveData runs, by default, outside of the main thread.
  * We use LiveDate to observe changes in the Database; for other
- * operations such as insert, update or delete we do not need
+ * operations such as insert, updateItem or delete we do not need
  * to observe changes in the database. For those operations,
  * we will not use LiveData and therefore we will keep using the
  * executors.
@@ -35,9 +35,9 @@ import io.reactivex.MaybeObserver;
  * A method, annotated with @Update can return an int.
  * This is the number of updated rows.
  *
- * @Update will try to update all your fields using the value of the primary key in a where clause.
+ * @Update will try to updateItem all your fields using the value of the primary key in a where clause.
  * If your entity is not persisted in the database yet,
- * the update query will not be able to find a row and will not update anything.
+ * the updateItem query will not be able to find a row and will not updateItem anything.
  *
  * You can use @Insert(onConflict = OnConflictStrategy.REPLACE). This will try
  * to insert the entity and, if there is an existing row that has the same ID value,

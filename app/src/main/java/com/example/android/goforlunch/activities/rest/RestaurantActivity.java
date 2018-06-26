@@ -31,6 +31,7 @@ import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 import com.example.android.goforlunch.repository.RepoStrings;
@@ -130,6 +131,9 @@ public class RestaurantActivity extends AppCompatActivity {
     // Disposable
     private Disposable getImageFromInternalStorageDisposable;
 
+    //Intent
+    private Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,7 +148,6 @@ public class RestaurantActivity extends AppCompatActivity {
 
         glide = Glide.with(context);
 
-        this.configureInternalStorage(context);
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
         /** Instantiation of the fab and set onClick listener*/
@@ -160,9 +163,11 @@ public class RestaurantActivity extends AppCompatActivity {
 
         /** We get the intent to display the information
          * */
-        Intent intent = getIntent();
+        intent = getIntent();
         fillUIUsingIntent(intent);
         intentRestaurantName = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME);
+
+        this.configureInternalStorage(context);
 
         /** We get the user information
          * */
@@ -213,7 +218,7 @@ public class RestaurantActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                listOfCoworkers = UtilsFirebase.fillListWithCoworkersOfSameGroupAndSameRestaurant(dataSnapshot, userGroup, intentRestaurantName);
+                listOfCoworkers = UtilsFirebase.fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser(dataSnapshot, userEmail, userGroup, intentRestaurantName);
 
                 /** We use the list in the adapter
                  * */
@@ -239,6 +244,7 @@ public class RestaurantActivity extends AppCompatActivity {
      * */
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy: called!");
         super.onDestroy();
         this.disposeWhenDestroy();
     }
@@ -273,7 +279,7 @@ public class RestaurantActivity extends AppCompatActivity {
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
                     UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
 
-                    ToastHelper.toastShort(context, "Not Going to the restaurant!");
+                    ToastHelper.toastShort(context, getResources().getString(R.string.restaurantNotGoing));
                 }
 
             } else {
@@ -300,6 +306,8 @@ public class RestaurantActivity extends AppCompatActivity {
                             checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)),
                             checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
                     );
+
+                    ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME + "!"));
                 }
             }
         }
@@ -316,9 +324,9 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: callButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: phone = " + phoneToastString);
                             if (phoneToastString.equals("")) {
-                                ToastHelper.toastShort(context, "Phone is not available");
+                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantPhoneNotAvailable));
                             } else {
-                                ToastHelper.toastShort(context, "Calling to " + phoneToastString);
+                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantCallingTo) + phoneToastString);
                             }
 
                         } break;
@@ -327,9 +335,9 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
                             ToastHelper.toastShort(context, likeToastString);
 
-                            // TODO: 25/06/2018 Delete!
-                            List<File> files = getListFiles(new File(mainPath));
-                            Log.d(TAG, "onNavigationItemSelected: " + files.toString());
+                            // TODO: 26/06/2018 Delete these two methods!
+                            Utils.printFiles(imageDirPath);
+                            //getAndDisplayImageFromInternalStorage(imageDirPath);
 
                         } break;
 
@@ -337,7 +345,7 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: websiteButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: web URL = " + webUrlToastString);
                             if (webUrlToastString.equals("")) {
-                                ToastHelper.toastShort(context, "Website is not available");
+                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantWebsiteNotAvailable));
                             } else {
 
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlToastString));
@@ -415,7 +423,7 @@ public class RestaurantActivity extends AppCompatActivity {
         //If we don't have storage permissions, we don't continue
         if (ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ToastHelper.toastShort(context, "You don't have access to Internal Storage");
+            ToastHelper.toastShort(context, getResources().getString(R.string.storageNotGranted));
             return;
 
         } else {
@@ -425,7 +433,10 @@ public class RestaurantActivity extends AppCompatActivity {
             mainPath = storage.getInternalFilesDirectory() + File.separator;
             imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
 
-            ToastHelper.toastShort(context, "Access to internal storage granted");
+            Log.d(TAG, "configureInternalStorage: mainPath = " + mainPath);
+            Log.d(TAG, "configureInternalStorage: imageDirPath = " + imageDirPath);
+
+            ToastHelper.toastShort(context, getResources().getString(R.string.storageGranted));
 
         }
     }
@@ -555,7 +566,7 @@ public class RestaurantActivity extends AppCompatActivity {
     public void getAndDisplayImageFromInternalStorage(String filePath) {
         Log.d(TAG, "loadImageFromInternalStorage: called!");
 
-        getImageFromInternalStorageDisposable = getObservableImageFromInternalStorage(imageDirPath + File.separator + filePath)
+        getImageFromInternalStorageDisposable = getObservableImageFromInternalStorage(filePath)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<byte[]>() {
@@ -582,19 +593,4 @@ public class RestaurantActivity extends AppCompatActivity {
                 });
     }
 
-    // TODO: 25/06/2018 Delete!
-    private List<File> getListFiles(File parentDir) {
-        ArrayList<File> inFiles = new ArrayList<File>();
-        File[] files = parentDir.listFiles();
-        for (File file : files) {
-            if (file.isDirectory()) {
-                inFiles.addAll(getListFiles(file));
-            } else {
-                if(file.getName().endsWith(".csv")){
-                    inFiles.add(file);
-                }
-            }
-        }
-        return inFiles;
-    }
 }

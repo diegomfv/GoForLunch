@@ -31,7 +31,7 @@ import com.example.android.goforlunch.job.AlertJobCreator;
 import com.example.android.goforlunch.job.NotificationDailyJob;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTRIAL;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL2;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.facebook.login.LoginManager;
@@ -50,8 +50,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-// TODO: 21/05/2018 Add a flag so when we come back from RestaurantActivity when don't do API Requests again
-// TODO: 28/05/2018 Check if distance is too far, delete from the database!
+
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/05/2018 Check if there is internet connection
@@ -61,17 +60,14 @@ import butterknife.ButterKnife;
 // TODO: 29/05/2018 Check deprecated problem RVAdapter
 // TODO: 29/05/2018 General clean up
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
-// TODO: 13/06/2018 Remember to not allow doing queries in the main thread!
+// TODO: 26/06/2018 Bind views with butterKnife
+
 
 public class MainActivity extends AppCompatActivity{
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    //Loaders id
-    private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;
-
     //Widgets
-
     @BindView(R.id.main_drawer_layout_id)
     DrawerLayout mDrawerLayout;
 
@@ -296,7 +292,7 @@ public class MainActivity extends AppCompatActivity{
         JobManager.instance().cancel(JobId);
     }
 
-    /** Method used to update the NavDrawer info
+    /** Method used to updateItem the NavDrawer info
      * */
     private boolean updateNavDrawerTextViews() {
         Log.d(TAG, "updateNavDrawerTextViews: called!");
@@ -375,7 +371,7 @@ public class MainActivity extends AppCompatActivity{
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentRestaurantListView.newInstance();
+                                selectedFragment = FragmentRestaurantListViewTRIAL.newInstance();
                                 flagToSpecifyCurrentFragment = 2;
 
                             }
@@ -426,7 +422,7 @@ public class MainActivity extends AppCompatActivity{
                                         Log.d(TAG, "onDataChange: Internet is OK");
 
                                         if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
-                                            ToastHelper.toastShort(MainActivity.this, "You haven not chosen a restaurant yet!");
+                                            ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.navDrawerToastNotGroupYet));
 
                                         } else {
 
@@ -488,7 +484,7 @@ public class MainActivity extends AppCompatActivity{
                             LoginManager.getInstance().logOut();
 
                             Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                             finish();
 
@@ -520,6 +516,12 @@ public class MainActivity extends AppCompatActivity{
         progressBar.setVisibility(View.GONE);
         frameLayout.setVisibility(View.VISIBLE);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: called!");
+        super.onDestroy();
     }
 }
 

@@ -3,6 +3,8 @@ package com.example.android.goforlunch.helpermethods;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.example.android.goforlunch.R;
+
 /**
  * Created by Diego Fajardo on 27/04/2018.
  */
@@ -20,7 +22,7 @@ abstract public class ToastHelper {
     }
 
     public static void toastNoInternet (Context context) {
-        Toast.makeText(context, "There is no internet connection", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, context.getResources().getString(R.string.noInternet), Toast.LENGTH_SHORT).show();
     }
 
 }

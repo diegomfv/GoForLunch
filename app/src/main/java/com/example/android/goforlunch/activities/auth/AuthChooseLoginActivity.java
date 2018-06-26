@@ -192,7 +192,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
+                // Google Sign In failed, updateItem UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
                 // ...
             }
@@ -224,7 +224,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
+                            // Sign in success, updateItem UI with the signed-in user's information
                             Log.d(TAG, "GOOGLE signInWithCredential:success");
                             user = auth.getCurrentUser();
 
@@ -347,7 +347,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
+                            // Sign in success, updateItem UI with the signed-in user's information
                             Log.d(TAG, "FACEBOOK signInWithCredential:success");
                             user = auth.getCurrentUser();
 

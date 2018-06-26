@@ -2,6 +2,7 @@ package com.example.android.goforlunch.pageFragments;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -45,6 +46,7 @@ import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.remote.newmodels.distancematrix.DistanceMatrix;
 import com.example.android.goforlunch.remote.newmodels.placebyid.PlaceById;
@@ -117,17 +119,9 @@ import static com.example.android.goforlunch.repository.RepoStrings.Keys.NEARBY_
  * */
 public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
-    // TODO: 25/06/2018 Solve issue with storage... Probably response.bofy() is always null
-
-    /**************************
-     * LOG ********************
-     * ***********************/
+    // TODO: 25/06/2018 Solve issue with storage... Probably response.body() is always null
 
     private static final String TAG = FragmentRestaurantMapViewTRIAL2.class.getSimpleName();
-
-    /**************************
-     * VARIABLES **************
-     * ***********************/
 
     //ERROR that we are going to handle if the user doesn't have the correct version of the
     //Google Play Services
@@ -137,10 +131,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     private static final String COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final float DEFAULT_ZOOM = 17f;
 
-    //Loaders id
-    private static final int ID_LOADER_INIT_GENERAL_API_REQUESTS = 1;
-
-    //vars
+    //Map variables
     private boolean mLocationPermissionGranted = false; //used in permissions
     private GoogleMap mMap; //used to create the map
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
@@ -204,6 +195,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     @BindView(R.id.map_fragment_database_button_id)
     ImageButton buttonDatabase;
+
     @BindView(R.id.map_fragment_parent_relative_layout)
     RelativeLayout mapFragmentRelativeLayout;
 
@@ -227,21 +219,18 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     private String imageDirPath;
     private boolean accessInternalStorageGranted;
 
-    /******************************
-     * STATIC METHOD FOR **********
-     * INSTANTIATING THE FRAGMENT *
-     *****************************/
+    /** ------------------------------------------------ */
 
+    /** Method for instantiating the fragment
+     * */
     public static FragmentRestaurantMapViewTRIAL2 newInstance() {
         Log.d(TAG, "newInstance: called!");
         FragmentRestaurantMapViewTRIAL2 fragment = new FragmentRestaurantMapViewTRIAL2();
         return fragment;
     }
 
-    /******************
-     * LIFECYCLE
-     ********************/
-
+    /** onCreate()...
+     * */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -253,9 +242,24 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
          * */
         ButterKnife.bind(this, view);
 
-        this.sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        this.localDatabase = AppDatabase.getInstance(getActivity());
-        this.fireDb = FirebaseDatabase.getInstance();
+        /** Configure databases*/
+        this.configureDatabases(getActivity());
+        Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
+
+        /** Configure toolbar */
+        UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
+
+//        if (((AppCompatActivity) getActivity()) != null) {
+//            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+//        }
+//
+//        if (((AppCompatActivity) getActivity()) != null) {
+//            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+//            if (actionBar != null) {
+//                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+//                actionBar.setDisplayHomeAsUpEnabled(true);
+//            }
+//        }
 
         /** We get an array of restaurant types from RESOURCES
          * */
@@ -265,27 +269,13 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         this.listOfAllRestaurantsInDatabase = new ArrayList<>();
         this.listOfMarkers = new ArrayList<>();
 
-        if (((AppCompatActivity) getActivity()) != null) {
-            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        }
-
-        if (((AppCompatActivity) getActivity()) != null) {
-            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-                actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        }
-
         /** Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
 
         /** We get all the user information
          * */
-        this.auth = FirebaseAuth.getInstance();
         this.currentUser = auth.getCurrentUser();
-
         if (currentUser != null) {
             userEmail = currentUser.getEmail();
 
@@ -756,6 +746,17 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
      * CONFIGURATION
      * *****************/
 
+    /** Method that instantiates databases
+     * */
+    public void configureDatabases (Context context) {
+
+        fireDb = FirebaseDatabase.getInstance();
+        auth = FirebaseAuth.getInstance();
+        localDatabase = AppDatabase.getInstance(context);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+    }
+
     /** Method that configures the autocompleteTextView
      * */
     private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView,
@@ -1045,7 +1046,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                 } else {
                     Log.d(TAG, "onSuccess: localDB currently filled. Updating UI..");
 
-                    /* We update the UI
+                    /* We updateItem the UI
                     * */
                     updateMapWithPins(restaurantEntryList,
                             listOfVisitedRestaurantsByTheUsersGroup);
@@ -1415,7 +1416,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                     }
                 }
 
-                /* We update here the UI because all the restaurants that we got from the Http Requests
+                /* We updateItem here the UI because all the restaurants that we got from the Http Requests
                 are already in the database
                 * */
                 getAllRestaurantsAndDisplayPins();
@@ -1477,7 +1478,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                                   List<String> listOfVisitedRestaurantsByTheUsersGroup) {
         Log.d(TAG, "updateMapWithPins: called!");
 
-        /* We update a list of restaurants with all the restaurants of the database
+        /* We updateItem a list of restaurants with all the restaurants of the database
         * */
         // TODO: 25/06/2018 Did't find another place to be sure the database was completely
         // TODO: 25/06/2018 filled before updating the list
@@ -1491,7 +1492,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
             }
         });
 
-        /* We update the map's pins
+        /* We updateItem the map's pins
         * */
         if (mMap != null) {
             Log.d(TAG, "updateMapWithPins: the map is not null");

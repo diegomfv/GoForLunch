@@ -14,8 +14,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
+import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.repository.RepoStrings;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -31,14 +33,6 @@ public class Utils {
         Drawable drawable = menuItem.getIcon();
         drawable.mutate();
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-    }
-
-    public static void loadImageWithGlide (Context context, Object object, ImageView view) {
-
-        Glide.with(context)
-                .load(object)
-                .into(view);
-
     }
 
     /**
@@ -172,5 +166,52 @@ public class Utils {
 
     }
 
+    /** This method transforms the type of the restaurant from an int to a String
+     * */
+    public static String transformTypeToString (Context context, int type) {
 
+        String[] arrayOfTypes = context.getResources().getStringArray(R.array.typesOfRestaurants);
+
+        switch (type) {
+
+            case 0: return arrayOfTypes[0];
+            case 1: return arrayOfTypes[1];
+            case 2: return arrayOfTypes[2];
+            case 3: return arrayOfTypes[3];
+            case 4: return arrayOfTypes[4];
+            case 5: return arrayOfTypes[5];
+            case 6: return arrayOfTypes[6];
+            case 7: return arrayOfTypes[7];
+            case 8: return arrayOfTypes[8];
+            case 9: return arrayOfTypes[9];
+            case 10: return arrayOfTypes[10];
+            case 11: return arrayOfTypes[11];
+            case 12: return arrayOfTypes[12];
+            case 13: return arrayOfTypes[13];
+            default: return arrayOfTypes[13];
+
+        }
+    }
+
+    /** Method that transforms the rating to adapt it to 3 stars
+     *  */
+    public static float adaptRating (float rating ) {
+        return rating * 3 / 5;
+    }
+
+    /** Method that prints internal storage files (used for debug)
+     * */
+    public static void printFiles (String dirPath) {
+        Log.d(TAG, "printFiles: called!");
+
+        File dir = new File(dirPath);
+        File[] files = dir.listFiles();
+        if (files.length != 0) {
+            for (File aFile : files) {
+                Log.d(TAG, "getFiles: " + aFile.getName() + ", " + aFile.length());
+            }
+        } else {
+            Log.d(TAG, "printFiles: no files found!");
+        }
+    }
 }

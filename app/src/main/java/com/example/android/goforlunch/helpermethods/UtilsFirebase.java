@@ -222,7 +222,11 @@ public class UtilsFirebase {
 
     }
 
-    public static List<String> fillListWithCoworkersOfSameGroupAndSameRestaurant (DataSnapshot dataSnapshot, String userGroup, String intentRestaurant) {
+    public static List<String> fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser
+            (DataSnapshot dataSnapshot,
+             String userEmail,
+             String userGroup,
+             String intentRestaurant) {
 
         List<String> listOfCoworkers = new ArrayList<>();
 
@@ -230,7 +234,8 @@ public class UtilsFirebase {
                 dataSnapshot.getChildren()) {
 
             if (item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString().equalsIgnoreCase(userGroup)
-                    && item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO).child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase(intentRestaurant)) {
+                    && item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO).child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase(intentRestaurant)
+                    && !item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
 
                 listOfCoworkers.add(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString()
                         + " "
@@ -241,6 +246,9 @@ public class UtilsFirebase {
 
         return listOfCoworkers;
     }
+
+
+
 
     /** Method that returns a groupKey using a datasnapshot
      * */

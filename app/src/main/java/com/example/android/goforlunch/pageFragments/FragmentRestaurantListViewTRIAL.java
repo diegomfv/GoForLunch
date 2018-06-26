@@ -2,6 +2,7 @@ package com.example.android.goforlunch.pageFragments;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -10,12 +11,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,13 +21,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.data.AppDatabase;
@@ -37,6 +34,7 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,16 +44,31 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.jakewharton.rxbinding2.widget.RxTextView;
+import com.jakewharton.rxbinding2.widget.TextViewTextChangeEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
  */
 
+/** Fragment that displays the list of restaurants in a recyclerView
+ * */
 public class FragmentRestaurantListViewTRIAL extends Fragment {
 
     // TODO: 28/05/2018 Some names appear over the others
@@ -67,10 +80,15 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
     private String[] arrayOfTypes;
 
     //Widgets
-    private TextView mErrorMessageDisplay;
-    private ProgressBar mProgressBar;
-    private Toolbar toolbar;
-    private RelativeLayout toolbar2;
+    @BindView(R.id.list_autocomplete_id)
+    AutoCompleteTextView autocompleteTextView;
+
+    @BindView(R.id.list_main_toolbar_id)
+    Toolbar toolbar;
+
+    @BindView(R.id.list_toolbar_search_id)
+    RelativeLayout toolbar2;
+
     private ActionBar actionBar;
 
     //List of elements
@@ -80,16 +98,15 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
     //This list will have as many elements repeated as coworkers going to the restaurant
     private List<String> listOfRestaurantsByCoworker;
 
-    //Widgets
-    private AutoCompleteTextView mSearchText;
-
     //RecyclerView
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    @BindView(R.id.list_recycler_view_id)
+    RecyclerView recyclerView;
+
+    private RecyclerView.Adapter rvAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     //Database
-    private AppDatabase mDb;
+    private AppDatabase localDatabase;
     private MainViewModel mainViewModel;
 
     //SharedPreferences
@@ -109,16 +126,27 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
     private String userGroup;
     private String userGroupKey;
 
-    /******************************
-     * STATIC METHOD FOR **********
-     * INSTANTIATING THE FRAGMENT *
-     *****************************/
+    //Observers
+    private MaybeObserver restaurantsObserver;
 
+    //Disposables
+    private Disposable autocompleteTextViewDisposable;
+
+    //Glide
+    private RequestManager glide;
+
+
+    /** ------------------------------------------------ */
+
+    /** Method for instantiating the fragment
+     * */
     public static FragmentRestaurantListViewTRIAL newInstance() {
         FragmentRestaurantListViewTRIAL fragment = new FragmentRestaurantListViewTRIAL();
         return fragment;
     }
 
+    /** onCreate()...
+     * */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -127,38 +155,50 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
 
+        /**Butterknife binding
+         * */
+        ButterKnife.bind(this, view);
+
         /** Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
 
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        fireDb = FirebaseDatabase.getInstance();
-
+        /** Configure databases*/
+        this.configureDatabases(getActivity());
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
         listOfRestaurants = new ArrayList<>();
         listOfRestaurantsByType = new ArrayList<>();
         listOfRestaurantsByCoworker = new ArrayList<>();
 
-        mDb = AppDatabase.getInstance(getActivity());
+        /** Configure toolbar */
+        UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
+
+//        if (((AppCompatActivity) getActivity()) != null) {
+//            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+//        }
+//
+//        if (((AppCompatActivity) getActivity()) != null) {
+//            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+//            if (actionBar != null) {
+//                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+//                actionBar.setDisplayHomeAsUpEnabled(true);
+//            }
+//        }
+
 
         /** We get an array of restaurant types from RESOURCES
          * */
         this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
 
-        toolbar = (Toolbar) view.findViewById(R.id.list_main_toolbar_id);
-        toolbar2 = (RelativeLayout) view.findViewById(R.id.list_toolbar_search_id);
+        /** Glide configuration*/
+        glide = Glide.with(getActivity());
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.list_recycler_view_id);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
-        mRecyclerView.setAdapter(mAdapter);
+        /** Configure RecyclerView*/
+        this.configureRecyclerView();
 
         /** We get the user information
          * */
-        auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
         Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
@@ -210,17 +250,15 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                      * */
                     listOfRestaurants = restaurantEntries;
 
-                    /** We modify the adapter and set it in the RV
+                    /** We update the recyclerView with the new list
                      * */
-                    mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
-                    mRecyclerView.setAdapter(mAdapter);
+                    updateRecyclerViewWithNewRestaurantsList(restaurantEntries);
 
                 } else {
                     Log.d(TAG, "onChanged: restaurantEntries is NULL");
                 }
             }
         });
-
 
         dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
         dbRefUsers.addValueEventListener(new ValueEventListener() {
@@ -242,7 +280,6 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                         /** We create a list with all the restaurants that the users are going to.
                          * If several coworkers are going to the same restaurant, it will appear in the UI
                          * */
-
                         Log.d(TAG, "onDataChange: " + item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString());
                         listOfRestaurantsByCoworker.add(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
                                 .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
@@ -250,10 +287,10 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
                     }
                 }
 
-                /** We modify the adapter and set it in the RV
+                /** We update the recyclerView with the new list
                  * */
-                mAdapter = new RVAdapterList(getActivity(), listOfRestaurants, listOfRestaurantsByCoworker);
-                mRecyclerView.setAdapter(mAdapter);
+                updateRecyclerViewWithNewListOfRestaurantsByCoworker(
+                        autocompleteTextView.getText().toString().trim());
 
             }
 
@@ -264,100 +301,17 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
             }
         });
 
-        mSearchText = (AutoCompleteTextView) view.findViewById(R.id.list_autocomplete_id);
 
-        if (getActivity() != null) {
-            ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
-                    getActivity(),
-                    android.R.layout.simple_list_item_1, //This layout has to be a textview
-                    RepoStrings.RESTAURANT_TYPES
-            );
+        /** Configuration process */
+        this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
 
-            // TODO: 24/06/2018 CHANGE THIS!!!!!!
-            // TODO: 24/06/2018
-            // TODO: 24/06/2018
-            // TODO: 24/06/2018
-            // TODO: 24/06/2018
-
-
-            // TODO: 29/05/2018 Hide the keyboard when the item is clicked or enter is pressed
-            // TODO: 28/05/2018 Change the position of the displayed text in the Adapter
-            mSearchText.setAdapter(autocompleteAdapter);
-            mSearchText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    Log.d(TAG, "beforeTextChanged: " + charSequence);
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    Log.d(TAG, "onTextChanged: " + charSequence);
-
-                    // TODO: 29/05/2018 Hide keyboard when magnifying class is clicked
-
-                    // TODO: 17/06/2018 Might be possible to do this with notifyDataSetChanged
-
-                    String typeAsString = charSequence.toString();
-                    int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(typeAsString, arrayOfTypes);
-
-                    if (Arrays.asList(RepoStrings.RESTAURANT_TYPES).contains(typeAsString)) {
-
-                        listOfRestaurantsByType = new ArrayList<>();
-
-                        for (int j = 0; j < listOfRestaurants.size(); j++) {
-
-                            if (listOfRestaurants.get(j).getType() == typeAsInt) {
-                                listOfRestaurantsByType.add(listOfRestaurants.get(j));
-                            }
-                        }
-
-                        mAdapter = new RVAdapterList(getContext(), listOfRestaurantsByType, listOfRestaurantsByCoworker);
-                        mRecyclerView.setAdapter(mAdapter);
-
-                    } else {
-
-                        mAdapter = new RVAdapterList(getContext(), listOfRestaurants, listOfRestaurantsByCoworker);
-                        mRecyclerView.setAdapter(mAdapter);
-
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-                    Log.d(TAG, "afterTextChanged: " + editable);
-
-                }
-            });
-
-            mSearchText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Log.d(TAG, "onItemClick: ITEM CLICKED");
-
-                    Utils.hideKeyboard(getActivity());
-
-                }
-            });
-        }
-
-        if (((AppCompatActivity) getActivity()) != null) {
-            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        }
-
-        if (((AppCompatActivity) getActivity()) != null) {
-            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-                actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        }
-
-        Anim.crossFadeShortAnimation(mRecyclerView);
+        Anim.crossFadeShortAnimation(recyclerView);
 
         return view;
 
     }
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -389,5 +343,236 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    /*****************
+     * CONFIGURATION *
+     * **************/
+
+    /** Method that instantiates databases
+     * */
+    public void configureDatabases (Context context) {
+
+        fireDb = FirebaseDatabase.getInstance();
+        auth = FirebaseAuth.getInstance();
+        localDatabase = AppDatabase.getInstance(context);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+    }
+
+    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView,
+                                                Disposable disposable) {
+        Log.d(TAG, "configureAutocompleteTextView: called!");
+
+        ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
+                getActivity(),
+                android.R.layout.simple_list_item_1, //This layout has to be a textview
+                arrayOfTypes
+        );
+
+        autoCompleteTextView.setAdapter(autocompleteAdapter);
+
+        disposable = RxTextView.textChangeEvents(autoCompleteTextView)
+                .skip(2)
+                .debounce(600, TimeUnit.MILLISECONDS)
+                .map(new Function<TextViewTextChangeEvent, String>() {
+                    @Override
+                    public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
+                        return textViewTextChangeEvent.text().toString();
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<String>() {
+                    @Override
+                    public void onNext(String type) {
+                        Log.d(TAG, "onNext: type = " + type);
+                        Log.d(TAG, "onNext: typeAsInt = " + Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
+
+                        if (Arrays.asList(arrayOfTypes).contains(type)
+                                && Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes) != 0) {
+                            Log.d(TAG, "onNext: getting restaurant by type");
+                            getRestaurantsByTypeAndDisplayThemInRecyclerView(Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
+
+                        } else {
+                            Log.d(TAG, "onNext: getting all restaurants");
+                            getAllRestaurantsAndDisplayThemInRecyclerView();
+                        }
+
+                        Utils.hideKeyboard(getActivity());
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
+
+
+                    }
+                });
+
+    }
+
+    private void configureRecyclerView () {
+        Log.d(TAG, "configureRecyclerView: called!");
+
+        if (getActivity() != null) {
+
+            recyclerView.setHasFixedSize(true);
+            this.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            this.listOfRestaurants = new ArrayList<>();
+            this.rvAdapter = new RVAdapterList(
+                    getActivity(),
+                    this.listOfRestaurants,
+                    this.listOfRestaurantsByCoworker,
+                    glide);
+            this.recyclerView.setAdapter(this.rvAdapter);
+
+        }
+    }
+
+
+    /******************************************************
+     * RX JAVA
+     *****************************************************/
+
+    /** Method used to avoid memory leaks
+     * */
+    private void dispose (Disposable disposable) {
+        Log.d(TAG, "dispose: called!");
+        if (disposable != null
+                && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+    }
+
+    //****************************************************
+    // FETCH DATA, MODIFY DATA from LOCAL DATABASE
+    //****************************************************
+
+    /** Method that returns all restaurants in the database
+     * */
+    private Maybe<List<RestaurantEntry>> getAllRestaurantsInDatabase () {
+        Log.d(TAG, "getAllRestaurantsInDatabase: called!");
+        return localDatabase.restaurantDao().getAllRestaurantsRxJava();
+    }
+
+    /** Method that returns all restaurants in database of a specific type
+     * */
+    private Maybe<List<RestaurantEntry>> getRestaurantsByType(int type) {
+        Log.d(TAG, "getRestaurantsByType: called!");
+        if (type == 0) {
+            return localDatabase.restaurantDao().getAllRestaurantsRxJava();
+        } else {
+            return localDatabase.restaurantDao().getAllRestaurantsByTypeRxJava(String.valueOf(type));
+        }
+    }
+
+
+    //********************************
+    // INTERACT WITH DATA
+    //********************************
+
+    /** Method that fetches all the restaurants from the database
+     * and displays them in the recyclerView
+     * */
+    private void getAllRestaurantsAndDisplayThemInRecyclerView () {
+        Log.d(TAG, "getAllRestaurantsAndDisplayThemInRecyclerView: called!");
+
+        restaurantsObserver = getAllRestaurantsInDatabase()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(getMaybeObserverToUpdateRecyclerView());
+
+    }
+
+    /** Method that fetches the restaurants from the database according to the type inputted
+     * and displays them in the recyclerView
+     * */
+    private void getRestaurantsByTypeAndDisplayThemInRecyclerView(final int type) {
+        Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
+
+        restaurantsObserver = getRestaurantsByType(type)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(getMaybeObserverToUpdateRecyclerView());
+
+    }
+
+    //********************************
+    // OBSERVERS
+    //********************************
+
+    /** This observer returns all the restaurants in the database
+     * and allows updating the UI with the info.
+     * */
+    private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToUpdateRecyclerView() {
+        Log.d(TAG, "getMaybeObserverToUpdateMap: ");
+
+        return new MaybeObserver<List<RestaurantEntry>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: ");
+
+            }
+
+            @Override
+            public void onSuccess(List<RestaurantEntry> restaurantEntryList) {
+                Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
+                updateRecyclerViewWithNewRestaurantsList(restaurantEntryList);
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+
+            }
+        };
+    }
+
+    private void updateRecyclerViewWithNewRestaurantsList(
+            List<RestaurantEntry> listOfFetchedRestaurants) {
+        Log.d(TAG, "updateRecyclerViewWithNewRestaurantsList: called!");
+        Log.d(TAG, "updateRecyclerViewWithNewRestaurantsList: list = " + listOfFetchedRestaurants.toString());
+
+        if (getActivity() != null) {
+
+            listOfRestaurants.clear();
+            listOfRestaurants.addAll(listOfFetchedRestaurants);
+
+            rvAdapter = new RVAdapterList(getActivity(), listOfRestaurants, listOfRestaurantsByCoworker, glide);
+            recyclerView.setAdapter(rvAdapter);
+
+            rvAdapter.notifyDataSetChanged();
+
+        }
+    }
+
+    private void updateRecyclerViewWithNewListOfRestaurantsByCoworker(String type) {
+        Log.d(TAG, "updateRecyclerViewWithNewListOfRestaurantsByCoworker: called!");
+
+        if (Arrays.asList(arrayOfTypes).contains(type)
+                && Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes) != 0) {
+            Log.d(TAG, "onNext: getting restaurant by type");
+            getRestaurantsByTypeAndDisplayThemInRecyclerView(Utils.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
+
+        } else {
+            Log.d(TAG, "onNext: getting all restaurants");
+            getAllRestaurantsAndDisplayThemInRecyclerView();
+        }
+
+    }
+
 
 }

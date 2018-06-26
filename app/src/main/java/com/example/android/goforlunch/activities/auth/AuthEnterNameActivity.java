@@ -190,7 +190,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                     Log.d(TAG, "onClick: flag = false ->" + flag);
 
                     /** flag is false, therefore we came from Google of Facebook SignIn and
-                     * we only have to update the user info
+                     * we only have to updateItem the user info
                      * */
                     if (user != null) {
                         Log.d(TAG, "onClick: We came from Google or Facebook login");
@@ -270,7 +270,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                      * case we have to check if the user exists.
                      * If it does, we doesn't allow the user to continue.
                      * If it doesn't we have to
-                     * create the user and update the info.
+                     * create the user and updateItem the info.
                      * */
 
                     if (userAlreadyExists(listOfEmails, inputEmail.getText().toString().toLowerCase().trim())) {
