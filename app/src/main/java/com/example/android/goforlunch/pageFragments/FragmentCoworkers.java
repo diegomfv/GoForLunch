@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.pageFragments;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -8,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,16 +17,18 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.rvitemclick.ItemClickSupport;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -38,27 +40,31 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Diego Fajardo on 27/04/2018.
  */
 
 // TODO: 28/05/2018 Remove the user from the list!
-public class FragmentCoworkersView extends Fragment {
+public class FragmentCoworkers extends Fragment {
 
-    private static final String TAG = FragmentCoworkersView.class.getSimpleName();
+    private static final String TAG = FragmentCoworkers.class.getSimpleName();
 
-    //Variables to store views related to the articles upload
-    private TextView mErrorMessageDisplay;
-    private ProgressBar mProgressBar;
-    private Toolbar toolbar;
+    @BindView(R.id.coworkers_toolbar_id)
+    Toolbar toolbar;
+
     private ActionBar actionBar;
 
     //RecyclerView
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    @BindView(R.id.coworkers_recycler_view_id)
+    RecyclerView recyclerView;
+
+    private RVAdapterCoworkers adapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    //Firabase
+    //Firebase
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
@@ -82,8 +88,8 @@ public class FragmentCoworkersView extends Fragment {
      * INSTANTIATING THE FRAGMENT *
      *****************************/
 
-    public static FragmentCoworkersView newInstance() {
-        FragmentCoworkersView fragment = new FragmentCoworkersView();
+    public static FragmentCoworkers newInstance() {
+        FragmentCoworkers fragment = new FragmentCoworkers();
         return fragment;
     }
 
@@ -93,6 +99,10 @@ public class FragmentCoworkersView extends Fragment {
 
         Log.i(TAG, "onCreateView: Map");
 
+        View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
+
+        ButterKnife.bind(this, view);
+
         /** Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
@@ -100,29 +110,29 @@ public class FragmentCoworkersView extends Fragment {
         fireDb = FirebaseDatabase.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
+        /** Configure toolbar */
+        UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
+//        if (((AppCompatActivity) getActivity()) != null) {
+//            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+//        }
+//
+//        if (((AppCompatActivity) getActivity()) != null) {
+//            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+//            if (actionBar != null) {
+//                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+//                actionBar.setDisplayHomeAsUpEnabled(true);
+//            }
+//        }
+
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
-
-        View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
-
-        toolbar = (Toolbar) view.findViewById(R.id.map_toolbar_id);
-        if (((AppCompatActivity) getActivity()) != null) {
-            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        }
-
-        if (((AppCompatActivity) getActivity()) != null) {
-            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-                actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        }
 
         listOfCoworkers = new ArrayList<>();
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.coworkers_recycler_view_id);
-        mRecyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(mLayoutManager);
+
+        this.configureOnClickRecyclerView();
 
         /** We get the user information
          * */
@@ -162,8 +172,8 @@ public class FragmentCoworkersView extends Fragment {
                                 // TODO: 16/06/2018 Iterate through the list of coworkers to delete the currentUser
 
                                 if (getActivity() != null) {
-                                    mAdapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
-                                    mRecyclerView.setAdapter(mAdapter);
+                                    adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
+                                    recyclerView.setAdapter(adapter);
                                 }
 
                             }
@@ -200,8 +210,8 @@ public class FragmentCoworkersView extends Fragment {
                     listOfCoworkers = UtilsFirebase.fillListWithUsersFromDataSnapshot(dataSnapshot, userEmail, userGroup);
 
                     if (getActivity() != null) {
-                        mAdapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
-                        mRecyclerView.setAdapter(mAdapter);
+                        adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
+                        recyclerView.setAdapter(adapter);
                     }
 
                 }
@@ -214,7 +224,7 @@ public class FragmentCoworkersView extends Fragment {
             }
         });
 
-        Anim.crossFadeShortAnimation(mRecyclerView);
+        Anim.crossFadeShortAnimation(recyclerView);
 
         return view;
     }
@@ -234,6 +244,55 @@ public class FragmentCoworkersView extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Method that configures onClick for recyclerView items
+     * */
+    private void configureOnClickRecyclerView () {
+        Log.d(TAG, "configureOnClickRecyclerView: called!");
+
+        ItemClickSupport.addTo(recyclerView)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Log.d(TAG, "onItemClicked: item(" + position + ") clicked!");
+
+                        if (null == adapter.getUser(position).getRestaurantName()
+                                || adapter.getUser(position).getRestaurantName().equalsIgnoreCase(RepoStrings.NOT_AVAILABLE_FOR_STRINGS)) {
+
+                            if (null != getActivity()) {
+                                ToastHelper.toastShort(getActivity(), getActivity().getResources().getString(R.string.noInfoAvailable));
+                            }
+
+                        } else {
+
+                            /* We launch Restaurant Activity */
+                            startActivity(createAndFillIntentWithUserInfo(adapter, position));
+                        }
+
+                    }
+                });
+
+    }
+
+    /** Method that creates an intent and fills it with all the necessary info to be displayed
+     * in Restaurant Activity
+     * */
+    private Intent createAndFillIntentWithUserInfo(RVAdapterCoworkers adapter, int position) {
+
+        Intent intent = new Intent(getActivity(), RestaurantActivity.class);
+
+        intent.putExtra(RepoStrings.SentIntent.PLACE_ID, adapter.getUser(position).getPlaceId());
+        intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, adapter.getUser(position).getImageUrl());
+        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, adapter.getUser(position).getRestaurantName());
+        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, adapter.getUser(position).getRestaurantType());
+        intent.putExtra(RepoStrings.SentIntent.ADDRESS, adapter.getUser(position).getAddress());
+        intent.putExtra(RepoStrings.SentIntent.RATING, adapter.getUser(position).getRating());
+        intent.putExtra(RepoStrings.SentIntent.PHONE, adapter.getUser(position).getPhone());
+        intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, adapter.getUser(position).getWebsiteUrl());
+
+        return intent;
+
     }
 
 }

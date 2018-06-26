@@ -30,7 +30,7 @@ import com.example.android.goforlunch.job.AddRestaurantToGroupDailyJob;
 import com.example.android.goforlunch.job.AlertJobCreator;
 import com.example.android.goforlunch.job.NotificationDailyJob;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
-import com.example.android.goforlunch.pageFragments.FragmentCoworkersView;
+import com.example.android.goforlunch.pageFragments.FragmentCoworkers;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTRIAL;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL2;
 import com.example.android.goforlunch.repository.RepoStrings;
@@ -382,7 +382,7 @@ public class MainActivity extends AppCompatActivity{
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentCoworkersView.newInstance();
+                                selectedFragment = FragmentCoworkers.newInstance();
                                 flagToSpecifyCurrentFragment = 3;
 
                             }

@@ -30,6 +30,7 @@
     <!-- FRAGMENTS: Coworkers -->
     <string name="avCowHasNotDecided">%1$s %2$s has not decided yet&#8230;</string>
     <string name="avCowHasDecided">%1$s %2$s is eating \"%3$s\" (%4$s)</string>
+    <string name="noInfoAvailable">No information available</string>
 
 
 
@@ -127,6 +128,7 @@
     <string name="restaurantCallingTo">Calling to</string>
     <string name="restaurantPhoneNotAvailable">Phone not available</string>
     <string name="restaurantWebsiteNotAvailable">Website not available</string>
+
 
 
 </resources>

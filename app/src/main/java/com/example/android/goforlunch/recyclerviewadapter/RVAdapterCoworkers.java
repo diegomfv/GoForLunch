@@ -72,49 +72,7 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
         Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantName());
         Log.d(TAG, "onBindViewHolder: " + listOfCoworkers.get(holder.getAdapterPosition()).getRating());
 
-        if (listOfCoworkers.get(position).getRestaurantName() == null
-                || listOfCoworkers.get(position).getRestaurantName().equals("")) {
-
-            holder.textView.setText(mContext.getResources()
-                    .getString(
-                            R.string.avCowHasNotDecided,
-                            listOfCoworkers.get(position).getFirstName(),
-                            listOfCoworkers.get(position).getLastName()));
-
-            holder.textView.setTextColor(mContext.getResources().getColor(android.R.color.darker_gray));
-            holder.cardView.setOnClickListener(null);
-
-        } else {
-
-            holder.textView.setText(mContext.getResources()
-                    .getString(R.string.avCowHasDecided,
-                            listOfCoworkers.get(position).getFirstName(),
-                            listOfCoworkers.get(position).getLastName(),
-                            Utils.transformTypeToString(mContext, listOfCoworkers.get(position).getRestaurantType()),
-                            listOfCoworkers.get(position).getRestaurantName()));
-
-            holder.textView.setTextColor(mContext.getResources().getColor(android.R.color.black));
-
-            holder.cardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    // TODO: 13/06/2018 Put this inside a method
-                    Intent intent = new Intent(mContext, RestaurantActivity.class);
-                    intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfCoworkers.get(holder.getAdapterPosition()).getPlaceId());
-                    intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getImageUrl());
-                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME,listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantName());
-                    intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfCoworkers.get(holder.getAdapterPosition()).getRestaurantType());
-                    intent.putExtra(RepoStrings.SentIntent.ADDRESS, listOfCoworkers.get(holder.getAdapterPosition()).getAddress());
-                    intent.putExtra(RepoStrings.SentIntent.RATING, listOfCoworkers.get(holder.getAdapterPosition()).getRating());
-                    intent.putExtra(RepoStrings.SentIntent.PHONE, listOfCoworkers.get(holder.getAdapterPosition()).getPhone());
-                    intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, listOfCoworkers.get(holder.getAdapterPosition()).getWebsiteUrl());
-
-                    mContext.startActivity(intent);
-
-                }
-            });
-        }
+        holder.updateItem(position);
 
         Anim.crossFadeShortAnimation(holder.itemView);
 
@@ -125,10 +83,14 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
         return listOfCoworkers.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.coworkers_cardview_id)
-        CardView cardView;
+    /** Method that retrieves a user in FragmentCoworkers when clicked
+     * */
+    public User getUser (int position) {
+        return this.listOfCoworkers.get(position);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.cv_coworkers_textview_id)
         TextView textView;
