@@ -335,10 +335,6 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
                             ToastHelper.toastShort(context, likeToastString);
 
-                            // TODO: 26/06/2018 Delete these two methods!
-                            Utils.printFiles(imageDirPath);
-                            //getAndDisplayImageFromInternalStorage(imageDirPath);
-
                         } break;
 
                         case R.id.restaurant_view_website_id: {

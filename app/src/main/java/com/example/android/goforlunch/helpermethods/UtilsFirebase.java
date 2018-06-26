@@ -178,7 +178,7 @@ public class UtilsFirebase {
 
     /** Method to fill a list with all users of a specific group using a dataSnapshot
      * */
-    public static List<User> fillListWithUsersFromDataSnapshot (DataSnapshot dataSnapshot, String email, String group) {
+    public static List<User> fillListWithUsersOfSameGroupFromDataSnapshot(DataSnapshot dataSnapshot, String email, String group) {
 
         List<User> listOfUsers = new ArrayList<>();
 
@@ -190,11 +190,15 @@ public class UtilsFirebase {
 
                 User.Builder builder = new User.Builder();
 
+                /* User personal info
+                * */
                 builder.setFirstName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString());
                 builder.setLastName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString());
                 builder.setEmail(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString());
                 builder.setGroup(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString());
 
+                /* User Restaurant info
+                * */
                 builder.setAddress(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
                         .child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue()).toString());
                 builder.setImageUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
@@ -207,10 +211,13 @@ public class UtilsFirebase {
                         .child(RepoStrings.FirebaseReference.RESTAURANT_RATING).getValue()).toString());
                 builder.setRestaurantName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
                         .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
-                builder.setRestaurantType(setTypeIfPossible(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString()));
                 builder.setWebsiteUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
                         .child(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue()).toString());
+
+                /* We get the type from the int and convert it to string
+                * */
+                builder.setRestaurantType(setTypeIfPossible(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString()));
 
                 listOfUsers.add(builder.create());
             }

@@ -159,6 +159,7 @@ public class FragmentCoworkers extends Fragment {
                         userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
 
                         /** We fill the list of the coworkers using the group of the user
+                         * (this is a singleEventListener)
                          *  */
                         dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                         dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -166,16 +167,18 @@ public class FragmentCoworkers extends Fragment {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                                listOfCoworkers.clear();
-                                listOfCoworkers = UtilsFirebase.fillListWithUsersFromDataSnapshot(dataSnapshot, userEmail, userGroup);
+                                if (userGroup != null || !userGroup.equalsIgnoreCase("")) {
 
-                                // TODO: 16/06/2018 Iterate through the list of coworkers to delete the currentUser
+                                    listOfCoworkers.clear();
+                                    listOfCoworkers = UtilsFirebase.fillListWithUsersOfSameGroupFromDataSnapshot(dataSnapshot, userEmail, userGroup);
 
-                                if (getActivity() != null) {
-                                    adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
-                                    recyclerView.setAdapter(adapter);
+                                    // TODO: 16/06/2018 Iterate through the list of coworkers to delete the currentUser
+
+                                    if (getActivity() != null) {
+                                        adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
+                                        recyclerView.setAdapter(adapter);
+                                    }
                                 }
-
                             }
 
                             @Override
@@ -207,7 +210,7 @@ public class FragmentCoworkers extends Fragment {
                 if (userGroup != null || !userGroup.equalsIgnoreCase("")) {
 
                     listOfCoworkers.clear();
-                    listOfCoworkers = UtilsFirebase.fillListWithUsersFromDataSnapshot(dataSnapshot, userEmail, userGroup);
+                    listOfCoworkers = UtilsFirebase.fillListWithUsersOfSameGroupFromDataSnapshot(dataSnapshot, userEmail, userGroup);
 
                     if (getActivity() != null) {
                         adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
