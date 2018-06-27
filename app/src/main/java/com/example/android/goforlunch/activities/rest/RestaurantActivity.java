@@ -29,10 +29,12 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
+import com.example.android.goforlunch.helpermethods.UtilsRemote;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
@@ -334,6 +336,13 @@ public class RestaurantActivity extends AppCompatActivity {
                         case R.id.restaurant_view_like_id: {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
                             ToastHelper.toastShort(context, likeToastString);
+
+                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    UtilsRemote.isInternetAvailable();
+                                }
+                            });
 
                         } break;
 

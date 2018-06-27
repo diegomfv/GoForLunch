@@ -18,6 +18,10 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.repository.RepoStrings;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -28,6 +32,26 @@ import java.util.Map;
 public class Utils {
 
     private static final String TAG = "Utils";
+
+    // Background thread!!
+    // TCP/HTTP/DNS (depending on the port, 53=DNS, 80=HTTP, etc.)
+    public static boolean isInternetAvailable() {
+        Log.d(TAG, "isInternetAvailable: called!");
+        try {
+            int timeoutMs = 1500;
+            Socket sock = new Socket();
+            SocketAddress sockaddr = new InetSocketAddress("8.8.8.8", 53);
+
+            sock.connect(sockaddr, timeoutMs);
+            sock.close();
+
+            Log.d(TAG, "isInternetAvailable: true");
+            return true;
+        } catch (IOException e) {
+            Log.d(TAG, "isInternetAvailable: false");
+            return false; }
+    }
+
 
     public static void menuIconColor(MenuItem menuItem, int color) {
         Drawable drawable = menuItem.getIcon();

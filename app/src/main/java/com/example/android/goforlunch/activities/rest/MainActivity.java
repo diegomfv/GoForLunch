@@ -26,6 +26,7 @@ import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
+import com.example.android.goforlunch.helpermethods.UtilsRemote;
 import com.example.android.goforlunch.job.AddRestaurantToGroupDailyJob;
 import com.example.android.goforlunch.job.AlertJobCreator;
 import com.example.android.goforlunch.job.NotificationDailyJob;
@@ -50,14 +51,11 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-
-
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/05/2018 Check if there is internet connection
 // TODO: 29/05/2018 Enable notifications at 4pm
 // TODO: 29/05/2018 Enable notifications if restaurant is chosen
 // TODO: 29/05/2018 Translations
-// TODO: 29/05/2018 Check deprecated problem RVAdapter
 // TODO: 29/05/2018 General clean up
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
 // TODO: 26/06/2018 Bind views with butterKnife
@@ -332,12 +330,7 @@ public class MainActivity extends AppCompatActivity{
 
     /** Method used to check if there is internet connection
      * */
-    // TODO: 13/06/2018 Modify this!
-    private boolean internetConnectionIsOK () {
-        Log.d(TAG, "internetConnectionIsOK: called!");
 
-        return true;
-    }
 
     /*****************
      * LISTENERS *****
@@ -401,7 +394,6 @@ public class MainActivity extends AppCompatActivity{
                 }
             };
 
-
     private NavigationView.OnNavigationItemSelectedListener navViewListener =
             new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -418,7 +410,7 @@ public class MainActivity extends AppCompatActivity{
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                                    if (internetConnectionIsOK()) {
+                                    if (UtilsRemote.isOnline()) {
                                         Log.d(TAG, "onDataChange: Internet is OK");
 
                                         if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
