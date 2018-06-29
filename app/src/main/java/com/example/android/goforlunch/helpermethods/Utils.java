@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.repository.RepoStrings;
 
 import java.io.File;
@@ -25,6 +26,13 @@ import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Created by Diego Fajardo on 27/04/2018.
  */
@@ -32,6 +40,26 @@ import java.util.Map;
 public class Utils {
 
     private static final String TAG = "Utils";
+
+    public static void checkInternetInBackgroundThread (final DisposableObserver disposableObserver) {
+        Log.d(TAG, "checkInternetInBackgroundThread: called! ");
+
+        // TODO: 27/06/2018 If I don't use AppExecutors it crashes
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: checking internet connection...");
+
+                Observable.just(Utils.isInternetAvailable())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(disposableObserver);
+            }
+
+        });
+
+    }
+
 
     // Background thread!!
     // TCP/HTTP/DNS (depending on the port, 53=DNS, 80=HTTP, etc.)

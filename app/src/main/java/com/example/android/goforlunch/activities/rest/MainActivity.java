@@ -410,7 +410,7 @@ public class MainActivity extends AppCompatActivity{
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                                    if (UtilsRemote.isOnline()) {
+//                                    if (Utils.checkInternetInBackgroundThread();) {
                                         Log.d(TAG, "onDataChange: Internet is OK");
 
                                         if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
@@ -424,11 +424,11 @@ public class MainActivity extends AppCompatActivity{
 
                                         }
 
-                                    } else {
+//                                    } else {
                                         Log.d(TAG, "onDataChange: There is no internet!");
                                         ToastHelper.toastNoInternet(MainActivity.this);
 
-                                    }
+//                                    }
                                 }
 
                                 @Override

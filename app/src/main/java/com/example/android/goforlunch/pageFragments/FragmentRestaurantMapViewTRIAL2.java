@@ -1042,7 +1042,36 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
                 if (restaurantEntryList.size() == 0) {
                     Log.d(TAG, "onSuccess: localDB is EMPTY. Starting request process..");
-                    startHttpRequestProcess();
+
+                    Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+                        @Override
+                        public void onNext(Boolean aBoolean) {
+                            Log.d(TAG, "onNext: " + aBoolean);
+
+                            if (aBoolean) {
+                                Log.d(TAG, "onNext: internet connection: " + aBoolean);
+                                startHttpRequestProcess();
+
+                            } else {
+                                Log.d(TAG, "onNext: internet connection: " + aBoolean);
+                                ToastHelper.toastShort(getActivity(), getActivity().getResources().getString(R.string.noInternet));
+                            }
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.d(TAG, "onError: " + Log.getStackTraceString(e));
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            Log.d(TAG, "onComplete: ");
+
+                        }
+                    });
+
                 } else {
                     Log.d(TAG, "onSuccess: localDB currently filled. Updating UI..");
 

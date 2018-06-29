@@ -45,6 +45,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
+import io.reactivex.observers.DisposableObserver;
+
 /**
  * Created by Diego Fajardo on 31/05/2018.
  */
@@ -136,7 +138,33 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Google Button clicked!");
-                googleSignIn();
+
+                Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+                   @Override
+                   public void onNext(Boolean aBoolean) {
+                       Log.d(TAG, "onNext: ");
+
+                       if (aBoolean) {
+                           googleSignIn();
+
+                       } else {
+                           ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.noInternet));
+                       }
+
+                   }
+
+                   @Override
+                   public void onError(Throwable e) {
+                       Log.d(TAG, "onError: ");
+
+                   }
+
+                   @Override
+                   public void onComplete() {
+                       Log.d(TAG, "onComplete: ");
+
+                   }
+                });
             }
         });
 
@@ -146,9 +174,36 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         buttonFacebook.setReadPermissions("email", "public_profile", "user_friends");
         buttonFacebook.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
+            public void onSuccess(final LoginResult loginResult) {
                 Log.d(TAG, "onSuccess: " + loginResult);
-                handleFacebookAccessToken(loginResult.getAccessToken());
+
+                Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+
+                    @Override
+                    public void onNext(Boolean aBoolean) {
+                        Log.d(TAG, "onNext: " + aBoolean);
+
+                        if (aBoolean) {
+                            handleFacebookAccessToken(loginResult.getAccessToken());
+
+                        } else {
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError: ");
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
+
+                    }
+                });
             }
 
             @Override

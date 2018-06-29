@@ -283,6 +283,15 @@ public class FragmentCoworkers extends Fragment {
      * */
     private Intent createAndFillIntentWithUserInfo(RVAdapterCoworkers adapter, int position) {
 
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getPlaceId());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getImageUrl());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getRestaurantName());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getRestaurantType());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getAddress());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getRating());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getPhone());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getWebsiteUrl());
+
         Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
         intent.putExtra(RepoStrings.SentIntent.PLACE_ID, adapter.getUser(position).getPlaceId());

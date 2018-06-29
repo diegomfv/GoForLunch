@@ -15,12 +15,15 @@ import android.widget.ProgressBar;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+
+import io.reactivex.observers.DisposableObserver;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
@@ -87,54 +90,85 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
         buttonSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String email = inputEmail.getText().toString();
-                final String password = inputPassword.getText().toString();
 
-                if (TextUtils.isEmpty(email)) {
-                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter email address");
-                    return;
-                } else  if (TextUtils.isEmpty(password)) {
-                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter password");
-                    return;
-                } else  if (password.length() < 6) {
-                    Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
-                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Password is too short");
-                    return;
-                }
+                Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+                    @Override
+                    public void onNext(Boolean aBoolean) {
+                        Log.d(TAG, "onNext: ");
 
-                progressBar.setVisibility(View.VISIBLE);
+                        if (aBoolean) {
+                            Log.d(TAG, "onNext: " + aBoolean);
 
-                //authenticate user
-                auth.signInWithEmailAndPassword(email,password)
-                        .addOnCompleteListener(AuthSignInPasswordActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
-                                progressBar.setVisibility(View.GONE);
+                            String email = inputEmail.getText().toString();
+                            final String password = inputPassword.getText().toString();
 
-                                if (!task.isSuccessful()) {
-                                    Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+                            if (TextUtils.isEmpty(email)) {
+                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter email address");
+                                return;
 
-                                    //We get the exception and display why it was not succesful
-                                    FirebaseAuthException e = (FirebaseAuthException )task.getException();
+                            } else  if (TextUtils.isEmpty(password)) {
+                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter password");
+                                return;
 
-                                    if (e != null) {
-                                        Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                        ToastHelper.toastShort(AuthSignInPasswordActivity.this, e.getMessage());
-                                    } else {
-                                        ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Something went wrong");
-                                    }
+                            } else  if (password.length() < 6) {
+                                Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
+                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Password is too short");
+                                return;
 
-                                } else {
-                                    Intent intent = new Intent(AuthSignInPasswordActivity.this, MainActivity.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(new Intent(AuthSignInPasswordActivity.this, MainActivity.class));
-                                    finish();
-                                }
                             }
-                        });
+
+                            progressBar.setVisibility(View.VISIBLE);
+
+                            //authenticate user
+                            auth.signInWithEmailAndPassword(email,password)
+                                    .addOnCompleteListener(AuthSignInPasswordActivity.this, new OnCompleteListener<AuthResult>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<AuthResult> task) {
+                                            // If sign in fails, display a message to the user. If sign in succeeds
+                                            // the auth state listener will be notified and logic to handle the
+                                            // signed in user can be handled in the listener.
+                                            progressBar.setVisibility(View.GONE);
+
+                                            if (!task.isSuccessful()) {
+                                                Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                                //We get the exception and display why it was not succesful
+                                                FirebaseAuthException e = (FirebaseAuthException )task.getException();
+
+                                                if (e != null) {
+                                                    Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, e.getMessage());
+                                                } else {
+                                                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Something went wrong");
+                                                }
+
+                                            } else {
+                                                Intent intent = new Intent(AuthSignInPasswordActivity.this, MainActivity.class);
+                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                startActivity(new Intent(AuthSignInPasswordActivity.this, MainActivity.class));
+                                                finish();
+                                            }
+                                        }
+                                    });
+
+                        } else {
+                            Log.d(TAG, "onNext: internet connectio = " + aBoolean);
+                            ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.noInternet));
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError: " + Log.getStackTraceString(e));
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
+                    }
+                });
+
             }
         });
     }

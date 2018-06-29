@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -264,54 +265,84 @@ public class RestaurantActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            Map<String,Object> map;
+            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+                @Override
+                public void onNext(Boolean aBoolean) {
+                    Log.d(TAG, "onNext: " + aBoolean);
 
-            if (fabShowsCheck) {
-                /** If we click the fab when it shows check it has to display "add".
-                 * Moreover, we modify the info in the database
-                 * */
-                fabShowsCheck = false;
-                Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
+                    if (aBoolean) {
+                        Log.d(TAG, "onNext: internet state = " + aBoolean);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
+                        Map<String,Object> map;
 
-                    /** We delete the restaurant from the database (user's)
-                     **/
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                    UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
+                        if (fabShowsCheck) {
+                            /** If we click the fab when it shows check it has to display "add".
+                             * Moreover, we modify the info in the database
+                             * */
+                            fabShowsCheck = false;
+                            Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
 
-                    ToastHelper.toastShort(context, getResources().getString(R.string.restaurantNotGoing));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
+
+                                /** We delete the restaurant from the database (user's)
+                                 **/
+                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
+
+                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantNotGoing));
+                            }
+
+                        } else {
+
+                            /** If we click the fab when it shows "add" it has to display "check".
+                             * Moreover, we modify the info in the database
+                             * */
+                            fabShowsCheck = true;
+                            Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
+
+                                /** We add the restaurant to the database (user's)
+                                 * */
+                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)),
+                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
+                                );
+
+                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + " " + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) + "!");
+                            }
+                        }
+
+                    } else {
+                        Log.d(TAG, "onNext: internet state = " + aBoolean);
+                        ToastHelper.toastShort(RestaurantActivity.this, getResources().getString(R.string.noInternet));
+
+                    }
                 }
 
-            } else {
+                @Override
+                public void onError(Throwable e) {
+                    Log.d(TAG, "onError: " + Log.getStackTraceString(e));
 
-                /** If we click the fab when it shows "add" it has to display "check".
-                 * Moreover, we modify the info in the database
-                 * */
-                fabShowsCheck = true;
-                Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
-
-                    /** We add the restaurant to the database (user's)
-                     * */
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                    UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)),
-                            checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
-                    );
-
-                    ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME + "!"));
                 }
-            }
+
+                @Override
+                public void onComplete() {
+                    Log.d(TAG, "onComplete: ");
+
+                }
+            });
+
+
         }
     };
 
@@ -337,10 +368,28 @@ public class RestaurantActivity extends AppCompatActivity {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
                             ToastHelper.toastShort(context, likeToastString);
 
-                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
                                 @Override
-                                public void run() {
-                                    UtilsRemote.isInternetAvailable();
+                                public void onNext(Boolean aBoolean) {
+                                    Log.d(TAG, "onNext: " + aBoolean);
+
+                                    if (aBoolean) {
+                                        ToastHelper.toastShort(RestaurantActivity.this, "Internet available");
+                                    } else {
+                                        ToastHelper.toastShort(RestaurantActivity.this, "No internet available");
+                                    }
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    Log.d(TAG, "onError: " + Log.getStackTraceString(e));
+
+                                }
+
+                                @Override
+                                public void onComplete() {
+                                    Log.d(TAG, "onComplete: ");
+
                                 }
                             });
 
