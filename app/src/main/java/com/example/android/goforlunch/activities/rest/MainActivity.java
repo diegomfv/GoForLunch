@@ -26,7 +26,6 @@ import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.helpermethods.UtilsRemote;
 import com.example.android.goforlunch.job.AddRestaurantToGroupDailyJob;
 import com.example.android.goforlunch.job.AlertJobCreator;
 import com.example.android.goforlunch.job.NotificationDailyJob;
@@ -418,7 +417,7 @@ public class MainActivity extends AppCompatActivity{
 
                                         } else {
 
-                                            Map<String, Object> map = UtilsFirebase.fillMapUsingDataSnapshot(dataSnapshot);
+                                            Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
                                             Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
                                             startActivity(Utils.fillIntentUsingMapInfo(intent, map));
 

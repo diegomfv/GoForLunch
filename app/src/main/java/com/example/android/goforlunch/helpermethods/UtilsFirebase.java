@@ -1,10 +1,16 @@
 package com.example.android.goforlunch.helpermethods;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
+import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
+import com.example.android.goforlunch.activities.rest.JoinGroupActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.facebook.login.LoginManager;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 
@@ -17,8 +23,6 @@ import java.util.Objects;
 /**
  * Created by Diego Fajardo on 14/06/2018.
  */
-
-
 
 public class UtilsFirebase {
 
@@ -100,7 +104,7 @@ public class UtilsFirebase {
     /** Method that returns
      * all user restaurant info
      * */
-    public static Map<String,Object> fillMapUsingDataSnapshot(DataSnapshot dataSnapshot) {
+    public static Map<String,Object> fillMapWithRestaurantInfoUsingDataSnapshot(DataSnapshot dataSnapshot) {
 
         Map <String, Object> map = new HashMap<>();
 
@@ -252,8 +256,23 @@ public class UtilsFirebase {
         return listOfCoworkers;
     }
 
+    /** Method that fills a list with all the groups in firebase database
+     * */
+    public static List<String> fillListWithAllGroups (DataSnapshot dataSnapshot) {
 
+        List<String> listOfGroups = new ArrayList<>();
 
+        for (DataSnapshot item :
+                dataSnapshot.getChildren()) {
+
+            if (null !=item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue().toString()) {
+                listOfGroups.add(item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue().toString());
+            }
+
+        }
+
+        return listOfGroups;
+    }
 
     /** Method that returns a groupKey using a datasnapshot
      * */
@@ -289,4 +308,23 @@ public class UtilsFirebase {
 
         }
     }
+
+    /** Method that logs out the user
+     * */
+    public static void logOut (Context context) {
+
+        /** The user signs out
+         *  and goes to AuthSignIn Activity
+         *  */
+        FirebaseAuth.getInstance().signOut();
+        LoginManager.getInstance().logOut();
+
+        Intent intent = new Intent(context, AuthChooseLoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(intent);
+
+    }
+
+
+
 }

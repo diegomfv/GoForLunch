@@ -119,18 +119,15 @@
         android:layout_marginBottom="10dp"
         android:defaultFocusHighlightEnabled="false">
 
-        <com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/pers_enter_group_id"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textSize="14sp"
-            android:hint="Your Group"
             android:maxLines="1"
             android:inputType="text"
-            android:imeOptions="actionSearch"
-            android:completionThreshold="1"
             android:enabled="false"
-            android:maxLength="12" />
+            android:hint="Enter your password" />
 
     </android.support.design.widget.TextInputLayout>
 

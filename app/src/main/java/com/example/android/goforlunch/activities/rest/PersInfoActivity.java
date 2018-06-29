@@ -32,10 +32,8 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repository.RepoStrings;
-import com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,6 +52,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.reactivex.observers.DisposableObserver;
+
 /**
  * Created by Diego Fajardo on 09/05/2018.
  */
@@ -69,17 +71,32 @@ public class PersInfoActivity extends AppCompatActivity{
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
-    private ImageView iv_userImage;
-    private TextInputEditText inputFirstName;
-    private TextInputEditText inputLastName;
-    private TextInputEditText inputEmail;
-    private TextInputEditText inputPassword;
-    private TextInputAutoCompleteTextView inputGroup;
+    @BindView(R.id.pers_enter_image_id)
+    ImageView iv_userImage;
 
-    private Button buttonSaveChanges;
-    private Button buttonChangePassword;
+    @BindView(R.id.pers_enter_first_name_id)
+    TextInputEditText inputFirstName;
 
-    private ProgressBar progressBar;
+    @BindView(R.id.pers_enter_last_name_id)
+    TextInputEditText inputLastName;
+
+    @BindView(R.id.pers_enter_email_id)
+    TextInputEditText inputEmail;
+
+    @BindView(R.id.pers_enter_password_id)
+    TextInputEditText inputPassword;
+
+    @BindView(R.id.pers_enter_group_id)
+    TextInputEditText inputGroup;
+
+    @BindView(R.id.pers_enter_save_changes_button_id)
+    Button buttonSaveChanges;
+
+    @BindView(R.id.pers_enter_change_password_id)
+    Button buttonChangePassword;
+
+    @BindView(R.id.pers_enter_progressbar)
+    ProgressBar progressBar;
 
     private List<String> listOfGroups;
     private String[] arrayOfGroups;
@@ -113,6 +130,8 @@ public class PersInfoActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pers_info);
 
+        ButterKnife.bind(this);
+
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
         localDatabase = AppDatabase.getInstance(PersInfoActivity.this);
@@ -121,64 +140,6 @@ public class PersInfoActivity extends AppCompatActivity{
         glide = Glide.with(PersInfoActivity.this);
 
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
-
-        iv_userImage = (ImageView) findViewById(R.id.pers_enter_image_id);
-        inputFirstName = (TextInputEditText) findViewById(R.id.pers_enter_first_name_id);
-        inputLastName = (TextInputEditText) findViewById(R.id.pers_enter_last_name_id);
-        inputEmail = (TextInputEditText) findViewById(R.id.pers_enter_email_id);
-        inputPassword = (TextInputEditText) findViewById(R.id.pers_enter_password_id);
-        inputGroup = (TextInputAutoCompleteTextView) findViewById(R.id.pers_enter_group_id);
-        buttonSaveChanges = (Button) findViewById(R.id.pers_enter_save_changes_button_id);
-        buttonChangePassword = (Button) findViewById(R.id.pers_enter_change_password_id);
-        progressBar = (ProgressBar) findViewById(R.id.pers_enter_progressbar);
-
-        /** We get the user information
-         * */
-        currentUser = auth.getCurrentUser();
-        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
-
-        if (currentUser != null) {
-
-            userEmail = currentUser.getEmail();
-            userProfilePictureUri = currentUser.getPhotoUrl();
-            Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
-
-            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                        userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
-                        userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
-                        userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
-                        userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
-                        userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
-
-                        /** We fill the widgets with the user's info
-                         * */
-                        inputFirstName.setText(userFirstName);
-                        inputLastName.setText(userLastName);
-                        inputEmail.setText(userEmail);
-                        inputGroup.setText(userGroup);
-                        inputPassword.setText("******");
-
-                        glide.load(userProfilePictureUri).into(iv_userImage);
-
-                        //iv_userImage.setImageURI(userProfilePictureUri);
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: called!");
-
-                    }
-                });
-            }
-        }
 
         buttonSaveChanges.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,11 +219,112 @@ public class PersInfoActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Clicked! " + view.toString());
-
-                ToastHelper.toastShort(PersInfoActivity.this, "Not implemented yet!");
+                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.notImplemented));
             }
         });
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: called!");
+
+        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+            @Override
+            public void onNext(Boolean aBoolean) {
+                Log.d(TAG, "onNext: " + aBoolean);
+
+                if(aBoolean) {
+
+                    /** We get the user information
+                     * */
+                    currentUser = auth.getCurrentUser();
+                    Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+                    if (currentUser != null) {
+
+                        userEmail = currentUser.getEmail();
+                        userProfilePictureUri = currentUser.getPhotoUrl();
+                        Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
+
+                        if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                            dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
+                        }
+                    }
+
+                } else {
+
+                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.noInternetLoggingOut));
+
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "onError: " + Log.getStackTraceString(e));
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+
+            }
+        });
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: called!");
+        dbRefUsers.removeEventListener(valueEventListenerGetInfoAndFillWidgets);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: called!");
+        super.onDestroy();
+    }
+
+    /** Value Event ListenerL gets all user's info from Firebase and fills all the widgets
+     *  */
+    private ValueEventListener valueEventListenerGetInfoAndFillWidgets = new ValueEventListener() {
+
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+            userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
+            userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
+            userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
+            userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
+            userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+
+            /** We fill the widgets with the user's info
+             * */
+            inputFirstName.setText(userFirstName);
+            inputLastName.setText(userLastName);
+            inputEmail.setText(userEmail);
+            inputGroup.setText(userGroup);
+            inputPassword.setText("******");
+
+            glide.load(userProfilePictureUri).into(iv_userImage);
+
+            //iv_userImage.setImageURI(userProfilePictureUri);
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: called!");
+
+        }
+    };
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -365,11 +427,5 @@ public class PersInfoActivity extends AppCompatActivity{
                 super.onRequestPermissionsResult(requestCode, permissions,
                         grantResults);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
-        super.onDestroy();
     }
 }

@@ -9,18 +9,17 @@
 
     <string name="action_settings">Settings</string>
 
-
     <!-- GENERAL MESSAGES -->
     <string name="noInternet">Internet: NOT available</string>
     <string name="storageNotGranted">Storage Access: NOT granted</string>
     <string name="storageGranted">Storage Access: GRANTED</string>
-
+    <string name="notImplemented">Not implemented&#8230;</string>
+    <string name="somethingWentWrong">Something went wrong&#8230; Please, try again</string>
 
     <!-- MAIN ACTIVITY -->
     <string name="mainBottomMapView">Map View</string>
     <string name="mainBottomListView">List View</string>
     <string name="mainBottomWorkmates">Workmates</string>
-
 
     <!-- FRAGMENTS -->
     <string name="autoCompleteSearchText">Search</string>
@@ -31,9 +30,6 @@
     <string name="avCowHasNotDecided">%1$s %2$s has not decided yet&#8230;</string>
     <string name="avCowHasDecided">%1$s %2$s is eating \"%3$s\" (%4$s)</string>
     <string name="noInfoAvailable">No information available</string>
-
-
-
 
 
 
@@ -106,6 +102,9 @@
     <string name="signInButtonSignIn">SIGN IN</string>
     <string name="signInButtonResetPassword">RESET PASSWORD</string>
     <string name="signInButtonRegister">REGISTER</string>
+    <string name="signInToastEnterEmail">Enter email address</string>
+    <string name="signInToastEnterPassword">Enter password</string>
+    <string name="signInToastPasswordTooShort">The password is too short</string>
 
     <!-- AUTH ENTER NAME ACTIVITY -->
     <string name="enterNameFirstName">First Name</string>
@@ -123,12 +122,24 @@
     <string name="restaurantBottomLike">LIKE</string>
     <string name="restaurantBottomWebsite">WEBSITE</string>
 
-    <string name="restaurantNotGoing">Not going to the restaurant..</string>
+    <string name="restaurantNotGoing">Not going to the restaurant&#8230;</string>
     <string name="restaurantGoing">Going to </string>
     <string name="restaurantCallingTo">Calling to</string>
     <string name="restaurantPhoneNotAvailable">Phone not available</string>
     <string name="restaurantWebsiteNotAvailable">Website not available</string>
 
+    <!-- PERS INFO ACTIVITY -->
+    <string name="group">Group</string>
+
+    <!-- JOIN GROUP ACTIVITY -->
+    <string name="joinGroupsDoesNotExist">That group does not exist</string>
+    <string name="joinWouldYouLikeJoin">Would you like to join this group(</string>
+    <string name="joinJoinGroup">Join Group</string>
+    <string name="joinYes">Yes</string>
+    <string name="joinNo">No</string>
+    <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
+    <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
+    <string name="noInternetLoggingOut">Sorry, logging out. No internet connection</string>
 
 
 </resources>

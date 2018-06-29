@@ -355,7 +355,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                         /** Getting user's restaurant info
                          * */
-                        Map <String, Object> map = UtilsFirebase.fillMapUsingDataSnapshot(dataSnapshot);
+                        Map <String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
 
                         /** Inserting a new restaurant in the group
                          * */

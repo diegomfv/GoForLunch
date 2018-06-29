@@ -23,47 +23,40 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 
+import butterknife.BindView;
 import io.reactivex.observers.DisposableObserver;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
  */
 
-// TODO: 01/06/2018 We can create a database to store userNames and passwords
-// TODO: 01/06/2018 and display them using TextInputAutocompleteTextView
 public class AuthSignInPasswordActivity extends AppCompatActivity {
 
     private static final String TAG = AuthSignInPasswordActivity.class.getSimpleName();
 
-    private FirebaseAuth auth;
+    @BindView(R.id.signin_textinput_email_id)
+    TextInputEditText inputEmail;
 
-    private TextInputEditText inputEmail;
-    private TextInputEditText inputPassword;
+    @BindView(R.id.signin_textinput_password_id)
+    TextInputEditText inputPassword;
 
-    private Button buttonSignIn;
-    private Button buttonReset;
-    private Button buttonRegister;
+    @BindView(R.id.signin_button_id)
+    Button buttonSignIn;
 
-    private ProgressBar progressBar;
+    @BindView(R.id.signin_reset_button_id)
+    Button buttonReset;
+
+    @BindView(R.id.signin_register_button_id)
+    Button buttonRegister;
+
+    // TODO: 01/06/2018 Delete?
+    @BindView(R.id.signin_progressbar_id)
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        auth = FirebaseAuth.getInstance();
-
-        //We set the contentView after checking if the user is already logged in
         setContentView(R.layout.activity_auth_signin_password);
-
-        inputEmail = (TextInputEditText) findViewById(R.id.signin_textinput_email_id);
-        inputPassword = (TextInputEditText) findViewById(R.id.signin_textinput_password_id);
-
-        buttonSignIn = (Button) findViewById(R.id.signin_button_id);
-        buttonReset = (Button) findViewById(R.id.signin_reset_button_id);
-        buttonRegister = (Button) findViewById(R.id.signin_register_button_id);
-
-        // TODO: 01/06/2018 Delete?
-        progressBar = (ProgressBar) findViewById(R.id.signin_progressbar_id);
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +76,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
         buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Not implemented yet");
+                ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.notImplemented));
             }
         });
 
@@ -103,16 +96,16 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
                             final String password = inputPassword.getText().toString();
 
                             if (TextUtils.isEmpty(email)) {
-                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter email address");
+                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.signInToastEnterEmail));
                                 return;
 
                             } else  if (TextUtils.isEmpty(password)) {
-                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Enter password");
+                                ToastHelper.toastShort(AuthSignInPasswordActivity.this,  getResources().getString(R.string.signInToastEnterPassword));
                                 return;
 
                             } else  if (password.length() < 6) {
                                 Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
-                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Password is too short");
+                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.signInToastPasswordTooShort));
                                 return;
 
                             }
@@ -120,6 +113,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
                             progressBar.setVisibility(View.VISIBLE);
 
                             //authenticate user
+                            FirebaseAuth auth = FirebaseAuth.getInstance();
                             auth.signInWithEmailAndPassword(email,password)
                                     .addOnCompleteListener(AuthSignInPasswordActivity.this, new OnCompleteListener<AuthResult>() {
                                         @Override
@@ -139,7 +133,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
                                                     Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                                     ToastHelper.toastShort(AuthSignInPasswordActivity.this, e.getMessage());
                                                 } else {
-                                                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, "Something went wrong");
+                                                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
                                                 }
 
                                             } else {
@@ -152,7 +146,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
                                     });
 
                         } else {
-                            Log.d(TAG, "onNext: internet connectio = " + aBoolean);
+                            Log.d(TAG, "onNext: internet connection = " + aBoolean);
                             ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.noInternet));
 
                         }

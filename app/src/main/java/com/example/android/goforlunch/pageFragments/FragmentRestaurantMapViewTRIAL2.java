@@ -397,12 +397,18 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     private void disposeWhenDestroy () {
         Log.d(TAG, "disposeWhenDestroy: called!");
-        dispose(this.autocompleteTextViewDisposable);
-        dispose(this.textSearchDisposable);
-        dispose(this.placeIdDisposable);
-        dispose(this.distanceMatrixDisposable);
-        dispose(this.nearbyDisposable);
+        disposeIfNotNull(this.autocompleteTextViewDisposable);
+        disposeIfNotNull(this.textSearchDisposable);
+        disposeIfNotNull(this.placeIdDisposable);
+        disposeIfNotNull(this.distanceMatrixDisposable);
+        disposeIfNotNull(this.nearbyDisposable);
 
+    }
+
+    private void disposeIfNotNull (Disposable disposable) {
+        if (disposable != null) {
+            disposable.dispose();
+        }
     }
 
     /**************************

@@ -54,7 +54,7 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
                 // TODO: 13/06/2018 Might not be necessary to check internet connection
                 /** Getting user's restaurant info
                  * */
-                Map<String, Object> map = UtilsFirebase.fillMapUsingDataSnapshot(dataSnapshot);
+                Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
 
                 /** Inserting a new restaurant in the group
                  * */
