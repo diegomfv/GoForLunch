@@ -21,6 +21,8 @@
     <string name="getAccountsDenied">GET_ACCOUNTS Denied</string>
 
     <!-- COMMON -->
+    <string name="commonToastEnterFirstName">Please, enter First name</string>
+    <string name="commonToastEnterLastName">Please, enter Last name</string>
     <string name="commonToastEnterEmail">Please, enter email address</string>
     <string name="commonToastEnterPassword">Please, enter password</string>
     <string name="commonToastPasswordTooShort">The password is too short</string>
@@ -120,8 +122,7 @@
     <string name="enterNameStart">START</string>
     <string name="enterNameYouNotPickedImage">You have not picked an image</string>
     <string name="enterNameThisEmailAlreadyExists">A user with this email already exists</string>
-    <string name="enterNameToastEnterFirstName">Please, enter First name</string>
-    <string name="enterNameToastEnterLastName">Please, enter Last name</string>
+
 
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupJoinGroup">JOIN GROUP</string>

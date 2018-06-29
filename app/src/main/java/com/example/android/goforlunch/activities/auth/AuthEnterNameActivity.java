@@ -400,11 +400,11 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     public boolean checkMinimumRequisites () {
 
         if (inputFirstName.getText().toString().length() == 0) {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameToastEnterFirstName));
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonToastEnterFirstName));
             return false;
 
         } else if (inputLastName.getText().toString().length() == 0) {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameToastEnterLastName));
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonToastEnterLastName));
             return false;
 
         } else if (inputEmail.getText().toString().length() == 0) {

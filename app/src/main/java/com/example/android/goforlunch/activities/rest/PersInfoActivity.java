@@ -61,12 +61,6 @@ import io.reactivex.observers.DisposableObserver;
  */
 public class PersInfoActivity extends AppCompatActivity{
 
-    // TODO: 29/05/2018 Eliminate that the FirstName view is focused from the beginning
-    // TODO: 29/05/2018 Eliminate the group option here
-    // TODO: 29/05/2018 Check AutocompleteTextView. Things are missing
-    // TODO: 06/06/2018 Fill the textInputs with first name and last name
-    // TODO: 06/06/2018 Allow to modify the profile picture
-
     private static final String TAG = PersInfoActivity.class.getSimpleName();
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
@@ -147,10 +141,10 @@ public class PersInfoActivity extends AppCompatActivity{
                 Log.d(TAG, "onClick: Clicked! " + view.toString());
 
                 if (inputFirstName.getText().toString().trim().length() == 0) {
-                    ToastHelper.toastShort(PersInfoActivity.this, "Please insert your first name");
+                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonToastEnterFirstName));
 
                 } else if (inputLastName.getText().toString().trim().length() == 0) {
-                    ToastHelper.toastShort(PersInfoActivity.this, "Please, insert your last name");
+                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonToastEnterLastName));
 
                 } else {
 
