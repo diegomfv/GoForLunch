@@ -57,9 +57,6 @@
 
         </activity>
 
-        <activity android:name=".activities.auth.AuthResetPasswordActivity"
-            android:screenOrientation="portrait"/>
-
         <activity android:name=".activities.auth.AuthEnterNameActivity" />
         <activity android:name=".data.sqlite.AndroidDatabaseManager" />
         <activity android:name=".activities.rest.PersInfoActivity" />

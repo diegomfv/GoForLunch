@@ -395,8 +395,8 @@ public class PersInfoActivity extends AppCompatActivity{
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setCancelable(true);
-        alertBuilder.setTitle("Permission necessary");
-        alertBuilder.setMessage(msg + " permission is necessary");
+        alertBuilder.setTitle(getResources().getString(R.string.permissionPermissionNecessary));
+        alertBuilder.setMessage(msg + " " + getResources().getString(R.string.permissionPermissionIsNecessary));
         alertBuilder.setPositiveButton(android.R.string.yes,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

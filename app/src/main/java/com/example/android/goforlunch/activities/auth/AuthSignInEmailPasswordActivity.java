@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.reactivex.observers.DisposableObserver;
 
 /**
@@ -57,6 +58,12 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth_signin_email_password);
+
+        ButterKnife.bind(this);
+
+        // TODO: 29/06/2018 Delete this!
+        inputEmail.setText("diego.fajardo@hotmail.com");
+        inputPassword.setText("123456");
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,16 +103,16 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
                             final String password = inputPassword.getText().toString();
 
                             if (TextUtils.isEmpty(email)) {
-                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.signInToastEnterEmail));
+                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastEnterEmail));
                                 return;
 
                             } else  if (TextUtils.isEmpty(password)) {
-                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this,  getResources().getString(R.string.signInToastEnterPassword));
+                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this,  getResources().getString(R.string.commonToastEnterPassword));
                                 return;
 
                             } else  if (password.length() < 6) {
                                 Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
-                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.signInToastPasswordTooShort));
+                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastPasswordTooShort));
                                 return;
 
                             }

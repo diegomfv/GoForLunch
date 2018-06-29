@@ -49,6 +49,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Diego Fajardo on 09/05/2018.
  */
@@ -58,16 +61,26 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
-    private TextInputEditText inputFirstName;
-    private TextInputEditText inputLastName;
-    private TextInputEditText inputEmail;
-    private TextInputEditText inputPassword;
+    @BindView(R.id.enter_first_name_id)
+    TextInputEditText inputFirstName;
 
-    private ImageView iv_userImage;
+    @BindView(R.id.enter_last_name_id)
+    TextInputEditText inputLastName;
 
-    private Button buttonStart;
+    @BindView(R.id.enter_email_id)
+    TextInputEditText inputEmail;
 
-    private ProgressBar progressBar;
+    @BindView(R.id.enter_password_id)
+    TextInputEditText inputPassword;
+
+    @BindView(R.id.enter_image_id)
+    ImageView iv_userImage;
+
+    @BindView(R.id.enter_start_button_id)
+    Button buttonStart;
+
+    @BindView(R.id.enter_progressbar)
+    ProgressBar progressBar;
 
     private String email;
     private String password;
@@ -93,21 +106,16 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth_enter_name);
 
+        ButterKnife.bind(this);
+
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
-        inputFirstName = (TextInputEditText) findViewById(R.id.enter_first_name_id);
-        inputLastName = (TextInputEditText) findViewById(R.id.enter_last_name_id);
-        inputEmail = (TextInputEditText) findViewById(R.id.enter_email_id);
-        inputPassword = (TextInputEditText) findViewById(R.id.enter_password_id);
-        iv_userImage = (ImageView) findViewById(R.id.enter_image_id);
-        buttonStart = (Button) findViewById(R.id.enter_start_button_id);
-        progressBar = (ProgressBar) findViewById(R.id.enter_progressbar);
-
         /** If we have sign in with google or facebook first time, the user needs to fill some
          * information. This code will fill the email and password fields for the user automatically.
-         * This fields cannot be modified*/
+         * This fields cannot be modified
+         * */
         if (user != null) {
 
             if (user.getDisplayName() == null) {
@@ -190,7 +198,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                     Log.d(TAG, "onClick: flag = false ->" + flag);
 
                     /** flag is false, therefore we came from Google of Facebook SignIn and
-                     * we only have to updateItem the user info
+                     * we only have to update the user info
                      * */
                     if (user != null) {
                         Log.d(TAG, "onClick: We came from Google or Facebook login");
@@ -221,7 +229,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                     Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                                 }
 
-                                                ToastHelper.toastShort(AuthEnterNameActivity.this, "Something went wrong. Please, sign up again");
+                                                ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
 
                                             } else {
                                                 Log.d(TAG, "onComplete: task was successful");
@@ -270,13 +278,13 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                      * case we have to check if the user exists.
                      * If it does, we doesn't allow the user to continue.
                      * If it doesn't we have to
-                     * create the user and updateItem the info.
+                     * create the user and update the info.
                      * */
 
                     if (userAlreadyExists(listOfEmails, inputEmail.getText().toString().toLowerCase().trim())) {
                         /** A user with this email already exists, so we don't let the user to continue with the process
                          * (we cannot create two users with the same email) */
-                        ToastHelper.toastShort(AuthEnterNameActivity.this, "A user with this email already exists.");
+                        ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameThisEmailAlreadyExists));
 
                     } else {
                         /** A user with this email DOES NOT exist, so we can continue with the process
@@ -304,9 +312,6 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                 if (e != null) {
                                                     Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                                 }
-
-                                                // TODO: 01/06/2018 Need to delete this
-                                                ToastHelper.toastShort(AuthEnterNameActivity.this, e.getMessage());
 
                                             } else {
 
@@ -336,7 +341,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                                             Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                                                         }
 
-                                                                        ToastHelper.toastShort(AuthEnterNameActivity.this, "Something went wrong. Please, sign up again");
+                                                                        ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
 
                                                                     } else {
                                                                         Log.d(TAG, "onComplete: task was successful");
@@ -389,29 +394,29 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
     }
 
-    /** This method is used to check that the minimun requisites for creating an user
+    /** This method is used to check that the minimum requisites for creating an user
      * are fulfilled
      * */
     public boolean checkMinimumRequisites () {
 
         if (inputFirstName.getText().toString().length() == 0) {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, "Please, enter your First name");
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameToastEnterFirstName));
             return false;
 
         } else if (inputLastName.getText().toString().length() == 0) {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, "Please, enter your Last name");
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameToastEnterLastName));
             return false;
 
         } else if (inputEmail.getText().toString().length() == 0) {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, "Please, enter email");
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonToastEnterEmail));
             return false;
 
         } else if (inputPassword.getText().toString().length() == 0) {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, "Please, enter password");
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonToastEnterPassword));
             return false;
 
         } else if (inputPassword.getText().toString().length() < 6) {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, "Sorry, password is too short");
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonToastPasswordTooShort));
             return false;
 
         } else {
@@ -419,7 +424,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         }
     }
 
-        /** Checks if a value is in a list. It is used to
+    /** Checks if a value is in a list. It is used to
      * check if the user email is already in the database.
      * */
     public boolean userAlreadyExists(List<String> listOfEmails, String inputString) {
@@ -470,8 +475,8 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                            final String permission) {
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setCancelable(true);
-        alertBuilder.setTitle("Permission necessary");
-        alertBuilder.setMessage(msg + " permission is necessary");
+        alertBuilder.setTitle(getResources().getString(R.string.permissionPermissionNecessary));
+        alertBuilder.setMessage(msg + getResources().getString(R.string.permissionPermissionIsNecessary));
         alertBuilder.setPositiveButton(android.R.string.yes,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -484,7 +489,12 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         alert.show();
     }
 
+    /******************
+    * CALLBACKS *******
+     * ***************/
 
+    /** External Storage permission
+     * */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
@@ -493,7 +503,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // do your stuff
                 } else {
-                    ToastHelper.toastShort(AuthEnterNameActivity.this, "GET_ACCOUNTS Denied");
+                    ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.getAccountsDenied));
                 }
                 break;
             default:
@@ -502,6 +512,8 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         }
     }
 
+    /** Getting the image
+     * */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -519,14 +531,12 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                ToastHelper.toastShort(AuthEnterNameActivity.this, "Something went wrong");
+                ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
             }
 
         } else {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, "You have not picked an image");
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameYouNotPickedImage));
         }
 
     }
-
-
 }

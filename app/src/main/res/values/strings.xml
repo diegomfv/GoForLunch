@@ -11,10 +11,19 @@
 
     <!-- GENERAL MESSAGES -->
     <string name="noInternet">Internet: NOT available</string>
+    <string name="noInternetLoggingOut">Sorry, logging out. No internet connection</string>
     <string name="storageNotGranted">Storage Access: NOT granted</string>
     <string name="storageGranted">Storage Access: GRANTED</string>
     <string name="notImplemented">Not implemented&#8230;</string>
     <string name="somethingWentWrong">Something went wrong&#8230; Please, try again</string>
+    <string name="permissionPermissionNecessary">Permission necessary</string>
+    <string name="permissionPermissionIsNecessary">permission is necessary</string>
+    <string name="getAccountsDenied">GET_ACCOUNTS Denied</string>
+
+    <!-- COMMON -->
+    <string name="commonToastEnterEmail">Please, enter email address</string>
+    <string name="commonToastEnterPassword">Please, enter password</string>
+    <string name="commonToastPasswordTooShort">The password is too short</string>
 
     <!-- MAIN ACTIVITY -->
     <string name="mainBottomMapView">Map View</string>
@@ -102,9 +111,6 @@
     <string name="signInButtonSignIn">SIGN IN</string>
     <string name="signInButtonResetPassword">RESET PASSWORD</string>
     <string name="signInButtonRegister">REGISTER</string>
-    <string name="signInToastEnterEmail">Enter email address</string>
-    <string name="signInToastEnterPassword">Enter password</string>
-    <string name="signInToastPasswordTooShort">The password is too short</string>
 
     <!-- AUTH ENTER NAME ACTIVITY -->
     <string name="enterNameFirstName">First Name</string>
@@ -112,6 +118,10 @@
     <string name="enterNameEmail">Email</string>
     <string name="enterNamePassword">Password</string>
     <string name="enterNameStart">START</string>
+    <string name="enterNameYouNotPickedImage">You have not picked an image</string>
+    <string name="enterNameThisEmailAlreadyExists">A user with this email already exists</string>
+    <string name="enterNameToastEnterFirstName">Please, enter First name</string>
+    <string name="enterNameToastEnterLastName">Please, enter Last name</string>
 
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupJoinGroup">JOIN GROUP</string>
@@ -139,7 +149,7 @@
     <string name="joinNo">No</string>
     <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
-    <string name="noInternetLoggingOut">Sorry, logging out. No internet connection</string>
+
 
 
 </resources>
