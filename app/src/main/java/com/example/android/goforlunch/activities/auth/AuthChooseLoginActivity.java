@@ -225,7 +225,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Password Button clicked!");
 
-                startActivity(new Intent(AuthChooseLoginActivity.this, AuthSignInPasswordActivity.class));
+                startActivity(new Intent(AuthChooseLoginActivity.this, AuthSignInEmailPasswordActivity.class));
                 finish();
 
             }

@@ -30,9 +30,9 @@ import io.reactivex.observers.DisposableObserver;
  * Created by Diego Fajardo on 07/05/2018.
  */
 
-public class AuthSignInPasswordActivity extends AppCompatActivity {
+public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
-    private static final String TAG = AuthSignInPasswordActivity.class.getSimpleName();
+    private static final String TAG = AuthSignInEmailPasswordActivity.class.getSimpleName();
 
     @BindView(R.id.signin_textinput_email_id)
     TextInputEditText inputEmail;
@@ -56,13 +56,13 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_auth_signin_password);
+        setContentView(R.layout.activity_auth_signin_email_password);
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(AuthSignInPasswordActivity.this, AuthEnterNameActivity.class);
+                Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, AuthEnterNameActivity.class);
                 intent.putExtra(RepoStrings.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
                 intent.putExtra(RepoStrings.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
 
@@ -76,7 +76,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
         buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.notImplemented));
+                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.notImplemented));
             }
         });
 
@@ -96,16 +96,16 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
                             final String password = inputPassword.getText().toString();
 
                             if (TextUtils.isEmpty(email)) {
-                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.signInToastEnterEmail));
+                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.signInToastEnterEmail));
                                 return;
 
                             } else  if (TextUtils.isEmpty(password)) {
-                                ToastHelper.toastShort(AuthSignInPasswordActivity.this,  getResources().getString(R.string.signInToastEnterPassword));
+                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this,  getResources().getString(R.string.signInToastEnterPassword));
                                 return;
 
                             } else  if (password.length() < 6) {
                                 Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
-                                ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.signInToastPasswordTooShort));
+                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.signInToastPasswordTooShort));
                                 return;
 
                             }
@@ -115,7 +115,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
                             //authenticate user
                             FirebaseAuth auth = FirebaseAuth.getInstance();
                             auth.signInWithEmailAndPassword(email,password)
-                                    .addOnCompleteListener(AuthSignInPasswordActivity.this, new OnCompleteListener<AuthResult>() {
+                                    .addOnCompleteListener(AuthSignInEmailPasswordActivity.this, new OnCompleteListener<AuthResult>() {
                                         @Override
                                         public void onComplete(@NonNull Task<AuthResult> task) {
                                             // If sign in fails, display a message to the user. If sign in succeeds
@@ -131,15 +131,15 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
 
                                                 if (e != null) {
                                                     Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, e.getMessage());
+                                                    ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, e.getMessage());
                                                 } else {
-                                                    ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
+                                                    ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
                                                 }
 
                                             } else {
-                                                Intent intent = new Intent(AuthSignInPasswordActivity.this, MainActivity.class);
+                                                Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
                                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                startActivity(new Intent(AuthSignInPasswordActivity.this, MainActivity.class));
+                                                startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
                                                 finish();
                                             }
                                         }
@@ -147,7 +147,7 @@ public class AuthSignInPasswordActivity extends AppCompatActivity {
 
                         } else {
                             Log.d(TAG, "onNext: internet connection = " + aBoolean);
-                            ToastHelper.toastShort(AuthSignInPasswordActivity.this, getResources().getString(R.string.noInternet));
+                            ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.noInternet));
 
                         }
                     }
