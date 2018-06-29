@@ -45,6 +45,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
+import butterknife.BindView;
 import io.reactivex.observers.DisposableObserver;
 
 /**
@@ -61,9 +62,14 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     //Google Sign In Request Code
     private static int RC_SIGN_IN = 101;
 
-    private SignInButton buttonGoogle;
-    private LoginButton buttonFacebook;
-    private Button buttonPassword;
+    @BindView(R.id.choose_google_sign_in_button)
+    SignInButton buttonGoogle;
+
+    @BindView(R.id.choose_facebook_sign_in_button)
+    LoginButton buttonFacebook;
+
+    @BindView(R.id.choose_sign_in_password_button_id)
+    Button buttonPassword;
 
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -85,6 +91,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
+        // TODO: 29/06/2018 Delete signOut()
         auth.signOut();
         user = auth.getCurrentUser();
 
@@ -121,10 +128,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         /** We set the content view after checking if the user is logged in
          * */
         setContentView(R.layout.activity_auth_choose_login);
-
-        buttonGoogle = findViewById(R.id.choose_google_sign_in_button);
-        buttonFacebook = findViewById(R.id.choose_facebook_sign_in_button);
-        buttonPassword = findViewById(R.id.choose_sign_in_password_button_id);
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -336,7 +339,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                                                 String userKey = dbRefUsers.push().getKey();
 
-                                                String [] names = getFirstNameAndLastName();
+                                                String [] names = Utils.getFirstNameAndLastName(user.getDisplayName());
 
                                                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
                                                 UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
@@ -459,7 +462,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                                                 String userKey = dbRefUsers.push().getKey();
 
-                                                String [] names = getFirstNameAndLastName();
+                                                String [] names = Utils.getFirstNameAndLastName(user.getDisplayName());
 
                                                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
                                                 UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
@@ -513,19 +516,4 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                     }
                 });
     }
-
-    /** Method used to get the first name and last name of the user
-     * */
-    private String[] getFirstNameAndLastName () {
-
-        String names = user.getDisplayName();
-
-        if (names != null) {
-            return names.split(" ");
-
-        } else {
-            return null;
-        }
-    }
-
 }

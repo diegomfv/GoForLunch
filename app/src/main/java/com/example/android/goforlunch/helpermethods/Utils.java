@@ -293,4 +293,17 @@ public class Utils {
         return true;
     }
 
+    /** Method used to get
+     * the first name and last name of the user
+     * */
+    public static String[] getFirstNameAndLastName (String names) {
+
+        if (names != null) {
+            return names.split(" ");
+
+        } else {
+            return null;
+        }
+    }
+
 }
