@@ -1,5 +1,6 @@
 package com.example.android.goforlunch;
 
+import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repository.RepoStrings;
 
@@ -546,6 +547,33 @@ public class UnitTests {
 
         System.out.println(Integer.parseInt(str));
 
+    }
+
+    @Test
+    public void modifyAString () {
+
+        String alfa = "alfa";
+
+        Anim.modifyString(alfa);
+
+        System.out.println(alfa);
+
 
     }
+
+    @Test
+    public void modifyANumber () {
+
+        int alfa = 2;
+
+        Anim.modifyInt(alfa);
+
+        System.out.println(alfa);
+
+
+    }
+
+
+
+
 }

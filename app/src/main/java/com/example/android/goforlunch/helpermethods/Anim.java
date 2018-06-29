@@ -53,7 +53,7 @@ public class Anim {
 
     }
 
-    public static void crossFadeLongtAnimation(View view) {
+    public static void crossFadeLongAnimation(View view) {
 
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.

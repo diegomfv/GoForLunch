@@ -46,6 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Objects;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.reactivex.observers.DisposableObserver;
 
 /**
@@ -126,9 +127,11 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
         }
 
-        /** We set the content view after checking if the user is logged in
+        /** We set the content view after checking if the user is logged in. If he/she is, then
+         * we start immediately MainActivity without showing this screen
          * */
         setContentView(R.layout.activity_auth_choose_login);
+        ButterKnife.bind(this);
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
