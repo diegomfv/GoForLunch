@@ -535,7 +535,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
             }
 
         } else {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameYouNotPickedImage));
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
         }
 
     }

@@ -29,7 +29,6 @@ import android.widget.ProgressBar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
@@ -49,7 +48,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -92,9 +90,6 @@ public class PersInfoActivity extends AppCompatActivity{
     @BindView(R.id.pers_enter_progressbar)
     ProgressBar progressBar;
 
-    private List<String> listOfGroups;
-    private String[] arrayOfGroups;
-
     //Variables
     private String userFirstName;
     private String userLastName;
@@ -109,11 +104,9 @@ public class PersInfoActivity extends AppCompatActivity{
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
-    private DatabaseReference dbRefGroups;
     private DatabaseReference dbRefUsers;
 
-    private AppDatabase localDatabase;
-
+    //Shared Preferences
     private SharedPreferences sharedPref;
 
     //Glide
@@ -128,7 +121,7 @@ public class PersInfoActivity extends AppCompatActivity{
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
-        localDatabase = AppDatabase.getInstance(PersInfoActivity.this);
+
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
 
         glide = Glide.with(PersInfoActivity.this);
@@ -170,7 +163,7 @@ public class PersInfoActivity extends AppCompatActivity{
                                             Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                         }
 
-                                        ToastHelper.toastShort(PersInfoActivity.this, "Something went wrong. Please, try again");
+                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
 
                                     } else {
                                         Log.d(TAG, "onComplete: task was successful");
@@ -182,7 +175,7 @@ public class PersInfoActivity extends AppCompatActivity{
                                         map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
                                         UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
 
-                                        ToastHelper.toastShort(PersInfoActivity.this, "Your information has been updated");
+                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
 
                                         startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
                                         finish();
@@ -318,35 +311,9 @@ public class PersInfoActivity extends AppCompatActivity{
         }
     };
 
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: called!");
-
-        if (resultCode == RESULT_OK) {
-            try {
-                final Uri imageUri = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-
-                glide.load(selectedImage).into(iv_userImage);
-
-                /** We store the Uri value. We will use it if the user saves changes
-                 * */
-                userProfilePictureUri = imageUri;
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                ToastHelper.toastShort(PersInfoActivity.this, "Something went wrong");
-            }
-
-        } else {
-            ToastHelper.toastShort(PersInfoActivity.this, "You have not picked an image");
-        }
-
-    }
+    /******************
+     * METHODS *******
+     * ***************/
 
     /** Method that checks if we have permission to read external storage
      * **/
@@ -403,6 +370,9 @@ public class PersInfoActivity extends AppCompatActivity{
         alert.show();
     }
 
+    /******************
+     * CALLBACKS *******
+     * ***************/
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -421,5 +391,33 @@ public class PersInfoActivity extends AppCompatActivity{
                 super.onRequestPermissionsResult(requestCode, permissions,
                         grantResults);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: called!");
+
+        if (resultCode == RESULT_OK) {
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+
+                glide.load(selectedImage).into(iv_userImage);
+
+                /** We store the Uri value. We will use it if the user saves changes
+                 * */
+                userProfilePictureUri = imageUri;
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
+            }
+
+        } else {
+            ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
+        }
+
     }
 }

@@ -26,6 +26,7 @@
     <string name="commonToastEnterEmail">Please, enter email address</string>
     <string name="commonToastEnterPassword">Please, enter password</string>
     <string name="commonToastPasswordTooShort">The password is too short</string>
+    <string name="commonYouNotPickedImage">You have not picked an image</string>
 
     <!-- MAIN ACTIVITY -->
     <string name="mainBottomMapView">Map View</string>
@@ -120,7 +121,6 @@
     <string name="enterNameEmail">Email</string>
     <string name="enterNamePassword">Password</string>
     <string name="enterNameStart">START</string>
-    <string name="enterNameYouNotPickedImage">You have not picked an image</string>
     <string name="enterNameThisEmailAlreadyExists">A user with this email already exists</string>
 
 
@@ -140,7 +140,8 @@
     <string name="restaurantWebsiteNotAvailable">Website not available</string>
 
     <!-- PERS INFO ACTIVITY -->
-    <string name="group">Group</string>
+    <string name="persInfoGroup">Group</string>
+    <string name="persInfoToastYourInfoUpdated">Your information has been updated</string>
 
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupsDoesNotExist">That group does not exist</string>
