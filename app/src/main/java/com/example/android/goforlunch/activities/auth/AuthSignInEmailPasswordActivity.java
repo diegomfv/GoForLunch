@@ -35,6 +35,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
     private static final String TAG = AuthSignInEmailPasswordActivity.class.getSimpleName();
 
+    //Widgets
     @BindView(R.id.signin_textinput_email_id)
     TextInputEditText inputEmail;
 

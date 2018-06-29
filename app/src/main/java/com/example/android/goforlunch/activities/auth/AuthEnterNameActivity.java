@@ -61,6 +61,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
+    //Widgets
     @BindView(R.id.enter_first_name_id)
     TextInputEditText inputFirstName;
 

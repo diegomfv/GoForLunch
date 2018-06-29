@@ -62,6 +62,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     //Google Sign In Request Code
     private static int RC_SIGN_IN = 101;
 
+    //Widgets
     @BindView(R.id.choose_google_sign_in_button)
     SignInButton buttonGoogle;
 

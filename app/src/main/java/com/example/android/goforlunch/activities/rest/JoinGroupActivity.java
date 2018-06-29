@@ -49,6 +49,7 @@ public class JoinGroupActivity extends AppCompatActivity {
 
     private static final String TAG = JoinGroupActivity.class.getSimpleName();
 
+    //Widgets
     @BindView(R.id.join_fab_id)
     FloatingActionButton fab;
 
@@ -206,16 +207,16 @@ public class JoinGroupActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "onStop: called!");
         super.onStop();
+        Log.d(TAG, "onStop: called!");
         dbRefUsers.removeEventListener(valueEventListenerGetUserGroupAndRestOfGroups);
         dbRefGroups.removeEventListener(valueEventListenerGetAllGroups);
     }
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
         super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
         if (null != disposable) {
             disposable.dispose();
         }

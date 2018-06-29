@@ -63,6 +63,7 @@ public class PersInfoActivity extends AppCompatActivity{
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
+    //Widgets
     @BindView(R.id.pers_enter_image_id)
     ImageView iv_userImage;
 
