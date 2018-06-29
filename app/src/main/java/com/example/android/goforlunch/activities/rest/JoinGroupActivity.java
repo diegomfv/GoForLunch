@@ -184,6 +184,7 @@ public class JoinGroupActivity extends AppCompatActivity {
                     dbRefUsers.addValueEventListener(valueEventListenerGetUserGroupAndRestOfGroups);
 
                 } else {
+                    UtilsFirebase.logOut(JoinGroupActivity.this);
 
                 }
             }

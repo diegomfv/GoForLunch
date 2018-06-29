@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.activities.rest.JoinGroupActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -316,6 +317,8 @@ public class UtilsFirebase {
         /** The user signs out
          *  and goes to AuthSignIn Activity
          *  */
+        ToastHelper.toastShort(context, context.getResources().getString(R.string.noInternetLoggingOut));
+
         FirebaseAuth.getInstance().signOut();
         LoginManager.getInstance().logOut();
 

@@ -221,7 +221,7 @@ public class PersInfoActivity extends AppCompatActivity{
             public void onNext(Boolean aBoolean) {
                 Log.d(TAG, "onNext: " + aBoolean);
 
-                if(aBoolean) {
+                if (aBoolean) {
 
                     /** We get the user information
                      * */
@@ -242,8 +242,7 @@ public class PersInfoActivity extends AppCompatActivity{
                     }
 
                 } else {
-
-                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.noInternetLoggingOut));
+                    UtilsFirebase.logOut(PersInfoActivity.this);
 
                 }
             }
@@ -384,7 +383,7 @@ public class PersInfoActivity extends AppCompatActivity{
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // do your stuff
                 } else {
-                    ToastHelper.toastShort(PersInfoActivity.this, "GET_ACCOUNTS Denied");
+                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.getAccountsDenied));
                 }
                 break;
             default:
