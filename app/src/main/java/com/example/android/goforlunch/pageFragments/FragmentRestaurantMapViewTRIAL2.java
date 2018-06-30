@@ -19,7 +19,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,15 +47,15 @@ import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.remote.newmodels.distancematrix.DistanceMatrix;
-import com.example.android.goforlunch.remote.newmodels.placebyid.PlaceById;
-import com.example.android.goforlunch.remote.newmodels.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.remote.newmodels.placebynearby.PlacesByNearby;
-import com.example.android.goforlunch.remote.newmodels.placetextsearch.PlacesByTextSearch;
-import com.example.android.goforlunch.remote.newmodels.placetextsearch.Result;
-import com.example.android.goforlunch.remote.newremotes.AllGoogleServices;
-import com.example.android.goforlunch.remote.newremotes.GoogleService;
-import com.example.android.goforlunch.remote.newremotes.GoogleServiceStreams;
+import com.example.android.goforlunch.remote.models.distancematrix.DistanceMatrix;
+import com.example.android.goforlunch.remote.models.placebyid.PlaceById;
+import com.example.android.goforlunch.remote.models.placebynearby.LatLngForRetrofit;
+import com.example.android.goforlunch.remote.models.placebynearby.PlacesByNearby;
+import com.example.android.goforlunch.remote.models.placetextsearch.PlacesByTextSearch;
+import com.example.android.goforlunch.remote.models.placetextsearch.Result;
+import com.example.android.goforlunch.remote.remote.AllGoogleServices;
+import com.example.android.goforlunch.remote.remote.GoogleService;
+import com.example.android.goforlunch.remote.remote.GoogleServiceStreams;
 import com.example.android.goforlunch.repository.RepoConstants;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.android.gms.common.ConnectionResult;
@@ -242,6 +241,12 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
          * */
         ButterKnife.bind(this, view);
 
+        /** Storage configuration
+         * */
+        storage = new Storage(getActivity());
+        mainPath = storage.getInternalFilesDirectory() + File.separator;
+        imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
+
         /** Configure databases*/
         this.configureDatabases(getActivity());
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
@@ -397,18 +402,12 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     private void disposeWhenDestroy () {
         Log.d(TAG, "disposeWhenDestroy: called!");
-        disposeIfNotNull(this.autocompleteTextViewDisposable);
-        disposeIfNotNull(this.textSearchDisposable);
-        disposeIfNotNull(this.placeIdDisposable);
-        disposeIfNotNull(this.distanceMatrixDisposable);
-        disposeIfNotNull(this.nearbyDisposable);
+        Utils.dispose(this.autocompleteTextViewDisposable);
+        Utils.dispose(this.textSearchDisposable);
+        Utils.dispose(this.placeIdDisposable);
+        Utils.dispose(this.distanceMatrixDisposable);
+        Utils.dispose(this.nearbyDisposable);
 
-    }
-
-    private void disposeIfNotNull (Disposable disposable) {
-        if (disposable != null) {
-            disposable.dispose();
-        }
     }
 
     /**************************
@@ -452,10 +451,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     ToastHelper.toastShort(getActivity(), "Write to Storage Permission GRANTED");
                     accessInternalStorageGranted = true;
-
-                    storage = new Storage(getActivity());
-                    mainPath = storage.getInternalFilesDirectory() + File.separator;
-                    imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
 
                     if (!storage.isDirectoryExists(imageDirPath)) {
                         Log.d(TAG, "configureInternalStorage: imageDir does not exist. Creating directory...");
@@ -832,8 +827,10 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     private void getInternalStorageAccessPermission () {
         Log.d(TAG, "getInternalStorageAccessPermission: called!");
 
-        if (ActivityCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this.getActivity().getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            accessInternalStorageGranted = true;
+
+        } else {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RepoConstants.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION);
@@ -844,19 +841,22 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
     /** Saves an image in the
      * internal storage using a background thread
      * */
-    public void saveImageInInternalStorage (final String filePath, Response<ResponseBody> responseBody) {
+    public void saveImageInInternalStorage (final String filePath, final Bitmap bm) {
         Log.d(TAG, "saveImageInInternalStorage: called!");
 
-        final Bitmap bitmap = BitmapFactory.decodeStream(responseBody.body().byteStream());
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run: Saving file...");
-                boolean isFileCreated = storage.createFile(imageDirPath + File.separator + filePath, bitmap);
-                Log.d(TAG, "run: file saved = " + isFileCreated);
+           if (filePath != null && bm != null) {
 
-            }
-        });
+               AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                   @Override
+                   public void run() {
+                       Log.d(TAG, "run: Saving file...");
+                       boolean isFileCreated = storage.createFile(imageDirPath + File.separator + filePath, bm);
+                       Log.d(TAG, "run: file saved = " + isFileCreated);
+
+                   }
+               });
+
+           }
     }
 
     /******************************************************
@@ -1249,106 +1249,111 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
         return new DisposableObserver<PlaceById>() {
             @Override
             public void onNext(final PlaceById placeById) {
-                Log.d(TAG, "onNext: " + placeById.toString());
+                Log.d(TAG, "onNext: PLACEBYID: " + placeById.toString());
 
-                final com.example.android.goforlunch.remote.newmodels.placebyid.Result result = placeById.getResult();
+                final com.example.android.goforlunch.remote.models.placebyid.Result result = placeById.getResult();
+                Log.d(TAG, "onNext: PLACEBYID: result = " + result);
 
-                String closingTime = checkClosingTime(result);
+                if (result != null) {
 
-                updateGeneralRestaurantInfoUsingPlaceId(
-                        Utils.checkToAvoidNull(result.getPlaceId()),
-                        Utils.checkToAvoidNull(result.getInternationalPhoneNumber()),
-                        Utils.checkToAvoidNull(result.getWebsite()),
-                        closingTime);
+                    String closingTime = checkClosingTime(result);
 
-
-                /* START DISTANCE MATRIX REQUEST */
-                Log.d(TAG, "onNext: starting distance matrix request: " + result.getPlaceId());
-                distanceMatrixDisposable =
-                        GoogleServiceStreams.streamFetchDistanceMatrix(
-                                "imperial",
-                                "place_id:" + result.getPlaceId(),
-                                myPosition,
-                                RepoStrings.Keys.MATRIX_DISTANCE_KEY)
-                                .subscribeWith(getDistanceMatrixDisposableObserver(result.getPlaceId()));
-
-                Log.d(TAG, "onNext: result.getPhotos() = " + result.getPhotos());
+                    updateGeneralRestaurantInfoUsingPlaceId(
+                            Utils.checkToAvoidNull(result.getPlaceId()),
+                            Utils.checkToAvoidNull(result.getInternationalPhoneNumber()),
+                            Utils.checkToAvoidNull(result.getWebsite()),
+                            closingTime);
 
 
-                /* START PHOTO REQUEST */
-                Log.d(TAG, "onNext: starting photo request: " + result.getPlaceId());
-                if (null != result.getPhotos()) {
-                    Log.d(TAG, "onNext: result.getPhotos != null");
+                    /* START DISTANCE MATRIX REQUEST */
+                    Log.d(TAG, "onNext: PLACEBYID: starting distance matrix request: " + result.getPlaceId());
+                    distanceMatrixDisposable =
+                            GoogleServiceStreams.streamFetchDistanceMatrix(
+                                    "imperial",
+                                    "place_id:" + result.getPlaceId(),
+                                    myPosition,
+                                    RepoStrings.Keys.MATRIX_DISTANCE_KEY)
+                                    .subscribeWith(getDistanceMatrixDisposableObserver(result.getPlaceId()));
 
-                    for (int i = 0; i < result.getPhotos().size(); i++) {
+                    Log.d(TAG, "onNext: PLACEBYID: result.getPhotos() = " + result.getPhotos());
 
-                        if (null != result.getPhotos().get(i)) {
-                            Log.d(TAG, "onNext: photo number " + i + " of placeId " + result.getPlaceId() + " is not null");
 
-                            GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
-                            Call<ResponseBody> callPhoto = googleService.fetchDataPhoto( "400",
-                                    result.getPhotos().get(0).getPhotoReference(),
-                                    RepoStrings.Keys.PHOTO_KEY);
-                            callPhoto.enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(final Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    Log.d(TAG, "onResponse: url = " + call.request().url().toString());
-                                    Log.d(TAG, "onResponse: response = " + response.toString());
+                    /* START PHOTO REQUEST */
+                    Log.d(TAG, "onNext: PLACEBYID: starting photo request: " + result.getPlaceId());
+                    if (null != result.getPhotos()) {
+                        Log.d(TAG, "onNext: PLACEBYID: result.getPhotos != null");
 
-                                    if (null != response.body()) {
-                                        Log.d(TAG, "onResponse: response.body() = " + response.body().toString());
-                                    } else  {
-                                        Log.d(TAG, "onResponse: response.body is null");
+                        for (int i = 0; i < result.getPhotos().size(); i++) {
+
+                            if (null != result.getPhotos().get(i)) {
+                                Log.d(TAG, "onNext: PLACEBYID: photo number " + i + " of placeId " + result.getPlaceId() + " is not null");
+
+                                GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
+                                Call<ResponseBody> callPhoto = googleService.fetchDataPhoto( "400",
+                                        result.getPhotos().get(0).getPhotoReference(),
+                                        RepoStrings.Keys.PHOTO_KEY);
+                                callPhoto.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(final Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        Log.d(TAG, "onResponse: PHOTO: url = " + call.request().url().toString());
+                                        Log.d(TAG, "onResponse: PHOTO: response = " + response.toString());
+
+                                        /* We save the image url in the database
+                                         * */
+                                        Log.d(TAG, "onResponse: PHOTO: saving url in database");
+                                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Log.d(TAG, "run: saving url...");
+                                                updateRestaurantPhotoUsingPlaceId(result.getPlaceId(), call.request().url().toString());
+
+                                            }
+                                        });
+
+                                        Log.d(TAG, "onResponse: PHOTO: accessInternalStorage = " + accessInternalStorageGranted);
+
+                                        /* We store the image in the internal storage
+                                         * */
+                                        if (accessInternalStorageGranted) {
+                                            Log.d(TAG, "onResponse: PHOTO saving image in storage");
+                                            if (response.body() != null) {
+                                                Log.d(TAG, "onResponse: PHOTO response.body() IS NOT NULL");
+                                                Bitmap bm = BitmapFactory.decodeStream(response.body().byteStream());
+
+                                                if (result.getPlaceId() != null && bm != null) {
+                                                    saveImageInInternalStorage(result.getPlaceId(), bm);
+                                                }
+
+                                            } else {
+                                                Log.d(TAG, "onResponse: response.body() is null");
+                                            }
+                                        }
                                     }
 
-                                    /* We save the image url in the database
-                                    * */
-                                    Log.d(TAG, "onResponse: saving url in database");
-                                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Log.d(TAG, "run: saving url...");
-                                            updateRestaurantPhotoUsingPlaceId(result.getPlaceId(), call.request().url().toString());
+                                    @Override
+                                    public void onFailure(final Call<ResponseBody> call, Throwable t) {
+                                        Log.d(TAG, "onFailure: url = " + call.request().url().toString());
 
-                                        }
-                                    });
+                                        /* We also save the url if onFailure is called
+                                         * */
+                                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Log.d(TAG, "run: saving url...");
+                                                localDatabase.restaurantDao()
+                                                        .updateRestaurantImageUrl(result.getPlaceId(), call.request().url().toString());
 
-                                    /* We store the image in the internal storage
-                                    * */
-                                    if (accessInternalStorageGranted) {
-                                        Log.d(TAG, "onResponse: saving image in storage");
-                                        if (null != response.body()) {
-                                            Log.d(TAG, "onResponse: response.body() IS NOT NULL");
-                                            saveImageInInternalStorage(result.getPlaceId(), response);
-                                        } else {
-                                            Log.d(TAG, "onResponse: response.body() is null");
-                                        }
+                                            }
+                                        });
+
                                     }
-                                }
-
-                                @Override
-                                public void onFailure(final Call<ResponseBody> call, Throwable t) {
-                                    Log.d(TAG, "onFailure: url = " + call.request().url().toString());
-
-                                    /* We also save the url if onFailure is called
-                                    * */
-                                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Log.d(TAG, "run: saving url...");
-                                            localDatabase.restaurantDao()
-                                                    .updateRestaurantImageUrl(result.getPlaceId(), call.request().url().toString());
-
-                                        }
-                                    });
-
-                                }
-                            });
+                                });
 
                             /* We only store one photoUrl in the database.
                             That's why we break the loop
                              * */
-                            break;
+                                break;
+                            }
                         }
                     }
                 }
@@ -1416,7 +1421,7 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                     listOfPlaceIds.add(restaurantEntryList.get(i).getPlaceId());
                 }
 
-                List<com.example.android.goforlunch.remote.newmodels.placebynearby.Result> listOfResults = placesByNearby.getResults();
+                List<com.example.android.goforlunch.remote.models.placebynearby.Result> listOfResults = placesByNearby.getResults();
 
                 for (int i = 0; i < listOfResults.size(); i++) {
 
@@ -1498,8 +1503,6 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                                     Utils.getTypeAsStringAndReturnTypeAsInt(arrayOfTypes[i], arrayOfTypes)));
 
         }
-
-
     }
 
     /********************

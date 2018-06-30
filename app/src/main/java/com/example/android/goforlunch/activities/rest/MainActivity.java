@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
@@ -51,14 +52,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
+// TODO: 29/06/2018 Check storage issue
 // TODO: 29/05/2018 Check if there is internet connection
 // TODO: 29/05/2018 Enable notifications at 4pm
 // TODO: 29/05/2018 Enable notifications if restaurant is chosen
 // TODO: 29/05/2018 Translations
-// TODO: 29/05/2018 General clean up
+// TODO: 29/05/2018 General cleanup
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
-// TODO: 26/06/2018 Bind views with butterKnife
-
 
 public class MainActivity extends AppCompatActivity{
 
@@ -86,17 +86,6 @@ public class MainActivity extends AppCompatActivity{
     private int jobIdNotifications;
 
     //------------------------------------------------
-
-    //ERROR that we are going to handle if the user doesn't have the correct version of the
-    //Google Play Services
-    private static final int ERROR_DIALOG_REQUEST = 9001;
-
-    private static final String FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    private static final float DEFAULT_ZOOM = 17f;
-    private static final float LATITUDE_BOUND = 0.007f;
-    private static final float LONGITUDE_BOUND = 0.015f;
 
     //Vars
     private boolean mLocationPermissionGranted = false; //used in permissions
@@ -133,6 +122,8 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         ButterKnife.bind(this);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -153,6 +144,23 @@ public class MainActivity extends AppCompatActivity{
 
         //showProgressBar(progressBar, container);
 
+    }
+
+    /** We use onResume() to check if the notifications
+     * are on or off
+     * */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: called!");
+        //checkNotifications(sharedPref);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: called!");
+
         /** We get the user information
          * */
         auth = FirebaseAuth.getInstance();
@@ -166,61 +174,17 @@ public class MainActivity extends AppCompatActivity{
             if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
                 fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                        for (DataSnapshot item :
-                                dataSnapshot.getChildren()) {
-
-                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
-
-                                userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
-                                userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
-                                userKey = item.getKey();
-                                userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
-                                userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
-                                Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
-
-                                updateNavDrawerTextViews();
-                                chooseGroupReminder();
-                                //checkAddRestaurantDailyJob(sharedPref);
-
-                                /** We show the MAP fragment
-                                 * */
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL2.newInstance())
-                                        .commit();
-
-                                /** We specify that that is the fragment we are showing
-                                 * */
-                                flagToSpecifyCurrentFragment = 1;
-
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-                    }
-                });
+                fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
             }
         }
     }
 
-    /** We use onResume() to check if the notifications
-     * are on or off
-     * */
     @Override
-    protected void onResume() {
-        super.onResume();
-        //checkNotifications(sharedPref);
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: called!");
+        fireDbRefUsers.removeEventListener(valueEventListenerGetUserInfo);
     }
-
 
     @Override
     public void onBackPressed() {
@@ -334,6 +298,51 @@ public class MainActivity extends AppCompatActivity{
     /*****************
      * LISTENERS *****
      * **************/
+
+    /** Listener to get all the user's information from the database
+     * */
+    private ValueEventListener valueEventListenerGetUserInfo = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+            for (DataSnapshot item :
+                    dataSnapshot.getChildren()) {
+
+                if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
+
+                    userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                    userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                    userKey = item.getKey();
+                    userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
+                    userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                    Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
+
+                    updateNavDrawerTextViews();
+                    chooseGroupReminder();
+                    //checkAddRestaurantDailyJob(sharedPref);
+
+                    /** We show the MAP fragment
+                     * */
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL2.newInstance())
+                            .commit();
+
+                    /** We specify that that is the fragment we are showing
+                     * */
+                    flagToSpecifyCurrentFragment = 1;
+
+                }
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+        }
+    };
 
     private BottomNavigationView.OnNavigationItemSelectedListener botNavListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {

@@ -97,6 +97,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
                     public void onNext(Boolean aBoolean) {
                         Log.d(TAG, "onNext: ");
 
+                        /* If there is internet connection
+                        * */
                         if (aBoolean) {
                             Log.d(TAG, "onNext: " + aBoolean);
 

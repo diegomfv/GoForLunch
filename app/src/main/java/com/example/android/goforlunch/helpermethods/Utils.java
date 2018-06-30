@@ -306,4 +306,24 @@ public class Utils {
         }
     }
 
+    /** We use this method to check if the strings that come from the intent are null or not
+     * */
+    public static String checkIfIsNull (String string) {
+
+        if (string == null) {
+            return "";
+        } else {
+            return string;
+        }
+    }
+    /** Method used to avoid memory leaks
+     * */
+    public static void dispose (Disposable disposable) {
+        if (disposable != null
+                && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+
+    }
+
 }

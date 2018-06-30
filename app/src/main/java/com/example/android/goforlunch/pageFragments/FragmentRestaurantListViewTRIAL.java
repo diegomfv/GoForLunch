@@ -440,16 +440,6 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
      * RX JAVA
      *****************************************************/
 
-    /** Method used to avoid memory leaks
-     * */
-    private void dispose (Disposable disposable) {
-        Log.d(TAG, "dispose: called!");
-        if (disposable != null
-                && !disposable.isDisposed()) {
-            disposable.dispose();
-        }
-    }
-
     //****************************************************
     // FETCH DATA, MODIFY DATA from LOCAL DATABASE
     //****************************************************

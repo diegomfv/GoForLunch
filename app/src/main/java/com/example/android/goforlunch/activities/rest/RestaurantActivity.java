@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -30,12 +29,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.helpermethods.UtilsRemote;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
@@ -108,7 +106,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
     //RecyclerView
     @BindView(R.id.restaurant_recycler_view_id)
-    RecyclerView mRecyclerView;
+    RecyclerView recyclerView;
 
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -160,9 +158,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
 
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(context);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        this.configureRecyclerView();
 
         /** We get the intent to display the information
          * */
@@ -226,7 +222,7 @@ public class RestaurantActivity extends AppCompatActivity {
                 /** We use the list in the adapter
                  * */
                 mAdapter = new RVAdapterRestaurant(context, listOfCoworkers);
-                mRecyclerView.setAdapter(mAdapter);
+                recyclerView.setAdapter(mAdapter);
 
             }
 
@@ -238,9 +234,21 @@ public class RestaurantActivity extends AppCompatActivity {
         });
 
 
-        Anim.crossFadeShortAnimation(mRecyclerView);
+        Anim.crossFadeShortAnimation(recyclerView);
 
 
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d(TAG, "onStart: called!");
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop: called!");
+        super.onStop();
     }
 
     /** disposeWhenDestroy() avoids memory leaks
@@ -253,8 +261,13 @@ public class RestaurantActivity extends AppCompatActivity {
     }
 
     private void disposeWhenDestroy () {
-        dispose(this.getImageFromInternalStorageDisposable);
+        Utils.dispose(this.getImageFromInternalStorageDisposable);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        NavUtils.navigateUpFromSameTask(this);
     }
 
     /*****************
@@ -308,14 +321,14 @@ public class RestaurantActivity extends AppCompatActivity {
                                  * */
                                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
                                 UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)),
-                                        checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)),
+                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
                                 );
 
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + " " + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) + "!");
@@ -415,36 +428,22 @@ public class RestaurantActivity extends AppCompatActivity {
                 }
             };
 
+    /******************************************************
+     * CONFIGURATION
+     *****************************************************/
 
-    @Override
-    public void onBackPressed() {
-        NavUtils.navigateUpFromSameTask(this);
-    }
 
-    /** We use this method to check if the strings that come from the intent are null or not
-     * */
-    private String checkIfIsNull (String string) {
+    private void configureRecyclerView () {
 
-        if (string == null) {
-            return "";
-        } else {
-            return string;
-        }
+        recyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(mLayoutManager);
+
     }
 
     /******************************************************
      * RX JAVA
      *****************************************************/
-
-    /** Method used to avoid memory leaks
-     * */
-    private void dispose (Disposable disposable) {
-        if (disposable != null
-                && !disposable.isDisposed()) {
-            disposable.dispose();
-        }
-    }
-
 
     /** Method used to set the Fab button state
      * */

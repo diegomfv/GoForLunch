@@ -1,14 +1,8 @@
 package com.example.android.goforlunch.helpermethods;
 
-import android.util.Log;
-
-import com.example.android.goforlunch.remote.newmodels.placebyid.Result;
+import com.example.android.goforlunch.remote.models.placebyid.Result;
 import com.example.android.goforlunch.repository.RepoStrings;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.Calendar;
 
 /**
