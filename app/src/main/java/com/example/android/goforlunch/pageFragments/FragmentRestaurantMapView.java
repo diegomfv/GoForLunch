@@ -354,9 +354,8 @@ public class FragmentRestaurantMapView extends Fragment {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: refresh button clicked!");
                 ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Deleting db and starting request process");
+                deleteAllFilesInStorage();
                 deleteAllRestaurantsAndStartRequestProcess();
-                // TODO: 30/06/2018 Delete all Storage!
-                //deleteAllFilesInStorage();
 
             }
         });
@@ -382,8 +381,6 @@ public class FragmentRestaurantMapView extends Fragment {
                         }
                     }
                 });
-
-                Utils.printFiles(imageDirPath);
 
                 startActivity(new Intent(getActivity(), AndroidDatabaseManager.class));
                 
@@ -861,19 +858,44 @@ public class FragmentRestaurantMapView extends Fragment {
            }
     }
 
+    /** Method that deletes all files in the internal storage: "imageDir" path */
+    public void deleteAllFilesInStorage () {
+        Log.d(TAG, "deleteAllFilesInStorage: called!");
+
+        if (accessInternalStorageGranted) {
+            Log.d(TAG, "deleteAllFilesInStorage: access to storage GRANTED!");
+
+            if (storage.isDirectoryExists(imageDirPath)) {
+                Utils.printFiles(imageDirPath);
+
+                /* We delete the directory (which will delete all the files in it)
+                */
+                storage.deleteDirectory(imageDirPath);
+                Utils.printFiles(imageDirPath);
+
+                /* We create it again
+                * */
+                storage.createDirectory(imageDirPath);
+                Utils.printFiles(imageDirPath);
+
+            } else {
+
+                /* Since the directory does not exist yet, we create it
+                * */
+                storage.createDirectory(imageDirPath);
+                Utils.printFiles(imageDirPath);
+
+            }
+
+        } else {
+            Log.d(TAG, "deleteAllFilesInStorage: access to internal storage NOT GRANTED!");
+
+        }
+    }
+
     /******************************************************
      * RX JAVA
      *****************************************************/
-
-    /** Method used to avoid memory leaks
-     * */
-    private void dispose (Disposable disposable) {
-        Log.d(TAG, "dispose: called!");
-        if (disposable != null
-                && !disposable.isDisposed()) {
-            disposable.dispose();
-        }
-    }
 
     //****************************************************
     // FETCH DATA, MODIFY DATA from LOCAL DATABASE

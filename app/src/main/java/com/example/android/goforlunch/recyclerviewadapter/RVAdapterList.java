@@ -272,7 +272,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
          * and the image is loaded using glide in the main thread
          * */
         private void getAndDisplayImageFromInternalStorage(String filePath, final ImageView imageView) {
-            Log.d(TAG, "loadImageFromInternalStorage: called!");
+            Log.d(TAG, "getAndDisplayImageFromInternalStorage: called!");
 
             getImageFromInternalStorageDisposable = getObservableImageFromInternalStorage(imageDirPath + File.separator + filePath)
                     .subscribeOn(Schedulers.io())
@@ -280,7 +280,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
                     .subscribeWith(new DisposableObserver<byte[]>() {
                         @Override
                         public void onNext(byte[] bytes) {
-                            Log.d(TAG, "onNext: ");
+                            Log.d(TAG, "onNext: loading image from storage!");
 
                             Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
                             glide.load(bm).into(imageView);
