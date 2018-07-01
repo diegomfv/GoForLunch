@@ -18,7 +18,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
@@ -32,8 +31,8 @@ import com.example.android.goforlunch.job.AlertJobCreator;
 import com.example.android.goforlunch.job.NotificationDailyJob;
 import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkers;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantListViewTRIAL;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapViewTRIAL2;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
+import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -326,7 +325,7 @@ public class MainActivity extends AppCompatActivity{
                      * */
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.main_fragment_container_id, FragmentRestaurantMapViewTRIAL2.newInstance())
+                            .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
                             .commit();
 
                     /** We specify that that is the fragment we are showing
@@ -360,7 +359,7 @@ public class MainActivity extends AppCompatActivity{
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentRestaurantMapViewTRIAL2.newInstance();
+                                selectedFragment = FragmentRestaurantMapView.newInstance();
                                 flagToSpecifyCurrentFragment = 1;
 
                             }
@@ -372,7 +371,7 @@ public class MainActivity extends AppCompatActivity{
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentRestaurantListViewTRIAL.newInstance();
+                                selectedFragment = FragmentRestaurantListView.newInstance();
                                 flagToSpecifyCurrentFragment = 2;
 
                             }

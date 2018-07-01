@@ -69,12 +69,12 @@ import io.reactivex.schedulers.Schedulers;
 
 /** Fragment that displays the list of restaurants in a recyclerView
  * */
-public class FragmentRestaurantListViewTRIAL extends Fragment {
+public class FragmentRestaurantListView extends Fragment {
 
     // TODO: 28/05/2018 Some names appear over the others
     // TODO: 29/05/2018 Modify the number of users that go to a place!
 
-    private static final String TAG = FragmentRestaurantListViewTRIAL.class.getSimpleName();
+    private static final String TAG = FragmentRestaurantListView.class.getSimpleName();
 
     //Array of restaurant types (got from Resources, strings)
     private String[] arrayOfTypes;
@@ -140,8 +140,8 @@ public class FragmentRestaurantListViewTRIAL extends Fragment {
 
     /** Method for instantiating the fragment
      * */
-    public static FragmentRestaurantListViewTRIAL newInstance() {
-        FragmentRestaurantListViewTRIAL fragment = new FragmentRestaurantListViewTRIAL();
+    public static FragmentRestaurantListView newInstance() {
+        FragmentRestaurantListView fragment = new FragmentRestaurantListView();
         return fragment;
     }
 

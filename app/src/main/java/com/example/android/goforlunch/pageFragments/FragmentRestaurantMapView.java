@@ -116,11 +116,9 @@ import static com.example.android.goforlunch.repository.RepoStrings.Keys.NEARBY_
 
 /** Fragment that displays the Google Map
  * */
-public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
+public class FragmentRestaurantMapView extends Fragment {
 
-    // TODO: 25/06/2018 Solve issue with storage... Probably response.body() is always null
-
-    private static final String TAG = FragmentRestaurantMapViewTRIAL2.class.getSimpleName();
+    private static final String TAG = FragmentRestaurantMapView.class.getSimpleName();
 
     //ERROR that we are going to handle if the user doesn't have the correct version of the
     //Google Play Services
@@ -222,9 +220,9 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
 
     /** Method for instantiating the fragment
      * */
-    public static FragmentRestaurantMapViewTRIAL2 newInstance() {
+    public static FragmentRestaurantMapView newInstance() {
         Log.d(TAG, "newInstance: called!");
-        FragmentRestaurantMapViewTRIAL2 fragment = new FragmentRestaurantMapViewTRIAL2();
+        FragmentRestaurantMapView fragment = new FragmentRestaurantMapView();
         return fragment;
     }
 
@@ -357,6 +355,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                 Log.d(TAG, "onClick: refresh button clicked!");
                 ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Deleting db and starting request process");
                 deleteAllRestaurantsAndStartRequestProcess();
+                // TODO: 30/06/2018 Delete all Storage!
+                //deleteAllFilesInStorage();
 
             }
         });
@@ -382,6 +382,8 @@ public class FragmentRestaurantMapViewTRIAL2 extends Fragment {
                         }
                     }
                 });
+
+                Utils.printFiles(imageDirPath);
 
                 startActivity(new Intent(getActivity(), AndroidDatabaseManager.class));
                 
