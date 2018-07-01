@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <FrameLayout
@@ -12,30 +11,46 @@
         android:background="@color/colorPrimaryDark">
     </FrameLayout>
 
-    <ImageView
-        android:id="@+id/signin_image_id"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp"
-        android:src="@drawable/ic_lunch"
-        android:layout_gravity="center_horizontal">
-    </ImageView>
-
     <ProgressBar
         android:id="@+id/signin_progressbar_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_marginBottom="10dp"/>
+
+    <ImageView
+        android:id="@+id/signin_image_id"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/go_for_lunch_icon"
+        android:layout_gravity="center_horizontal">
+    </ImageView>
+
+    <Button
+        android:id="@+id/choose_sign_in_password_button_id"
+        style="@style/GeneralButton"
+        android:padding="10dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="40dp"
+        android:text="Sign In with Email" />
+
+    <FrameLayout
+        android:id="@+id/choose_separationLine"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@drawable/bottom_border"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"/>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/choose_google_sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="40dp"/>
 
     <!-- There is also a facebook login button in "facebook for developers" -->
 
@@ -44,18 +59,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp" />
-
-    <Button
-        android:id="@+id/choose_sign_in_password_button_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:padding="10dp"
-        android:background="@drawable/button_border"
-        android:textColor="@color/colorAccentDark"
-        android:text="Sign in (Password)"/>
+        android:layout_marginTop="30dp" />
 
 </LinearLayout>
