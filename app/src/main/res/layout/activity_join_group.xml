@@ -15,9 +15,9 @@
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/join_fab_id"
         style="@style/fabBackStyle"
-        android:backgroundTint="@android:color/white"
         app:rippleColor="@color/colorAccentLight"
-        app:fabSize="mini" />
+        app:fabSize="mini"
+        app:borderWidth="0.1dp"/>
 
     <android.support.design.widget.TextInputLayout
        style="@style/textInputLayoutStyle"

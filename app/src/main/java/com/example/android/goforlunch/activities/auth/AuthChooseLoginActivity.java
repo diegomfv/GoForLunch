@@ -66,7 +66,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private static int RC_GOOGLE_SIGN_IN = 101;
 
     //Widgets
-    @BindView(R.id.main_progress_bar_id)
+    @BindView(R.id.choose_progressbar_id)
     ProgressBar progressBar;
 
     @BindView(R.id.choose_sign_in_password_button_id)
