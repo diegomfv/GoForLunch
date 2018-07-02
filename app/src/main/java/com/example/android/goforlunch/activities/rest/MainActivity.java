@@ -51,6 +51,7 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.observers.DisposableObserver;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/06/2018 Check storage issue
@@ -76,12 +77,15 @@ public class MainActivity extends AppCompatActivity{
     @BindView(R.id.main_bottom_navigation_id)
     BottomNavigationView bottomNavigationView;
 
-    private ProgressBar progressBar;
+    @BindView(R.id.main_progress_bar_id)
+    ProgressBar progressBar;
+
+    @BindView(R.id.main_fragment_container_id)
+    FrameLayout container;
+
     private TextView navUserName;
     private TextView navUserEmail;
     private ImageView navUserProfilePicture;
-
-    private FrameLayout container;
 
     //Background jobs
     private int jobIdAddRestaurant;
@@ -89,20 +93,10 @@ public class MainActivity extends AppCompatActivity{
 
     //------------------------------------------------
 
-    //Vars
-    private boolean mLocationPermissionGranted = false; //used in permissions
-    private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
-
     //Flag to know which fragment we are in avoiding relaunching it
     private int flagToSpecifyCurrentFragment;
 
-    //Counter used to limit the times we try to start requests in case database is empty.
-    private int startRequestsCounter = 0;
-
-    //Retrofit usage
-    private LatLngForRetrofit myPosition;
-
-     //Shared Preferences
+    //Shared Preferences
     private SharedPreferences sharedPref;
 
     //Firebase
@@ -124,8 +118,6 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
         ButterKnife.bind(this);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -141,10 +133,17 @@ public class MainActivity extends AppCompatActivity{
         navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
         navUserProfilePicture = (ImageView) headerView.findViewById(R.id.nav_drawer_image_id);
 
-        container = (FrameLayout) findViewById(R.id.main_fragment_container_id);
-        progressBar = (ProgressBar) findViewById(R.id.main_progress_bar_id);
+        showProgressBar(progressBar, container);
 
-        //showProgressBar(progressBar, container);
+        /* When we start main Activity, we always load map fragment
+        * */
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
+                .commit();
+        flagToSpecifyCurrentFragment = 1;
+
+        hideProgressBar(progressBar,container);
 
     }
 
@@ -156,6 +155,7 @@ public class MainActivity extends AppCompatActivity{
         super.onResume();
         Log.d(TAG, "onResume: called!");
         //checkNotifications(sharedPref);
+        // TODO: 02/07/2018 !!!!
     }
 
     @Override
@@ -163,22 +163,49 @@ public class MainActivity extends AppCompatActivity{
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        /** We get the user information
-         * */
-        auth = FirebaseAuth.getInstance();
-        currentUser = auth.getCurrentUser();
-        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+            @Override
+            public void onNext(Boolean aBoolean) {
+                Log.d(TAG, "onNext: ");
 
-        if (currentUser != null) {
+                if (aBoolean) {
 
-            userEmail = currentUser.getEmail();
+                    /** We get the user information
+                     * */
+                    auth = FirebaseAuth.getInstance();
+                    currentUser = auth.getCurrentUser();
+                    Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
-            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+                    if (currentUser != null) {
 
-                fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                        userEmail = currentUser.getEmail();
+
+                        if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                            fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                            fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                        }
+                    }
+
+
+                } else {
+
+                    UtilsFirebase.logOut(MainActivity.this);
+
+                }
             }
-        }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+
+            }
+        });
     }
 
     @Override
@@ -331,17 +358,6 @@ public class MainActivity extends AppCompatActivity{
                     chooseGroupReminder();
                     //checkAddRestaurantDailyJob(sharedPref);
 
-                    /** We show the MAP fragment
-                     * */
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
-                            .commit();
-
-                    /** We specify that that is the fragment we are showing
-                     * */
-                    flagToSpecifyCurrentFragment = 1;
-
                 }
             }
         }
@@ -358,6 +374,8 @@ public class MainActivity extends AppCompatActivity{
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Log.d(TAG, "onNavigationItemSelected: called!");
+
+                    showProgressBar(progressBar, container);
 
                     Fragment selectedFragment = null;
 
@@ -403,6 +421,8 @@ public class MainActivity extends AppCompatActivity{
                             .beginTransaction()
                             .replace(R.id.main_fragment_container_id, selectedFragment)
                             .commit();
+
+                    hideProgressBar(progressBar, container);
 
                     //true means that we want to select the clicked item
                     //if we choose false, the fragment will be shown but the item

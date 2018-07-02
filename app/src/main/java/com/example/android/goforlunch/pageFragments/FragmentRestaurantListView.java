@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.activities.rest.PersInfoActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -38,6 +39,7 @@ import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
+import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.repository.RepoStrings;
@@ -230,26 +232,34 @@ public class FragmentRestaurantListView extends Fragment {
             public void onNext(Boolean aBoolean) {
                 Log.d(TAG, "onNext: ");
 
-                /** We get the user information
-                 * */
-                currentUser = auth.getCurrentUser();
-                Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+                if (aBoolean) {
 
-                if (currentUser != null) {
+                    /** We get the user information
+                     * */
+                    currentUser = auth.getCurrentUser();
+                    Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
-                    userEmail = currentUser.getEmail();
+                    if (currentUser != null) {
 
-                    if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+                        userEmail = currentUser.getEmail();
 
-                        dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                        dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                        if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                            dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                            dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                        }
+
                     }
 
+                    dbRefUsersGetListOfRestaurantsByCoworkers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                    dbRefUsersGetListOfRestaurantsByCoworkers.addValueEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
+
+                } else {
+
+                    if (getActivity() != null) {
+                        UtilsFirebase.logOut(getActivity());
+                    }
                 }
-
-                dbRefUsersGetListOfRestaurantsByCoworkers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                dbRefUsersGetListOfRestaurantsByCoworkers.addValueEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
-
             }
 
             @Override

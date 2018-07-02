@@ -229,6 +229,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                             handleFacebookAccessToken(loginResult.getAccessToken());
 
                         } else {
+                            // TODO: 02/07/2018 Put sth!
 
                         }
 
