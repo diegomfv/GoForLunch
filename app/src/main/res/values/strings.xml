@@ -128,8 +128,8 @@
     <string name="enterNameThisEmailAlreadyExists">A user with this email already exists</string>
 
     <!-- JOIN GROUP ACTIVITY -->
-    <string name="joinGroupJoinGroup">JOIN GROUP</string>
-    <string name="joinGroupCreateNewGroup">CREATE NEW GROUP</string>
+    <string name="joinGroupJoinGroup">Join Group</string>
+    <string name="joinGroupCreateNewGroup">Create New Group</string>
 
     <!-- RESTAURANT ACTIVITY -->
     <string name="restaurantBottomCall">CALL</string>

@@ -40,33 +40,15 @@
     <Button
         android:id="@+id/join_button_join_group_id"
         style="@style/generalButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="10dp"
-        android:background="@android:color/white"
-        android:textColor="@color/colorAccentDark"
-        android:text="@string/joinGroupJoinGroup"
-        android:layout_marginTop="20dp"/>
-
-    android:id="@+id/signin_button_id"
-    style="@style/generalButtonStyle"
-    android:padding="10dp"
-    android:layout_gravity="center_horizontal"
-    android:layout_marginTop="10dp"
-    android:text="@string/signInButtonSignIn"
-
+        android:layout_marginTop="20dp"
+        android:text="@string/joinGroupJoinGroup" />
 
     <Button
         android:id="@+id/join_button_create_group_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="10dp"
-        android:background="@android:color/white"
-        android:textColor="@color/colorAccentDark"
+        style="@style/generalButtonStyle"
+        android:layout_marginTop="20dp"
         android:text="@string/joinGroupCreateNewGroup"
-        android:layout_marginTop="20dp"/>
+        />
 
 
 
