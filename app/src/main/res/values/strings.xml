@@ -28,6 +28,12 @@
     <string name="commonToastPasswordTooShort">The password is too short</string>
     <string name="commonYouNotPickedImage">You have not picked an image</string>
 
+    <string name="commonFirstName">First Name</string>
+    <string name="commonLastName">Last Name</string>
+    <string name="commonEmail">Email</string>
+    <string name="commonPassword">Password</string>
+    <string name="commonGroup">Group</string>
+
     <!-- MAIN ACTIVITY -->
     <string name="mainBottomMapView">Map View</string>
     <string name="mainBottomListView">List View</string>
@@ -124,10 +130,6 @@
     <string name="signInButtonSignUp">Sign Up</string>
 
     <!-- AUTH ENTER NAME ACTIVITY -->
-    <string name="enterNameFirstName">First Name</string>
-    <string name="enterNameLastName">Last Name</string>
-    <string name="enterNameEmail">Email</string>
-    <string name="enterNamePassword">Password</string>
     <string name="enterNameStart">Start</string>
     <string name="enterNameThisEmailAlreadyExists">A user with this email already exists</string>
 
@@ -147,8 +149,13 @@
     <string name="restaurantWebsiteNotAvailable">Website not available</string>
 
     <!-- PERS INFO ACTIVITY -->
-    <string name="persInfoGroup">Group</string>
+    <string name="persSaveChanges">Save Changes</string>
+    <string name="persChangePassword">Change password</string>
     <string name="persInfoToastYourInfoUpdated">Your information has been updated</string>
+    <string name="persInfoDialogAreYouChangeData">Are you sure you want to modify your profile info?</string>
+    <string name="persInfoDialogChangingData">Modifying profile info</string>
+    <string name="persInfoDialogChangeDataYes">YES, I am sure</string>
+    <string name="persInfoDialogChangeDataNo">No</string>
 
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupsDoesNotExist">That group does not exist</string>

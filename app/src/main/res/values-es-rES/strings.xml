@@ -63,10 +63,10 @@
     <string name="signInButtonRegister">REGISTRARSE</string>
 
     <!-- AUTH ENTER NAME ACTIVITY -->
-    <string name="enterNameFirstName">Nombre</string>
-    <string name="enterNameLastName">Apellidos</string>
-    <string name="enterNameEmail">Email</string>
-    <string name="enterNamePassword">Password</string>
+    <string name="commonFirstName">Nombre</string>
+    <string name="commonLastName">Apellidos</string>
+    <string name="commonEmail">Email</string>
+    <string name="commonPassword">Password</string>
     <string name="enterNameStart">EMPIEZA!</string>
 
     <!-- JOIN GROUP ACTIVITY -->

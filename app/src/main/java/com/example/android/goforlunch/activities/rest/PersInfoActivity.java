@@ -15,8 +15,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +27,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -64,6 +67,12 @@ public class PersInfoActivity extends AppCompatActivity{
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
     //Widgets
+    @BindView(R.id.pers_enter_fab_id)
+    FloatingActionButton fab;
+
+    @BindView(R.id.pers_enter_progressbar)
+    ProgressBar progressBar;
+
     @BindView(R.id.pers_enter_image_id)
     ImageView iv_userImage;
 
@@ -85,11 +94,8 @@ public class PersInfoActivity extends AppCompatActivity{
     @BindView(R.id.pers_enter_save_changes_button_id)
     Button buttonSaveChanges;
 
-    @BindView(R.id.pers_enter_change_password_id)
-    Button buttonChangePassword;
-
-    @BindView(R.id.pers_enter_progressbar)
-    ProgressBar progressBar;
+    @BindView(R.id.pers_enter_tv_change_password_id)
+    TextView tvChangePassword;
 
     //Variables
     private String userFirstName;
@@ -129,6 +135,15 @@ public class PersInfoActivity extends AppCompatActivity{
 
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: fab clicked!");
+
+                NavUtils.navigateUpFromSameTask(PersInfoActivity.this);
+            }
+        });
+
         buttonSaveChanges.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -142,48 +157,7 @@ public class PersInfoActivity extends AppCompatActivity{
 
                 } else {
 
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(
-                                    Utils.capitalize(inputFirstName.getText().toString().trim())
-                                            + " "
-                                            + Utils.capitalize(inputLastName.getText().toString().trim()))
-                            .setPhotoUri(userProfilePictureUri)
-                            .build();
-
-                    currentUser.updateProfile(profileUpdates)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (!task.isSuccessful()) {
-                                        Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
-
-                                        //We get the exception and display why it was not successful
-                                        FirebaseAuthException e = (FirebaseAuthException) task.getException();
-
-                                        if (e != null) {
-                                            Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                        }
-
-                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
-
-                                    } else {
-                                        Log.d(TAG, "onComplete: task was successful");
-
-                                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-
-                                        Map<String, Object> map = new HashMap<>();
-                                        map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
-                                        map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
-                                        UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
-
-                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
-
-                                        startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
-                                        finish();
-
-                                    }
-                                }
-                            });
+                    alertDialogChangeData();
                 }
             }
         });
@@ -203,7 +177,7 @@ public class PersInfoActivity extends AppCompatActivity{
             }
         });
 
-        buttonChangePassword.setOnClickListener(new View.OnClickListener() {
+        tvChangePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Clicked! " + view.toString());
@@ -328,7 +302,7 @@ public class PersInfoActivity extends AppCompatActivity{
                 if (ActivityCompat.shouldShowRequestPermissionRationale(
                         (Activity) context,
                         Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    showDialog("External storage", context,
+                    showRequestPermissionsDialog("External storage", context,
                             Manifest.permission.READ_EXTERNAL_STORAGE);
 
                 } else {
@@ -346,28 +320,6 @@ public class PersInfoActivity extends AppCompatActivity{
         } else {
             return true;
         }
-    }
-
-    /** Method used to display a dialog
-     * */
-    public void showDialog(final String msg, final Context context,
-                           final String permission) {
-        Log.d(TAG, "showDialog: called!");
-
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
-        alertBuilder.setCancelable(true);
-        alertBuilder.setTitle(getResources().getString(R.string.permissionPermissionNecessary));
-        alertBuilder.setMessage(msg + " " + getResources().getString(R.string.permissionPermissionIsNecessary));
-        alertBuilder.setPositiveButton(android.R.string.yes,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions((Activity) context,
-                                new String[] { permission },
-                                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-                    }
-                });
-        AlertDialog alert = alertBuilder.create();
-        alert.show();
     }
 
     /******************
@@ -420,4 +372,138 @@ public class PersInfoActivity extends AppCompatActivity{
         }
 
     }
+
+    /** Method that shows the progress bar and disables a/some buttons
+     * */
+    private void showProgressBarAndDisableButtons (ProgressBar progressBar, Button button, TextView textView){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.VISIBLE);
+
+        /* We block the interaction with buttons
+         * */
+        button.setClickable(false);
+        textView.setClickable(false);
+
+    }
+
+    /** Method that hides the progress bar and enables a/some buttons
+     * */
+    private void hideProgressBarAndEnableButtons (ProgressBar progressBar, Button button, TextView textView){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.INVISIBLE);
+
+        /* We block the interaction with buttons
+         * */
+        button.setClickable(true);
+        textView.setClickable(false);
+
+    }
+
+    /******************
+     * DIALOGS *******
+     * ***************/
+
+    /** Method that creates an alert dialog that
+     * can be used save the personal info changes in the data
+     * */
+    private void alertDialogChangeData() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(PersInfoActivity.this);
+        builder.setMessage(getResources().getString(R.string.persInfoDialogAreYouChangeData))
+                .setTitle(getResources().getString(R.string.persInfoDialogChangingData))
+                .setPositiveButton(getResources().getString(R.string.persInfoDialogChangeDataYes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "onClick: yes button clicked!");
+
+                        showProgressBarAndDisableButtons(progressBar, buttonSaveChanges, tvChangePassword);
+
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(
+                                        Utils.capitalize(inputFirstName.getText().toString().trim())
+                                                + " "
+                                                + Utils.capitalize(inputLastName.getText().toString().trim()))
+                                .setPhotoUri(userProfilePictureUri)
+                                .build();
+
+                        currentUser.updateProfile(profileUpdates)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (!task.isSuccessful()) {
+                                            Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                            //We get the exception and display why it was not successful
+                                            FirebaseAuthException e = (FirebaseAuthException) task.getException();
+
+                                            if (e != null) {
+                                                Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                            }
+
+                                            ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                                            hideProgressBarAndEnableButtons(progressBar, buttonSaveChanges, tvChangePassword);
+
+
+                                        } else {
+                                            Log.d(TAG, "onComplete: task was successful");
+
+                                            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+
+                                            Map<String, Object> map = new HashMap<>();
+                                            map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
+                                            map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
+                                            UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
+
+                                            ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
+
+                                            startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                                            finish();
+
+                                        }
+                                    }
+                                });
+
+
+                    }
+                })
+                .setNegativeButton(getResources().getString(R.string.persInfoDialogChangeDataNo), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "onClick: no button clicked!");
+                        //Nothing happens
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /** Method used to display a dialog for permissions request
+     * */
+    public void showRequestPermissionsDialog(final String msg, final Context context,
+                                             final String permission) {
+        Log.d(TAG, "showRequestPermissionsDialog: called!");
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+        alertBuilder.setCancelable(true);
+        alertBuilder.setTitle(getResources().getString(R.string.permissionPermissionNecessary));
+        alertBuilder.setMessage(msg + " " + getResources().getString(R.string.permissionPermissionIsNecessary));
+        alertBuilder.setPositiveButton(android.R.string.yes,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions((Activity) context,
+                                new String[] { permission },
+                                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                    }
+                });
+        AlertDialog alert = alertBuilder.create();
+        alert.show();
+    }
+
+
 }

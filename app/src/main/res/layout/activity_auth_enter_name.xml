@@ -14,7 +14,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="90dp">
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/enter_fab_id"
@@ -45,7 +45,7 @@
         android:id="@+id/enter_image_id"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:layout_marginBottom="10dp"
         app:civ_border_width="0.5dp"
         app:civ_border_color="#FF000000"
@@ -63,7 +63,7 @@
             android:id="@+id/enter_first_name_id"
             style="@style/textInputEditTextStyle"
             android:inputType="text"
-            android:hint="@string/enterNameFirstName" />
+            android:hint="@string/commonFirstName" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -74,7 +74,7 @@
             android:id="@+id/enter_last_name_id"
             style="@style/textInputEditTextStyle"
             android:inputType="text"
-            android:hint="@string/enterNameLastName" />
+            android:hint="@string/commonLastName" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -85,7 +85,7 @@
             android:id="@+id/enter_email_id"
             style="@style/textInputEditTextStyle"
             android:inputType="text"
-            android:hint="@string/enterNameEmail" />
+            android:hint="@string/commonEmail" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -96,7 +96,7 @@
             android:id="@+id/enter_password_id"
             style="@style/textInputEditTextStyle"
             android:inputType="textPassword"
-            android:hint="@string/enterNamePassword" />
+            android:hint="@string/commonPassword" />
 
     </android.support.design.widget.TextInputLayout>
 

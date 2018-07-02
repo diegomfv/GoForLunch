@@ -517,7 +517,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     /** Method that creates an alert dialog that
-     * can be used to delete the Read Articles History
+     * can be used to log out
      * */
     private void alertDialogLogOut () {
 

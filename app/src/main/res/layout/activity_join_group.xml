@@ -33,7 +33,7 @@
             android:id="@+id/join_textInputAutocompleteTextView"
             style="@style/textInputEditTextStyle"
             android:inputType="text"
-            android:hint="@string/persInfoGroup"/>
+            android:hint="@string/commonGroup"/>
 
     </android.support.design.widget.TextInputLayout>
 
