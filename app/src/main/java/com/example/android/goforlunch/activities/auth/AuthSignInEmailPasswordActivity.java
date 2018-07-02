@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
@@ -50,6 +51,9 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
     @BindView(R.id.signin_signIn_button_id)
     Button buttonSignIn;
 
+    @BindView(R.id.signin_textView_forgot_password)
+    TextView tvForgotPassword;
+
     @BindView(R.id.signin_signUp_button_id)
     Button buttonSignUp;
 
@@ -78,21 +82,6 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: fab clicked!");
                 NavUtils.navigateUpFromSameTask(AuthSignInEmailPasswordActivity.this);
-            }
-        });
-
-        buttonSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, AuthEnterNameActivity.class);
-                intent.putExtra(RepoStrings.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
-                intent.putExtra(RepoStrings.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
-
-                //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
-                intent.putExtra(RepoStrings.SentIntent.FLAG, true);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
             }
         });
 
@@ -185,6 +174,30 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
             }
         });
+
+        tvForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: tvForgotPassword clicked!");
+                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.notImplemented));
+            }
+        });
+
+        buttonSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, AuthEnterNameActivity.class);
+                intent.putExtra(RepoStrings.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
+                intent.putExtra(RepoStrings.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
+
+                //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
+                intent.putExtra(RepoStrings.SentIntent.FLAG, true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+
     }
 
     /** Method that shows the progress bar and disables a/some buttons

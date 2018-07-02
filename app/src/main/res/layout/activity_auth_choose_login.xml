@@ -11,26 +11,33 @@
         android:background="@color/colorPrimaryDark">
     </FrameLayout>
 
-    <ProgressBar
-        android:id="@+id/choose_progressbar_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:layout_marginBottom="10dp"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="90dp">
+
+        <ProgressBar
+            android:id="@+id/choose_progressbar_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="30dp"
+            android:layout_margin="30dp"
+            android:visibility="invisible"
+            android:layout_marginBottom="10dp"/>
+
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/choose_image_id"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:layout_marginTop="100dp"
         android:src="@drawable/go_for_lunch_icon"
         android:layout_gravity="center_horizontal">
     </ImageView>
 
     <Button
         android:id="@+id/choose_sign_in_password_button_id"
-        style="@style/generalButtonStyle"
+        style="@style/buttonGeneralStyle"
         android:layout_marginTop="40dp"
         android:text="@string/choose_signInWithEmail" />
 

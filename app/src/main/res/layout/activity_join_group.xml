@@ -14,16 +14,10 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/join_fab_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:backgroundTint="@android:color/white"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="30dp"
-        android:src="@drawable/ic_arrow_back_color_primary_18dp"
-        android:elevation="4dp"
+        style="@style/fabBackStyle"
+        android:backgroundTint="@android:color/white"
         app:rippleColor="@color/colorAccentLight"
-        app:fabSize="mini"
-        />
+        app:fabSize="mini" />
 
     <android.support.design.widget.TextInputLayout
        style="@style/textInputLayoutStyle"
@@ -39,13 +33,13 @@
 
     <Button
         android:id="@+id/join_button_join_group_id"
-        style="@style/generalButtonStyle"
+        style="@style/buttonGeneralStyle"
         android:layout_marginTop="20dp"
         android:text="@string/joinGroupJoinGroup" />
 
     <Button
         android:id="@+id/join_button_create_group_id"
-        style="@style/generalButtonStyle"
+        style="@style/buttonGeneralStyle"
         android:layout_marginTop="20dp"
         android:text="@string/joinGroupCreateNewGroup"
         />

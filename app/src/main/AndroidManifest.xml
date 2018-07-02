@@ -55,14 +55,14 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.rest.JoinGroupActivity"
-            android:parentActivityName=".activities.auth.AuthChooseLoginActivity"
+            android:parentActivityName=".activities.rest.MainActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.rest.MainActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.rest.PersInfoActivity"
-            android:parentActivityName=".activities.auth.AuthChooseLoginActivity"
+            android:parentActivityName=".activities.rest.MainActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.rest.RestaurantActivity"

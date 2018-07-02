@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
@@ -44,6 +45,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -65,6 +68,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private static int RC_GOOGLE_SIGN_IN = 101;
 
     //Widgets
+    @BindView(R.id.main_progress_bar_id)
+    ProgressBar progressBar;
+
     @BindView(R.id.choose_sign_in_password_button_id)
     Button buttonPassword;
 
@@ -300,6 +306,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
+        showProgressBarAndDisableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
+
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -406,11 +414,16 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                             }
 
                         } else {
-                            // If sign in fails, display a message to the user.
+
+                            /* If sign in fails, display a message to the user
+                            * hide progress bar and enable onClick on views
+                            * */
                             Log.w(TAG, "GOOGLE signInWithCredential:failure", task.getException());
 
-                            ToastHelper.toastShort(AuthChooseLoginActivity.this, "Authentication Failed");
-                            //updateUI(null);
+                            ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                            hideProgressBarAndEnableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
+
                         }
 
                         // ...
@@ -422,6 +435,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
      * */
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
+
+        showProgressBarAndDisableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         auth.signInWithCredential(credential)
@@ -529,15 +544,57 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                             }
 
                         } else {
-                            // If sign in fails, display a message to the user.
+                            /* If sign in fails, display a message to the user
+                             * hide progress bar and enable onClick on views
+                             * */
                             Log.w(TAG, "FACEBOOK signInWithCredential:failure", task.getException());
 
-                            ToastHelper.toastShort(AuthChooseLoginActivity.this, "Authentication Failed");
-                            //updateUI(null);
+                            ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                            hideProgressBarAndEnableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
+
                         }
 
                         // ...
                     }
                 });
     }
+
+    /** Method that shows the progress bar and disables a/some buttons
+     * */
+    private void showProgressBarAndDisableButton (ProgressBar progressBar, Button buttonEmail, TextView tvRegister,  SignInButton buttonGoogle, LoginButton buttonFacebook){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.VISIBLE);
+
+        /* We block the interaction with start button
+         * */
+        buttonEmail.setClickable(false);
+        tvRegister.setClickable(false);
+        buttonGoogle.setClickable(false);
+        buttonFacebook.setClickable(false);
+
+    }
+
+    /** Method that hides the progress bar and enables a/some buttons
+     * */
+    private void hideProgressBarAndEnableButton (ProgressBar progressBar, Button buttonEmail, TextView tvRegister,  SignInButton buttonGoogle, LoginButton buttonFacebook){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.INVISIBLE);
+
+        /* We block the interaction with start button
+         * */
+        buttonEmail.setClickable(true);
+        tvRegister.setClickable(true);
+        buttonGoogle.setClickable(true);
+        buttonFacebook.setClickable(true);
+
+    }
+
+
+
+
 }
