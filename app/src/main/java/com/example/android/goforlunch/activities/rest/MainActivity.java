@@ -62,6 +62,7 @@ import io.reactivex.observers.DisposableObserver;
 // TODO: 29/05/2018 General cleanup
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
 // TODO: 02/07/2018 The request gets several times the same restaurant and insert all them in the database
+// TODO: 02/07/2018 User image has to be displayed in coworkers 
 
 public class MainActivity extends AppCompatActivity{
 
@@ -186,7 +187,6 @@ public class MainActivity extends AppCompatActivity{
                             fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                         }
                     }
-
 
                 } else {
 

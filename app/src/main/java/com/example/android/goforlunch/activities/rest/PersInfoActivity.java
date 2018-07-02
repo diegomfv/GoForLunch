@@ -187,6 +187,12 @@ public class PersInfoActivity extends AppCompatActivity{
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: called!");
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: called!");
@@ -206,8 +212,12 @@ public class PersInfoActivity extends AppCompatActivity{
                     if (currentUser != null) {
 
                         userEmail = currentUser.getEmail();
-                        userProfilePictureUri = currentUser.getPhotoUrl();
-                        Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
+
+                        Log.d(TAG, "onNext: userProfilePictureUri = " + userProfilePictureUri);
+                        if (userProfilePictureUri == null) {
+                            userProfilePictureUri = currentUser.getPhotoUrl();
+                            Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
+                        }
 
                         if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
@@ -352,11 +362,13 @@ public class PersInfoActivity extends AppCompatActivity{
 
         if (resultCode == RESULT_OK) {
             try {
+                Log.d(TAG, "onActivityResult: data.getData() = " + data.getData());
                 final Uri imageUri = data.getData();
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
 
                 glide.load(selectedImage).into(iv_userImage);
+                Log.d(TAG, "onActivityResult: image loaded!");
 
                 /** We store the Uri value. We will use it if the user saves changes
                  * */

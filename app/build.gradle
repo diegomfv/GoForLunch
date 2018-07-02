@@ -66,6 +66,9 @@ dependencies {
     //Firebase Realtime Database
     implementation 'com.google.firebase:firebase-database:15.0.0'
 
+    //Firebase Storage
+    implementation 'com.google.firebase:firebase-storage:15.0.0'
+
     //Firebase Authentication
     implementation 'com.google.firebase:firebase-auth:15.1.0'
 

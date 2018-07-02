@@ -37,6 +37,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,8 +71,13 @@ public class FragmentCoworkers extends Fragment {
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
+    private FirebaseStorage fireStorage;
+
     private DatabaseReference dbRefUsersGetUserInfo;
     private DatabaseReference dbRefUsersGetCoworkers;
+
+    private StorageReference stRef;
+    private StorageReference stRefImages;
 
     private String userFirstName;
     private String userLastName;
@@ -109,7 +116,10 @@ public class FragmentCoworkers extends Fragment {
         setHasOptionsMenu(true);
 
         fireDb = FirebaseDatabase.getInstance();
+        fireStorage = FirebaseStorage.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+
 
         /** Configure toolbar */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
@@ -161,7 +171,6 @@ public class FragmentCoworkers extends Fragment {
                     dbRefUsersGetCoworkers.addValueEventListener(valueEventListenerGetCoworkers);
 
                 } else {
-
                     UtilsFirebase.logOut(getActivity());
 
                 }
@@ -191,7 +200,6 @@ public class FragmentCoworkers extends Fragment {
         dbRefUsersGetCoworkers.removeEventListener(valueEventListenerGetCoworkers);
         Log.d(TAG, "onStop: called!");
 
-
     }
 
     @Override
@@ -205,9 +213,7 @@ public class FragmentCoworkers extends Fragment {
                 }
                 return true;
             }
-
         }
-
         return super.onOptionsItemSelected(item);
     }
 
