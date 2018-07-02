@@ -143,7 +143,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                 Log.d(TAG, "onClick: Password Button clicked!");
 
                 startActivity(new Intent(AuthChooseLoginActivity.this, AuthSignInEmailPasswordActivity.class));
-                finish();
 
             }
         });
@@ -153,8 +152,13 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Register textView clicked!");
 
-                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
-                finish();
+                Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class);
+
+                //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
+                intent.putExtra(RepoStrings.SentIntent.FLAG, true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+
             }
         });
 

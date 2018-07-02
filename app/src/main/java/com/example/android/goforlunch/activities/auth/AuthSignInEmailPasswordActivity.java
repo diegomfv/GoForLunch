@@ -123,6 +123,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
                             }
 
+                            /* We show the progress bar
+                            * */
                             progressBar.setVisibility(View.VISIBLE);
 
                             //authenticate user
@@ -134,7 +136,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
                                             // If sign in fails, display a message to the user. If sign in succeeds
                                             // the auth state listener will be notified and logic to handle the
                                             // signed in user can be handled in the listener.
-                                            progressBar.setVisibility(View.GONE);
+                                            //progressBar.setVisibility(View.GONE);
 
                                             if (!task.isSuccessful()) {
                                                 Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
@@ -151,7 +153,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
                                             } else {
                                                 Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
-                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                                 startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
                                                 finish();
                                             }

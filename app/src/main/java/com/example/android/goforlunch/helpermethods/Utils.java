@@ -1,11 +1,14 @@
 package com.example.android.goforlunch.helpermethods;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.support.design.widget.TextInputEditText;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +20,8 @@ import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.jakewharton.rxbinding2.widget.RxTextView;
+import com.jakewharton.rxbinding2.widget.TextViewTextChangeEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +30,13 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -325,5 +332,48 @@ public class Utils {
         }
 
     }
+
+    @SuppressLint("CheckResult")
+    private void configureTextInputEditTextWithHideKeyboard (final AppCompatActivity activity, TextInputEditText textInputEditText) {
+
+        RxTextView.textChangeEvents(textInputEditText)
+            .skip(2)
+            .debounce(800,TimeUnit.MILLISECONDS)
+            .map(new Function<TextViewTextChangeEvent, String>() {
+                @Override
+                public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
+                    return textViewTextChangeEvent.text().toString();
+                }
+            })
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(new DisposableObserver<String>() {
+                @Override
+                public void onNext(String text) {
+                    Log.d(TAG, "onNext: text = " + text);
+
+                  if (text.length() > 3) {
+                      Utils.hideKeyboard(activity);
+                  }
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+
+                }
+
+                @Override
+                public void onComplete() {
+                    Log.d(TAG, "onComplete: ");
+
+
+                }
+            });
+
+
+
+    }
+
+
 
 }

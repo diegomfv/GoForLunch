@@ -32,6 +32,10 @@
     <string name="mainBottomMapView">Map View</string>
     <string name="mainBottomListView">List View</string>
     <string name="mainBottomWorkmates">Workmates</string>
+    <string name="mainDialogAreYouSureLogOut">Are you sure you want to log out?</string>
+    <string name="mainDialogLoggingOut">Logging Out</string>
+    <string name="mainDialogLoggingOutYes">YES, I am sure</string>
+    <string name="mainDialogLoggingOutNo">NO</string>
 
     <!-- FRAGMENTS -->
     <string name="autoCompleteSearchText">Search</string>

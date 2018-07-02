@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.activities.rest;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
@@ -183,6 +185,12 @@ public class MainActivity extends AppCompatActivity{
         super.onStop();
         Log.d(TAG, "onStop: called!");
         fireDbRefUsers.removeEventListener(valueEventListenerGetUserInfo);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: called!");
+        super.onDestroy();
     }
 
     @Override
@@ -476,16 +484,7 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_logout: {
                             Log.d(TAG, "onNavigationItemSelected: log out pressed");
 
-                            /** The user signs out
-                             *  and goes to AuthSignIn Activity
-                             *  */
-                            auth.signOut();
-                            LoginManager.getInstance().logOut();
-
-                            Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                            finish();
+                            alertDialogLogOut();
 
                             return true;
                         }
@@ -517,10 +516,44 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
-        super.onDestroy();
+    /** Method that creates an alert dialog that
+     * can be used to delete the Read Articles History
+     * */
+    private void alertDialogLogOut () {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage(getResources().getString(R.string.mainDialogAreYouSureLogOut))
+                .setTitle(getResources().getString(R.string.mainDialogLoggingOut))
+                .setPositiveButton(getResources().getString(R.string.mainDialogLoggingOutYes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "onClick: yes button clicked!");
+
+                        /** The user signs out
+                         *  and goes to AuthSignIn Activity
+                         *  */
+                        auth.signOut();
+                        LoginManager.getInstance().logOut();
+
+                        Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+
+                    }
+                })
+                .setNegativeButton(getResources().getString(R.string.mainDialogLoggingOutNo), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "onClick: no button clicked!");
+                        //Nothing happens
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
+
+
 }
 

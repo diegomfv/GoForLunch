@@ -85,7 +85,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     @BindView(R.id.enter_start_button_id)
     Button buttonStart;
 
-    @BindView(R.id.enter_progressbar)
+    @BindView(R.id.enter_progressbar_id)
     ProgressBar progressBar;
 
     private String email;
@@ -219,7 +219,10 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
                         if (checkMinimumRequisites()) {
 
-                            progressBar.setVisibility(View.VISIBLE);
+                            /* We show the progress bar
+                             * and block the interaction with buttons
+                             * */
+                           showProgressBarAndDisableButton(progressBar, buttonStart);
 
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(
@@ -244,6 +247,12 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                 }
 
                                                 ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                                                /* We hide the progress bar
+                                                 * and enable buttonStart
+                                                 * */
+                                                hideProgressBarAndEnableButton(progressBar, buttonStart);
+
 
                                             } else {
                                                 Log.d(TAG, "onComplete: task was successful");
@@ -306,7 +315,10 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
                         if (checkMinimumRequisites()) {
 
-                            progressBar.setVisibility(View.VISIBLE);
+                            /* We show the progress bar
+                             * and block the interaction with buttons
+                             * */
+                            showProgressBarAndDisableButton(progressBar, buttonStart);
 
                             //We create the user
                             auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
@@ -326,6 +338,13 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                 if (e != null) {
                                                     Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
                                                 }
+
+                                                ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                                                 /* We hide the progress bar
+                                                 * and enable buttonStart
+                                                 * */
+                                                hideProgressBarAndEnableButton(progressBar, buttonStart);
 
                                             } else {
 
@@ -553,4 +572,34 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         }
 
     }
+
+    /** Method that shows the progress bar and disables a/some buttons
+     * */
+    private void showProgressBarAndDisableButton (ProgressBar progressBar, Button button){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.VISIBLE);
+
+        /* We block the interaction with start button
+         * */
+        buttonStart.setClickable(false);
+
+    }
+
+    /** Method that hides the progress bar and enables a/some buttons
+     * */
+    private void hideProgressBarAndEnableButton (ProgressBar progressBar, Button button){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.INVISIBLE);
+
+        /* We block the interaction with start button
+         * */
+        buttonStart.setClickable(true);
+
+    }
+
+
 }

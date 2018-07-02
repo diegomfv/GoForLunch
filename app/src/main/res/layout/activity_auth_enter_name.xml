@@ -12,26 +12,34 @@
         android:background="@color/colorPrimaryDark">
     </FrameLayout>
 
-    <ProgressBar
-        android:id="@+id/enter_progressbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:visibility="gone"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/enter_fab_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:backgroundTint="@android:color/white"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="30dp"
-        android:src="@drawable/ic_arrow_back_color_primary_18dp"
-        android:elevation="4dp"
-        app:rippleColor="@color/colorAccentLight"
-        app:fabSize="mini"
-        />
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/enter_fab_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundTint="@android:color/white"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="30dp"
+            android:src="@drawable/ic_arrow_back_color_primary_18dp"
+            android:elevation="4dp"
+            app:rippleColor="@color/colorAccentLight"
+            app:fabSize="mini"
+            />
+
+        <ProgressBar
+            android:id="@+id/enter_progressbar_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="30dp"
+            android:layout_margin="30dp"
+            android:visibility="invisible"
+            android:layout_marginBottom="10dp"/>
+
+    </RelativeLayout>
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/enter_image_id"
@@ -95,7 +103,7 @@
     <Button
         android:id="@+id/enter_start_button_id"
         style="@style/generalButtonStyle"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:text="@string/enterNameStart"/>
 
 </LinearLayout>
