@@ -47,11 +47,11 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
     @BindView(R.id.signin_textinput_password_id)
     TextInputEditText inputPassword;
 
-    @BindView(R.id.signin_button_id)
+    @BindView(R.id.signin_signIn_button_id)
     Button buttonSignIn;
 
-    @BindView(R.id.signin_register_button_id)
-    Button buttonRegister;
+    @BindView(R.id.signin_signUp_button_id)
+    Button buttonSignUp;
 
     // TODO: 01/06/2018 Delete?
     @BindView(R.id.signin_progressbar_id)
@@ -68,6 +68,11 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
         inputEmail.setText("diego.fajardo@hotmail.com");
         inputPassword.setText("123456");
 
+        /** Configuring textInputEditTexts: hide keyboard
+         * */
+        Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputEmail);
+        Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputPassword);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,7 +81,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
             }
         });
 
-        buttonRegister.setOnClickListener(new View.OnClickListener() {
+        buttonSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -123,9 +128,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
                             }
 
-                            /* We show the progress bar
-                            * */
-                            progressBar.setVisibility(View.VISIBLE);
+                            showProgressBarAndDisableButtons(progressBar, buttonSignIn, buttonSignUp);
 
                             //authenticate user
                             FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -150,6 +153,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
                                                 } else {
                                                     ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
                                                 }
+
+                                                hideProgressBarAndEnableButtons(progressBar, buttonSignIn, buttonSignUp);
 
                                             } else {
                                                 Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
@@ -181,4 +186,38 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
             }
         });
     }
+
+    /** Method that shows the progress bar and disables a/some buttons
+     * */
+    private void showProgressBarAndDisableButtons (ProgressBar progressBar, Button buttonSignIn, Button buttonSignUp){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.VISIBLE);
+
+        /* We block the interaction with buttons
+         * */
+        buttonSignIn.setClickable(false);
+        buttonSignUp.setClickable(false);
+
+    }
+
+    /** Method that hides the progress bar and enables a/some buttons
+     * */
+    private void hideProgressBarAndEnableButtons (ProgressBar progressBar, Button buttonSignIn, Button buttonSignUp){
+
+        /* We show the progress bar
+         * */
+        progressBar.setVisibility(View.INVISIBLE);
+
+        /* We block the interaction with buttons
+         * */
+        buttonSignIn.setClickable(true);
+        buttonSignUp.setClickable(true);
+    }
+
+
+
+
+
 }

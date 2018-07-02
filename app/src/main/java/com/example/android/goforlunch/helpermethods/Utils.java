@@ -334,11 +334,11 @@ public class Utils {
     }
 
     @SuppressLint("CheckResult")
-    private void configureTextInputEditTextWithHideKeyboard (final AppCompatActivity activity, TextInputEditText textInputEditText) {
+    public static void configureTextInputEditTextWithHideKeyboard (final AppCompatActivity activity, TextInputEditText textInputEditText) {
 
         RxTextView.textChangeEvents(textInputEditText)
             .skip(2)
-            .debounce(800,TimeUnit.MILLISECONDS)
+            .debounce(1000,TimeUnit.MILLISECONDS)
             .map(new Function<TextViewTextChangeEvent, String>() {
                 @Override
                 public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {

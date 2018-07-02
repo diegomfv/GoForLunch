@@ -118,6 +118,13 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
+        /** Configuring textInputEditTexts: hide keyboard
+         * */
+        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputFirstName);
+        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputLastName);
+        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputEmail);
+        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputPassword);
+
         /** If we have sign in with google or facebook first time, the user needs to fill some
          * information. This code will fill the email and password fields for the user automatically.
          * This fields cannot be modified
