@@ -148,6 +148,9 @@
     <string name="restaurantPhoneNotAvailable">Phone not available</string>
     <string name="restaurantWebsiteNotAvailable">Website not available</string>
 
+    <string name="restaurantNoCoworkersJoining">No Coworkers joining at the moment!</string>
+    <string name="restaurantUserIsJoining">%1$s is joining!</string>
+
     <!-- PERS INFO ACTIVITY -->
     <string name="persSaveChanges">Save Changes</string>
     <string name="persChangePassword">Change password</string>

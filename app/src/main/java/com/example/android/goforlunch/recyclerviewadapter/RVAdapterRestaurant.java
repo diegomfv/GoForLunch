@@ -14,6 +14,9 @@ import com.example.android.goforlunch.helpermethods.Anim;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Diego Fajardo on 06/05/2018.
  */
@@ -55,16 +58,9 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
         Log.d(TAG, "onBindViewHolder: position# " + position);
 
-        if (listOfCoworkers.size() == 0) {
-            holder.tv_text.setText("No coworkers joining at the moment!");
-
-        } else {
-
-            holder.tv_text.setText(listOfCoworkers.get(position) + " is joining!");
-        }
+        holder.updateItem(position);
 
         Anim.crossFadeShortAnimation(holder.itemView);
     }
@@ -80,15 +76,31 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
     }
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.cv_coworkers_textview_id)
         TextView tv_text;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            tv_text = itemView.findViewById(R.id.cv_coworkers_textview_id);
+            ButterKnife.bind(this, itemView);
 
         }
+
+        /** Method that updates the info displayed in an item of the recyclerView
+         * */
+        public void updateItem(int position) {
+            Log.d(TAG, "updateItem: called!");
+
+            if (listOfCoworkers.size() == 0) {
+                tv_text.setText(mContext.getResources().getString(R.string.restaurantNoCoworkersJoining));
+
+            } else {
+                tv_text.setText(mContext.getResources().getString(R.string.restaurantUserIsJoining, listOfCoworkers.get(position)));
+            }
+
+        }
+
     }
 
     // ------------------------- METHODS -------------------------------

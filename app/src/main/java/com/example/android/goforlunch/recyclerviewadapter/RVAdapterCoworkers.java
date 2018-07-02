@@ -109,7 +109,6 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             textView.setText(setInfo(position));
             textView.setTextColor(setColor(position));
 
-
         }
 
         public String setInfo(int position) {
