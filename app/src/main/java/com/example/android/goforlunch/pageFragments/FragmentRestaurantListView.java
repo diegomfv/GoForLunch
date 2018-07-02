@@ -71,9 +71,6 @@ import io.reactivex.schedulers.Schedulers;
  * */
 public class FragmentRestaurantListView extends Fragment {
 
-    // TODO: 28/05/2018 Some names appear over the others
-    // TODO: 29/05/2018 Modify the number of users that go to a place!
-
     private static final String TAG = FragmentRestaurantListView.class.getSimpleName();
 
     //Array of restaurant types (got from Resources, strings)
@@ -311,17 +308,41 @@ public class FragmentRestaurantListView extends Fragment {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: called!");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: called!");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
+    }
+
+
 
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(TAG, "onCreateOptionsMenu: called!");
 
-        getActivity().getMenuInflater().inflate(R.menu.list_menu, menu);
+        if (getActivity() != null) {
+            getActivity().getMenuInflater().inflate(R.menu.list_menu, menu);
+        }
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG, "onOptionsItemSelected: called!");
 
         switch (item.getItemId()) {
 
@@ -351,6 +372,7 @@ public class FragmentRestaurantListView extends Fragment {
     /** Method that instantiates databases
      * */
     public void configureDatabases (Context context) {
+        Log.d(TAG, "configureDatabases: called!");
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();

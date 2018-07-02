@@ -60,6 +60,7 @@ import butterknife.ButterKnife;
 // TODO: 29/05/2018 Translations
 // TODO: 29/05/2018 General cleanup
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
+// TODO: 02/07/2018 The request gets several times the same restaurant and insert all them in the database
 
 public class MainActivity extends AppCompatActivity{
 

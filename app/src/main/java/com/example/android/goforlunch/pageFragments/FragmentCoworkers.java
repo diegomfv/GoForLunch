@@ -49,7 +49,6 @@ import io.reactivex.observers.DisposableObserver;
  * Created by Diego Fajardo on 27/04/2018.
  */
 
-// TODO: 28/05/2018 Remove the user from the list!
 public class FragmentCoworkers extends Fragment {
 
     private static final String TAG = FragmentCoworkers.class.getSimpleName();
@@ -70,7 +69,8 @@ public class FragmentCoworkers extends Fragment {
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
-    private DatabaseReference dbRefUsers;
+    private DatabaseReference dbRefUsersGetUserInfo;
+    private DatabaseReference dbRefUsersGetCoworkers;
 
     private String userFirstName;
     private String userLastName;
@@ -121,11 +121,6 @@ public class FragmentCoworkers extends Fragment {
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
 
-        /** We set a listener for listening for changes in the database (coworkers list)
-         * */
-        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        dbRefUsers.addValueEventListener(valueEventListenerGetCoworkers);
-
         Anim.crossFadeShortAnimation(recyclerView);
 
         return view;
@@ -155,10 +150,15 @@ public class FragmentCoworkers extends Fragment {
 
                         if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                            dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                            dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                            dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                         }
                     }
+
+                    /** We set a listener for listening for changes in the database (coworkers list)
+                     * */
+                    dbRefUsersGetCoworkers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                    dbRefUsersGetCoworkers.addValueEventListener(valueEventListenerGetCoworkers);
 
                 } else {
 
@@ -187,7 +187,8 @@ public class FragmentCoworkers extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        dbRefUsers.removeEventListener(valueEventListenerGetCoworkers);
+        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
+        dbRefUsersGetCoworkers.removeEventListener(valueEventListenerGetCoworkers);
         Log.d(TAG, "onStop: called!");
 
 
@@ -230,8 +231,8 @@ public class FragmentCoworkers extends Fragment {
             /** We fill the list of the coworkers using the group of the user
              * (this is a singleEventListener)
              *  */
-            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-            dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetCoworkers);
+            dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+            dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetCoworkers);
 
         }
 
@@ -273,6 +274,7 @@ public class FragmentCoworkers extends Fragment {
      *****************************************************/
 
     private void configureRecyclerView () {
+        Log.d(TAG, "configureRecyclerView: called!");
 
         if (getActivity() != null) {
 
@@ -282,8 +284,6 @@ public class FragmentCoworkers extends Fragment {
 
         }
     }
-
-
 
     /** Method that configures onClick for recyclerView items
      * */
