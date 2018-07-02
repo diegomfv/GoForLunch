@@ -8,10 +8,12 @@ import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -67,7 +69,6 @@ public class Utils {
 
     }
 
-
     // Background thread!!
     // TCP/HTTP/DNS (depending on the port, 53=DNS, 80=HTTP, etc.)
     public static boolean isInternetAvailable() {
@@ -87,11 +88,31 @@ public class Utils {
             return false; }
     }
 
+    /** Method that shows progress bar and disables user interaction
+     * */
+    public static void showProgressBarAndDisableUserInteraction (AppCompatActivity appCompatActivity, ProgressBar progressBar) {
 
-    public static void menuIconColor(MenuItem menuItem, int color) {
-        Drawable drawable = menuItem.getIcon();
-        drawable.mutate();
-        drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        progressBar.setVisibility(View.VISIBLE);
+
+        appCompatActivity
+                .getWindow()
+                .setFlags(
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+
+    }
+
+    /**  Method that hides progress bar and enables user interaction
+     * */
+    public static void hideProgressBarAndEnableUserInteraction (AppCompatActivity appCompatActivity, ProgressBar progressBar) {
+
+        progressBar.setVisibility(View.INVISIBLE);
+
+        appCompatActivity
+                .getWindow()
+                .clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
     }
 
     /**
@@ -176,22 +197,6 @@ public class Utils {
             Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
                     entry.getValue().toString());
         }
-
-        return true;
-    }
-
-    public static boolean showProgressBar (ProgressBar progressBar, View view) {
-
-        progressBar.setVisibility(View.VISIBLE);
-        view.setVisibility(View.GONE);
-
-        return true;
-    }
-
-    public static boolean hideProgressBar (ProgressBar progressBar, View view) {
-
-        progressBar.setVisibility(View.GONE);
-        view.setVisibility(View.VISIBLE);
 
         return true;
     }

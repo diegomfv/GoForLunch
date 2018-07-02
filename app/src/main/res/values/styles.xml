@@ -17,13 +17,10 @@
     <style name="fabBackStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="app:backgroundTint">@android:color/white</item>
         <item name="android:layout_marginLeft">30dp</item>
         <item name="android:layout_marginTop">30dp</item>
         <item name="android:src">@drawable/ic_arrow_back_color_primary_18dp</item>
         <item name="android:elevation">4dp</item>
-        <item name="app:rippleColor">@color/colorAccentLight</item>
-        <item name="app:fabSize">mini</item>
     </style>
 
     <style name="buttonGeneralStyle">

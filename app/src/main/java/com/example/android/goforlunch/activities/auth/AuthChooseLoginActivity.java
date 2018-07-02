@@ -45,8 +45,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -306,7 +304,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
-        showProgressBarAndDisableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
+        Utils.showProgressBarAndDisableUserInteraction(AuthChooseLoginActivity.this, progressBar);
 
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         auth.signInWithCredential(credential)
@@ -422,7 +420,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
                             ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
 
-                            hideProgressBarAndEnableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
+                            Utils.hideProgressBarAndEnableUserInteraction(AuthChooseLoginActivity.this, progressBar);
 
                         }
 
@@ -436,7 +434,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
-        showProgressBarAndDisableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
+        Utils.showProgressBarAndDisableUserInteraction(AuthChooseLoginActivity.this, progressBar);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         auth.signInWithCredential(credential)
@@ -551,7 +549,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
                             ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
 
-                            hideProgressBarAndEnableButton(progressBar, buttonPassword, tvRegister, buttonGoogle, buttonFacebook);
+                            Utils.hideProgressBarAndEnableUserInteraction(AuthChooseLoginActivity.this, progressBar);
 
                         }
 
@@ -559,42 +557,5 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                     }
                 });
     }
-
-    /** Method that shows the progress bar and disables a/some buttons
-     * */
-    private void showProgressBarAndDisableButton (ProgressBar progressBar, Button buttonEmail, TextView tvRegister,  SignInButton buttonGoogle, LoginButton buttonFacebook){
-
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.VISIBLE);
-
-        /* We block the interaction with start button
-         * */
-        buttonEmail.setClickable(false);
-        tvRegister.setClickable(false);
-        buttonGoogle.setClickable(false);
-        buttonFacebook.setClickable(false);
-
-    }
-
-    /** Method that hides the progress bar and enables a/some buttons
-     * */
-    private void hideProgressBarAndEnableButton (ProgressBar progressBar, Button buttonEmail, TextView tvRegister,  SignInButton buttonGoogle, LoginButton buttonFacebook){
-
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.INVISIBLE);
-
-        /* We block the interaction with start button
-         * */
-        buttonEmail.setClickable(true);
-        tvRegister.setClickable(true);
-        buttonGoogle.setClickable(true);
-        buttonFacebook.setClickable(true);
-
-    }
-
-
-
 
 }

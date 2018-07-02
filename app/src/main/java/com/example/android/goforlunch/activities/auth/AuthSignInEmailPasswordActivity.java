@@ -117,7 +117,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
                             }
 
-                            showProgressBarAndDisableButtons(progressBar, buttonSignIn, buttonSignUp);
+                            Utils.showProgressBarAndDisableUserInteraction(AuthSignInEmailPasswordActivity.this, progressBar);
 
                             //authenticate user
                             FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -143,7 +143,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
                                                     ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
                                                 }
 
-                                                hideProgressBarAndEnableButtons(progressBar, buttonSignIn, buttonSignUp);
+                                                Utils.hideProgressBarAndEnableUserInteraction(AuthSignInEmailPasswordActivity.this, progressBar);
 
                                             } else {
                                                 Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
@@ -199,38 +199,5 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
         });
 
     }
-
-    /** Method that shows the progress bar and disables a/some buttons
-     * */
-    private void showProgressBarAndDisableButtons (ProgressBar progressBar, Button buttonSignIn, Button buttonSignUp){
-
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.VISIBLE);
-
-        /* We block the interaction with buttons
-         * */
-        buttonSignIn.setClickable(false);
-        buttonSignUp.setClickable(false);
-
-    }
-
-    /** Method that hides the progress bar and enables a/some buttons
-     * */
-    private void hideProgressBarAndEnableButtons (ProgressBar progressBar, Button buttonSignIn, Button buttonSignUp){
-
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.INVISIBLE);
-
-        /* We block the interaction with buttons
-         * */
-        buttonSignIn.setClickable(true);
-        buttonSignUp.setClickable(true);
-    }
-
-
-
-
 
 }

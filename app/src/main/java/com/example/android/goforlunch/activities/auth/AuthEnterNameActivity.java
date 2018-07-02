@@ -229,7 +229,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                             /* We show the progress bar
                              * and block the interaction with buttons
                              * */
-                           showProgressBarAndDisableButton(progressBar, buttonStart);
+                            Utils.showProgressBarAndDisableUserInteraction(AuthEnterNameActivity.this, progressBar);
 
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(
@@ -258,7 +258,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                 /* We hide the progress bar
                                                  * and enable buttonStart
                                                  * */
-                                                hideProgressBarAndEnableButton(progressBar, buttonStart);
+                                                Utils.hideProgressBarAndEnableUserInteraction(AuthEnterNameActivity.this, progressBar);
 
 
                                             } else {
@@ -325,7 +325,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                             /* We show the progress bar
                              * and block the interaction with buttons
                              * */
-                            showProgressBarAndDisableButton(progressBar, buttonStart);
+                            Utils.showProgressBarAndDisableUserInteraction(AuthEnterNameActivity.this, progressBar);
 
                             //We create the user
                             auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
@@ -351,7 +351,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                  /* We hide the progress bar
                                                  * and enable buttonStart
                                                  * */
-                                                hideProgressBarAndEnableButton(progressBar, buttonStart);
+                                                Utils.hideProgressBarAndEnableUserInteraction(AuthEnterNameActivity.this, progressBar);
 
                                             } else {
 
@@ -579,34 +579,5 @@ public class AuthEnterNameActivity extends AppCompatActivity{
         }
 
     }
-
-    /** Method that shows the progress bar and disables a/some buttons
-     * */
-    private void showProgressBarAndDisableButton (ProgressBar progressBar, Button button){
-
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.VISIBLE);
-
-        /* We block the interaction with start button
-         * */
-        buttonStart.setClickable(false);
-
-    }
-
-    /** Method that hides the progress bar and enables a/some buttons
-     * */
-    private void hideProgressBarAndEnableButton (ProgressBar progressBar, Button button){
-
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.INVISIBLE);
-
-        /* We block the interaction with start button
-         * */
-        buttonStart.setClickable(true);
-
-    }
-
 
 }
