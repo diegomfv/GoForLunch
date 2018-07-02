@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,6 +38,9 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
     private static final String TAG = AuthSignInEmailPasswordActivity.class.getSimpleName();
 
     //Widgets
+    @BindView(R.id.signin_fab_id)
+    FloatingActionButton fab;
+
     @BindView(R.id.signin_textinput_email_id)
     TextInputEditText inputEmail;
 
@@ -62,6 +67,14 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
         // TODO: 29/06/2018 Delete this!
         inputEmail.setText("diego.fajardo@hotmail.com");
         inputPassword.setText("123456");
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: fab clicked!");
+                NavUtils.navigateUpFromSameTask(AuthSignInEmailPasswordActivity.this);
+            }
+        });
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -13,8 +13,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -62,6 +64,9 @@ public class AuthEnterNameActivity extends AppCompatActivity{
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
     //Widgets
+    @BindView(R.id.enter_fab_id)
+    FloatingActionButton fab;
+
     @BindView(R.id.enter_first_name_id)
     TextInputEditText inputFirstName;
 
@@ -168,6 +173,14 @@ public class AuthEnterNameActivity extends AppCompatActivity{
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "onCancelled: " + databaseError.getCode());
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: fab clicked!");
+                NavUtils.navigateUpFromSameTask(AuthEnterNameActivity.this);
             }
         });
 
