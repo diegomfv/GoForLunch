@@ -108,21 +108,24 @@
 
     <string name="navDrawerToastNotGroupYet">You haven\'t chosen a group yet!</string>
 
+    <!-- CHOOSE LOGIN ACTIVITY -->
+    <string name="choose_register">Register</string>
+    <string name="choose_signInWithEmail">Sign In with Email</string>
+
     <!-- AUTH SIGN IN ACTIVITY -->
     <string name="signInEmail">Email</string>
     <string name="signInPassword">Password</string>
-    <string name="signInButtonSignIn">SIGN IN</string>
-    <string name="signInButtonResetPassword">RESET PASSWORD</string>
-    <string name="signInButtonRegister">REGISTER</string>
+    <string name="signInButtonSignIn">Sign In</string>
+    <string name="signInTextViewForgotPassword">Forgot your password?</string>
+    <string name="signInButtonSignUp">Sign Up</string>
 
     <!-- AUTH ENTER NAME ACTIVITY -->
     <string name="enterNameFirstName">First Name</string>
     <string name="enterNameLastName">Last Name</string>
     <string name="enterNameEmail">Email</string>
     <string name="enterNamePassword">Password</string>
-    <string name="enterNameStart">START</string>
+    <string name="enterNameStart">Start</string>
     <string name="enterNameThisEmailAlreadyExists">A user with this email already exists</string>
-
 
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupJoinGroup">JOIN GROUP</string>

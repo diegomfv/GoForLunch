@@ -45,9 +45,6 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
     @BindView(R.id.signin_button_id)
     Button buttonSignIn;
 
-    @BindView(R.id.signin_reset_button_id)
-    Button buttonReset;
-
     @BindView(R.id.signin_register_button_id)
     Button buttonRegister;
 
@@ -78,13 +75,6 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
                 intent.putExtra(RepoStrings.SentIntent.FLAG, true);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-            }
-        });
-
-        buttonReset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.notImplemented));
             }
         });
 

@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
@@ -61,17 +62,20 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private static final String TAG = AuthChooseLoginActivity.class.getSimpleName();
 
     //Google Sign In Request Code
-    private static int RC_SIGN_IN = 101;
+    private static int RC_GOOGLE_SIGN_IN = 101;
 
     //Widgets
+    @BindView(R.id.choose_sign_in_password_button_id)
+    Button buttonPassword;
+
+    @BindView(R.id.choose_textView_register)
+    TextView tvRegister;
+
     @BindView(R.id.choose_google_sign_in_button)
     SignInButton buttonGoogle;
 
     @BindView(R.id.choose_facebook_sign_in_button)
     LoginButton buttonFacebook;
-
-    @BindView(R.id.choose_sign_in_password_button_id)
-    Button buttonPassword;
 
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -133,6 +137,28 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         setContentView(R.layout.activity_auth_choose_login);
         ButterKnife.bind(this);
 
+        buttonPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: Password Button clicked!");
+
+                startActivity(new Intent(AuthChooseLoginActivity.this, AuthSignInEmailPasswordActivity.class));
+                finish();
+
+            }
+        });
+
+        tvRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: Register textView clicked!");
+
+                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
+                finish();
+            }
+        });
+
+
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -141,6 +167,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
+        buttonGoogle.setStyle(SignInButton.SIZE_WIDE,SignInButton.COLOR_DARK);
         buttonGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -227,17 +254,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         });
 
 
-        buttonPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: Password Button clicked!");
-
-                startActivity(new Intent(AuthChooseLoginActivity.this, AuthSignInEmailPasswordActivity.class));
-                finish();
-
-            }
-        });
-
     }
 
     @Override
@@ -245,7 +261,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         super.onActivityResult(requestCode, resultCode, data);
 
 
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == RC_GOOGLE_SIGN_IN) {
             Log.d(TAG, "onActivityResult: google process..!");
             // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
@@ -272,7 +288,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     public void googleSignIn() {
 
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+        startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN);
     }
 
     /** Method for google sign in authentication
