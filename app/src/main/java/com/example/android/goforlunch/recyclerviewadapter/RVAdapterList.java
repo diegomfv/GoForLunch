@@ -22,6 +22,7 @@ import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.Utils;
+import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.snatik.storage.Storage;
 
@@ -103,29 +104,17 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         Anim.crossFadeShortAnimation(holder.itemView);
 
         holder.updateItem(position);
-
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent intent = new Intent(mContext, RestaurantActivity.class);
-                intent.putExtra(RepoStrings.SentIntent.PLACE_ID, listOfRestaurants.get(holder.getAdapterPosition()).getPlaceId());
-                intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, listOfRestaurants.get(holder.getAdapterPosition()).getImageUrl());
-                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, listOfRestaurants.get(holder.getAdapterPosition()).getName());
-                intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfRestaurants.get(holder.getAdapterPosition()).getType());
-                intent.putExtra(RepoStrings.SentIntent.ADDRESS, listOfRestaurants.get(holder.getAdapterPosition()).getAddress());
-                intent.putExtra(RepoStrings.SentIntent.RATING, listOfRestaurants.get(holder.getAdapterPosition()).getRating());
-                intent.putExtra(RepoStrings.SentIntent.PHONE, listOfRestaurants.get(holder.getAdapterPosition()).getPhone());
-                intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, listOfRestaurants.get(holder.getAdapterPosition()).getWebsiteUrl());
-
-                mContext.startActivity(intent);
-            }
-        });
     }
 
     @Override
     public int getItemCount() {
         return listOfRestaurants.size();
+    }
+
+    /** Method that retrieves a user in FragmentCoworkers when clicked
+     * */
+    public RestaurantEntry getRestaurant (int position) {
+        return this.listOfRestaurants.get(position);
     }
 
 
@@ -174,7 +163,6 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
            coworkersJoining.setText(getCoworkersJoining(position));
            ratingBar.setRating(getRating(position));
            loadImage(position, photo);
-
 
        }
 

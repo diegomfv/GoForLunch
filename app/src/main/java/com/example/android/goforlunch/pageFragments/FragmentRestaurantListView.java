@@ -3,6 +3,7 @@ package com.example.android.goforlunch.pageFragments;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,14 +30,18 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.helpermethods.Anim;
+import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsConfiguration;
+import com.example.android.goforlunch.recyclerviewadapter.RVAdapterCoworkers;
 import com.example.android.goforlunch.recyclerviewadapter.RVAdapterList;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.rvitemclick.ItemClickSupport;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -99,7 +104,7 @@ public class FragmentRestaurantListView extends Fragment {
     @BindView(R.id.list_recycler_view_id)
     RecyclerView recyclerView;
 
-    private RecyclerView.Adapter rvAdapter;
+    private RVAdapterList adapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     //Database
@@ -113,7 +118,8 @@ public class FragmentRestaurantListView extends Fragment {
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
-    private DatabaseReference dbRefUsers;
+    private DatabaseReference dbRefUsersGetUserInfo;
+    private DatabaseReference dbRefUsersGetListOfRestaurantsByCoworkers;
 
     //Variables
     private String userFirstName;
@@ -171,19 +177,6 @@ public class FragmentRestaurantListView extends Fragment {
         /** Configure toolbar */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
 
-//        if (((AppCompatActivity) getActivity()) != null) {
-//            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-//        }
-//
-//        if (((AppCompatActivity) getActivity()) != null) {
-//            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-//            if (actionBar != null) {
-//                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-//                actionBar.setDisplayHomeAsUpEnabled(true);
-//            }
-//        }
-
-
         /** We get an array of restaurant types from RESOURCES
          * */
         this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
@@ -193,46 +186,7 @@ public class FragmentRestaurantListView extends Fragment {
 
         /** Configure RecyclerView*/
         this.configureRecyclerView();
-
-        /** We get the user information
-         * */
-        currentUser = auth.getCurrentUser();
-        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
-
-        if (currentUser != null) {
-
-            userEmail = currentUser.getEmail();
-
-            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                        for (DataSnapshot item :
-                                dataSnapshot.getChildren()) {
-
-                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
-
-                                userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
-                                userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
-                                userKey = item.getKey();
-                                userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
-                                userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-                    }
-                });
-            }
-        }
+        this.configureOnClickRecyclerView();
 
         mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
@@ -257,48 +211,6 @@ public class FragmentRestaurantListView extends Fragment {
             }
         });
 
-        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        dbRefUsers.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                listOfRestaurantsByCoworker.clear();
-
-                for (DataSnapshot item :
-                        dataSnapshot.getChildren()) {
-
-                    if (item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null
-                            && !item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")
-                            && !item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
-
-                        /** We create a list with all the restaurants that the users are going to.
-                         * If several coworkers are going to the same restaurant, it will appear in the UI
-                         * */
-                        Log.d(TAG, "onDataChange: " + item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString());
-                        listOfRestaurantsByCoworker.add(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                                .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
-
-                    }
-                }
-
-                /** We update the recyclerView with the new list
-                 * */
-                updateRecyclerViewWithNewListOfRestaurantsByCoworker(
-                        autocompleteTextView.getText().toString().trim());
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-            }
-        });
-
-
         /** Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
 
@@ -312,12 +224,56 @@ public class FragmentRestaurantListView extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: called!");
+
+        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+            @Override
+            public void onNext(Boolean aBoolean) {
+                Log.d(TAG, "onNext: ");
+
+                /** We get the user information
+                 * */
+                currentUser = auth.getCurrentUser();
+                Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+                if (currentUser != null) {
+
+                    userEmail = currentUser.getEmail();
+
+                    if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                        dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                        dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                    }
+
+                }
+
+                dbRefUsersGetListOfRestaurantsByCoworkers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                dbRefUsersGetListOfRestaurantsByCoworkers.addValueEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+
+            }
+        });
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
+        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
+        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
+
     }
 
     @Override
@@ -364,6 +320,76 @@ public class FragmentRestaurantListView extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    /*****************
+     * LISTENERS *****
+     * **************/
+
+    private ValueEventListener valueEventListenerGetUserInfo = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+            for (DataSnapshot item :
+                    dataSnapshot.getChildren()) {
+
+                if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
+
+                    userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                    userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                    userKey = item.getKey();
+                    userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
+                    userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                }
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+        }
+    };
+
+    private ValueEventListener valueEventListenerGetListOfRestaurantsByCoworkers = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+            listOfRestaurantsByCoworker.clear();
+
+            for (DataSnapshot item :
+                    dataSnapshot.getChildren()) {
+
+                if (item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null
+                        && !item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")
+                        && !item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
+
+                    /** We create a list with all the restaurants that the users are going to.
+                     * If several coworkers are going to the same restaurant, it will appear in the UI
+                     * */
+                    Log.d(TAG, "onDataChange: " + item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString());
+                    listOfRestaurantsByCoworker.add(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
+
+                }
+            }
+
+            /** We update the recyclerView with the new list
+             * */
+            updateRecyclerViewWithNewListOfRestaurantsByCoworker(
+                    autocompleteTextView.getText().toString().trim());
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+        }
+    };
 
     /*****************
      * CONFIGURATION *
@@ -447,16 +473,44 @@ public class FragmentRestaurantListView extends Fragment {
             recyclerView.setHasFixedSize(true);
             this.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
             this.listOfRestaurants = new ArrayList<>();
-            this.rvAdapter = new RVAdapterList(
+            this.adapter = new RVAdapterList(
                     getActivity(),
                     this.listOfRestaurants,
                     this.listOfRestaurantsByCoworker,
                     glide);
-            this.recyclerView.setAdapter(this.rvAdapter);
+            this.recyclerView.setAdapter(this.adapter);
 
         }
     }
 
+    /** Method that configures onClick for recyclerView items
+     * */
+    private void configureOnClickRecyclerView () {
+        Log.d(TAG, "configureOnClickRecyclerView: called!");
+
+        ItemClickSupport.addTo(recyclerView)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Log.d(TAG, "onItemClicked: item(" + position + ") clicked!");
+
+                        if (null == adapter.getRestaurant(position).getName()
+                                || adapter.getRestaurant(position).getName().equalsIgnoreCase(RepoStrings.NOT_AVAILABLE_FOR_STRINGS)) {
+
+                            if (null != getActivity()) {
+                                ToastHelper.toastShort(getActivity(), getActivity().getResources().getString(R.string.noInfoAvailable));
+                            }
+
+                        } else {
+
+                            /* We launch Restaurant Activity */
+                            startActivity(createAndFillIntentWithUserInfo(adapter, position));
+                        }
+
+                    }
+                });
+
+    }
 
     /******************************************************
      * RX JAVA
@@ -553,6 +607,10 @@ public class FragmentRestaurantListView extends Fragment {
         };
     }
 
+    /******************************************************
+     * UPDATE RECYCLER VIEW
+     *****************************************************/
+
     private void updateRecyclerViewWithNewRestaurantsList(
             List<RestaurantEntry> listOfFetchedRestaurants) {
         Log.d(TAG, "updateRecyclerViewWithNewRestaurantsList: called!");
@@ -563,10 +621,10 @@ public class FragmentRestaurantListView extends Fragment {
             listOfRestaurants.clear();
             listOfRestaurants.addAll(listOfFetchedRestaurants);
 
-            rvAdapter = new RVAdapterList(getActivity(), listOfRestaurants, listOfRestaurantsByCoworker, glide);
-            recyclerView.setAdapter(rvAdapter);
+            adapter = new RVAdapterList(getActivity(), listOfRestaurants, listOfRestaurantsByCoworker, glide);
+            recyclerView.setAdapter(adapter);
 
-            rvAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
 
         }
     }
@@ -585,6 +643,41 @@ public class FragmentRestaurantListView extends Fragment {
         }
 
     }
+
+    /******************************************************
+     * OTHER METHODS
+     *****************************************************/
+
+    /** Method that creates an intent and fills it with all the necessary info to be displayed
+     * in Restaurant Activity
+     * */
+    private Intent createAndFillIntentWithUserInfo(RVAdapterList adapter, int position) {
+        Log.d(TAG, "createAndFillIntentWithUserInfo: called!");
+
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getPlaceId());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getImageUrl());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getName());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getType());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getAddress());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getRating());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getPhone());
+        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getWebsiteUrl());
+
+        Intent intent = new Intent(getActivity(), RestaurantActivity.class);
+
+        intent.putExtra(RepoStrings.SentIntent.PLACE_ID, adapter.getRestaurant(position).getPlaceId());
+        intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, adapter.getRestaurant(position).getImageUrl());
+        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, adapter.getRestaurant(position).getName());
+        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, adapter.getRestaurant(position).getType());
+        intent.putExtra(RepoStrings.SentIntent.ADDRESS, adapter.getRestaurant(position).getAddress());
+        intent.putExtra(RepoStrings.SentIntent.RATING, adapter.getRestaurant(position).getRating());
+        intent.putExtra(RepoStrings.SentIntent.PHONE, adapter.getRestaurant(position).getPhone());
+        intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, adapter.getRestaurant(position).getWebsiteUrl());
+
+        return intent;
+
+    }
+
 
 
 }
