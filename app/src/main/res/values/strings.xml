@@ -168,7 +168,7 @@
     <string name="joinNo">No</string>
     <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
-
+    <string name="persInfoSomethingWrongImage">Something went wrong uploading the image</string>
 
 
 </resources>

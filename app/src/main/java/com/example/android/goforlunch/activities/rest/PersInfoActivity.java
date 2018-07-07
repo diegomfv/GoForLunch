@@ -37,6 +37,8 @@ import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -47,6 +49,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -106,12 +111,19 @@ public class PersInfoActivity extends AppCompatActivity{
     private String userGroupKey;
 
     private Uri userProfilePictureUri;
+    private InputStream inputStreamSelectedImage;
 
-    //Firebase
+    //Firebase Database
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
+
+    //Firebase Storage
+    private FirebaseStorage fireStorage;
+    private StorageReference stRefMain;
+    private StorageReference stRefImageDir;
+    private StorageReference stRefUser;
 
     //Shared Preferences
     private SharedPreferences sharedPref;
@@ -128,6 +140,10 @@ public class PersInfoActivity extends AppCompatActivity{
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
+
+        fireStorage = FirebaseStorage.getInstance();
+        stRefMain = fireStorage.getReference();
+        stRefImageDir = stRefMain.child(RepoStrings.Directories.IMAGE_DIR);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
 
@@ -213,6 +229,14 @@ public class PersInfoActivity extends AppCompatActivity{
 
                         userEmail = currentUser.getEmail();
 
+                        /* We get a reference to user's firebase storage
+                        * */
+                        if (userEmail != null) {
+                            stRefUser = stRefImageDir.child(userEmail);
+                        } else {
+                            stRefUser = null;
+                        }
+
                         Log.d(TAG, "onNext: userProfilePictureUri = " + userProfilePictureUri);
                         if (userProfilePictureUri == null) {
                             userProfilePictureUri = currentUser.getPhotoUrl();
@@ -282,9 +306,11 @@ public class PersInfoActivity extends AppCompatActivity{
             inputGroup.setText(userGroup);
             inputPassword.setText("******");
 
-            glide.load(userProfilePictureUri).into(iv_userImage);
-
-            //iv_userImage.setImageURI(userProfilePictureUri);
+            if (userProfilePictureUri == null) {
+                glide.load(getResources().getDrawable(R.drawable.picture_not_available)).into(iv_userImage);
+            } else {
+                glide.load(userProfilePictureUri).into(iv_userImage);
+            }
 
         }
 
@@ -363,11 +389,21 @@ public class PersInfoActivity extends AppCompatActivity{
         if (resultCode == RESULT_OK) {
             try {
                 Log.d(TAG, "onActivityResult: data.getData() = " + data.getData());
-                final Uri imageUri = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
 
-                glide.load(selectedImage).into(iv_userImage);
+                /* We get the image data and update inputStreamSelectedImage variable which will be
+                * used later if the user decides to save this image in his/her profile
+                * */
+                final Uri imageUri = data.getData();
+                inputStreamSelectedImage = getContentResolver().openInputStream(imageUri);
+
+                // TODO: 07/07/2018 Delete, not necessary here
+                /* Starting storage process
+                * */
+                startStorageProcess(inputStreamSelectedImage);
+
+                final Bitmap selectedBitmap = BitmapFactory.decodeStream(inputStreamSelectedImage);
+
+                glide.load(selectedBitmap).into(iv_userImage);
                 Log.d(TAG, "onActivityResult: image loaded!");
 
                 /** We store the Uri value. We will use it if the user saves changes
@@ -384,6 +420,29 @@ public class PersInfoActivity extends AppCompatActivity{
         }
 
     }
+
+    /** Method that saves a imageStream in FirebaseStorage
+     * */
+    private void startStorageProcess (InputStream imageStream) {
+        Log.d(TAG, "startStorageProcess: called!");
+        Log.d(TAG, "startStorageProcess: reference = " + stRefUser);
+        //Uploading image
+        UploadTask uploadTask = stRefUser.putStream(imageStream);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: something went wrong!");
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "onSuccess: file uploaded!");
+
+            }
+        });
+    }
+
 
     /** Method that shows the progress bar and disables a/some buttons
      * */
@@ -424,7 +483,7 @@ public class PersInfoActivity extends AppCompatActivity{
      * */
     private void alertDialogChangeData() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(PersInfoActivity.this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(PersInfoActivity.this);
         builder.setMessage(getResources().getString(R.string.persInfoDialogAreYouChangeData))
                 .setTitle(getResources().getString(R.string.persInfoDialogChangingData))
                 .setPositiveButton(getResources().getString(R.string.persInfoDialogChangeDataYes), new DialogInterface.OnClickListener() {
@@ -466,21 +525,45 @@ public class PersInfoActivity extends AppCompatActivity{
 
                                             dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
 
+                                            /* Updating the database
+                                            * */
                                             Map<String, Object> map = new HashMap<>();
                                             map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
                                             map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
                                             UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
 
-                                            ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
+                                            /* If an image was downloaded, then we update user's storage image
+                                            * */
+                                            Log.d(TAG, "onComplete: inputStream = " + inputStreamSelectedImage);
+                                            if (inputStreamSelectedImage != null) {
+                                                UploadTask uploadTask = stRefUser.putStream(inputStreamSelectedImage);
+                                                uploadTask.addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.d(TAG, "onFailure: something went wrong!");
 
-                                            startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
-                                            finish();
+                                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoSomethingWrongImage));
 
+                                                        startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                                                        finish();
+
+                                                    }
+                                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                        Log.d(TAG, "onSuccess: file uploaded!");
+
+                                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
+
+                                                        startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                                                        finish();
+
+                                                    }
+                                                });
+                                            }
                                         }
                                     }
                                 });
-
-
                     }
                 })
                 .setNegativeButton(getResources().getString(R.string.persInfoDialogChangeDataNo), new DialogInterface.OnClickListener() {
@@ -516,6 +599,5 @@ public class PersInfoActivity extends AppCompatActivity{
         AlertDialog alert = alertBuilder.create();
         alert.show();
     }
-
 
 }

@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.rest.FirebaseActivityDELETE;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
@@ -148,8 +149,12 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
                                             } else {
                                                 Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
                                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
                                                 startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
+                                                //startActivity(new Intent(AuthSignInEmailPasswordActivity.this, FirebaseActivityDELETE.class));
                                                 finish();
+
+
                                             }
                                         }
                                     });

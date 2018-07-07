@@ -119,6 +119,10 @@ public class FragmentCoworkers extends Fragment {
         fireStorage = FirebaseStorage.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
+        stRef = fireStorage.getReference();
+        stRefImages = stRef.child("profilePictures");
+        stRefImages.getPath();
+
 
 
         /** Configure toolbar */
