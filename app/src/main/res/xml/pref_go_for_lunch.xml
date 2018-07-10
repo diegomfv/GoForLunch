@@ -5,7 +5,7 @@
         android:id="@+id/settings_notifications"
         android:defaultValue="false"
         android:key="@string/pref_key_notifications"
-        android:title="Notifications"
+        android:title="@string/pref_title"
         android:summaryOff="@string/pref_summaryOff"
         android:summaryOn="@string/pref_summaryOn">
     </CheckBoxPreference>

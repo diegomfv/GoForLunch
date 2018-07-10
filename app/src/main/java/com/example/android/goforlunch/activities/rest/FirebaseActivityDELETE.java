@@ -431,15 +431,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button 8 clicked!");
 
-                String userKey = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY);
-                String userRestaurant = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_RESTAURANT_NAME);
-                String userGroupKey = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP_KEY);
-                String userGroup = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP);
 
-                Log.d(TAG, "onClick: userKey: " + userKey);
-                Log.d(TAG, "onClick: userRestaurant: " + userRestaurant);
-                Log.d(TAG, "onClick: userGroupKey: " + userGroupKey);
-                Log.d(TAG, "onClick: userGroup: " + userGroup);
 
             }
         });
@@ -490,7 +482,33 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button10");
 
-                startActivity(new Intent(FirebaseActivityDELETE.this, AndroidDatabaseManager.class));
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child("-LF4O_-YbE0dFCUT-CE-");
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.getValue());
+
+                        if (dataSnapshot.child("blablabla") != null) {
+                            Log.d(TAG, "onDataChange: " + "blablabla is != null");
+                            Log.d(TAG, "onDataChange: " + dataSnapshot.child("blablabla").getValue());
+                            Log.d(TAG, "onDataChange: " + dataSnapshot.child("blablabla").getValue().toString());
+                        } else {
+                            Log.d(TAG, "onDataChange: " + "blablabla is null)");
+                        }
+
+                        if (dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP) != null) {
+                            Log.d(TAG, "onDataChange: " + dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString());
+                            button10.setText(dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString());
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.e(TAG, "onCancelled: " );
+
+                    }
+                });
             }
         });
 

@@ -14,7 +14,6 @@
         android:layout_height="70dp"
         app:civ_border_width="0.5dp"
         app:civ_border_color="#FF000000"
-        android:src="@drawable/homer_simpson"
         android:layout_margin="5dp"
         android:layout_alignParentBottom="true"/>
 

@@ -31,13 +31,11 @@ import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.job.AddRestaurantToGroupDailyJob;
 import com.example.android.goforlunch.job.AlertJobCreator;
 import com.example.android.goforlunch.job.NotificationDailyJob;
-import com.example.android.goforlunch.models.modelnearby.LatLngForRetrofit;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkers;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -105,6 +103,7 @@ public class MainActivity extends AppCompatActivity{
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRefUsers;
+    private DatabaseReference fireDbRefGroups;
 
     //Variables
     private String userFirstName;
@@ -143,6 +142,9 @@ public class MainActivity extends AppCompatActivity{
                 .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
                 .commit();
         flagToSpecifyCurrentFragment = 1;
+
+        checkAddRestaurantAt4pmDailyJob(sharedPref);
+        checkNotifications(sharedPref);
 
         hideProgressBar(progressBar,container);
 
@@ -232,26 +234,31 @@ public class MainActivity extends AppCompatActivity{
     }
 
     /**
-     * This method creates a new job to add restaurants to the database if it
+     * This method creates a new job to add restaurants to the database every day at 4pm if it
      * has not been created yet
      * */
-    private void checkAddRestaurantDailyJob (SharedPreferences sharedPreferences) {
-        Log.d(TAG, "checkAddRestaurantDailyJob: called!");
+    private void checkAddRestaurantAt4pmDailyJob(SharedPreferences sharedPreferences) {
+        Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: called!");
 
-        if (sharedPreferences.getBoolean(getResources().getString(R.string.key_addRestaurantIsOn), true)){
-            Log.d(TAG, "checkAddRestaurantDailyJob: do nothing!");
+        /* The first time this method is called, it will return false because there would not be
+        * any info in SharedPreferences. When running the "else" part, it will fill SharedPreferences
+        * and from that moment on it will do nothing because the alarm will already be set and this
+        * alarm will be "true" in SharedPreferences
+        * */
+        if (sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_addRestaurantIsOn), false)){
+            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: do nothing!");
             //do nothing since alarm is currently running
 
         } else {
-            Log.d(TAG, "checkAddRestaurantDailyJob: create job!");
+            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: create job!");
 
             JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
             jobIdAddRestaurant = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
             ToastHelper.toastShort(MainActivity.this, "AddRestaurantToGroupDailyJob created!");
 
-            /** We change sharedPref in the Database
-             * */
-            sharedPref.edit().putBoolean(getResources().getString(R.string.key_addRestaurantIsOn), true).apply();
+            /* We change sharedPref in the Database
+             *  */
+            sharedPref.edit().putBoolean(getResources().getString(R.string.pref_key_addRestaurantIsOn), true).apply();
         }
     }
 
@@ -262,19 +269,19 @@ public class MainActivity extends AppCompatActivity{
     private void checkNotifications (SharedPreferences sharedPreferences) {
         Log.d(TAG, "checkNotifications: called!");
 
-        if (sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), true)){
+        if (sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false)){
             Log.d(TAG, "checkNotifications: do nothing!");
             //do nothing since alarm is currently running
 
         } else {
             Log.d(TAG, "checkNotifications: cancel job and create alarm");
 
-            /** We cancel the job to avoid creating more than one
-             * */
+            /* We cancel the job to avoid
+            creating more than one*/
             cancelJob(jobIdNotifications);
 
-            /** We create the alarm for notifications using Evernote Android Job Library
-             * */
+            /* We create the alarm for notifications
+            using Evernote Android Job Library */
             JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
             jobIdNotifications = NotificationDailyJob.scheduleNotificationDailyJob();
 
@@ -289,7 +296,7 @@ public class MainActivity extends AppCompatActivity{
         JobManager.instance().cancel(JobId);
     }
 
-    /** Method used to updateItem the NavDrawer info
+    /** Method used to update the NavDrawer info
      * */
     private boolean updateNavDrawerTextViews() {
         Log.d(TAG, "updateNavDrawerTextViews: called!");
@@ -302,8 +309,13 @@ public class MainActivity extends AppCompatActivity{
 
         if (currentUser.getPhotoUrl() != null) {
             Log.d(TAG, "updateNavDrawerTextViews: " + currentUser.getPhotoUrl());
-            Glide.with(navUserProfilePicture)
+            Glide.with(MainActivity.this)
                     .load(currentUser.getPhotoUrl())
+                    .into(navUserProfilePicture);
+        } else {
+            Log.d(TAG, "updateNavDrawerTextViews: currentUserPhoto = null");
+            Glide.with(MainActivity.this)
+                    .load(getResources().getDrawable(R.drawable.picture_not_available))
                     .into(navUserProfilePicture);
         }
 
@@ -356,7 +368,7 @@ public class MainActivity extends AppCompatActivity{
 
                     updateNavDrawerTextViews();
                     chooseGroupReminder();
-                    //checkAddRestaurantDailyJob(sharedPref);
+                    //checkAddRestaurantAt4pmDailyJob(sharedPref);
 
                 }
             }
@@ -575,6 +587,40 @@ public class MainActivity extends AppCompatActivity{
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
+    // TODO: 07/07/2018 Delete!
+    public void getTheInfo () {
+        Log.d(TAG, "getTheInfo: called!");
+
+        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
+                .child(userKey)
+                .child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+        fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null &&
+                        dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString() != null) {
+
+                    ToastHelper.toastShort(MainActivity.this,
+                            dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() + " / "
+                            + dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+            }
+        });
+
+
+
+    }
+
 
 
 }

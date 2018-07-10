@@ -45,6 +45,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Map;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -98,6 +99,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.clear().apply();
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();

@@ -2,6 +2,7 @@ package com.example.android.goforlunch.job;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
@@ -11,9 +12,12 @@ import com.evernote.android.job.JobCreator;
  */
 public class AlertJobCreator implements JobCreator {
 
+    private static final String TAG = AlertJobCreator.class.getSimpleName();
+
     @Nullable
     @Override
     public Job create(@NonNull String tag) {
+        Log.d(TAG, "create: called");
 
         switch (tag) {
 
