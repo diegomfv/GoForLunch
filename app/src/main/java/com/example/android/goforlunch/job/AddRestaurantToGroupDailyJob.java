@@ -23,6 +23,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Diego Fajardo on 07/06/2018.
  */
+
+/** This class is responsible of
+ * adding a restaurant to the group at 4p and
+ * deleting it from the user's
+ * */
 public class AddRestaurantToGroupDailyJob extends DailyJob {
 
     public static final String TAG = "AddRestaurantToGroupDai";

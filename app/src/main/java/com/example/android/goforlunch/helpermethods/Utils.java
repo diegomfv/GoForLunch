@@ -5,20 +5,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.bumptech.glide.Glide;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.repository.RepoStrings;
@@ -35,7 +29,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
@@ -166,6 +159,12 @@ public class Utils {
         return true;
     }
 
+    public static boolean updateSharedPreferences(SharedPreferences sharedPref, String key, boolean value) {
+        sharedPref.edit().putBoolean(key,value).apply();
+        return true;
+    }
+
+
     /** Method to get
      * info (a String) from Shared Preferences
      * */
@@ -186,16 +185,10 @@ public class Utils {
             for (Map.Entry<String, ?> entry :
                     map.entrySet()) {
 
+                // TODO: 10/07/2018 Take care!! What if it's boolean!?
                 updateSharedPreferences(sharedPref, entry.getKey(), "");
 
             }
-        }
-
-        // TODO: 02/06/2018 Delete this!
-        Map<String, ?> prefsMap = sharedPref.getAll();
-        for (Map.Entry<String, ?> entry: prefsMap.entrySet()) {
-            Log.d(TAG, "SharedPreferences: " + entry.getKey() + ":" +
-                    entry.getValue().toString());
         }
 
         return true;
@@ -375,10 +368,16 @@ public class Utils {
                 }
             });
 
-
-
     }
 
+    /** Method to print sharedPreferences
+     * */
+    public static void printSharedPreferences (SharedPreferences sharedPreferences) {
+        Log.d(TAG, "printSharedPreferences: called!");
 
-
+        Map<String, ?> allEntries = sharedPreferences.getAll();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            Log.i(TAG, "map values -> " + entry.getKey() + ": " + entry.getValue().toString());
+        }
+    }
 }

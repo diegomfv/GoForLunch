@@ -53,9 +53,6 @@ import io.reactivex.observers.DisposableObserver;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/06/2018 Check storage issue
-// TODO: 29/05/2018 Check if there is internet connection
-// TODO: 29/05/2018 Enable notifications at 4pm
-// TODO: 29/05/2018 Enable notifications if restaurant is chosen
 // TODO: 29/05/2018 Translations
 // TODO: 29/05/2018 General cleanup
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
@@ -123,8 +120,6 @@ public class MainActivity extends AppCompatActivity{
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         fireDb = FirebaseDatabase.getInstance();
 
-        Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
-
         bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
         mNavigationView.setNavigationItemSelectedListener(navViewListener);
 
@@ -143,9 +138,6 @@ public class MainActivity extends AppCompatActivity{
                 .commit();
         flagToSpecifyCurrentFragment = 1;
 
-        checkAddRestaurantAt4pmDailyJob(sharedPref);
-        checkNotifications(sharedPref);
-
         hideProgressBar(progressBar,container);
 
     }
@@ -157,8 +149,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: called!");
-        //checkNotifications(sharedPref);
-        // TODO: 02/07/2018 !!!!
+
     }
 
     @Override
@@ -233,68 +224,6 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    /**
-     * This method creates a new job to add restaurants to the database every day at 4pm if it
-     * has not been created yet
-     * */
-    private void checkAddRestaurantAt4pmDailyJob(SharedPreferences sharedPreferences) {
-        Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: called!");
-
-        /* The first time this method is called, it will return false because there would not be
-        * any info in SharedPreferences. When running the "else" part, it will fill SharedPreferences
-        * and from that moment on it will do nothing because the alarm will already be set and this
-        * alarm will be "true" in SharedPreferences
-        * */
-        if (sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_addRestaurantIsOn), false)){
-            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: do nothing!");
-            //do nothing since alarm is currently running
-
-        } else {
-            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: create job!");
-
-            JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
-            jobIdAddRestaurant = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
-            ToastHelper.toastShort(MainActivity.this, "AddRestaurantToGroupDailyJob created!");
-
-            /* We change sharedPref in the Database
-             *  */
-            sharedPref.edit().putBoolean(getResources().getString(R.string.pref_key_addRestaurantIsOn), true).apply();
-        }
-    }
-
-    /**
-     * This method creates a new job that will create notifications to tell
-     * the user where he/she is going to have lunch
-     * **/
-    private void checkNotifications (SharedPreferences sharedPreferences) {
-        Log.d(TAG, "checkNotifications: called!");
-
-        if (sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false)){
-            Log.d(TAG, "checkNotifications: do nothing!");
-            //do nothing since alarm is currently running
-
-        } else {
-            Log.d(TAG, "checkNotifications: cancel job and create alarm");
-
-            /* We cancel the job to avoid
-            creating more than one*/
-            cancelJob(jobIdNotifications);
-
-            /* We create the alarm for notifications
-            using Evernote Android Job Library */
-            JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
-            jobIdNotifications = NotificationDailyJob.scheduleNotificationDailyJob();
-
-            ToastHelper.toastShort(MainActivity.this, "An alarm has been set at 1pm!");
-        }
-    }
-
-    /** Method used to cancel notifications
-     * */
-    private void cancelJob(int JobId) {
-        Log.d(TAG, "cancelJob: called!");
-        JobManager.instance().cancel(JobId);
-    }
 
     /** Method used to update the NavDrawer info
      * */
@@ -328,7 +257,7 @@ public class MainActivity extends AppCompatActivity{
         Log.d(TAG, "chooseGroupReminder: called!");
 
         if (userGroup == null || userGroup.equalsIgnoreCase("")) {
-            ToastHelper.toastShort(this, "You haven't chosen a group yet!");
+            ToastHelper.toastShort(this, getResources().getString(R.string.joinNotChosenGroup));
         }
         return true;
     }
@@ -339,8 +268,6 @@ public class MainActivity extends AppCompatActivity{
         return mDrawerLayout;
     }
 
-    /** Method used to check if there is internet connection
-     * */
 
 
     /*****************
@@ -366,9 +293,13 @@ public class MainActivity extends AppCompatActivity{
                     userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
                     Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
 
+                    /* We check that alarms are running
+                    * */
+                    checkAddRestaurantAt4pmDailyJob(sharedPref);
+                    checkNotifications(sharedPref);
+
                     updateNavDrawerTextViews();
                     chooseGroupReminder();
-                    //checkAddRestaurantAt4pmDailyJob(sharedPref);
 
                 }
             }
@@ -381,6 +312,42 @@ public class MainActivity extends AppCompatActivity{
         }
     };
 
+    /** Listener for when the user clicks
+     * the Lunch button in nav drawer
+     * */
+    private ValueEventListener valueEventListenerNavLunch = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+            Log.d(TAG, "onDataChange: Internet is OK");
+
+            if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue() != null) {
+                if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
+                    /* The user has not chosen a restaurant yet
+                     * */
+                    ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.navDrawerToastNotRestaurantYet));
+
+                } else {
+                    /* The user has a restaurant
+                     * */
+                    Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
+                    Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
+                    startActivity(Utils.fillIntentUsingMapInfo(intent, map));
+
+                }
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+        }
+    };
+
+
+    /** Listener for bottom navigation view
+     * */
     private BottomNavigationView.OnNavigationItemSelectedListener botNavListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -443,6 +410,8 @@ public class MainActivity extends AppCompatActivity{
                 }
             };
 
+    /** Listener for the navigation drawer
+     * */
     private NavigationView.OnNavigationItemSelectedListener navViewListener =
             new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -453,36 +422,33 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
 
-                            fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                            fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
                                 @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+                                public void onNext(Boolean aBoolean) {
+                                    Log.d(TAG, "onNext: " + aBoolean);
 
-//                                    if (Utils.checkInternetInBackgroundThread();) {
-                                        Log.d(TAG, "onDataChange: Internet is OK");
+                                    if (aBoolean) {
 
-                                        if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
-                                            ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.navDrawerToastNotGroupYet));
+                                        // TODO: 10/07/2018 Check internet in background thread
+                                        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                        fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerNavLunch);
 
-                                        } else {
+                                    } else {
+                                        //Do nothing because there is no internet
+                                        ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.noInternet));
 
-                                            Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
-                                            Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
-                                            startActivity(Utils.fillIntentUsingMapInfo(intent, map));
-
-                                        }
-
-//                                    } else {
-                                        Log.d(TAG, "onDataChange: There is no internet!");
-                                        ToastHelper.toastNoInternet(MainActivity.this);
-
-//                                    }
+                                    }
                                 }
 
                                 @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    Log.d(TAG, "onCancelled: " + databaseError.getCode());
+                                public void onError(Throwable e) {
+                                    Log.e(TAG, "onError: " + e.getMessage());
+
+                                }
+
+                                @Override
+                                public void onComplete() {
+                                    Log.d(TAG, "onComplete: ");
 
                                 }
                             });
@@ -518,6 +484,8 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_logout: {
                             Log.d(TAG, "onNavigationItemSelected: log out pressed");
 
+                            /* We display a dialog for loggin out
+                            * */
                             alertDialogLogOut();
 
                             return true;
@@ -535,6 +503,7 @@ public class MainActivity extends AppCompatActivity{
     /** Method that allows to show the progress bar
      * */
     public void showProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
+        Log.d(TAG, "showProgressBar: called!");
 
         progressBar.setVisibility(View.VISIBLE);
         frameLayout.setVisibility(View.INVISIBLE);
@@ -544,6 +513,7 @@ public class MainActivity extends AppCompatActivity{
     /** Method that hides the progress bar
      * */
     public void hideProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
+        Log.d(TAG, "hideProgressBar: called!");
 
         progressBar.setVisibility(View.GONE);
         frameLayout.setVisibility(View.VISIBLE);
@@ -554,6 +524,7 @@ public class MainActivity extends AppCompatActivity{
      * can be used to log out
      * */
     private void alertDialogLogOut () {
+        Log.d(TAG, "alertDialogLogOut: called!");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setMessage(getResources().getString(R.string.mainDialogAreYouSureLogOut))
@@ -563,9 +534,9 @@ public class MainActivity extends AppCompatActivity{
                     public void onClick(DialogInterface dialog, int which) {
                         Log.d(TAG, "onClick: yes button clicked!");
 
-                        /** The user signs out
-                         *  and goes to AuthSignIn Activity
-                         *  */
+                        /* The user signs out
+                         * and goes to AuthSignIn Activity
+                         */
                         auth.signOut();
                         LoginManager.getInstance().logOut();
 
@@ -588,40 +559,93 @@ public class MainActivity extends AppCompatActivity{
         dialog.show();
     }
 
-    // TODO: 07/07/2018 Delete!
-    public void getTheInfo () {
-        Log.d(TAG, "getTheInfo: called!");
+    /*********************
+     * NOTIFICATIONS *****
+     * ******************/
 
-        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
-                .child(userKey)
-                .child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-        fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+    /**
+     * This method creates a new job to add restaurants to the database every day at 4pm if it
+     * has not been created yet
+     * */
+    private void checkAddRestaurantAt4pmDailyJob(SharedPreferences sharedPreferences) {
+        Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: called!");
 
-                if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null &&
-                        dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString() != null) {
+        boolean addRestaurantAlarmIsTrue = sharedPreferences.getBoolean(getResources().getString(R.string.key_alarmAddRestaurantIsOn), false);
 
-                    ToastHelper.toastShort(MainActivity.this,
-                            dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() + " / "
-                            + dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
+        /* The first time this method is called, it will run the else statement because there would not be
+         * any info in SharedPreferences. When running the "else" part, it will fill SharedPreferences
+         * and from that moment on it will do nothing because the alarm will already be set and this
+         * alarm will be "true" in SharedPreferences
+         * */
 
-                }
-            }
+        if (addRestaurantAlarmIsTrue){
+            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: do nothing!");
+            //do nothing since alarm is currently running
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+        } else {
+            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: create job!");
 
-            }
-        });
+             /* We cancel the job to avoid
+            creating more than one (just in case) */
+            cancelJob(jobIdAddRestaurant);
 
+            JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
+            jobIdAddRestaurant = AddRestaurantToGroupDailyJob.scheduleAddRestaurantToGroupDailyJob();
 
+            /* We change sharedPref in the Database. The alarm is set so, from now on, we won't do anything
+             *  */
+            Utils.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmAddRestaurantIsOn), true);
 
+            Log.i(TAG, "checkAddRestaurantAt4pmDailyJob: ALARM IS ON!");
+        }
     }
 
+    /**
+     * This method creates a new job that will create notifications to tell
+     * the user where he/she is going to have lunch
+     * **/
+    private void checkNotifications (SharedPreferences sharedPreferences) {
+        Log.d(TAG, "checkNotifications: called!");
 
+        boolean notificationsAlarmIsTrue = sharedPreferences.getBoolean(getResources().getString(R.string.key_alarmNotificationsAreOn), false);
+
+        /* The first time this method is called, it will run the else statement because there would not be
+         * any info in SharedPreferences. When running the "else" part, it will fill SharedPreferences
+         * and from that moment on it will do nothing because the alarm will already be set and this
+         * alarm will be "true" in SharedPreferences
+         * */
+
+        if (notificationsAlarmIsTrue) {
+            Log.d(TAG, "checkNotifications: do nothing!");
+            //do nothing since alarm is currently running
+
+        } else {
+            Log.d(TAG, "checkNotifications: cancel job and create alarm");
+
+            /* We cancel the job to avoid
+            creating more than one (just in case) */
+            cancelJob(jobIdNotifications);
+
+            /* We create the alarm for notifications
+            using Evernote Android Job Library */
+            JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
+            jobIdNotifications = NotificationDailyJob.scheduleNotificationDailyJob();
+
+            /* We change sharedPref in the Database. The alarm is set so, from now on, we won't do anything
+             *  */
+            Utils.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmNotificationsAreOn), true);
+
+            Log.i(TAG, "checkNotifications: ALARM IS ON!");
+
+        }
+    }
+
+    /** Method used to cancel notifications
+     * */
+    private void cancelJob(int JobId) {
+        Log.d(TAG, "cancelJob: called!");
+        JobManager.instance().cancel(JobId);
+    }
 
 }
 

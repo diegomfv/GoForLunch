@@ -45,6 +45,14 @@
     <string name="mainDialogLoggingOutYes">YES, I am sure</string>
     <string name="mainDialogLoggingOutNo">NO</string>
 
+    <!--
+     These 2 methods save in sharedPreferences that the two alarms have been created
+     (the notifications alarm has nothing to do with Settings Activity (the preferences fragment
+     updates pref_key_notifications which is used to determine if the notification has to appear)
+     -->
+    <string name="key_alarmAddRestaurantIsOn" translatable="false">alarmAddRestaurantOn</string>
+    <string name="key_alarmNotificationsAreOn" translatable="false">alarmNotificationsOn</string>
+
     <!-- FRAGMENTS -->
     <string name="autoCompleteSearchText">Search</string>
     <string name="toolbarImHungry">I\'m hungry</string>
@@ -63,7 +71,6 @@
     <string name="pref_summaryOn">Notifications are enabled</string>
     <string name="pref_title">Notifications</string>
     <string name="pref_key_notifications" translatable="false">alarmNotifications</string>
-    <string name="pref_key_addRestaurantIsOn" translatable="false">alarmAddRestaurant</string>
 
 
     <!-- INTENT RECYCLER VIEW -> USER_RESTAURANT_NAME IMAGE_LOAD_TYPE -->
@@ -120,7 +127,7 @@
     <string name="navDrawerSettings">SETTINGS</string>
     <string name="navDrawerLogOut">LOG OUT</string>
 
-    <string name="navDrawerToastNotGroupYet">You haven\'t chosen a group yet!</string>
+    <string name="navDrawerToastNotRestaurantYet">You haven\'t chosen a restaurant yet!</string>
 
     <!-- CHOOSE LOGIN ACTIVITY -->
     <string name="choose_register">Register</string>

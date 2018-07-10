@@ -146,6 +146,7 @@ public class PersInfoActivity extends AppCompatActivity{
         stRefImageDir = stRefMain.child(RepoStrings.Directories.IMAGE_DIR);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
+        Utils.printSharedPreferences(sharedPref);
 
         glide = Glide.with(PersInfoActivity.this);
 

@@ -233,9 +233,7 @@ public class RestaurantActivity extends AppCompatActivity {
             }
         });
 
-
         Anim.crossFadeShortAnimation(recyclerView);
-
 
     }
 

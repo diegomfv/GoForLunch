@@ -40,6 +40,10 @@ import io.reactivex.observers.DisposableObserver;
 /**
  * Created by Diego Fajardo on 07/06/2018.
  */
+
+/** This class is responsible of
+ * the creation of the Notification
+ * */
 public class NotificationDailyJob extends DailyJob {
 
     public static final String TAG = "NotificationDailyJob";
@@ -50,13 +54,10 @@ public class NotificationDailyJob extends DailyJob {
 
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
-
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRefUsers;
-    private DatabaseReference fireDbRefGroups;
 
     private String userKey;
-    private String userGroupKey;
 
     private SharedPreferences sharedPref;
 
@@ -69,7 +70,9 @@ public class NotificationDailyJob extends DailyJob {
         If they are, we star the process to create a notification.
         If they are not, we do nothing.
         * */
-        if (sharedPref.getBoolean(getContext().getResources().getString(R.string.pref_key_notifications), true)) {
+        boolean notificationsAreEnabled = (sharedPref.getBoolean(getContext().getResources().getString(R.string.pref_key_notifications), false));
+
+        if (notificationsAreEnabled) {
 
             /* We check if internet is available.
             * If it is available, we continue with the process (creating the notification)
@@ -96,7 +99,6 @@ public class NotificationDailyJob extends DailyJob {
                             sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
                             userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
-                            userGroupKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_GROUP_KEY, "");
 
                             fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
                                     .child(userKey)
