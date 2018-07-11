@@ -23,6 +23,7 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -106,6 +107,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
         auth = FirebaseAuth.getInstance();
         // TODO: 29/06/2018 Delete signOut()
         auth.signOut();
+        LoginManager.getInstance().logOut();
         user = auth.getCurrentUser();
 
         Log.d(TAG, "onCreate: SHARED_PREFERENCES = " + sharedPref.getAll().toString());
@@ -396,7 +398,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                                         "",
                                                         "",
                                                         "",
-                                                        "",
+                                                        0,
                                                         "");
 
                                                 Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
@@ -526,7 +528,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                                                         "",
                                                         "",
                                                         "",
-                                                        "",
+                                                        0,
                                                         "");
 
                                                 Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);

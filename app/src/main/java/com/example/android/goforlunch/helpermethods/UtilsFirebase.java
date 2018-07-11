@@ -85,7 +85,7 @@ public class UtilsFirebase {
                                                                String placeId,
                                                                String rating,
                                                                String restaurantName,
-                                                               String restaurantType,
+                                                               int restaurantType,
                                                                String websiteUrl) {
 
         Map <String, Object> map = new HashMap<>();

@@ -86,6 +86,7 @@
     <string name="facebook_app_id">622449801446185</string>
     <string name="fb_login_protocol_scheme">fb622449801446185</string>
 
+
     <!-- RESTAURANT TYPES -->
     <string name="typeAll">All</string>
     <string name="typeAmerican">American</string>
@@ -103,6 +104,24 @@
     <string name="typeOther">Other</string>
 
     <string-array name="typesOfRestaurants">
+        <item>@string/typeAll</item>         <!-- 0   -->
+        <item>@string/typeAmerican</item>    <!-- 1   -->
+        <item>@string/typeChinese</item>     <!-- 2   -->
+        <item>@string/typeEnglish</item>     <!-- 3   -->
+        <item>@string/typeFrench</item>      <!-- 4   -->
+        <item>@string/typeGerman</item>      <!-- 5   -->
+        <item>@string/typeIndian</item>      <!-- 6   -->
+        <item>@string/typeItalian</item>     <!-- 6   -->
+        <item>@string/typeJapanese</item>    <!-- 8   -->
+        <item>@string/typeMexican</item>     <!-- 9   -->
+        <item>@string/typeSpanish</item>     <!-- 10  -->
+        <item>@string/typeThai</item>        <!-- 11  -->
+        <item>@string/typeVietnamese</item>  <!-- 12  -->
+        <item>@string/typeOther</item>       <!-- 13  -->
+    </string-array>
+
+    <!-- RESTAURANT TYPES ~ NOT TRANSLATABLE ~ FOR FETCHING RESTAURANTS -->
+    <string-array name="fetchTypesOfRestaurants">
         <item>@string/typeAll</item>         <!-- 0   -->
         <item>@string/typeAmerican</item>    <!-- 1   -->
         <item>@string/typeChinese</item>     <!-- 2   -->
@@ -174,13 +193,13 @@
 
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupsDoesNotExist">That group does not exist</string>
-    <string name="joinWouldYouLikeJoin">Would you like to join this group(</string>
+    <string name="joinWouldYouLikeJoin">Would you like to join this group</string>
     <string name="joinJoinGroup">Join Group</string>
     <string name="joinYes">Yes</string>
     <string name="joinNo">No</string>
     <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
-
+    <string name="joinNewGroupIs">Your new group is</string>
 
 
 </resources>

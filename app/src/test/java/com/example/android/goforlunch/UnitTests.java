@@ -1,5 +1,6 @@
 package com.example.android.goforlunch;
 
+import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repository.RepoStrings;
@@ -8,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.RoundingMode;
+import java.security.PublicKey;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -550,25 +552,64 @@ public class UnitTests {
     }
 
     @Test
-    public void modifyAString () {
+    public void mapTrials () {
 
-        String alfa = "alfa";
+        Map<String,RestaurantEntry> mapOfRestaurants = new HashMap<>();
 
-        Anim.modifyString(alfa);
+        for (int i = 0; i < 5; i++) {
 
-        System.out.println(alfa);
+            mapOfRestaurants.put(
+                    String.valueOf(i),
+                    new RestaurantEntry(
+                            "",
+                            "",
+                            13,
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                    ));
+        }
 
+        Iterator<Map.Entry<String, RestaurantEntry>> iter = mapOfRestaurants.entrySet().iterator();
+        int counter = 0;
+        while (iter.hasNext()) {
 
-    }
+            counter++;
 
-    @Test
-    public void modifyANumber () {
+            Map.Entry<String, RestaurantEntry> restaurantEntry = iter.next();
 
-        int alfa = 2;
+            restaurantEntry.getValue().setPlaceId(counter + "");
 
-        Anim.modifyInt(alfa);
+            if (!iter.hasNext()) {
+                /* We have reached the end of the loop, so we can start with
+                 * Distance Matrix process */
 
-        System.out.println(alfa);
+            }
+        }
+
+        counter = 0;
+
+        iter = mapOfRestaurants.entrySet().iterator();
+
+        while (iter.hasNext()) {
+
+            counter++;
+
+            Map.Entry<String, RestaurantEntry> restaurantEntry = iter.next();
+
+            System.out.println(counter + ": " + restaurantEntry.toString());
+
+            if (!iter.hasNext()) {
+                System.out.println("End of the loop");
+
+            }
+        }
 
 
     }

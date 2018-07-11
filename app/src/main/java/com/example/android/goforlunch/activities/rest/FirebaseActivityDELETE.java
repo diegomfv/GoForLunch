@@ -197,7 +197,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                             "",
                             "",
                             "",
-                            "",
+                            0,
                             "");
 
                 }

@@ -108,7 +108,7 @@ public class JoinGroupActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: buttonJoinGroup clicked!");
 
-                if (textInputAutoCompleteTextView.equals("")) {
+                if (textInputAutoCompleteTextView.getText().toString().equals("")) {
                     ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinNotChosenGroup));
 
                 } else if (userGroup.equalsIgnoreCase(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim())) {
@@ -128,7 +128,7 @@ public class JoinGroupActivity extends AppCompatActivity {
 
                                     /* We create a dialog to join group
                                      * */
-                                    alertDialogJoinGroup(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim());
+                                    alertDialogJoinGroup(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()));
 
                                 } else  {
                                     Log.d(TAG, "onNext: " + aBoolean);
@@ -341,7 +341,7 @@ public class JoinGroupActivity extends AppCompatActivity {
     private void alertDialogJoinGroup (final String group) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(JoinGroupActivity.this);
-        builder.setMessage(getResources().getString(R.string.joinWouldYouLikeJoin) + group + ")?")
+        builder.setMessage(getResources().getString(R.string.joinWouldYouLikeJoin) + " (" + group + ")?")
                 .setTitle(getResources().getString(R.string.joinGroupJoinGroup))
                 .setPositiveButton(getResources().getString(R.string.joinYes), new DialogInterface.OnClickListener() {
                     @Override
@@ -361,6 +361,12 @@ public class JoinGroupActivity extends AppCompatActivity {
 
                                 dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
                                 UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
+
+                                ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinNewGroupIs) + " " + group + "!");
+
+                                /* We take the user to Main Activity
+                                * */
+                                startActivity(new Intent(JoinGroupActivity.this, MainActivity.class));
 
                             }
 

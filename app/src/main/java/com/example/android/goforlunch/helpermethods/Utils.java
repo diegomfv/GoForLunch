@@ -321,6 +321,7 @@ public class Utils {
             return string;
         }
     }
+
     /** Method used to avoid memory leaks
      * */
     public static void dispose (Disposable disposable) {

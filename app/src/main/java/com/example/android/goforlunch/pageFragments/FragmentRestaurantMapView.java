@@ -354,7 +354,7 @@ public class FragmentRestaurantMapView extends Fragment {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: refresh button clicked!");
                 ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Deleting db and starting request process");
-                deleteAllFilesInStorage();
+                //deleteAllFilesInStorage();
                 deleteAllRestaurantsAndStartRequestProcess();
 
             }
@@ -1542,7 +1542,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
         /* We updateItem a list of restaurants with all the restaurants of the database
         * */
-        // TODO: 25/06/2018 Did't find another place to be sure the database was completely
+        // TODO: 25/06/2018 Didn't find another place to be sure the database was completely
         // TODO: 25/06/2018 filled before updating the list
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override

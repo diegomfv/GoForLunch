@@ -325,7 +325,7 @@ public class RestaurantActivity extends AppCompatActivity {
                                         Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
                                         Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
                                         Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_TYPE)),
+                                        getIntent().getIntExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, 0),
                                         Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
                                 );
 
@@ -370,39 +370,16 @@ public class RestaurantActivity extends AppCompatActivity {
                             if (phoneToastString.equals("")) {
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantPhoneNotAvailable));
                             } else {
-                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantCallingTo) + phoneToastString);
+                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantCallingTo) + " " + phoneToastString);
                             }
 
                         } break;
 
                         case R.id.restaurant_view_like_id: {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
+
                             ToastHelper.toastShort(context, likeToastString);
 
-                            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-                                @Override
-                                public void onNext(Boolean aBoolean) {
-                                    Log.d(TAG, "onNext: " + aBoolean);
-
-                                    if (aBoolean) {
-                                        ToastHelper.toastShort(RestaurantActivity.this, "Internet available");
-                                    } else {
-                                        ToastHelper.toastShort(RestaurantActivity.this, "No internet available");
-                                    }
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Log.d(TAG, "onError: " + Log.getStackTraceString(e));
-
-                                }
-
-                                @Override
-                                public void onComplete() {
-                                    Log.d(TAG, "onComplete: ");
-
-                                }
-                            });
 
                         } break;
 
@@ -422,7 +399,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     }
 
-                    return false; // TODO: 19/05/2018 Check true or false
+                    return false;
                 }
             };
 

@@ -82,7 +82,9 @@
 
         <activity android:name=".data.sqlite.AndroidDatabaseManager"
             android:screenOrientation="portrait" />
+        <activity android:name=".activities.rest.FetchingActivityDELETE" />
 
+        <service android:name=".activities.rest.FetchingService" />
     </application>
 
 </manifest>

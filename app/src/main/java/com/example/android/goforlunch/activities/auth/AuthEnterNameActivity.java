@@ -270,6 +270,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
 
                                                 dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
                                                         + "/" + userKey);
+
                                                 UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
                                                         Utils.capitalize(inputFirstName.getText().toString().trim()),
                                                         Utils.capitalize(inputLastName.getText().toString().trim()),
@@ -283,6 +284,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                         RepoStrings.FirebaseReference.USERS
                                                                 + "/" + userKey
                                                                 + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+
                                                 UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
                                                         "",
                                                         "",
@@ -290,7 +292,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                         "",
                                                         "",
                                                         "",
-                                                        "",
+                                                        0,
                                                         "");
 
                                                 startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
@@ -412,7 +414,7 @@ public class AuthEnterNameActivity extends AppCompatActivity{
                                                                                 "",
                                                                                 "",
                                                                                 "",
-                                                                                "",
+                                                                                0,
                                                                                 "");
 
                                                                         startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
