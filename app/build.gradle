@@ -125,6 +125,9 @@ dependencies {
     //Android-storage library
     implementation 'com.snatik:storage:2.1.0'
 
+    //Database (access to see it)
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
+
 }
 
 //Firebase plugin

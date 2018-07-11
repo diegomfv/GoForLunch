@@ -1080,7 +1080,9 @@ public class FragmentRestaurantMapView extends Fragment {
 
                             if (aBoolean) {
                                 Log.d(TAG, "onNext: internet connection: " + aBoolean);
-                                startHttpRequestProcess();
+
+                                // TODO: 11/07/2018 Check to delete this
+                                //startHttpRequestProcess();
 
                             } else {
                                 Log.d(TAG, "onNext: internet connection: " + aBoolean);

@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -12,6 +13,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsRemote;
 import com.example.android.goforlunch.remote.models.distancematrix.DistanceMatrix;
@@ -27,6 +29,7 @@ import com.example.android.goforlunch.repository.RepoStrings;
 import com.snatik.storage.Storage;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +45,8 @@ import retrofit2.Response;
 
 import static com.example.android.goforlunch.repository.RepoStrings.Keys.NEARBY_KEY;
 
+// TODO: 11/07/2018 Remove ConcurrentModificationException
+
 /**
  * Created by Diego Fajardo on 11/07/2018.
  */
@@ -50,10 +55,16 @@ public class FetchingService extends Service {
     private static final String TAG = FetchingService.class.getSimpleName();
 
     private Map<String,RestaurantEntry> mapOfRestaurants;
+
+    private ArrayList<RestaurantEntry> restaurantsEntryList;
+    private ArrayList<String> restaurantPlacesIdList;
+
     private String[] arrayOfTypes;
 
     private LatLngForRetrofit myPosition;
     private Disposable disposable;
+
+    private Handler mHandler;
 
     private RestaurantEntry restaurantEntry;
 
@@ -73,13 +84,26 @@ public class FetchingService extends Service {
 
         localDatabase = AppDatabase.getInstance(getApplicationContext());
 
+        /* We delete the database
+        * */
+        localDatabase.clearAllTables();
+
         configuringInternalStorage();
 
         mapOfRestaurants = new HashMap<>();
 
+        restaurantsEntryList = new ArrayList<>();
+        restaurantPlacesIdList = new ArrayList<>();
+
+
         /* We pass the NON TRANSLATED ARRAY!
         * */
         arrayOfTypes = getResources().getStringArray(R.array.fetchTypesOfRestaurants);
+
+        /* We will use this to show a Toast in Map Fragment
+        * if there is no internet
+        * */
+        mHandler = new Handler();
 
 
     }
@@ -88,16 +112,19 @@ public class FetchingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: called!");
 
-        final int latitute = intent.getIntExtra("latitude", 0);
-        final int longitude = intent.getIntExtra("longitude", 0);
+        double latitude = intent.getDoubleExtra("latitude", 0);
+        double longitude = intent.getDoubleExtra("longitude", 0);
         accessInternalStorageGranted = intent.getBooleanExtra("accessInternalStorage", false);
+        Log.i(TAG, "onStartCommand: accessInternalStorageGranted = " + accessInternalStorageGranted);
 
-        if (latitute == 0 || longitude == 0) {
-            //do nothing
+        if (latitude == 0 || longitude == 0) {
+            Log.i(TAG, "onStartCommand: latitude = " + latitude);
+            Log.i(TAG, "onStartCommand: longitude = " + longitude);
+            //position is incorrect, do nothing
 
         } else {
 
-            myPosition = new LatLngForRetrofit(latitute,longitude);
+            myPosition = new LatLngForRetrofit(latitude,longitude);
 
             Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
                 @Override
@@ -105,10 +132,21 @@ public class FetchingService extends Service {
                     Log.d(TAG, "onNext: " + aBoolean);
 
                     if (!aBoolean) {
-                        //do nothing, there is no internet
+                        //show "no internet message" and do nothing
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d(TAG, "run: handler running!");
+                                ToastHelper.toastShort(FetchingService.this, getResources().getString(R.string.noInternet));
+                            }
+                        });
+
+                        stopSelf();
 
                     } else {
 
+                        /* We start the fetching process
+                        * */
                         startNearbyPlacesProcess();
 
                     }
@@ -126,7 +164,6 @@ public class FetchingService extends Service {
 
                 }
             });
-
 
         }
 
@@ -146,8 +183,12 @@ public class FetchingService extends Service {
     public void onDestroy() {
         Log.d(TAG, "onDestroy: called!");
         super.onDestroy();
+        disposable.dispose();
     }
 
+    /** This method starts the process for fetching restaurants using
+     * nearby places service
+     * */
     private void startNearbyPlacesProcess () {
         Log.d(TAG, "startNearbyPlacesProcess: called!");
 
@@ -216,8 +257,9 @@ public class FetchingService extends Service {
 
     }
 
-
-
+    /** This method starts the process for fetching restaurants using
+     * text search service
+     * */
     private void startTextSearchProcess(final int type) {
         Log.d(TAG, "startTextSearchProcess: called!");
 
@@ -301,16 +343,21 @@ public class FetchingService extends Service {
 
     }
 
+    /** This methods starts several loops for doing 3 types of calls:
+     * place Id call,
+     * distance matrix call,
+     * photo call
+     * */
     private void startPlaceIdProcess () {
         Log.d(TAG, "startPlaceIdProcess: called!");
 
         /* We iterate through the map
         * */
-
         Log.i(TAG, "startPlaceIdProcess: PLACE ID PROCESS STARTED");
 
         Iterator<Map.Entry<String, RestaurantEntry>> iter = mapOfRestaurants.entrySet().iterator();
 
+        // TODO: 11/07/2018 ConcurrentModificationException!
         while (iter.hasNext()) {
 
             Map.Entry<String, RestaurantEntry> restaurantEntry = iter.next();
@@ -352,7 +399,7 @@ public class FetchingService extends Service {
 
             /* We update each place with the PlaceId info
              * */
-            updateMapAndStorageWithPhotos(restaurantEntry);
+            updateMapAndInternalStorageWithPhotos(restaurantEntry);
 
         }
 
@@ -361,6 +408,9 @@ public class FetchingService extends Service {
 
     }
 
+    /** This methods updates the map of
+     * restaurant entries with Place Id information
+     * */
     private void updateMapWithPlaceIdInfo(final Map.Entry<String,RestaurantEntry> restaurantEntry) {
         Log.d(TAG, "updateMapWithPlaceIdInfo: called!");
 
@@ -403,6 +453,9 @@ public class FetchingService extends Service {
                 });
     }
 
+    /** This methods updates the map of
+     * restaurant entries with DistanceMatrix information
+     * */
     private void updateMapWithDistanceMatrix (final Map.Entry<String,RestaurantEntry> restaurantEntry) {
         Log.d(TAG, "updateMapWithDistanceMatrix: called!");
 
@@ -453,12 +506,13 @@ public class FetchingService extends Service {
 
     }
 
-    private void updateMapAndStorageWithPhotos (final Map.Entry<String, RestaurantEntry> restaurantEntry) {
-        Log.d(TAG, "updateMapAndStorageWithPhotos: called!");
+    private void updateMapAndInternalStorageWithPhotos(final Map.Entry<String, RestaurantEntry> restaurantEntry) {
+        Log.d(TAG, "updateMapAndInternalStorageWithPhotos: called!");
 
         GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
-        Call<ResponseBody> callPhoto = googleService.fetchDataPhoto( "400",
-               restaurantEntry.getValue().getImageUrl(),
+        Call<ResponseBody> callPhoto = googleService.fetchDataPhoto(
+                "400",
+                restaurantEntry.getValue().getImageUrl(),
                 RepoStrings.Keys.PHOTO_KEY);
         callPhoto.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -475,6 +529,7 @@ public class FetchingService extends Service {
                         Log.d(TAG, "run: saving url...");
 
                         restaurantEntry.getValue().setImageUrl(call.request().url().toString());
+                        insertRestaurantEntryInDatabase(restaurantEntry.getValue());
 
                     }
                 });
@@ -504,16 +559,16 @@ public class FetchingService extends Service {
             public void onFailure(final Call<ResponseBody> call, Throwable t) {
                 Log.d(TAG, "onFailure: url = " + call.request().url().toString());
 
-                /* We also save the url if onFailure is called
+                /* We save the image url in the database
                  * */
-                saveUrlInLocalDatabase(restaurantEntry.getValue().getPlaceId(), call.request().url().toString() );
-
+                Log.d(TAG, "onFailure: PHOTO: saving url in database");
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
                         Log.d(TAG, "run: saving url...");
-                        localDatabase.restaurantDao()
-                                .updateRestaurantImageUrl(restaurantEntry.getValue().getPlaceId(), call.request().url().toString());
+
+                        restaurantEntry.getValue().setImageUrl(call.request().url().toString());
+                        insertRestaurantEntryInDatabase(restaurantEntry.getValue());
 
                     }
                 });
@@ -544,33 +599,12 @@ public class FetchingService extends Service {
 
                         }
                     });
-
                 }
-
             }
-
 
         } else {
             Log.i(TAG, "saveImageInInternalStorage: accessInternalStorageGrantes = false");
         }
-
-    }
-
-    /** This method stores the image url in the local database
-     * */
-    private void saveUrlInLocalDatabase (final String placeId, final String url) {
-        Log.d(TAG, "storeUrlInLocalDatabase: called!");
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run: saving url...");
-                localDatabase.restaurantDao()
-                        .updateRestaurantImageUrl(placeId, url);
-
-            }
-        });
-
     }
 
 
@@ -594,6 +628,15 @@ public class FetchingService extends Service {
         String newDirectory = imageDirPath;
         boolean isCreated = internalStorage.createDirectory(newDirectory);
         Log.d(TAG, "onClick: isCreated = " + isCreated);
+
+    }
+
+    /** This method inserts a restaurant in the database
+     * */
+    private void insertRestaurantEntryInDatabase (RestaurantEntry restaurantEntry) {
+        Log.d(TAG, "insertRestaurantEntryInDatabase: called!");
+
+        localDatabase.restaurantDao().insertRestaurant(restaurantEntry);
 
     }
 

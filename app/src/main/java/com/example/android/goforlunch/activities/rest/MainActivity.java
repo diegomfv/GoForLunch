@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.amitshekhar.DebugDB;
 import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
@@ -459,7 +460,15 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_join_group: {
                             Log.d(TAG, "onNavigationItemSelected: join group pressed");
 
-                            startActivity(new Intent(MainActivity.this, JoinGroupActivity.class));
+                            //startActivity(new Intent(MainActivity.this, JoinGroupActivity.class));
+
+                            Intent intent = new Intent(MainActivity.this, FetchingService.class);
+
+                            intent.putExtra("latitude", 51.457202);
+                            intent.putExtra("longitude", -2.606345);
+                            intent.putExtra("accessInternalStorage", true);
+
+                            startService(intent);
 
                             return true;
 
@@ -468,7 +477,8 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_personal_info: {
                             Log.d(TAG, "onNavigationItemSelected: personal info pressed");
 
-                            startActivity(new Intent(MainActivity.this, PersInfoActivity.class));
+                            //startActivity(new Intent(MainActivity.this, PersInfoActivity.class));
+                            DebugDB.getAddressLog();
 
                             return true;
                         }
