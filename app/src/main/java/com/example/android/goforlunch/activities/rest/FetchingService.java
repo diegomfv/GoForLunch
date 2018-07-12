@@ -30,10 +30,7 @@ import com.snatik.storage.Storage;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
@@ -54,10 +51,10 @@ public class FetchingService extends Service {
 
     private static final String TAG = FetchingService.class.getSimpleName();
 
-    private Map<String,RestaurantEntry> mapOfRestaurants;
+    //private Map<String,RestaurantEntry> mapOfRestaurants;
 
-    private ArrayList<RestaurantEntry> restaurantsEntryList;
-    private ArrayList<String> restaurantPlacesIdList;
+    private ArrayList<RestaurantEntry> listOfRestaurantsEntries;
+    private ArrayList<String> listOfPlacesIdsOfRestaurants;
 
     private String[] arrayOfTypes;
 
@@ -90,11 +87,11 @@ public class FetchingService extends Service {
 
         configuringInternalStorage();
 
-        mapOfRestaurants = new HashMap<>();
+        // TODO: 11/07/2018 delete!
+        // mapOfRestaurants = new HashMap<>();
 
-        restaurantsEntryList = new ArrayList<>();
-        restaurantPlacesIdList = new ArrayList<>();
-
+        listOfRestaurantsEntries = new ArrayList<>();
+        listOfPlacesIdsOfRestaurants = new ArrayList<>();
 
         /* We pass the NON TRANSLATED ARRAY!
         * */
@@ -112,8 +109,8 @@ public class FetchingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: called!");
 
-        double latitude = intent.getDoubleExtra("latitude", 0);
-        double longitude = intent.getDoubleExtra("longitude", 0);
+        double latitude = (double) intent.getExtras().get("latitude");
+        double longitude = (double) intent.getExtras().get("longitude");
         accessInternalStorageGranted = intent.getBooleanExtra("accessInternalStorage", false);
         Log.i(TAG, "onStartCommand: accessInternalStorageGranted = " + accessInternalStorageGranted);
 
@@ -210,8 +207,9 @@ public class FetchingService extends Service {
 
                                 for (int i = 0; i < listOfResults.size(); i++) {
 
-                                    mapOfRestaurants.put(
-                                            Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
+                                    listOfPlacesIdsOfRestaurants.add(Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()));
+
+                                    listOfRestaurantsEntries.add(
                                             new RestaurantEntry(
                                                     Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
                                                     Utils.checkToAvoidNull(listOfResults.get(i).getName()),
@@ -235,7 +233,8 @@ public class FetchingService extends Service {
 
                                 Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED!");
 
-                                for (int i = 1; i < arrayOfTypes.length - 1; i++) { //-1 because we don't want to fetch "type OTHER" restaurants
+                                for (int i = 1; i < arrayOfTypes.length - 1; i++) {
+                                    //-1 because we don't want to fetch "type OTHER" restaurants
 
                                     startTextSearchProcess(i);
 
@@ -280,27 +279,34 @@ public class FetchingService extends Service {
 
                                 for (int i = 0; i < listOfResults.size(); i++) {
 
-                                    if (mapOfRestaurants.get(listOfResults.get(i).getPlaceId()) != null) {
-                                        /* If the place is already in the map and the type is equal to 13,
-                                        we only update the type */
+                                    /* If the place is already in the lists and the type is equal to 13,
+                                    we only update the type */
 
-                                        restaurantEntry = mapOfRestaurants.get(listOfResults.get(i).getPlaceId());
+                                    if (listOfPlacesIdsOfRestaurants.contains(listOfResults.get(i).getPlaceId())) {
 
-                                        if (restaurantEntry.getType() == 13) {
-                                            restaurantEntry.setType(type);
-                                            mapOfRestaurants.put(restaurantEntry.getPlaceId(), restaurantEntry);
+                                        for (int j = 0; j < listOfRestaurantsEntries.size(); j++) {
+
+                                            if (listOfRestaurantsEntries.get(j).getPlaceId().equalsIgnoreCase(listOfResults.get(i).getPlaceId())) {
+                                                if (listOfRestaurantsEntries.get(j).getType() == 13) {
+                                                    listOfRestaurantsEntries.get(j).setType(type);
+                                                }
+                                            }
+                                            break;
+
                                         }
 
                                     } else {
-                                        /* If the place is not already in the map,
-                                        we add the restaurant to it */
 
-                                        mapOfRestaurants.put(
-                                                Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
+                                        /* If the place is not already in the lists,
+                                        we add the restaurant to them */
+
+                                        listOfPlacesIdsOfRestaurants.add(listOfResults.get(i).getPlaceId());
+
+                                        listOfRestaurantsEntries.add(
                                                 new RestaurantEntry(
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getName()),
-                                                        13,
+                                                        type,
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getFormattedAddress()),
                                                         RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
                                                         RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
@@ -311,7 +317,6 @@ public class FetchingService extends Service {
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
                                         );
-
                                     }
                                 }
 
@@ -351,56 +356,47 @@ public class FetchingService extends Service {
     private void startPlaceIdProcess () {
         Log.d(TAG, "startPlaceIdProcess: called!");
 
-        /* We iterate through the map
+        /* We iterate thorough the list to start Place Id requests
         * */
         Log.i(TAG, "startPlaceIdProcess: PLACE ID PROCESS STARTED");
 
-        Iterator<Map.Entry<String, RestaurantEntry>> iter = mapOfRestaurants.entrySet().iterator();
-
-        // TODO: 11/07/2018 ConcurrentModificationException!
-        while (iter.hasNext()) {
-
-            Map.Entry<String, RestaurantEntry> restaurantEntry = iter.next();
-
-            /* We update each place with the PlaceId info
-            * */
-            updateMapWithPlaceIdInfo(restaurantEntry);
-
+        for (int i = 0; i < listOfRestaurantsEntries.size(); i++) {
+            updateMapWithPlaceIdInfo(listOfRestaurantsEntries.get(i));
         }
 
         Log.i(TAG, "startPlaceIdProcess: PLACE ID PROCESS ENDED");
         Log.i(TAG, "startPlaceIdProcess: DISTANCE MATRIX PROCESS STARTED");
 
         /* We have reached the end of the loop, so we can start with
-         * Distance Matrix process */
-        iter = mapOfRestaurants.entrySet().iterator();
+         * Distance Matrix requests */
 
-        while (iter.hasNext()) {
-
-            Map.Entry<String, RestaurantEntry> restaurantEntry = iter.next();
-
-            /* We update each place with the PlaceId info
-             * */
-            updateMapWithDistanceMatrix(restaurantEntry);
-
+        for (int i = 0; i < listOfRestaurantsEntries.size(); i++) {
+            updateMapWithDistanceMatrix(listOfRestaurantsEntries.get(i));
         }
-
 
         Log.i(TAG, "startPlaceIdProcess: DISTANCE MATRIX PROCESS ENDED!");
         Log.i(TAG, "startPlaceIdProcess: PHOTO PROCESS STARTED");
 
         /* We have reached the end of the loop, so we can start with
-         * Photo process */
-        iter = mapOfRestaurants.entrySet().iterator();
+         * Photo requests */
 
-        while (iter.hasNext()) {
+        for (int i = 0; i < listOfRestaurantsEntries.size(); i++) {
 
-            Map.Entry<String, RestaurantEntry> restaurantEntry = iter.next();
+            if (listOfRestaurantsEntries.get(i).getImageUrl() != null) {
+                if (!listOfRestaurantsEntries.get(i).getImageUrl().equalsIgnoreCase("")) {
 
-            /* We update each place with the PlaceId info
-             * */
-            updateMapAndInternalStorageWithPhotos(restaurantEntry);
+                    /* If we have a valid photo reference, we start fetching photo process and
+                    * we will insert the restaurant in the database at the end of this process
+                    * */
+                    updateMapAndInternalStorageWithPhotos(listOfRestaurantsEntries.get(i));
+                }
+            } else {
 
+                /* If we do not have a valid photo reference, we insert the restaurant
+                * directly in the database
+                * */
+                insertRestaurantEntryInDatabase(restaurantEntry);
+            }
         }
 
         Log.i(TAG, "startPlaceIdProcess: PHOTO PROCESS PROCESS ENDED!");
@@ -411,11 +407,11 @@ public class FetchingService extends Service {
     /** This methods updates the map of
      * restaurant entries with Place Id information
      * */
-    private void updateMapWithPlaceIdInfo(final Map.Entry<String,RestaurantEntry> restaurantEntry) {
+    private void updateMapWithPlaceIdInfo(final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapWithPlaceIdInfo: called!");
 
         disposable = GoogleServiceStreams.streamFetchPlaceById(
-                restaurantEntry.getValue().getPlaceId(),
+                restaurantEntry.getPlaceId(),
                 RepoStrings.Keys.PLACEID_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
@@ -431,24 +427,36 @@ public class FetchingService extends Service {
 
                             String closingTime = UtilsRemote.checkClosingTime(result);
 
-                            restaurantEntry.getValue().setOpenUntil(closingTime);
-                            restaurantEntry.getValue().setPhone(Utils.checkToAvoidNull(result.getInternationalPhoneNumber()));
-                            restaurantEntry.getValue().setWebsiteUrl(Utils.checkToAvoidNull(result.getWebsite()));
-                            restaurantEntry.getValue().setImageUrl(Utils.checkToAvoidNull(result.getPhotos().get(0).getPhotoReference()));
+                            restaurantEntry.setOpenUntil(closingTime);
+                            restaurantEntry.setPhone(Utils.checkToAvoidNull(result.getInternationalPhoneNumber()));
+                            restaurantEntry.setWebsiteUrl(Utils.checkToAvoidNull(result.getWebsite()));
 
+                            if (result.getPhotos() != null) {
+
+                                for (int i = 0; i < result.getPhotos().size(); i++) {
+                                    if (result.getPhotos().get(i) != null) {
+                                        if (result.getPhotos().get(i).getPhotoReference() != null
+                                                && !result.getPhotos().get(i).getPhotoReference().equalsIgnoreCase("")) {
+                                            restaurantEntry.setImageUrl(result.getPhotos().get(i).getPhotoReference());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + e.getMessage());
 
                     }
 
                     @Override
                     public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
 
                     }
-
 
                 });
     }
@@ -456,13 +464,13 @@ public class FetchingService extends Service {
     /** This methods updates the map of
      * restaurant entries with DistanceMatrix information
      * */
-    private void updateMapWithDistanceMatrix (final Map.Entry<String,RestaurantEntry> restaurantEntry) {
+    private void updateMapWithDistanceMatrix (final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapWithDistanceMatrix: called!");
 
         disposable =
                 GoogleServiceStreams.streamFetchDistanceMatrix(
                         "imperial",
-                        "place_id:" + restaurantEntry.getValue().getPlaceId(),
+                        "place_id:" + restaurantEntry.getPlaceId(),
                         myPosition,
                         RepoStrings.Keys.MATRIX_DISTANCE_KEY)
                         .subscribeWith(new DisposableObserver<DistanceMatrix>() {
@@ -477,7 +485,7 @@ public class FetchingService extends Service {
                                                 if (distanceMatrix.getRows().get(0).getElements().get(0) != null) {
                                                     if (distanceMatrix.getRows().get(0).getElements().get(0).getDistance() != null) {
                                                         if (distanceMatrix.getRows().get(0).getElements().get(0).getDistance().getText() != null) {
-                                                            restaurantEntry.getValue().setDistance(distanceMatrix.getRows().get(0).getElements().get(0).getDistance().getText());
+                                                            restaurantEntry.setDistance(distanceMatrix.getRows().get(0).getElements().get(0).getDistance().getText());
                                                         }
                                                     }
                                                 }
@@ -499,20 +507,18 @@ public class FetchingService extends Service {
                             public void onComplete() {
                                 Log.d(TAG, "onComplete: ");
 
-
-
                             }
                         });
 
     }
 
-    private void updateMapAndInternalStorageWithPhotos(final Map.Entry<String, RestaurantEntry> restaurantEntry) {
+    private void updateMapAndInternalStorageWithPhotos(final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapAndInternalStorageWithPhotos: called!");
 
         GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
         Call<ResponseBody> callPhoto = googleService.fetchDataPhoto(
                 "400",
-                restaurantEntry.getValue().getImageUrl(),
+                restaurantEntry.getImageUrl(),
                 RepoStrings.Keys.PHOTO_KEY);
         callPhoto.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -528,8 +534,8 @@ public class FetchingService extends Service {
                     public void run() {
                         Log.d(TAG, "run: saving url...");
 
-                        restaurantEntry.getValue().setImageUrl(call.request().url().toString());
-                        insertRestaurantEntryInDatabase(restaurantEntry.getValue());
+                        restaurantEntry.setImageUrl(call.request().url().toString());
+                        insertRestaurantEntryInDatabase(restaurantEntry);
 
                     }
                 });
@@ -545,8 +551,8 @@ public class FetchingService extends Service {
 
                     Bitmap bm = BitmapFactory.decodeStream(response.body().byteStream());
 
-                    if (restaurantEntry.getValue().getPlaceId() != null && bm != null) {
-                        saveImageInInternalStorage(restaurantEntry.getValue().getPlaceId(), bm);
+                    if (restaurantEntry.getPlaceId() != null && bm != null) {
+                        saveImageInInternalStorage(restaurantEntry.getPlaceId(), bm);
                     }
 
                 } else {
@@ -567,8 +573,8 @@ public class FetchingService extends Service {
                     public void run() {
                         Log.d(TAG, "run: saving url...");
 
-                        restaurantEntry.getValue().setImageUrl(call.request().url().toString());
-                        insertRestaurantEntryInDatabase(restaurantEntry.getValue());
+                        restaurantEntry.setImageUrl(call.request().url().toString());
+                        insertRestaurantEntryInDatabase(restaurantEntry);
 
                     }
                 });

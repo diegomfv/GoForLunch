@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +31,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
@@ -159,14 +162,13 @@ public class RestaurantActivity extends AppCompatActivity {
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
 
         this.configureRecyclerView();
+        this.configureInternalStorage(context);
 
         /** We get the intent to display the information
          * */
         intent = getIntent();
         fillUIUsingIntent(intent);
         intentRestaurantName = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME);
-
-        this.configureInternalStorage(context);
 
         /** We get the user information
          * */
@@ -459,7 +461,7 @@ public class RestaurantActivity extends AppCompatActivity {
             accessToInternalStorageGranted = true;
             storage = new Storage(context);
             mainPath = storage.getInternalFilesDirectory() + File.separator;
-            imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
+            imageDirPath = mainPath + RepoStrings.Directories.IMAGE_DIR + File.separator;
 
             Log.d(TAG, "configureInternalStorage: mainPath = " + mainPath);
             Log.d(TAG, "configureInternalStorage: imageDirPath = " + imageDirPath);
@@ -548,7 +550,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
         //if file exists in the directory -> load with storage
         if (storage.isFileExist(
-                imageDirPath + File.separator + intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID))) {
+                imageDirPath + intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID))) {
             Log.d(TAG, "loadImage: file does exist in the directory");
             getAndDisplayImageFromInternalStorage(intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID));
 
@@ -567,17 +569,20 @@ public class RestaurantActivity extends AppCompatActivity {
     private void loadImageWithUrl (Intent intent) {
         Log.d(TAG, "loadImageWithUrl: called!");
 
+        Log.i(TAG, "loadImageWithUrl: " + intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL));
+
         if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) == null
                 || intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL).equals("")) {
+            Log.d(TAG, "loadImageWithUrl: image is null");
 
             glide.load(R.drawable.lunch_image).into(ivRestPicture);
 
         } else {
+            Log.d(TAG, "loadImageWithUrl: image is not null or empty");
 
             glide.load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL)).into(ivRestPicture);
+
         }
-
-
     }
 
     /** Used to read an image from the internal storage and convert it to bitmap so that
@@ -619,6 +624,23 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    /** Note that if you set an image via ImageView.setImageBitmap(BITMAP) it internally creates
+     * a new BitmapDrawableeven if you pass null.
+     * In that case the check imageViewOne.getDrawable() == null is false anytime.
+     * To get to know if an image is set you can do the following
+     * */
+    // TODO: 12/07/2018 Move to Utils
+    private boolean hasImage(@NonNull ImageView view) {
+        Drawable drawable = view.getDrawable();
+        boolean hasImage = (drawable != null);
+
+        if (hasImage && (drawable instanceof BitmapDrawable)) {
+            hasImage = ((BitmapDrawable)drawable).getBitmap() != null;
+        }
+
+        return hasImage;
     }
 
 }

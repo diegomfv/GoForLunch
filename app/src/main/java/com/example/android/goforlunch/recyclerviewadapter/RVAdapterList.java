@@ -27,6 +27,7 @@ import com.example.android.goforlunch.repository.RepoStrings;
 import com.snatik.storage.Storage;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         this.glide = glide;
         this.storage = new Storage(mContext);
         this.mainPath = storage.getInternalFilesDirectory() + File.separator;
-        this.imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
+        this.imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR + File.separator;
         this.mShortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 
@@ -221,7 +222,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
             //if file exists in the directory -> load with storage
             if (storage.isFileExist(
-                    imageDirPath + File.separator + listOfRestaurants.get(position).getPlaceId())) {
+                    imageDirPath + listOfRestaurants.get(position).getPlaceId())) {
                 Log.d(TAG, "loadImage: file does exist in the directory");
                 getAndDisplayImageFromInternalStorage(listOfRestaurants.get(position).getPlaceId(), imageView);
 
@@ -244,7 +245,13 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
                 glide.load(R.drawable.lunch_image).into(imageView);
 
             } else {
-                glide.load(imageUrl).into(imageView);
+                Log.d(TAG, "loadImageWithUrl: TRYING TO LOAD FROM URL!");
+                    glide.load(imageUrl).into(imageView);
+
+                if (imageView.getDrawable() == null) {
+                    glide.load(R.drawable.lunch_image).into(imageView);
+                }
+
             }
         }
 
@@ -259,10 +266,10 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         /** Loads an image using glide. The observable emits the image in a background thread
          * and the image is loaded using glide in the main thread
          * */
-        private void getAndDisplayImageFromInternalStorage(String filePath, final ImageView imageView) {
+        private void getAndDisplayImageFromInternalStorage(String placeId, final ImageView imageView) {
             Log.d(TAG, "getAndDisplayImageFromInternalStorage: called!");
 
-            getImageFromInternalStorageDisposable = getObservableImageFromInternalStorage(imageDirPath + File.separator + filePath)
+            getImageFromInternalStorageDisposable = getObservableImageFromInternalStorage(imageDirPath + placeId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new DisposableObserver<byte[]>() {
