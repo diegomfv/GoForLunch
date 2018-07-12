@@ -36,6 +36,7 @@ import com.example.android.goforlunch.pageFragments.FragmentCoworkers;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.services.FetchingService;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -54,10 +55,22 @@ import io.reactivex.observers.DisposableObserver;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/05/2018 Translations
+// TODO: 12/07/2018 DistanceMatrix in ListView - Take care what it shows when there is no info! Might show -- --
 // TODO: 12/07/2018 Modify UI when using FacebookButton
 // TODO: 29/05/2018 General cleanup
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
-// TODO: 02/07/2018 User image has to be displayed in coworkers 
+// TODO: 02/07/2018 User image has to be displayed in coworkers
+
+//1
+// TODO: 12/07/2018 Changing Fetching process to Service. Information will be displayed using a ViewModel in the Fragment (pins)
+
+//2
+// TODO: 12/07/2018 Should I authenticate the user only in MainActivity and then pass user's data between all the activities
+// TODO: or should I do it in every activity
+
+//3
+// TODO: 12/07/2018 Problem when leaving the app because there is no internet
+
 
 public class MainActivity extends AppCompatActivity{
 
@@ -429,7 +442,6 @@ public class MainActivity extends AppCompatActivity{
 
                                     if (aBoolean) {
 
-                                        // TODO: 10/07/2018 Check internet in background thread
                                         fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
                                         fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerNavLunch);
 
@@ -459,15 +471,16 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_join_group: {
                             Log.d(TAG, "onNavigationItemSelected: join group pressed");
 
-                            //startActivity(new Intent(MainActivity.this, JoinGroupActivity.class));
+                            startActivity(new Intent(MainActivity.this, JoinGroupActivity.class));
 
-                            Intent intent = new Intent(MainActivity.this, FetchingService.class);
-
-                            intent.putExtra("latitude", 51.457202);
-                            intent.putExtra("longitude", -2.606345);
-                            intent.putExtra("accessInternalStorage", true);
-
-                            startService(intent);
+                            // TODO: 12/07/2018 Modify this!
+//                            Intent intent = new Intent(MainActivity.this, FetchingService.class);
+//
+//                            intent.putExtra("latitude", 51.457202);
+//                            intent.putExtra("longitude", -2.606345);
+//                            intent.putExtra("accessInternalStorage", true);
+//
+//                            startService(intent);
 
                             return true;
 
@@ -476,7 +489,9 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_personal_info: {
                             Log.d(TAG, "onNavigationItemSelected: personal info pressed");
 
-                            //startActivity(new Intent(MainActivity.this, PersInfoActivity.class));
+                            startActivity(new Intent(MainActivity.this, PersInfoActivity.class));
+
+                            // TODO: 12/07/2018 Delete if necessary
                             DebugDB.getAddressLog();
 
                             return true;

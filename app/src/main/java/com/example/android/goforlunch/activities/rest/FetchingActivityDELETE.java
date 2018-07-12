@@ -9,11 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.remote.remote.GoogleServiceStreams;
-import com.example.android.goforlunch.repository.RepoStrings;
-
-import io.reactivex.schedulers.Schedulers;
+import com.example.android.goforlunch.services.FetchingService;
 
 /**
  * Created by Diego Fajardo on 11/07/2018.

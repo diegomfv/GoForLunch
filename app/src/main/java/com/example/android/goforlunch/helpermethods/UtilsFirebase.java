@@ -2,6 +2,9 @@ package com.example.android.goforlunch.helpermethods;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.example.android.goforlunch.R;
@@ -312,19 +315,21 @@ public class UtilsFirebase {
 
     /** Method that logs out the user
      * */
-    public static void logOut (Context context) {
+    public static void logOut (FragmentActivity activity) {
 
         /** The user signs out
          *  and goes to AuthSignIn Activity
          *  */
-        ToastHelper.toastShort(context, context.getResources().getString(R.string.noInternetLoggingOut));
+        ToastHelper.toastShort(activity, activity.getResources().getString(R.string.noInternetLoggingOut));
 
         FirebaseAuth.getInstance().signOut();
         LoginManager.getInstance().logOut();
 
-        Intent intent = new Intent(context, AuthChooseLoginActivity.class);
+        Intent intent = new Intent(activity, AuthChooseLoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        context.startActivity(intent);
+        activity.startActivity(intent);
+        activity.finish();
+
 
     }
 

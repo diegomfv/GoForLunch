@@ -84,7 +84,7 @@
             android:screenOrientation="portrait" />
         <activity android:name=".activities.rest.FetchingActivityDELETE" />
 
-        <service android:name=".activities.rest.FetchingService" />
+        <service android:name=".services.FetchingService" />
     </application>
 
 </manifest>

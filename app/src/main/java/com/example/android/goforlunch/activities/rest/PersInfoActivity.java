@@ -53,6 +53,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -400,7 +401,7 @@ public class PersInfoActivity extends AppCompatActivity{
                 // TODO: 07/07/2018 Delete, not necessary here
                 /* Starting storage process
                 * */
-                startStorageProcess(inputStreamSelectedImage);
+                //startStorageProcess(inputStreamSelectedImage);
 
                 final Bitmap selectedBitmap = BitmapFactory.decodeStream(inputStreamSelectedImage);
 
@@ -420,28 +421,6 @@ public class PersInfoActivity extends AppCompatActivity{
             ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
         }
 
-    }
-
-    /** Method that saves a imageStream in FirebaseStorage
-     * */
-    private void startStorageProcess (InputStream imageStream) {
-        Log.d(TAG, "startStorageProcess: called!");
-        Log.d(TAG, "startStorageProcess: reference = " + stRefUser);
-        //Uploading image
-        UploadTask uploadTask = stRefUser.putStream(imageStream);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "onFailure: something went wrong!");
-
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.d(TAG, "onSuccess: file uploaded!");
-
-            }
-        });
     }
 
 
@@ -533,35 +512,10 @@ public class PersInfoActivity extends AppCompatActivity{
                                             map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
                                             UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
 
-                                            /* If an image was downloaded, then we update user's storage image
+                                            /* We save the image in the image view in the storage
                                             * */
-                                            Log.d(TAG, "onComplete: inputStream = " + inputStreamSelectedImage);
-                                            if (inputStreamSelectedImage != null) {
-                                                UploadTask uploadTask = stRefUser.putStream(inputStreamSelectedImage);
-                                                uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Log.d(TAG, "onFailure: something went wrong!");
+                                            startStorageProcessWithByteArray(iv_userImage);
 
-                                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoSomethingWrongImage));
-
-                                                        startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
-                                                        finish();
-
-                                                    }
-                                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                    @Override
-                                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                        Log.d(TAG, "onSuccess: file uploaded!");
-
-                                                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
-
-                                                        startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
-                                                        finish();
-
-                                                    }
-                                                });
-                                            }
                                         }
                                     }
                                 });
@@ -599,6 +553,71 @@ public class PersInfoActivity extends AppCompatActivity{
                 });
         AlertDialog alert = alertBuilder.create();
         alert.show();
+    }
+
+    /** Method that saves a imageStream in FirebaseStorage
+     * */
+    private void startStorageProcessWithInputStream (InputStream imageStream) {
+        Log.d(TAG, "startStorageProcess: called!");
+
+        Log.i(TAG, "startStorageProcess: reference = " + stRefUser);
+        //Uploading image
+        UploadTask uploadTask = stRefUser.child("image").putStream(imageStream);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: something went wrong!");
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "onSuccess: file uploaded!");
+
+            }
+        });
+    }
+
+
+    private void startStorageProcessWithByteArray (ImageView imageView) {
+        Log.d(TAG, "startStorageProcessWithByteArray: called!");
+
+        imageView.setDrawingCacheEnabled(true);
+        imageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        imageView.layout(0, 0, imageView.getMeasuredWidth(), imageView.getMeasuredHeight());
+        imageView.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(imageView.getDrawingCache());
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+        byte[] data = outputStream.toByteArray();
+
+        UploadTask uploadTask = stRefUser.child("image").putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: something went wrong!");
+
+                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoSomethingWrongImage));
+
+                startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                finish();
+
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "onSuccess: file uploaded!");
+
+                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
+
+                startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                finish();
+
+            }
+        });
+
     }
 
 }

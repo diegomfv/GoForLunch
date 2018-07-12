@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.activities.rest;
+package com.example.android.goforlunch.services;
 
 import android.app.Service;
 import android.content.Intent;
