@@ -19,8 +19,9 @@
     <string name="notImplemented">Not implemented&#8230;</string>
     <string name="somethingWentWrong">Something went wrong&#8230; Please, try again</string>
     <string name="permissionPermissionNecessary">Permission necessary</string>
-    <string name="permissionPermissionIsNecessary">permission is necessary</string>
+    <string name="permissionPermissionIsNecessary">Permission is necessary</string>
     <string name="getAccountsDenied">GET_ACCOUNTS Denied</string>
+    <string name="loading_please_wait">Loading... please wait</string>
 
     <!-- COMMON -->
     <string name="commonToastEnterFirstName">Please, enter First name</string>
@@ -200,6 +201,9 @@
     <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
     <string name="joinNewGroupIs">Your new group is</string>
+
+    <string name="snackbarNoInternetText">There is no internet connection</string>
+    <string name="snackbarNoInternetButton">HIDE</string>
 
 
 </resources>

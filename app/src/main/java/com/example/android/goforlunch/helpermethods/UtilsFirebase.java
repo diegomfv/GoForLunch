@@ -269,7 +269,7 @@ public class UtilsFirebase {
         for (DataSnapshot item :
                 dataSnapshot.getChildren()) {
 
-            if (null !=item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue().toString()) {
+            if (item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue() != null) {
                 listOfGroups.add(item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue().toString());
             }
 

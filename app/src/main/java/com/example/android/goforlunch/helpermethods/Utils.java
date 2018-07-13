@@ -5,13 +5,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.AppExecutors;
@@ -80,6 +88,37 @@ public class Utils {
             Log.d(TAG, "isInternetAvailable: false");
             return false; }
     }
+
+    /** Method to create a Snackbar
+     * displaying that there is no internet
+     * */
+    public static void createSnackbarNoInternet (Context context, View mainLayout, String message) {
+
+        final Snackbar snackbar = Snackbar.make(
+                mainLayout,
+                message,
+                Snackbar.LENGTH_INDEFINITE);
+
+        snackbar.setAction(
+                context.getResources().getString(R.string.snackbarNoInternetButton),
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Log.d(TAG, "onClick: snackbar clicked!");
+                        snackbar.dismiss();
+                    }
+                });
+
+        View snackbarView = snackbar.getView();
+        //snackbarView.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
+        TextView snackbarTextView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+        snackbarTextView.setTextColor(context.getResources().getColor(android.R.color.white));
+        Button snackbarButton = (Button) snackbarView.findViewById(android.support.design.R.id.snackbar_action);
+        snackbarButton.setTextColor(context.getResources().getColor(android.R.color.white));
+        snackbar.show();
+
+    }
+
 
     /** Method that shows progress bar and disables user interaction
      * */
@@ -371,6 +410,20 @@ public class Utils {
 
     }
 
+    /** Method that displays
+     * and hides de progress bar that occupies
+     * all the screen
+     * */
+    public static void showMainContent (LinearLayout progressBarContent, LinearLayout mainContent) {
+        Log.d(TAG, "showMainContent: called!");
+
+        progressBarContent.setVisibility(View.GONE);
+        mainContent.setVisibility(View.VISIBLE);
+
+    }
+
+
+
     /** Method to print sharedPreferences
      * */
     public static void printSharedPreferences (SharedPreferences sharedPreferences) {
@@ -381,4 +434,22 @@ public class Utils {
             Log.i(TAG, "map values -> " + entry.getKey() + ": " + entry.getValue().toString());
         }
     }
+
+    /** Method to check if an imageView has a drawable as image.
+     * Note that if you set an image via ImageView.setImageBitmap(BITMAP) it internally creates
+     * a new BitmapDrawable even if you pass null.
+     * In that case the check imageViewOne.getDrawable() == null is false anytime.
+     * To get to know if an image is set you can do the following
+     * */
+    public static boolean hasImage(@NonNull ImageView view) {
+        Drawable drawable = view.getDrawable();
+        boolean hasImage = (drawable != null);
+
+        if (hasImage && (drawable instanceof BitmapDrawable)) {
+            hasImage = ((BitmapDrawable)drawable).getBitmap() != null;
+        }
+
+        return hasImage;
+    }
+
 }

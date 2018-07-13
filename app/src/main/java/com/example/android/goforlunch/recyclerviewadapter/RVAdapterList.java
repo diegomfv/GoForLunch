@@ -246,11 +246,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
             } else {
                 Log.d(TAG, "loadImageWithUrl: TRYING TO LOAD FROM URL!");
-                    glide.load(imageUrl).into(imageView);
-
-                if (imageView.getDrawable() == null) {
-                    glide.load(R.drawable.lunch_image).into(imageView);
-                }
+                glide.load(imageUrl).into(imageView);
 
             }
         }

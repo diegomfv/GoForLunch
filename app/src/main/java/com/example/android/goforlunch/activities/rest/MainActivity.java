@@ -36,7 +36,6 @@ import com.example.android.goforlunch.pageFragments.FragmentCoworkers;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.repository.RepoStrings;
-import com.example.android.goforlunch.services.FetchingService;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -65,12 +64,10 @@ import io.reactivex.observers.DisposableObserver;
 // TODO: 12/07/2018 Changing Fetching process to Service. Information will be displayed using a ViewModel in the Fragment (pins)
 
 //2
-// TODO: 12/07/2018 Should I authenticate the user only in MainActivity and then pass user's data between all the activities
-// TODO: or should I do it in every activity
-
-//3
 // TODO: 12/07/2018 Problem when leaving the app because there is no internet
 
+//3
+// TODO: 12/07/2018 Offline challenge! Connect using broadcast receiver
 
 public class MainActivity extends AppCompatActivity{
 
@@ -78,7 +75,7 @@ public class MainActivity extends AppCompatActivity{
 
     //Widgets
     @BindView(R.id.main_drawer_layout_id)
-    DrawerLayout mDrawerLayout;
+    DrawerLayout mainDrawerLayout;
 
     @BindView(R.id.main_nav_view_id)
     NavigationView mNavigationView;
@@ -229,8 +226,8 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START);
+        if (mainDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mainDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             alertDialogLogOut();
         }
@@ -278,7 +275,7 @@ public class MainActivity extends AppCompatActivity{
     /** Method used in fragments to get the DrawerLayout
      * */
     public DrawerLayout getMDrawerLayout() {
-        return mDrawerLayout;
+        return mainDrawerLayout;
     }
 
 
@@ -474,6 +471,7 @@ public class MainActivity extends AppCompatActivity{
                             startActivity(new Intent(MainActivity.this, JoinGroupActivity.class));
 
                             // TODO: 12/07/2018 Modify this!
+
 //                            Intent intent = new Intent(MainActivity.this, FetchingService.class);
 //
 //                            intent.putExtra("latitude", 51.457202);

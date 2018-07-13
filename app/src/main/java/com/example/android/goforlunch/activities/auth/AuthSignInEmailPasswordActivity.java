@@ -1,6 +1,7 @@
 package com.example.android.goforlunch.activities.auth;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,12 +13,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.FirebaseActivityDELETE;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.broadcastreceivers.InternetStateChangeReceiver;
+import com.example.android.goforlunch.broadcastreceivers.ObservableObject;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repository.RepoStrings;
@@ -27,6 +31,9 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.observers.DisposableObserver;
@@ -35,11 +42,15 @@ import io.reactivex.observers.DisposableObserver;
  * Created by Diego Fajardo on 07/05/2018.
  */
 
-public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
+public class AuthSignInEmailPasswordActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = AuthSignInEmailPasswordActivity.class.getSimpleName();
 
     //Widgets
+
+    @BindView(R.id.main_layout_id)
+    LinearLayout mainLayout;
+
     @BindView(R.id.signin_fab_id)
     FloatingActionButton fab;
 
@@ -61,6 +72,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
     // TODO: 01/06/2018 Delete?
     @BindView(R.id.signin_progressbar_id)
     ProgressBar progressBar;
+
+    private InternetStateChangeReceiver receiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -205,4 +218,44 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        receiver = new InternetStateChangeReceiver();
+        registerReceiver(receiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        ObservableObject.getInstance().addObserver(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(receiver);
+        ObservableObject.getInstance().deleteObserver(this);
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.d(TAG, "update: called!");
+
+        int info = (int) data;
+
+        if (info == 1) {
+            Log.d(TAG, "update: There is internet");
+
+            Utils.createSnackbarNoInternet(
+                    AuthSignInEmailPasswordActivity.this,
+                    mainLayout,
+                    "Internet available");
+
+        } else {
+            Log.d(TAG, "update: There is no internet");
+
+            Utils.createSnackbarNoInternet(
+                    AuthSignInEmailPasswordActivity.this,
+                    mainLayout,
+                    "Internet not available");
+
+        }
+
+    }
 }

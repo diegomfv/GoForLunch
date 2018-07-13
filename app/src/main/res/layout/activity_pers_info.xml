@@ -1,131 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <FrameLayout
-        android:id="@+id/pers_enter_status_bar_id"
+    <include layout="@layout/progress_bar"/>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pers_main_content"
         android:layout_width="match_parent"
-        android:layout_height="25dp"
-        android:background="@color/colorPrimaryDark">
-    </FrameLayout>
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="90dp">
+        <FrameLayout
+            android:id="@+id/pers_enter_status_bar_id"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:background="@color/colorPrimaryDark">
+        </FrameLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/pers_enter_fab_id"
-            style="@style/fabBackStyle"
-            app:rippleColor="@color/colorAccentLight"
-            app:fabSize="mini"
-            app:borderWidth="0.1dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="90dp">
 
-        <ProgressBar
-            android:id="@+id/pers_enter_progressbar"
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/pers_enter_fab_id"
+                style="@style/fabBackStyle"
+                app:rippleColor="@color/colorAccentLight"
+                app:fabSize="mini"
+                app:borderWidth="0.1dp"/>
+
+            <ProgressBar
+                android:id="@+id/pers_enter_progressbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="30dp"
+                android:layout_margin="30dp"
+                android:visibility="invisible"
+                android:layout_marginBottom="10dp"/>
+
+        </RelativeLayout>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/pers_enter_image_id"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:civ_border_width="0.5dp"
+            app:civ_border_color="#FF000000"
+            android:layout_gravity="center_horizontal"
+            android:clickable="true"
+            android:focusable="true">
+        </de.hdodenhof.circleimageview.CircleImageView>
+
+        <android.support.design.widget.TextInputLayout
+            style="@style/textInputLayoutStyle"
+            android:layout_marginTop="20dp">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/pers_enter_first_name_id"
+                style="@style/textInputEditTextStyle"
+                android:inputType="text"
+                android:hint="@string/commonFirstName" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            style="@style/textInputLayoutStyle">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/pers_enter_last_name_id"
+                style="@style/textInputEditTextStyle"
+                android:inputType="text"
+                android:hint="@string/commonLastName" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            style="@style/textInputLayoutStyle"
+            android:defaultFocusHighlightEnabled="false">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/pers_enter_email_id"
+                style="@style/textInputEditTextStyle"
+                android:inputType="text"
+                android:enabled="false"
+                android:hint="@string/commonEmail" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            style="@style/textInputLayoutStyle"
+            android:defaultFocusHighlightEnabled="false">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/pers_enter_password_id"
+                style="@style/textInputEditTextStyle"
+                android:inputType="textPassword"
+                android:enabled="false"
+                android:hint="@string/commonPassword" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            style="@style/textInputLayoutStyle"
+            android:defaultFocusHighlightEnabled="false">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/pers_enter_group_id"
+                style="@style/textInputEditTextStyle"
+                android:inputType="text"
+                android:enabled="false"
+                android:hint="@string/commonGroup" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/pers_enter_save_changes_button_id"
+            style="@style/buttonGeneralStyle"
+            android:layout_marginTop="20dp"
+            android:text="@string/persSaveChanges"/>
+
+        <TextView
+            android:id="@+id/pers_enter_tv_change_password_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="30dp"
-            android:layout_margin="30dp"
-            android:visibility="invisible"
-            android:layout_marginBottom="10dp"/>
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:text="@string/persChangePassword"
+            android:textColor="@color/colorPrimary"
+            android:clickable="true"
+            android:focusable="true"/>
 
-    </RelativeLayout>
+    </LinearLayout>
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/pers_enter_image_id"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:civ_border_width="0.5dp"
-        app:civ_border_color="#FF000000"
-        android:layout_gravity="center_horizontal"
-        android:clickable="true"
-        android:focusable="true">
-    </de.hdodenhof.circleimageview.CircleImageView>
-
-    <android.support.design.widget.TextInputLayout
-        style="@style/textInputLayoutStyle"
-        android:layout_marginTop="20dp">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/pers_enter_first_name_id"
-            style="@style/textInputEditTextStyle"
-            android:inputType="text"
-            android:hint="@string/commonFirstName" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        style="@style/textInputLayoutStyle">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/pers_enter_last_name_id"
-            style="@style/textInputEditTextStyle"
-            android:inputType="text"
-            android:hint="@string/commonLastName" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        style="@style/textInputLayoutStyle"
-        android:defaultFocusHighlightEnabled="false">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/pers_enter_email_id"
-            style="@style/textInputEditTextStyle"
-            android:inputType="text"
-            android:enabled="false"
-            android:hint="@string/commonEmail" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        style="@style/textInputLayoutStyle"
-        android:defaultFocusHighlightEnabled="false">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/pers_enter_password_id"
-            style="@style/textInputEditTextStyle"
-            android:inputType="textPassword"
-            android:enabled="false"
-            android:hint="@string/commonPassword" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        style="@style/textInputLayoutStyle"
-        android:defaultFocusHighlightEnabled="false">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/pers_enter_group_id"
-            style="@style/textInputEditTextStyle"
-            android:inputType="text"
-            android:enabled="false"
-            android:hint="@string/commonGroup" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <Button
-        android:id="@+id/pers_enter_save_changes_button_id"
-        style="@style/buttonGeneralStyle"
-        android:layout_marginTop="20dp"
-        android:text="@string/persSaveChanges"/>
-
-    <TextView
-        android:id="@+id/pers_enter_tv_change_password_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="15dp"
-        android:text="@string/persChangePassword"
-        android:textColor="@color/colorPrimary"
-        android:clickable="true"
-        android:focusable="true"/>
-
-</LinearLayout>
-
+</FrameLayout>
 
 <!-- -->

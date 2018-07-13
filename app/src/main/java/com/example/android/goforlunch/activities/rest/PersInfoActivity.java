@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -103,6 +104,12 @@ public class PersInfoActivity extends AppCompatActivity{
     @BindView(R.id.pers_enter_tv_change_password_id)
     TextView tvChangePassword;
 
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarContent;
+
+    @BindView(R.id.pers_main_content)
+    LinearLayout mainContent;
+
     //Variables
     private String userFirstName;
     private String userLastName;
@@ -135,9 +142,6 @@ public class PersInfoActivity extends AppCompatActivity{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pers_info);
-
-        ButterKnife.bind(this);
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -147,11 +151,14 @@ public class PersInfoActivity extends AppCompatActivity{
         stRefImageDir = stRefMain.child(RepoStrings.Directories.IMAGE_DIR);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
-        Utils.printSharedPreferences(sharedPref);
+        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
         glide = Glide.with(PersInfoActivity.this);
 
-        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+        /* We set the content view
+        * */
+        setContentView(R.layout.activity_pers_info);
+        ButterKnife.bind(this);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -314,6 +321,8 @@ public class PersInfoActivity extends AppCompatActivity{
                 glide.load(userProfilePictureUri).into(iv_userImage);
             }
 
+            Utils.showMainContent (progressBarContent, mainContent);
+
         }
 
         @Override
@@ -422,7 +431,6 @@ public class PersInfoActivity extends AppCompatActivity{
         }
 
     }
-
 
     /** Method that shows the progress bar and disables a/some buttons
      * */
@@ -617,7 +625,6 @@ public class PersInfoActivity extends AppCompatActivity{
 
             }
         });
-
     }
 
 }

@@ -1,20 +1,28 @@
 package com.example.android.goforlunch.activities.auth;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.broadcastreceivers.InternetStateChangeReceiver;
+import com.example.android.goforlunch.broadcastreceivers.ObservableObject;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
@@ -46,8 +54,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.util.Map;
 import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,7 +72,7 @@ import io.reactivex.observers.DisposableObserver;
 // TODO: 02/06/2018  --------------------------- VERY IMPORTANT!!!!!! 
 // TODO: 02/06/2018 Check that sign in works well when we close the app instead of login off
 // TODO: 02/06/2018 Once, it allowed us to start with password account but the current user used gmail account
-public class AuthChooseLoginActivity extends AppCompatActivity{
+public class AuthChooseLoginActivity extends AppCompatActivity implements Observer{
 
     private static final String TAG = AuthChooseLoginActivity.class.getSimpleName();
 
@@ -68,6 +80,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
     private static int RC_GOOGLE_SIGN_IN = 101;
 
     //Widgets
+
+    @BindView(R.id.main_layout_id)
+    LinearLayout mainLayout;
+
     @BindView(R.id.choose_progressbar_id)
     ProgressBar progressBar;
 
@@ -95,8 +111,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
 
     private SharedPreferences sharedPref;
 
+    private InternetStateChangeReceiver receiver;
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
@@ -564,4 +582,43 @@ public class AuthChooseLoginActivity extends AppCompatActivity{
                 });
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        receiver = new InternetStateChangeReceiver();
+        registerReceiver(receiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        ObservableObject.getInstance().addObserver(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(receiver);
+        ObservableObject.getInstance().deleteObserver(this);
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.d(TAG, "update: called!");
+
+        int info = (int) data;
+
+        if (info == 1) {
+            Log.d(TAG, "update: There is internet");
+
+            Utils.createSnackbarNoInternet(
+                    AuthChooseLoginActivity.this,
+                    mainLayout,
+                    "Internet available");
+
+        } else {
+            Log.d(TAG, "update: There is no internet");
+
+            Utils.createSnackbarNoInternet(
+                    AuthChooseLoginActivity.this,
+                    mainLayout,
+                    "Internet not available");
+
+        }
+    }
 }

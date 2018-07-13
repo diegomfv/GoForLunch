@@ -1,50 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <FrameLayout
-        android:id="@+id/enter_status_bar_id"
+    <include layout="@layout/progress_bar"/>
+
+    <LinearLayout
+        android:id="@+id/join_main_content"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="25dp"
-        android:background="@color/colorPrimaryDark">
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/join_fab_id"
-        style="@style/fabBackStyle"
-        app:rippleColor="@color/colorAccentLight"
-        app:fabSize="mini"
-        app:borderWidth="0.1dp"/>
+        <FrameLayout
+            android:id="@+id/enter_status_bar_id"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:background="@color/colorPrimaryDark">
+        </FrameLayout>
 
-    <android.support.design.widget.TextInputLayout
-       style="@style/textInputLayoutStyle"
-        android:layout_margin="30dp">
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/join_fab_id"
+            style="@style/fabBackStyle"
+            app:rippleColor="@color/colorAccentLight"
+            app:fabSize="mini"
+            app:borderWidth="0.1dp"/>
 
-        <com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView
-            android:id="@+id/join_textInputAutocompleteTextView"
-            style="@style/textInputEditTextStyle"
-            android:inputType="text"
-            android:hint="@string/commonGroup"/>
+        <android.support.design.widget.TextInputLayout
+            style="@style/textInputLayoutStyle"
+            android:layout_margin="30dp">
 
-    </android.support.design.widget.TextInputLayout>
+            <com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView
+                android:id="@+id/join_textInputAutocompleteTextView"
+                style="@style/textInputEditTextStyle"
+                android:inputType="text"
+                android:hint="@string/commonGroup"/>
 
-    <Button
-        android:id="@+id/join_button_join_group_id"
-        style="@style/buttonGeneralStyle"
-        android:layout_marginTop="20dp"
-        android:text="@string/joinGroupJoinGroup" />
+        </android.support.design.widget.TextInputLayout>
 
-    <Button
-        android:id="@+id/join_button_create_group_id"
-        style="@style/buttonGeneralStyle"
-        android:layout_marginTop="20dp"
-        android:text="@string/joinGroupCreateNewGroup"
-        />
+        <Button
+            android:id="@+id/join_button_join_group_id"
+            style="@style/buttonGeneralStyle"
+            android:layout_marginTop="20dp"
+            android:text="@string/joinGroupJoinGroup" />
+
+        <Button
+            android:id="@+id/join_button_create_group_id"
+            style="@style/buttonGeneralStyle"
+            android:layout_marginTop="20dp"
+            android:text="@string/joinGroupCreateNewGroup"
+            />
+
+    </LinearLayout>
+
+</FrameLayout>
 
 
-
-
-</LinearLayout>

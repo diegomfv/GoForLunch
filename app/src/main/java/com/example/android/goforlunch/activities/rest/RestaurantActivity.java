@@ -3,6 +3,7 @@ package com.example.android.goforlunch.activities.rest;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -15,7 +16,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +34,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.broadcastreceivers.InternetStateChangeReceiver;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
@@ -146,23 +150,23 @@ public class RestaurantActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         context = RestaurantActivity.this;
-
+        
         fireDb = FirebaseDatabase.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        this.configureRecyclerView();
+        this.configureInternalStorage(context);
 
         glide = Glide.with(context);
 
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
-        /** Instantiation of the fab and set onClick listener*/
+        /** Instantiation of the fabs and set onClick listener*/
         fab.setOnClickListener(mFabListener);
 
         listOfCoworkers = new ArrayList<>();
 
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
-
-        this.configureRecyclerView();
-        this.configureInternalStorage(context);
 
         /** We get the intent to display the information
          * */
@@ -552,7 +556,7 @@ public class RestaurantActivity extends AppCompatActivity {
         if (storage.isFileExist(
                 imageDirPath + intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID))) {
             Log.d(TAG, "loadImage: file does exist in the directory");
-            getAndDisplayImageFromInternalStorage(intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID));
+            getAndDisplayImageFromInternalStorage(imageDirPath + intent.getStringExtra((RepoStrings.SentIntent.PLACE_ID)));
 
         } else {
             Log.d(TAG, "loadImage: file does not exist in the directory");
@@ -624,23 +628,6 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     }
                 });
-    }
-
-    /** Note that if you set an image via ImageView.setImageBitmap(BITMAP) it internally creates
-     * a new BitmapDrawableeven if you pass null.
-     * In that case the check imageViewOne.getDrawable() == null is false anytime.
-     * To get to know if an image is set you can do the following
-     * */
-    // TODO: 12/07/2018 Move to Utils
-    private boolean hasImage(@NonNull ImageView view) {
-        Drawable drawable = view.getDrawable();
-        boolean hasImage = (drawable != null);
-
-        if (hasImage && (drawable instanceof BitmapDrawable)) {
-            hasImage = ((BitmapDrawable)drawable).getBitmap() != null;
-        }
-
-        return hasImage;
     }
 
 }

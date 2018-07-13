@@ -77,6 +77,14 @@
 
         <!-- ////////////////////////////////////////////////////////////////// -->
 
+        <service android:name=".services.FetchingService" />
+
+        <!-- ////////////////////////////////////////////////////////////////// -->
+
+        <receiver android:name=".broadcastreceivers.InternetStateChangeReceiver"/>
+
+        <!-- ////////////////////////////////////////////////////////////////// -->
+
         <activity android:name=".activities.rest.FirebaseActivityDELETE"
             android:screenOrientation="portrait"/>
 
@@ -84,7 +92,22 @@
             android:screenOrientation="portrait" />
         <activity android:name=".activities.rest.FetchingActivityDELETE" />
 
-        <service android:name=".services.FetchingService" />
     </application>
 
 </manifest>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

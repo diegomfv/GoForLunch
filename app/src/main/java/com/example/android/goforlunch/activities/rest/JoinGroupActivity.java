@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
@@ -62,6 +63,12 @@ public class JoinGroupActivity extends AppCompatActivity {
     @BindView(R.id.join_textInputAutocompleteTextView)
     TextInputAutoCompleteTextView textInputAutoCompleteTextView;
 
+    @BindView(R.id.join_main_content)
+    LinearLayout mainContent;
+
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarContent;
+
     private String userKey;
     private String userGroup;
 
@@ -81,13 +88,16 @@ public class JoinGroupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_join_group);
-
-        ButterKnife.bind(this);
 
         fireDb = FirebaseDatabase.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(JoinGroupActivity.this);
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+
+        setContentView(R.layout.activity_join_group);
+
+        ////////////////////////////////
+
+        ButterKnife.bind(this);
 
         Log.d(TAG, "onCreate: userKey = " + userKey);
 
@@ -183,6 +193,8 @@ public class JoinGroupActivity extends AppCompatActivity {
                      * */
                     dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
                     dbRefUsers.addValueEventListener(valueEventListenerGetUserGroupAndRestOfGroups);
+
+                    Utils.showMainContent(progressBarContent, mainContent);
 
                 } else {
                     UtilsFirebase.logOut(JoinGroupActivity.this);

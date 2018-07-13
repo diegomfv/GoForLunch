@@ -58,6 +58,7 @@ import com.example.android.goforlunch.remote.remote.GoogleService;
 import com.example.android.goforlunch.remote.remote.GoogleServiceStreams;
 import com.example.android.goforlunch.repository.RepoConstants;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.services.FetchingService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -264,6 +265,9 @@ public class FragmentRestaurantMapView extends Fragment {
 //            }
 //        }
 
+
+
+
         /** We get an array of restaurant types from RESOURCES
          * */
         this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
@@ -355,7 +359,10 @@ public class FragmentRestaurantMapView extends Fragment {
                 Log.d(TAG, "onClick: refresh button clicked!");
                 ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Deleting db and starting request process");
                 //deleteAllFilesInStorage();
-                deleteAllRestaurantsAndStartRequestProcess();
+                //deleteAllRestaurantsAndStartRequestProcess();
+
+                getActivity().startService(new Intent(getActivity(), FetchingService.class));
+
 
             }
         });

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.AppDatabase;
@@ -42,16 +43,12 @@ import retrofit2.Response;
 
 import static com.example.android.goforlunch.repository.RepoStrings.Keys.NEARBY_KEY;
 
-// TODO: 11/07/2018 Remove ConcurrentModificationException
-
 /**
  * Created by Diego Fajardo on 11/07/2018.
  */
 public class FetchingService extends Service {
 
     private static final String TAG = FetchingService.class.getSimpleName();
-
-    //private Map<String,RestaurantEntry> mapOfRestaurants;
 
     private ArrayList<RestaurantEntry> listOfRestaurantsEntries;
     private ArrayList<String> listOfPlacesIdsOfRestaurants;
@@ -62,8 +59,6 @@ public class FetchingService extends Service {
     private Disposable disposable;
 
     private Handler mHandler;
-
-    private RestaurantEntry restaurantEntry;
 
     private boolean accessInternalStorageGranted = false;
 
@@ -83,7 +78,7 @@ public class FetchingService extends Service {
 
         /* We delete the database
         * */
-        localDatabase.clearAllTables();
+        //localDatabase.clearAllTables();
 
         configuringInternalStorage();
 
@@ -109,8 +104,11 @@ public class FetchingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: called!");
 
-        double latitude = (double) intent.getExtras().get("latitude");
-        double longitude = (double) intent.getExtras().get("longitude");
+        double latitude = 0;
+        double longitude = 0;
+
+//        double latitude = (double) intent.getExtras().get("latitude");
+//        double longitude = (double) intent.getExtras().get("longitude");
         accessInternalStorageGranted = intent.getBooleanExtra("accessInternalStorage", false);
         Log.i(TAG, "onStartCommand: accessInternalStorageGranted = " + accessInternalStorageGranted);
 
@@ -395,7 +393,7 @@ public class FetchingService extends Service {
                 /* If we do not have a valid photo reference, we insert the restaurant
                 * directly in the database
                 * */
-                insertRestaurantEntryInDatabase(restaurantEntry);
+                insertRestaurantEntryInDatabase(listOfRestaurantsEntries.get(i));
             }
         }
 
@@ -641,6 +639,8 @@ public class FetchingService extends Service {
      * */
     private void insertRestaurantEntryInDatabase (RestaurantEntry restaurantEntry) {
         Log.d(TAG, "insertRestaurantEntryInDatabase: called!");
+
+        // TODO: 12/07/2018 We can increase a counter here. When it is exactly the same as the number of restaurants inserted -1, we reactivate the map
 
         localDatabase.restaurantDao().insertRestaurant(restaurantEntry);
 
