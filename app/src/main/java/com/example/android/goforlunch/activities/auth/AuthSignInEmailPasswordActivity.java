@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -18,9 +19,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.rest.FirebaseActivityDELETE;
 import com.example.android.goforlunch.activities.rest.MainActivity;
-import com.example.android.goforlunch.broadcastreceivers.InternetStateChangeReceiver;
+import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.broadcastreceivers.ObservableObject;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
@@ -47,7 +47,6 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     private static final String TAG = AuthSignInEmailPasswordActivity.class.getSimpleName();
 
     //Widgets
-
     @BindView(R.id.main_layout_id)
     LinearLayout mainLayout;
 
@@ -73,7 +72,10 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     @BindView(R.id.signin_progressbar_id)
     ProgressBar progressBar;
 
-    private InternetStateChangeReceiver receiver;
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+
+    private Snackbar snackbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,6 +83,9 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         setContentView(R.layout.activity_auth_signin_email_password);
 
         ButterKnife.bind(this);
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
 
         // TODO: 29/06/2018 Delete this!
         inputEmail.setText("diego.fajardo@hotmail.com");
@@ -221,41 +226,58 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     @Override
     protected void onStart() {
         super.onStart();
-        receiver = new InternetStateChangeReceiver();
-        registerReceiver(receiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+
+        registerReceiver(receiver, intentFilter);
         ObservableObject.getInstance().addObserver(this);
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
         unregisterReceiver(receiver);
         ObservableObject.getInstance().deleteObserver(this);
+        snackbar = null;
+
     }
 
+    /** Method called via
+     * the broadcast receiver (internet connectivity)
+     * */
     @Override
     public void update(Observable observable, Object data) {
         Log.d(TAG, "update: called!");
 
-        int info = (int) data;
-
-        if (info == 1) {
-            Log.d(TAG, "update: There is internet");
-
-            Utils.createSnackbarNoInternet(
-                    AuthSignInEmailPasswordActivity.this,
-                    mainLayout,
-                    "Internet available");
-
-        } else {
+        if ((int) data == 0) {
             Log.d(TAG, "update: There is no internet");
 
-            Utils.createSnackbarNoInternet(
-                    AuthSignInEmailPasswordActivity.this,
-                    mainLayout,
-                    "Internet not available");
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        AuthSignInEmailPasswordActivity.this,
+                        mainLayout,
+                        "Internet not available");
+            } else {
+                snackbar.show();
+            }
 
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
         }
+    }
+
+    /** Method to configure the Broadcast Receiver
+     * */
+    public void configureBroadcastReceiver () {
+        Log.d(TAG, "configureBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
 
     }
+
 }

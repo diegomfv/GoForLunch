@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 
 import io.reactivex.observers.DisposableObserver;
@@ -16,9 +15,9 @@ import io.reactivex.observers.DisposableObserver;
 
 /** Broadcast receiver that listens to internet state changes
  * */
-public class InternetStateChangeReceiver extends BroadcastReceiver {
+public class InternetConnectionReceiver extends BroadcastReceiver {
 
-    private static final String TAG = InternetStateChangeReceiver.class.getSimpleName();
+    private static final String TAG = InternetConnectionReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(final Context context, final Intent intent) {

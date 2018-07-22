@@ -81,7 +81,7 @@
 
         <!-- ////////////////////////////////////////////////////////////////// -->
 
-        <receiver android:name=".broadcastreceivers.InternetStateChangeReceiver"/>
+        <receiver android:name=".broadcastreceivers.InternetConnectionReceiver"/>
 
         <!-- ////////////////////////////////////////////////////////////////// -->
 

@@ -197,6 +197,7 @@ public class JoinGroupActivity extends AppCompatActivity {
                     Utils.showMainContent(progressBarContent, mainContent);
 
                 } else {
+                    // TODO: 22/07/2018 Delete!
                     UtilsFirebase.logOut(JoinGroupActivity.this);
 
                 }

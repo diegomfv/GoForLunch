@@ -2,8 +2,10 @@ package com.example.android.goforlunch.helpermethods;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,6 +24,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.broadcastreceivers.ObservableObject;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -34,6 +38,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -89,10 +94,33 @@ public class Utils {
             return false; }
     }
 
+    /** Method used to connect
+     * the broadcast receiver with
+     * the activity
+     * */
+    public static void connectReceiver (Context context, BroadcastReceiver receiver, IntentFilter intentFilter, Observer observer){
+        Log.d(TAG, "connectReceiver: called!");
+
+        context.registerReceiver(receiver, intentFilter);
+        ObservableObject.getInstance().addObserver(observer);
+
+    }
+
+    /** Method used to disconnect
+     * the broadcast receiver from the activity
+     * */
+    public static void disconnectReceiver (Context context, BroadcastReceiver receiver, Observer observer) {
+        Log.d(TAG, "disconnectReceiver: called!");
+
+        context.unregisterReceiver(receiver);
+        ObservableObject.getInstance().deleteObserver(observer);
+
+    }
+
     /** Method to create a Snackbar
      * displaying that there is no internet
      * */
-    public static void createSnackbarNoInternet (Context context, View mainLayout, String message) {
+    public static Snackbar createSnackbar (Context context, View mainLayout, String message) {
 
         final Snackbar snackbar = Snackbar.make(
                 mainLayout,
@@ -117,10 +145,13 @@ public class Utils {
         snackbarButton.setTextColor(context.getResources().getColor(android.R.color.white));
         snackbar.show();
 
+        return snackbar;
+
     }
 
 
-    /** Method that shows progress bar and disables user interaction
+    // TODO: 22/07/2018 Delete!
+       /** Method that shows progress bar and disables user interaction
      * */
     public static void showProgressBarAndDisableUserInteraction (AppCompatActivity appCompatActivity, ProgressBar progressBar) {
 
@@ -146,6 +177,7 @@ public class Utils {
                 .clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
     }
+    // TODO: 22/07/2018 Delete!
 
     /**
      * Method that hides the keyboard
@@ -410,7 +442,7 @@ public class Utils {
 
     }
 
-    /** Method that displays
+    /** Method that displays the main content
      * and hides de progress bar that occupies
      * all the screen
      * */
@@ -419,6 +451,18 @@ public class Utils {
 
         progressBarContent.setVisibility(View.GONE);
         mainContent.setVisibility(View.VISIBLE);
+
+    }
+
+    /** Method that hides the main content
+     * and displays de progress bar that occupies
+     * all the screen
+     * */
+    public static void hideMainContent (LinearLayout progressBarContent, LinearLayout mainContent) {
+        Log.d(TAG, "hideMainContent: called!");
+
+        progressBarContent.setVisibility(View.VISIBLE);
+        mainContent.setVisibility(View.GONE);
 
     }
 

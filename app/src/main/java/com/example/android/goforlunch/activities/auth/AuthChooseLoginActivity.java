@@ -7,21 +7,18 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BaseTransientBottomBar;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
-import com.example.android.goforlunch.broadcastreceivers.InternetStateChangeReceiver;
+import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.broadcastreceivers.ObservableObject;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
@@ -54,9 +51,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
-import java.util.Map;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
@@ -81,9 +75,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     //Widgets
 
-    @BindView(R.id.main_layout_id)
-    LinearLayout mainLayout;
-
     @BindView(R.id.choose_progressbar_id)
     ProgressBar progressBar;
 
@@ -99,6 +90,12 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     @BindView(R.id.choose_facebook_sign_in_button)
     LoginButton buttonFacebook;
 
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarContent;
+
+    @BindView(R.id.main_layout_id)
+    LinearLayout mainContent;
+
     private GoogleSignInClient mGoogleSignInClient;
 
     //For facebook login
@@ -111,7 +108,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     private SharedPreferences sharedPref;
 
-    private InternetStateChangeReceiver receiver;
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+
+    private Snackbar snackbar;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -120,6 +120,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear().apply();
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -164,6 +167,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         setContentView(R.layout.activity_auth_choose_login);
         ButterKnife.bind(this);
 
+        // TODO: 22/07/2018 Might need to be moved to onStart()
+        Utils.showMainContent(progressBarContent, mainContent);
+
         buttonPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -190,7 +196,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         });
 
 
-        // Configure Google Sign In
+        /* Configure Google Sign In
+         *  */
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -210,6 +217,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                        Log.d(TAG, "onNext: ");
 
                        if (aBoolean) {
+
                            googleSignIn();
 
                        } else {
@@ -248,11 +256,15 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                     public void onNext(Boolean aBoolean) {
                         Log.d(TAG, "onNext: " + aBoolean);
 
-                        if (aBoolean) {
-                            handleFacebookAccessToken(loginResult.getAccessToken());
+                        if (!aBoolean) {
+                            Log.d(TAG, "onNext: internet not available");
+
+                            ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.noInternet));
 
                         } else {
-                            // TODO: 02/07/2018 Put sth!
+                            Log.d(TAG, "onNext: internet available");
+
+                            handleFacebookAccessToken(loginResult.getAccessToken());
 
                         }
 
@@ -289,6 +301,34 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     }
 
     @Override
+    protected void onStart() {
+        Log.d(TAG, "onStart: called!");
+        super.onStart();
+
+        Utils.connectReceiver(AuthChooseLoginActivity.this, receiver, intentFilter, this);
+
+
+
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop: called!");
+        super.onStop();
+
+        Utils.disconnectReceiver(
+                AuthChooseLoginActivity.this,
+                receiver,
+                AuthChooseLoginActivity.this);
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+
+
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -315,9 +355,40 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         }
     }
 
+    /** Method called via
+     * the broadcast receiver (internet connectivity)
+     * */
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) data == 0) {
+            Log.d(TAG, "update: Internet Available");
+
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        AuthChooseLoginActivity.this,
+                        mainContent,
+                        "Internet not available");
+
+            } else {
+                snackbar.show();
+            }
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+
+        }
+    }
+
     /** Method for google sign in
      * */
     public void googleSignIn() {
+        Log.d(TAG, "googleSignIn: called!");
 
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN);
@@ -328,7 +399,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
-        Utils.showProgressBarAndDisableUserInteraction(AuthChooseLoginActivity.this, progressBar);
+        /* We hide the main screen while the process runs
+        * */
+        Utils.hideMainContent(progressBarContent, mainContent);
 
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         auth.signInWithCredential(credential)
@@ -444,7 +517,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
                             ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
 
-                            Utils.hideProgressBarAndEnableUserInteraction(AuthChooseLoginActivity.this, progressBar);
+                            Utils.showMainContent(progressBarContent, mainContent);
 
                         }
 
@@ -458,7 +531,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
-        Utils.showProgressBarAndDisableUserInteraction(AuthChooseLoginActivity.this, progressBar);
+        Utils.hideMainContent(progressBarContent, mainContent);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         auth.signInWithCredential(credential)
@@ -573,7 +646,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
                             ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
 
-                            Utils.hideProgressBarAndEnableUserInteraction(AuthChooseLoginActivity.this, progressBar);
+                            Utils.showMainContent(progressBarContent, mainContent);
 
                         }
 
@@ -582,43 +655,4 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                 });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        receiver = new InternetStateChangeReceiver();
-        registerReceiver(receiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
-        ObservableObject.getInstance().addObserver(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        unregisterReceiver(receiver);
-        ObservableObject.getInstance().deleteObserver(this);
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        Log.d(TAG, "update: called!");
-
-        int info = (int) data;
-
-        if (info == 1) {
-            Log.d(TAG, "update: There is internet");
-
-            Utils.createSnackbarNoInternet(
-                    AuthChooseLoginActivity.this,
-                    mainLayout,
-                    "Internet available");
-
-        } else {
-            Log.d(TAG, "update: There is no internet");
-
-            Utils.createSnackbarNoInternet(
-                    AuthChooseLoginActivity.this,
-                    mainLayout,
-                    "Internet not available");
-
-        }
-    }
 }

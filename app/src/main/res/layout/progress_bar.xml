@@ -2,6 +2,13 @@
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <FrameLayout
+        android:id="@+id/choose_status_bar_id"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:background="@color/colorPrimaryDark">
+    </FrameLayout>
+
     <LinearLayout
         android:id="@+id/progressBar_content"
         android:layout_width="match_parent"

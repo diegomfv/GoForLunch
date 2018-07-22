@@ -5,10 +5,9 @@ package com.example.android.goforlunch.repository;
  */
 public interface RepoStrings {
 
-    // TODO: 25/05/2018 Delete this
-    String FAKE_USER_EMAIL = "todd_brown@gmail.com";
-
     String NOT_AVAILABLE_FOR_STRINGS = "";
+
+    String CONNECTIVITY_CHANGE_STATUS = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /** This string is used in for requests (TextSearch)
      * */
