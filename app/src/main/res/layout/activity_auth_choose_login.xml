@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/progress_bar"/>
+    <include layout="@layout/progress_bar_content"/>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/main_layout_id"
@@ -23,16 +23,6 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="90dp">
-
-            <ProgressBar
-                android:id="@+id/choose_progressbar_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="30dp"
-                android:layout_margin="30dp"
-                android:visibility="invisible"
-                android:layout_marginBottom="10dp"/>
 
         </RelativeLayout>
 

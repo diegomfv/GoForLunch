@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
@@ -69,10 +68,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     private static int RC_GOOGLE_SIGN_IN = 101;
 
     //Widgets
-
-    @BindView(R.id.choose_progressbar_id)
-    ProgressBar progressBar;
-
     @BindView(R.id.choose_sign_in_password_button_id)
     Button buttonPassword;
 
@@ -430,11 +425,11 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
 
             } else {
-                // TODO: 24/07/2018 Probably, this code will never be executed
+                // TODO: 24/07/2018 Probably, this code wwill
 
                 //go to AuthEnterNameActivity
-//                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
-//                finish();
+                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
+                finish();
 
             }
         }

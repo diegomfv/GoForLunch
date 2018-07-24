@@ -81,9 +81,6 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     @BindView(R.id.pers_enter_fab_id)
     FloatingActionButton fab;
 
-    @BindView(R.id.pers_enter_progressbar)
-    ProgressBar progressBar;
-
     @BindView(R.id.pers_enter_image_id)
     ImageView ivUserImage;
 
@@ -147,6 +144,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     private InternetConnectionReceiver receiver;
     private IntentFilter intentFilter;
     private Snackbar snackbar;
+
+    private boolean internetAvailable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -230,11 +229,13 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     }
 
     @Override
-    public void update(Observable o, Object internetAvailable) {
+    public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
 
-        if ((int) internetAvailable == 0) {
+        if ((int) internetAvailableUpdate == 0) {
             Log.d(TAG, "update: Internet not Available");
+
+            internetAvailable = false;
 
             if (snackbar == null) {
                 snackbar = Utils.createSnackbar(
@@ -253,6 +254,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         } else {
             Log.d(TAG, "update: Internet available");
+
+            internetAvailable = true;
 
             if (snackbar != null) {
                 snackbar.dismiss();
@@ -507,7 +510,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
                         /* If the snackbar is not visible, it means internet is available
                         * */
-                        if (!snackbar.isShown()) {
+                        if (internetAvailable) {
 
                             Utils.hideMainContent(progressBarContent, mainContent);
 

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/progress_bar"/>
+    <include layout="@layout/progress_bar_content"/>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/enter_main_content"
@@ -31,16 +31,6 @@
                 app:rippleColor="@color/colorAccentLight"
                 app:fabSize="mini"
                 app:borderWidth="0.1dp"/>
-
-            <ProgressBar
-                android:id="@+id/enter_progressbar_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="30dp"
-                android:layout_margin="30dp"
-                android:visibility="invisible"
-                android:layout_marginBottom="10dp"/>
 
         </RelativeLayout>
 
