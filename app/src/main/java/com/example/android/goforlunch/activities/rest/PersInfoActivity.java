@@ -71,7 +71,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Diego Fajardo on 09/05/2018.
  */
-public class PersInfoActivity extends AppCompatActivity implements Observer{
+public class PersInfoActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = PersInfoActivity.class.getSimpleName();
 
@@ -85,7 +85,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
     ProgressBar progressBar;
 
     @BindView(R.id.pers_enter_image_id)
-    ImageView iv_userImage;
+    ImageView ivUserImage;
 
     @BindView(R.id.pers_enter_first_name_id)
     TextInputEditText inputFirstName;
@@ -164,68 +164,17 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
 
         glide = Glide.with(PersInfoActivity.this);
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-
         /* We set the content view
         * */
         setContentView(R.layout.activity_pers_info);
         ButterKnife.bind(this);
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: fab clicked!");
-
-                NavUtils.navigateUpFromSameTask(PersInfoActivity.this);
-            }
-        });
-
-        buttonSaveChanges.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: Clicked! " + view.toString());
-
-                if (inputFirstName.getText().toString().trim().length() == 0) {
-                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonToastEnterFirstName));
-
-                } else if (inputLastName.getText().toString().trim().length() == 0) {
-                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonToastEnterLastName));
-
-                } else {
-                    alertDialogChangeData();
-                }
-            }
-        });
-
-        iv_userImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: iv_userImage clicked!");
-
-                if (checkPermissionREAD_EXTERNAL_STORAGE(PersInfoActivity.this)) {
-
-                    Intent intent = new Intent(Intent.ACTION_PICK);
-                    intent.setType("image/*");
-                    startActivityForResult(intent,0);
-
-                }
-            }
-        });
-
-        tvChangePassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: Clicked! " + view.toString());
-                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.notImplemented));
-            }
-        });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume: called!");
+        /* We set the listeners
+        * */
+        fab.setOnClickListener(fabOnClickListener);
+        buttonSaveChanges.setOnClickListener(buttonSaveChangesOnClickListener);
+        ivUserImage.setOnClickListener(ivOnClickListener);
+        tvChangePassword.setOnClickListener(tvChangePasswordOnClickListener);
     }
 
     @Override
@@ -233,6 +182,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
         Utils.connectReceiver(PersInfoActivity.this, receiver, intentFilter, this);
 
     }
@@ -242,24 +193,164 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        Utils.disconnectReceiver(
-                PersInfoActivity.this,
-                receiver,
-                PersInfoActivity.this);
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    PersInfoActivity.this,
+                    receiver,
+                    PersInfoActivity.this);
+        }
+
         receiver = null;
         intentFilter = null;
         snackbar = null;
 
-        dbRefUsers.removeEventListener(valueEventListenerGetInfoAndFillWidgets);
     }
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
         super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    PersInfoActivity.this,
+                    receiver,
+                    PersInfoActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+        fab.setOnClickListener(null);
+        buttonSaveChanges.setOnClickListener(null);
+        tvChangePassword.setOnClickListener(null);
+        ivUserImage.setOnClickListener(null);
+
     }
 
-    /** Value Event ListenerL gets all user's info from Firebase and fills all the widgets
+    @Override
+    public void update(Observable o, Object internetAvailable) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) internetAvailable == 0) {
+            Log.d(TAG, "update: Internet not Available");
+
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        PersInfoActivity.this,
+                        mainContent,
+                        "Internet not available");
+
+                ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
+                Utils.showMainContent(progressBarContent, mainContent);
+
+            } else {
+                snackbar.show();
+                ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
+                Utils.showMainContent(progressBarContent, mainContent);
+            }
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+
+            /* We get the user information
+            when internet comes back
+            */
+            Utils.hideMainContent(progressBarContent, mainContent);
+
+            currentUser = auth.getCurrentUser();
+            Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+            if (currentUser != null) {
+
+                userEmail = currentUser.getEmail();
+
+                /* We get a reference
+                to user's firebase storage
+                 * */
+                if (userEmail != null) {
+                    stRefUser = stRefImageDir.child(userEmail);
+                } else {
+                    stRefUser = null;
+                }
+
+                Log.d(TAG, "onNext: userProfilePictureUri = " + userProfilePictureUri);
+                if (userProfilePictureUri == null) {
+                    userProfilePictureUri = currentUser.getPhotoUrl();
+                    Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
+                }
+
+                if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
+                }
+            }
+        }
+
+    }
+
+    /***************
+     * LISTENERS ***
+     **************/
+
+    private View.OnClickListener fabOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: fab clicked!");
+
+            NavUtils.navigateUpFromSameTask(PersInfoActivity.this);
+        }
+    };
+
+    private View.OnClickListener buttonSaveChangesOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: Clicked! " + view.toString());
+
+            if (inputFirstName.getText().toString().trim().length() == 0) {
+                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonToastEnterFirstName));
+
+            } else if (inputLastName.getText().toString().trim().length() == 0) {
+                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonToastEnterLastName));
+
+            } else {
+                alertDialogChangeData();
+            }
+        }
+    };
+
+
+    private View.OnClickListener tvChangePasswordOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: Clicked! " + view.toString());
+            ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.notImplemented));
+        }
+    };
+
+
+    private View.OnClickListener ivOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: ivUserImage clicked!");
+
+            if (checkPermissionREAD_EXTERNAL_STORAGE(PersInfoActivity.this)) {
+
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(intent,0);
+
+            }
+        }
+    };
+
+    /** Value Event Listener: gets all user's info from Firebase and fills all the widgets
      *  */
     private ValueEventListener valueEventListenerGetInfoAndFillWidgets = new ValueEventListener() {
 
@@ -273,7 +364,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
             userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
             userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
 
-            /** We fill the widgets with the user's info
+            /* We fill the widgets with the user's info
              * */
             inputFirstName.setText(userFirstName);
             inputLastName.setText(userLastName);
@@ -282,12 +373,16 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
             inputPassword.setText("******");
 
             if (userProfilePictureUri == null) {
-                glide.load(getResources().getDrawable(R.drawable.picture_not_available)).into(iv_userImage);
+                glide.load(getResources().getDrawable(R.drawable.picture_not_available)).into(ivUserImage);
             } else {
-                glide.load(userProfilePictureUri).into(iv_userImage);
+                glide.load(userProfilePictureUri).into(ivUserImage);
             }
 
             Utils.showMainContent (progressBarContent, mainContent);
+
+            /* We remove the listener (probably not needed because it's a SingleValueEvent Listener)
+            * */
+            dbRefUsers.removeEventListener(this);
 
         }
 
@@ -373,14 +468,9 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
                 final Uri imageUri = data.getData();
                 inputStreamSelectedImage = getContentResolver().openInputStream(imageUri);
 
-                // TODO: 07/07/2018 Delete, not necessary here
-                /* Starting storage process
-                * */
-                //startStorageProcess(inputStreamSelectedImage);
-
                 final Bitmap selectedBitmap = BitmapFactory.decodeStream(inputStreamSelectedImage);
 
-                glide.load(selectedBitmap).into(iv_userImage);
+                glide.load(selectedBitmap).into(ivUserImage);
                 Log.d(TAG, "onActivityResult: image loaded!");
 
                 /** We store the Uri value. We will use it if the user saves changes
@@ -394,72 +484,6 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
 
         } else {
             ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
-        }
-
-    }
-
-    @Override
-    public void update(Observable o, Object internetAvailable) {
-        Log.d(TAG, "update: called!");
-
-        if ((int) internetAvailable == 0) {
-            Log.d(TAG, "update: Internet not Available");
-
-            if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
-                        PersInfoActivity.this,
-                        mainContent,
-                        "Internet not available");
-
-                ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
-                Utils.showMainContent(progressBarContent, mainContent);
-
-            } else {
-                snackbar.show();
-                ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
-                Utils.showMainContent(progressBarContent, mainContent);
-            }
-
-        } else {
-            Log.d(TAG, "update: Internet available");
-
-            if (snackbar != null) {
-                snackbar.dismiss();
-            }
-
-            /* We get the user information
-            when internet comes back
-            */
-            Utils.hideMainContent(progressBarContent, mainContent);
-
-            currentUser = auth.getCurrentUser();
-            Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
-
-            if (currentUser != null) {
-
-                userEmail = currentUser.getEmail();
-
-                /* We get a reference
-                to user's firebase storage
-                 * */
-                if (userEmail != null) {
-                    stRefUser = stRefImageDir.child(userEmail);
-                } else {
-                    stRefUser = null;
-                }
-
-                Log.d(TAG, "onNext: userProfilePictureUri = " + userProfilePictureUri);
-                if (userProfilePictureUri == null) {
-                    userProfilePictureUri = currentUser.getPhotoUrl();
-                    Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
-                }
-
-                if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                    dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
-                }
-            }
         }
 
     }
@@ -528,7 +552,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
 
                                                 /* We save the image in the image view in the storage
                                                  * */
-                                                startStorageProcessWithByteArray(iv_userImage);
+                                                startStorageProcessWithByteArray(ivUserImage);
 
                                             }
                                         }
@@ -611,6 +635,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer{
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d(TAG, "onSuccess: file uploaded!");
 
+                /* This toast does not appear in "AuthEnterNameActivity"!
+                * */
                 ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
 
                 startActivity(new Intent(PersInfoActivity.this, MainActivity.class));

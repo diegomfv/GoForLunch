@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -69,7 +70,6 @@ import butterknife.ButterKnife;
 /**
  * Created by Diego Fajardo on 09/05/2018.
  */
-// TODO: 24/07/2018 This code might be modified to be more readable
 public class AuthEnterNameActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = AuthEnterNameActivity.class.getSimpleName();
@@ -684,8 +684,6 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d(TAG, "onSuccess: file uploaded!");
-
-                ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
 
                 startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
                 finish();
