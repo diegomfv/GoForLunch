@@ -279,6 +279,56 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         }
     }
 
+    /** External Storage permission request
+     * */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: called!");
+
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // do your stuff
+                } else {
+                    ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.getAccountsDenied));
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions,
+                        grantResults);
+        }
+    }
+
+    /** Getting the image
+     * */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: called!");
+
+        if (resultCode == RESULT_OK) {
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                iv_userImage.setImageBitmap(selectedImage);
+
+                /** We store the Uri value. We will use it if the user saves changes
+                 * */
+                userProfilePictureUri = imageUri;
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
+            }
+
+        } else {
+            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
+        }
+
+    }
+
     /**************************
      * LISTENERS **************
      *************************/
@@ -368,6 +418,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
             Log.d(TAG, "onCancelled: " + databaseError.getCode());
         }
     };
+
+    /******************
+     * METHODS ********
+     *****************/
 
     /** This method is used to check that the minimum requisites for creating an user
      * are fulfilled
@@ -596,55 +650,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         alert.show();
     }
 
-    /** External Storage permission request
-     * */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult: called!");
 
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // do your stuff
-                } else {
-                    ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.getAccountsDenied));
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions,
-                        grantResults);
-        }
-    }
-
-    /** Getting the image
-     * */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: called!");
-
-        if (resultCode == RESULT_OK) {
-            try {
-                final Uri imageUri = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                iv_userImage.setImageBitmap(selectedImage);
-
-                /** We store the Uri value. We will use it if the user saves changes
-                 * */
-                userProfilePictureUri = imageUri;
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
-            }
-
-        } else {
-            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
-        }
-
-    }
 
     /** Method for saving images
      * in Firebase Storage
