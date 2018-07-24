@@ -538,6 +538,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     /** Method used to fill the UI using the intent
      * */
     private boolean fillUIUsingIntent(Intent intent) {
+        Log.d(TAG, "fillUIUsingIntent: called!");
 
         if (intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) == null
                 || intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME).equals("")) {

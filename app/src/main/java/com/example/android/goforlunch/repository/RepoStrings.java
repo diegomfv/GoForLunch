@@ -34,6 +34,8 @@ public interface RepoStrings {
 
     String RESTAURANT_TABLE_NAME = "restaurant";
 
+    String FLAG_SPECIFY_FRAGMENT = "flagToSpecifyFragment";
+
     interface Keys {
 
         String NEARBY_KEY = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";

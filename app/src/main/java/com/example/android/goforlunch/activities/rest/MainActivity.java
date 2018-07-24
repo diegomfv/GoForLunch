@@ -2,12 +2,14 @@ package com.example.android.goforlunch.activities.rest;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -27,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
+import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
@@ -48,6 +52,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,7 +76,7 @@ import io.reactivex.observers.DisposableObserver;
 //3
 // TODO: 12/07/2018 Offline challenge! Connect using broadcast receiver
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -84,11 +90,11 @@ public class MainActivity extends AppCompatActivity{
     @BindView(R.id.main_bottom_navigation_id)
     BottomNavigationView bottomNavigationView;
 
-    @BindView(R.id.main_progress_bar_id)
-    ProgressBar progressBar;
-
     @BindView(R.id.main_fragment_container_id)
     FrameLayout container;
+
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarContent;
 
     private TextView navUserName;
     private TextView navUserEmail;
@@ -121,45 +127,41 @@ public class MainActivity extends AppCompatActivity{
     private String userGroup;
     private String userGroupKey;
 
+    //InternetConnectionReceiver variables
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+    private Snackbar snackbar;
+
+    private boolean internetAvailable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        ButterKnife.bind(this);
+        Log.d(TAG, "onCreate: called!");
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         fireDb = FirebaseDatabase.getInstance();
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
-        mNavigationView.setNavigationItemSelectedListener(navViewListener);
+        //////////////////////////////////////
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         View headerView = mNavigationView.getHeaderView(0);
         navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
         navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
         navUserProfilePicture = (ImageView) headerView.findViewById(R.id.nav_drawer_image_id);
 
-        showProgressBar(progressBar, container);
+        bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
+        mNavigationView.setNavigationItemSelectedListener(navViewListener);
+
+        if (savedInstanceState != null) {
+            flagToSpecifyCurrentFragment = savedInstanceState.getInt(RepoStrings.FLAG_SPECIFY_FRAGMENT, 0);
+        }
 
         /* When we start main Activity, we always load map fragment
         * */
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
-                .commit();
-        flagToSpecifyCurrentFragment = 1;
-
-        hideProgressBar(progressBar,container);
-
-    }
-
-    /** We use onResume() to check if the notifications
-     * are on or off
-     * */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume: called!");
+        Log.i(TAG, "onCreate: flagToSpecifyCurrentFragment = " + flagToSpecifyCurrentFragment);
+        loadFragment();
 
     }
 
@@ -168,65 +170,54 @@ public class MainActivity extends AppCompatActivity{
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-            @Override
-            public void onNext(Boolean aBoolean) {
-                Log.d(TAG, "onNext: ");
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        Utils.connectReceiver(MainActivity.this, receiver, intentFilter, this);
 
-                if (aBoolean) {
-
-                    /** We get the user information
-                     * */
-                    auth = FirebaseAuth.getInstance();
-                    currentUser = auth.getCurrentUser();
-                    Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
-
-                    if (currentUser != null) {
-
-                        userEmail = currentUser.getEmail();
-
-                        if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                            fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                            fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
-                        }
-                    }
-
-                } else {
-                    // TODO: 22/07/2018 Delete!
-                    UtilsFirebase.logOut(MainActivity.this);
-
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, "onError: " + Log.getStackTraceString(e));
-            }
-
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: ");
-
-            }
-        });
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-        fireDbRefUsers.removeEventListener(valueEventListenerGetUserInfo);
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    MainActivity.this,
+                    receiver,
+                    MainActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
     }
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
         super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    MainActivity.this,
+                    receiver,
+                    MainActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(null);
+        mNavigationView.setNavigationItemSelectedListener(null);
+
     }
 
     @Override
     public void onBackPressed() {
+        Log.d(TAG, "onBackPressed: called!");
         if (mainDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mainDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
@@ -235,27 +226,96 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState: called!");
+        outState.putInt(RepoStrings.FLAG_SPECIFY_FRAGMENT, flagToSpecifyCurrentFragment);
+        super.onSaveInstanceState(outState);
+
+    }
+
+    /** Callback: listening to broadcast receiver
+     * */
+    @Override
+    public void update(Observable o, Object internetAvailableUpdate) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) internetAvailableUpdate == 0) {
+            Log.d(TAG, "update: Internet Not Available");
+
+            internetAvailable = false;
+
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        MainActivity.this,
+                        mainDrawerLayout,
+                        getResources().getString(R.string.noInternet));
+
+            } else {
+                snackbar.show();
+            }
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            internetAvailable = true;
+
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+
+            /* We get the user information
+             * */
+            auth = FirebaseAuth.getInstance();
+            currentUser = auth.getCurrentUser();
+            Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+            if (currentUser != null) {
+
+                userEmail = currentUser.getEmail();
+
+                if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                    fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                    fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                }
+            }
+
+        }
+    }
+
     /** Method used to update the NavDrawer info
      * */
-    private boolean updateNavDrawerTextViews() {
-        Log.d(TAG, "updateNavDrawerTextViews: called!");
+    private boolean updateNavDrawerViews() {
+        Log.d(TAG, "updateNavDrawerViews: called!");
 
-        /**
-         * We fill the variables for NavigationDrawer
+        /* We fill the variables for NavigationDrawer
          * */
-        navUserName.setText(userFirstName + " " + userLastName);
+        StringBuilder userName = new StringBuilder(userFirstName);
+        userName.append(" ").append(userLastName);
+
+        navUserName.setText(userName.toString());
         navUserEmail.setText(userEmail);
 
-        if (currentUser.getPhotoUrl() != null) {
-            Log.d(TAG, "updateNavDrawerTextViews: " + currentUser.getPhotoUrl());
-            Glide.with(MainActivity.this)
-                    .load(currentUser.getPhotoUrl())
-                    .into(navUserProfilePicture);
-        } else {
-            Log.d(TAG, "updateNavDrawerTextViews: currentUserPhoto = null");
+        if (!internetAvailable) {
+
             Glide.with(MainActivity.this)
                     .load(getResources().getDrawable(R.drawable.picture_not_available))
                     .into(navUserProfilePicture);
+
+        } else {
+
+            if (currentUser.getPhotoUrl() != null) {
+                Log.d(TAG, "updateNavDrawerViews: " + currentUser.getPhotoUrl());
+                Glide.with(MainActivity.this)
+                        .load(currentUser.getPhotoUrl())
+                        .into(navUserProfilePicture);
+            } else {
+                Log.d(TAG, "updateNavDrawerViews: currentUserPhoto = null");
+                Glide.with(MainActivity.this)
+                        .load(getResources().getDrawable(R.drawable.picture_not_available))
+                        .into(navUserProfilePicture);
+            }
         }
 
         return true;
@@ -277,8 +337,6 @@ public class MainActivity extends AppCompatActivity{
     public DrawerLayout getMDrawerLayout() {
         return mainDrawerLayout;
     }
-
-
 
     /*****************
      * LISTENERS *****
@@ -308,7 +366,7 @@ public class MainActivity extends AppCompatActivity{
                     checkAddRestaurantAt4pmDailyJob(sharedPref);
                     checkNotifications(sharedPref);
 
-                    updateNavDrawerTextViews();
+                    updateNavDrawerViews();
                     chooseGroupReminder();
 
                 }
@@ -343,7 +401,7 @@ public class MainActivity extends AppCompatActivity{
                     Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
                     Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
                     startActivity(Utils.fillIntentUsingMapInfo(intent, map));
-
+                    fireDbRefUsers.removeEventListener(this);
                 }
             }
         }
@@ -355,7 +413,6 @@ public class MainActivity extends AppCompatActivity{
         }
     };
 
-
     /** Listener for bottom navigation view
      * */
     private BottomNavigationView.OnNavigationItemSelectedListener botNavListener =
@@ -364,43 +421,41 @@ public class MainActivity extends AppCompatActivity{
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Log.d(TAG, "onNavigationItemSelected: called!");
 
-                    showProgressBar(progressBar, container);
-
                     Fragment selectedFragment = null;
 
                     switch (item.getItemId()) {
 
                         case R.id.nav_view_map_id:
 
-                            if (flagToSpecifyCurrentFragment == 1) {
+                            if (flagToSpecifyCurrentFragment == 0) {
                                 return true;
 
                             } else {
                                 selectedFragment = FragmentRestaurantMapView.newInstance();
-                                flagToSpecifyCurrentFragment = 1;
+                                flagToSpecifyCurrentFragment = 0;
 
                             }
                             break;
 
                         case R.id.nav_view_list_id:
 
-                            if (flagToSpecifyCurrentFragment == 2) {
+                            if (flagToSpecifyCurrentFragment == 1) {
                                 return true;
 
                             } else {
                                 selectedFragment = FragmentRestaurantListView.newInstance();
-                                flagToSpecifyCurrentFragment = 2;
+                                flagToSpecifyCurrentFragment = 1;
 
                             }
                             break;
                         case R.id.nav_view_coworkers_id:
 
-                            if (flagToSpecifyCurrentFragment == 3) {
+                            if (flagToSpecifyCurrentFragment == 2) {
                                 return true;
 
                             } else {
                                 selectedFragment = FragmentCoworkers.newInstance();
-                                flagToSpecifyCurrentFragment = 3;
+                                flagToSpecifyCurrentFragment = 2;
 
                             }
                             break;
@@ -410,8 +465,6 @@ public class MainActivity extends AppCompatActivity{
                             .beginTransaction()
                             .replace(R.id.main_fragment_container_id, selectedFragment)
                             .commit();
-
-                    hideProgressBar(progressBar, container);
 
                     //true means that we want to select the clicked item
                     //if we choose false, the fragment will be shown but the item
@@ -432,35 +485,14 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
 
-                            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-                                @Override
-                                public void onNext(Boolean aBoolean) {
-                                    Log.d(TAG, "onNext: " + aBoolean);
+                            if (!internetAvailable) {
+                                ToastHelper.toastNoInternet(MainActivity.this);
 
-                                    if (aBoolean) {
+                            } else {
+                                fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerNavLunch);
 
-                                        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                                        fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerNavLunch);
-
-                                    } else {
-                                        //Do nothing because there is no internet
-                                        ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.noInternet));
-
-                                    }
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    Log.e(TAG, "onError: " + e.getMessage());
-
-                                }
-
-                                @Override
-                                public void onComplete() {
-                                    Log.d(TAG, "onComplete: ");
-
-                                }
-                            });
+                            }
 
                             return true;
                         }
@@ -498,6 +530,8 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_settings: {
                             Log.d(TAG, "onNavigationItemSelected: settings pressed");
 
+                            /* Navigating to Settings
+                            * */
                             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
 
                             return true;
@@ -506,7 +540,7 @@ public class MainActivity extends AppCompatActivity{
                         case R.id.nav_logout: {
                             Log.d(TAG, "onNavigationItemSelected: log out pressed");
 
-                            /* We display a dialog for loggin out
+                            /* We display a dialog for logging out
                             * */
                             alertDialogLogOut();
 
@@ -521,25 +555,79 @@ public class MainActivity extends AppCompatActivity{
                 }
             };
 
-
-    /** Method that allows to show the progress bar
+    /** Method for showing the main content.
+     * We cannot use Utils because
+     * the mainContent Layout is not a Linear Layout
      * */
-    public void showProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
-        Log.d(TAG, "showProgressBar: called!");
+    private void showMainContent (LinearLayout progressBarContent, DrawerLayout mainContent) {
+        Log.d(TAG, "showMainContent: called!");
 
-        progressBar.setVisibility(View.VISIBLE);
-        frameLayout.setVisibility(View.INVISIBLE);
-
+        progressBarContent.setVisibility(View.GONE);
+        mainContent.setVisibility(View.VISIBLE);
     }
 
-    /** Method that hides the progress bar
+
+    /** Method that loads the fragment that is selected (the first time,
+     * the fragment will be the map fragment).
+     * This method is necessary
+     * for configuration changes.
      * */
-    public void hideProgressBar (ProgressBar progressBar, FrameLayout frameLayout) {
-        Log.d(TAG, "hideProgressBar: called!");
+    private void loadFragment () {
+        Log.i(TAG, "loadFragment: called!");
 
-        progressBar.setVisibility(View.GONE);
-        frameLayout.setVisibility(View.VISIBLE);
+        switch (flagToSpecifyCurrentFragment) {
 
+            case 0: {
+
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
+                        .commit();
+                flagToSpecifyCurrentFragment = 0;
+
+                showMainContent(progressBarContent, mainDrawerLayout);
+
+            }
+            break;
+
+            case 1: {
+
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment_container_id, FragmentRestaurantListView.newInstance())
+                        .commit();
+                flagToSpecifyCurrentFragment = 1;
+
+                showMainContent(progressBarContent, mainDrawerLayout);
+
+            }
+            break;
+
+            case 2: {
+
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment_container_id, FragmentCoworkers.newInstance())
+                        .commit();
+                flagToSpecifyCurrentFragment = 2;
+
+                showMainContent(progressBarContent, mainDrawerLayout);
+
+            }
+            break;
+
+            default: {
+
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
+                        .commit();
+                flagToSpecifyCurrentFragment = 0;
+
+                showMainContent(progressBarContent, mainDrawerLayout);
+
+            }
+        }
     }
 
     /** Method that creates an alert dialog that
@@ -556,17 +644,23 @@ public class MainActivity extends AppCompatActivity{
                     public void onClick(DialogInterface dialog, int which) {
                         Log.d(TAG, "onClick: yes button clicked!");
 
-                        /* The user signs out
-                         * and goes to AuthSignIn Activity
-                         */
-                        auth.signOut();
-                        LoginManager.getInstance().logOut();
+                        if (!internetAvailable) {
+                            ToastHelper.toastNoInternet(MainActivity.this);
 
-                        Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
+                        } else {
 
+                            /* The user signs out
+                             * and goes to AuthSignIn Activity
+                             */
+                            auth.signOut();
+                            LoginManager.getInstance().logOut();
+
+                            Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                            finish();
+
+                        }
                     }
                 })
                 .setNegativeButton(getResources().getString(R.string.mainDialogLoggingOutNo), new DialogInterface.OnClickListener() {
