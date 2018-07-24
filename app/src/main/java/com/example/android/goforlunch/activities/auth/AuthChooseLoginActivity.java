@@ -168,7 +168,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();
