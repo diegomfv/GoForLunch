@@ -570,7 +570,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Log.d(TAG, "onClick: no button clicked!");
-                        //Nothing happens
+
+                        ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoNotUpdated));
                     }
                 });
 

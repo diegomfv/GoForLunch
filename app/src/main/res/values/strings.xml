@@ -37,6 +37,9 @@
     <string name="commonPassword">Password</string>
     <string name="commonGroup">Group</string>
 
+    <string name="snackbarNoInternetText">There is no internet connection</string>
+    <string name="snackbarNoInternetButton">HIDE</string>
+
     <!-- MAIN ACTIVITY -->
     <string name="mainBottomMapView">Map View</string>
     <string name="mainBottomListView">List View</string>
@@ -86,7 +89,6 @@
     <!-- FACEBOOK SIGN IN -->
     <string name="facebook_app_id">622449801446185</string>
     <string name="fb_login_protocol_scheme">fb622449801446185</string>
-
 
     <!-- RESTAURANT TYPES -->
     <string name="typeAll">All</string>
@@ -191,6 +193,7 @@
     <string name="persInfoDialogChangeDataYes">YES, I am sure</string>
     <string name="persInfoDialogChangeDataNo">No</string>
     <string name="persInfoSomethingWrongImage">Something went wrong uploading the image</string>
+    <string name="persInfoNotUpdated">The information has not been updated</string>
 
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupsDoesNotExist">That group does not exist</string>
@@ -201,9 +204,6 @@
     <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
     <string name="joinNewGroupIs">Your new group is</string>
-
-    <string name="snackbarNoInternetText">There is no internet connection</string>
-    <string name="snackbarNoInternetButton">HIDE</string>
 
 
 </resources>
