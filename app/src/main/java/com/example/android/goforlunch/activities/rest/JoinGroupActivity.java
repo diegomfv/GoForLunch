@@ -2,11 +2,13 @@ package com.example.android.goforlunch.activities.rest;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
@@ -34,6 +37,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -46,7 +51,7 @@ import io.reactivex.observers.DisposableObserver;
 /**
  * Created by Diego Fajardo on 29/05/2018.
  */
-public class JoinGroupActivity extends AppCompatActivity {
+public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = JoinGroupActivity.class.getSimpleName();
 
@@ -84,6 +89,12 @@ public class JoinGroupActivity extends AppCompatActivity {
     //Disposable
     private Disposable disposable;
 
+    //InternetConnectionReceiver variables
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+    private Snackbar snackbar;
+
+    private boolean internetAvailable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,129 +103,30 @@ public class JoinGroupActivity extends AppCompatActivity {
         fireDb = FirebaseDatabase.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(JoinGroupActivity.this);
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+        Log.d(TAG, "onCreate: userKey = " + userKey);
 
+        /////////////////////////////////////////////
         setContentView(R.layout.activity_join_group);
-
-        ////////////////////////////////
-
         ButterKnife.bind(this);
 
-        Log.d(TAG, "onCreate: userKey = " + userKey);
+        Utils.showMainContent(progressBarContent, mainContent);
 
         listOfGroups = new ArrayList<>();
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: fab clicked!");
-
-                startActivity(new Intent(JoinGroupActivity.this, MainActivity.class));
-                finish();
-            }
-        });
-
-        buttonJoinGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: buttonJoinGroup clicked!");
-
-                if (textInputAutoCompleteTextView.getText().toString().equals("")) {
-                    ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinNotChosenGroup));
-
-                } else if (userGroup.equalsIgnoreCase(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim())) {
-                    ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinThisCurrentlyYourGroup));
-
-                } else {
-
-                    Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-                        @Override
-                        public void onNext(Boolean aBoolean) {
-                            Log.d(TAG, "onNext: " + aBoolean);
-
-                            if (listOfGroups.contains(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()))) {
-
-                                if (aBoolean) {
-                                    Log.d(TAG, "onNext: " + aBoolean);
-
-                                    /* We create a dialog to join group
-                                     * */
-                                    alertDialogJoinGroup(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()));
-
-                                } else  {
-                                    Log.d(TAG, "onNext: " + aBoolean);
-
-                                }
-                            } else {
-                                ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinGroupsDoesNotExist));
-                            }
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.d(TAG, "onError: " + Log.getStackTraceString(e));
-
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            Log.d(TAG, "onComplete: ");
-                        }
-                    });
-                }
-            }
-        });
-
-        buttonCreateGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: buttonCreateGroup clicked!");
-
-                ToastHelper.toastShort(JoinGroupActivity.this, "Not implemented!");
-
-            }
-        });
+        fab.setOnClickListener(fabOnClickListener);
+        buttonJoinGroup.setOnClickListener(buttonJoinGroupOnClickListener);
+        buttonCreateGroup.setOnClickListener(buttonCreateGroupOnClickListener);
 
     }
 
     @Override
     protected void onStart() {
-        Log.d(TAG, "onStart: called!");
         super.onStart();
+        Log.d(TAG, "onStart: called!");
 
-        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-            @Override
-            public void onNext(Boolean aBoolean) {
-                Log.d(TAG, "onNext: " + aBoolean);
-
-                if (aBoolean) {
-
-                    /** We get the user's group and a list with
-                     * the rest of groups
-                     * */
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                    dbRefUsers.addValueEventListener(valueEventListenerGetUserGroupAndRestOfGroups);
-
-                    Utils.showMainContent(progressBarContent, mainContent);
-
-                } else {
-                    // TODO: 22/07/2018 Delete!
-                    UtilsFirebase.logOut(JoinGroupActivity.this);
-
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.d(TAG, "onError: " + Log.getStackTraceString(e));
-
-            }
-
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: ");
-
-            }
-        });
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        Utils.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -222,22 +134,140 @@ public class JoinGroupActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-        dbRefUsers.removeEventListener(valueEventListenerGetUserGroupAndRestOfGroups);
-        dbRefGroups.removeEventListener(valueEventListenerGetAllGroups);
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    JoinGroupActivity.this,
+                    receiver,
+                    JoinGroupActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    JoinGroupActivity.this,
+                    receiver,
+                    JoinGroupActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+        fab.setOnClickListener(null);
+        buttonJoinGroup.setOnClickListener(null);
+        buttonCreateGroup.setOnClickListener(null);
+
         if (null != disposable) {
             disposable.dispose();
+        }
+
+    }
+
+    /** Callback: listening to broadcast receiver
+     * */
+    @Override
+    public void update(Observable o, Object internetAvailableUpdate) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) internetAvailableUpdate == 0) {
+            Log.d(TAG, "update: Internet Not Available");
+
+            internetAvailable = false;
+
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        JoinGroupActivity.this,
+                        mainContent,
+                        getResources().getString(R.string.noInternet));
+
+            } else {
+                snackbar.show();
+            }
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            internetAvailable = true;
+
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+
+            /* We get the user's group and
+            a list with the rest of groups
+             * */
+            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+            dbRefUsers.addValueEventListener(valueEventListenerGetUserGroupAndRestOfGroups);
+
         }
     }
 
     /***************************
-     * VALUE EVENT LISTENERS ***
+     * LISTENERS ***************
      **************************/
+
+    private View.OnClickListener fabOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: fab clicked!");
+
+            startActivity(new Intent(JoinGroupActivity.this, MainActivity.class));
+            finish();
+        }
+    };
+
+    private View.OnClickListener buttonJoinGroupOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: buttonJoinGroup clicked!");
+
+            if (textInputAutoCompleteTextView.getText().toString().equals("")) {
+                ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinNotChosenGroup));
+
+            } else if (userGroup.equalsIgnoreCase(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim())) {
+                ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinThisCurrentlyYourGroup));
+
+            } else {
+
+                if (!internetAvailable) {
+                    ToastHelper.toastNoInternet(JoinGroupActivity.this);
+
+                } else {
+
+                    if (listOfGroups.contains(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()))) {
+                        /* The group exists and we create a dialog to join group
+                         * */
+                        alertDialogJoinGroup(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()));
+
+                    } else {
+                        /* The group does not exist*/
+                        ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinGroupDoesNotExist));
+
+                    }
+                }
+            }
+        }
+    };
+
+    private View.OnClickListener buttonCreateGroupOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: buttonCreateGroup clicked!");
+            ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.notImplemented));
+
+        }
+    };
 
     /** Value Event Listener: get User Group and All Groups
      * */
@@ -255,6 +285,8 @@ public class JoinGroupActivity extends AppCompatActivity {
              * */
             dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
             dbRefGroups.addValueEventListener(valueEventListenerGetAllGroups);
+
+            dbRefUsers.removeEventListener(this);
 
         }
 
@@ -281,6 +313,8 @@ public class JoinGroupActivity extends AppCompatActivity {
             arrayOfGroups = listOfGroups.toArray(arrayOfGroups);
 
             configureAutocompleteTextView(textInputAutoCompleteTextView, disposable, arrayOfGroups);
+
+            dbRefGroups.removeEventListener(this);
 
         }
 
@@ -344,14 +378,13 @@ public class JoinGroupActivity extends AppCompatActivity {
 
                     }
                 });
-
     }
-
 
     /** Method that creates an alert dialog that
      * can be used to delete the Read Articles History
      * */
     private void alertDialogJoinGroup (final String group) {
+        Log.d(TAG, "alertDialogJoinGroup: called!");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(JoinGroupActivity.this);
         builder.setMessage(getResources().getString(R.string.joinWouldYouLikeJoin) + " (" + group + ")?")
@@ -359,43 +392,52 @@ public class JoinGroupActivity extends AppCompatActivity {
                 .setPositiveButton(getResources().getString(R.string.joinYes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "onClick: positive button clicked!");
 
-                        dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
-                        dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+                        if (!internetAvailable) {
+                            ToastHelper.toastNoInternet(JoinGroupActivity.this);
 
-                                String groupKey = UtilsFirebase.getGroupKeyFromDataSnapshot(dataSnapshot, group);
+                        } else {
 
-                                Map<String,Object> map = new HashMap<>();
-                                map.put(RepoStrings.FirebaseReference.USER_GROUP, group);
-                                map.put(RepoStrings.FirebaseReference.USER_GROUP_KEY, groupKey);
+                            Utils.hideMainContent(progressBarContent, mainContent);
 
-                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                                UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
+                            dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+                            dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                                ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinNewGroupIs) + " " + group + "!");
+                                    String groupKey = UtilsFirebase.getGroupKeyFromDataSnapshot(dataSnapshot, group);
 
-                                /* We take the user to Main Activity
-                                * */
-                                startActivity(new Intent(JoinGroupActivity.this, MainActivity.class));
+                                    Map<String,Object> map = new HashMap<>();
+                                    map.put(RepoStrings.FirebaseReference.USER_GROUP, group);
+                                    map.put(RepoStrings.FirebaseReference.USER_GROUP_KEY, groupKey);
 
-                            }
+                                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                                    UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Log.d(TAG, "onCancelled: " + databaseError.getCode());
+                                    ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinNewGroupIs) + " " + group + "!");
 
-                            }
-                        });
+                                    /* We take the user to Main Activity
+                                     * */
+                                    startActivity(new Intent(JoinGroupActivity.this, MainActivity.class));
 
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+                                }
+                            });
+                        }
                     }
                 })
                 .setNegativeButton(getResources().getString(R.string.joinNo), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //Nothing happens
+                        Log.d(TAG, "onClick: negative button clicked!");
+                        ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.persInfoNotUpdated));
                     }
                 });
 

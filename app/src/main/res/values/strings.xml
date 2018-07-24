@@ -196,7 +196,7 @@
     <string name="persInfoNotUpdated">The information has not been updated</string>
 
     <!-- JOIN GROUP ACTIVITY -->
-    <string name="joinGroupsDoesNotExist">That group does not exist</string>
+    <string name="joinGroupDoesNotExist">That group does not exist</string>
     <string name="joinWouldYouLikeJoin">Would you like to join this group</string>
     <string name="joinJoinGroup">Join Group</string>
     <string name="joinYes">Yes</string>

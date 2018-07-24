@@ -130,6 +130,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         * */
         internetAvailable = false;
 
+        /////////////////////////////////////////////
         /* We set the content view
         * */
         setContentView(R.layout.activity_auth_choose_login);

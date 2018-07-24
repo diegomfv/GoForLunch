@@ -163,6 +163,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         glide = Glide.with(PersInfoActivity.this);
 
+        /////////////////////////////////////////////
         /* We set the content view
         * */
         setContentView(R.layout.activity_pers_info);

@@ -146,6 +146,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         stRefMain = fireStorage.getReference();
         stRefImageDir = stRefMain.child(RepoStrings.Directories.IMAGE_DIR);
 
+        /////////////////////////////////////////////
         /* We set the content view
         * */
         setContentView(R.layout.activity_auth_enter_name);
