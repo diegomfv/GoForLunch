@@ -234,7 +234,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                 snackbar = Utils.createSnackbar(
                         AuthChooseLoginActivity.this,
                         mainContent,
-                        getResources().getString(R.string.noInternetFeaturesNotWork));
+                        getResources().getString(R.string.noInternet));
 
             } else {
                 snackbar.show();

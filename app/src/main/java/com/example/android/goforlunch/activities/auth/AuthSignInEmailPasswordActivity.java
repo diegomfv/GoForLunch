@@ -169,7 +169,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                 snackbar = Utils.createSnackbar(
                         AuthSignInEmailPasswordActivity.this,
                         mainContent,
-                        getResources().getString(R.string.noInternetFeaturesNotWork));
+                        getResources().getString(R.string.noInternet));
 
             } else {
                 snackbar.show();
