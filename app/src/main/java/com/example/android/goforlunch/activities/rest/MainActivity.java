@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity{
                     }
 
                 } else {
-
+                    // TODO: 22/07/2018 Delete!
                     UtilsFirebase.logOut(MainActivity.this);
 
                 }
@@ -233,7 +233,6 @@ public class MainActivity extends AppCompatActivity{
         }
 
     }
-
 
     /** Method used to update the NavDrawer info
      * */

@@ -47,9 +47,6 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     private static final String TAG = AuthSignInEmailPasswordActivity.class.getSimpleName();
 
     //Widgets
-    @BindView(R.id.main_layout_id)
-    LinearLayout mainLayout;
-
     @BindView(R.id.signin_fab_id)
     FloatingActionButton fab;
 
@@ -68,9 +65,11 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     @BindView(R.id.signin_signUp_button_id)
     Button buttonSignUp;
 
-    // TODO: 01/06/2018 Delete?
-    @BindView(R.id.signin_progressbar_id)
-    ProgressBar progressBar;
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarContent;
+
+    @BindView(R.id.signin_main_content)
+    LinearLayout mainContent;
 
     private InternetConnectionReceiver receiver;
     private IntentFilter intentFilter;
@@ -84,8 +83,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
         ButterKnife.bind(this);
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        Utils.showMainContent(progressBarContent, mainContent);
 
         // TODO: 29/06/2018 Delete this!
         inputEmail.setText("diego.fajardo@hotmail.com");
@@ -108,6 +106,78 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
             @Override
             public void onClick(View view) {
 
+                if (!snackbar.isShown()) {
+                    /* If the snackbar is not visible,
+                    it means internet is available
+                     * */
+
+                    String email = inputEmail.getText().toString();
+                    final String password = inputPassword.getText().toString();
+
+                    if (TextUtils.isEmpty(email)) {
+                        ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastEnterEmail));
+                        return;
+
+                    } else  if (TextUtils.isEmpty(password)) {
+                        ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this,  getResources().getString(R.string.commonToastEnterPassword));
+                        return;
+
+                    } else  if (password.length() < 6) {
+                        Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
+                        ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastPasswordTooShort));
+                        return;
+
+                    }
+
+                    Utils.hideMainContent(progressBarContent, mainContent);
+
+                    //authenticate user
+                    FirebaseAuth auth = FirebaseAuth.getInstance();
+                    auth.signInWithEmailAndPassword(email,password)
+                            .addOnCompleteListener(AuthSignInEmailPasswordActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    // If sign in fails, display a message to the user. If sign in succeeds
+                                    // the auth state listener will be notified and logic to handle the
+                                    // signed in user can be handled in the listener.
+                                    //progressBar.setVisibility(View.GONE);
+
+                                    if (!task.isSuccessful()) {
+                                        Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                        //We get the exception and display why it was not succesful
+                                        FirebaseAuthException e = (FirebaseAuthException )task.getException();
+
+                                        if (e != null) {
+                                            Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                            ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, e.getMessage());
+                                        } else {
+                                            ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
+                                        }
+
+                                        Utils.showMainContent(progressBarContent, mainContent);
+
+                                    } else {
+                                        Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                                        startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
+                                        //startActivity(new Intent(AuthSignInEmailPasswordActivity.this, FirebaseActivityDELETE.class));
+                                        finish();
+
+
+                                    }
+                                }
+                            });
+
+                } else {
+                    /* Snackbar is shown, therefore
+                    there is no internet connection */
+                    ToastHelper.toastNoInternet(AuthSignInEmailPasswordActivity.this);
+
+                }
+
+
                 Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
                     @Override
                     public void onNext(Boolean aBoolean) {
@@ -118,68 +188,11 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                         if (aBoolean) {
                             Log.d(TAG, "onNext: " + aBoolean);
 
-                            String email = inputEmail.getText().toString();
-                            final String password = inputPassword.getText().toString();
 
-                            if (TextUtils.isEmpty(email)) {
-                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastEnterEmail));
-                                return;
-
-                            } else  if (TextUtils.isEmpty(password)) {
-                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this,  getResources().getString(R.string.commonToastEnterPassword));
-                                return;
-
-                            } else  if (password.length() < 6) {
-                                Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
-                                ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastPasswordTooShort));
-                                return;
-
-                            }
-
-                            Utils.showProgressBarAndDisableUserInteraction(AuthSignInEmailPasswordActivity.this, progressBar);
-
-                            //authenticate user
-                            FirebaseAuth auth = FirebaseAuth.getInstance();
-                            auth.signInWithEmailAndPassword(email,password)
-                                    .addOnCompleteListener(AuthSignInEmailPasswordActivity.this, new OnCompleteListener<AuthResult>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<AuthResult> task) {
-                                            // If sign in fails, display a message to the user. If sign in succeeds
-                                            // the auth state listener will be notified and logic to handle the
-                                            // signed in user can be handled in the listener.
-                                            //progressBar.setVisibility(View.GONE);
-
-                                            if (!task.isSuccessful()) {
-                                                Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
-
-                                                //We get the exception and display why it was not succesful
-                                                FirebaseAuthException e = (FirebaseAuthException )task.getException();
-
-                                                if (e != null) {
-                                                    Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                                    ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, e.getMessage());
-                                                } else {
-                                                    ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
-                                                }
-
-                                                Utils.hideProgressBarAndEnableUserInteraction(AuthSignInEmailPasswordActivity.this, progressBar);
-
-                                            } else {
-                                                Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
-                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                                                startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
-                                                //startActivity(new Intent(AuthSignInEmailPasswordActivity.this, FirebaseActivityDELETE.class));
-                                                finish();
-
-
-                                            }
-                                        }
-                                    });
 
                         } else {
                             Log.d(TAG, "onNext: internet connection = " + aBoolean);
-                            ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.noInternet));
+                            ToastHelper.toastNoInternet(AuthSignInEmailPasswordActivity.this);
 
                         }
                     }
@@ -226,18 +239,25 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: called!");
 
-        registerReceiver(receiver, intentFilter);
-        ObservableObject.getInstance().addObserver(this);
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        Utils.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
 
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(TAG, "onStop: called!");
 
-        unregisterReceiver(receiver);
-        ObservableObject.getInstance().deleteObserver(this);
+        Utils.disconnectReceiver(
+                AuthSignInEmailPasswordActivity.this,
+                receiver,
+                AuthSignInEmailPasswordActivity.this);
+        receiver = null;
+        intentFilter = null;
         snackbar = null;
 
     }
@@ -246,16 +266,16 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
      * the broadcast receiver (internet connectivity)
      * */
     @Override
-    public void update(Observable observable, Object data) {
+    public void update(Observable observable, Object internetAvailable) {
         Log.d(TAG, "update: called!");
 
-        if ((int) data == 0) {
+        if ((int) internetAvailable == 0) {
             Log.d(TAG, "update: There is no internet");
 
             if (snackbar == null) {
                 snackbar = Utils.createSnackbar(
                         AuthSignInEmailPasswordActivity.this,
-                        mainLayout,
+                        mainContent,
                         "Internet not available");
             } else {
                 snackbar.show();
@@ -267,17 +287,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
             if (snackbar != null) {
                 snackbar.dismiss();
             }
+
         }
-    }
-
-    /** Method to configure the Broadcast Receiver
-     * */
-    public void configureBroadcastReceiver () {
-        Log.d(TAG, "configureBroadcastReceiver: called!");
-
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-
     }
 
 }

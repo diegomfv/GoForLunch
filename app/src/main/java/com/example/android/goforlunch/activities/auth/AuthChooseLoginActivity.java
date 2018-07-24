@@ -19,7 +19,6 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.broadcastreceivers.ObservableObject;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
@@ -60,13 +59,9 @@ import butterknife.ButterKnife;
 import io.reactivex.observers.DisposableObserver;
 
 /**
- * Created by Diego Fajardo on 31/05/2018.
+ * Created by Diego Fajardo on 24/07/2018.
  */
-
-// TODO: 02/06/2018  --------------------------- VERY IMPORTANT!!!!!! 
-// TODO: 02/06/2018 Check that sign in works well when we close the app instead of login off
-// TODO: 02/06/2018 Once, it allowed us to start with password account but the current user used gmail account
-public class AuthChooseLoginActivity extends AppCompatActivity implements Observer{
+public class AuthChooseLoginActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = AuthChooseLoginActivity.class.getSimpleName();
 
@@ -108,93 +103,52 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     private SharedPreferences sharedPref;
 
+    //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
     private IntentFilter intentFilter;
-
     private Snackbar snackbar;
+
+    private boolean internetAvailable;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: called!");
 
+        /* We delete all info from shared preferences
+        * */
         sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear().apply();
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-
+        /* We establish the entry points
+        to get the user information
+        * */
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
+
         // TODO: 29/06/2018 Delete signOut()
         auth.signOut();
         LoginManager.getInstance().logOut();
-        user = auth.getCurrentUser();
 
-        Log.d(TAG, "onCreate: SHARED_PREFERENCES = " + sharedPref.getAll().toString());
-        Log.d(TAG, "onCreate: user = " + user);
+        /* internetAvailable is false till the update() callback changes it
+        * */
+        internetAvailable = false;
 
-        if (user == null) {
-            Log.d(TAG, "onCreate: user is null");
-            //We delete Shared preferences info
-            Utils.deleteSharedPreferencesInfo(sharedPref);
-            // TODO: 13/06/2018 Remove all info in SharedPref
-
-
-        } else {
-
-            if (user.getDisplayName() != null){
-                Log.d(TAG, "onCreate: user is not null");
-
-                //go directly to MainActivity
-                startActivity(new Intent(AuthChooseLoginActivity.this, MainActivity.class));
-                finish();
-
-
-            } else {
-
-                //go to AuthEnterNameActivity
-                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
-                finish();
-
-            }
-
-        }
-
-        /** We set the content view after checking if the user is logged in. If he/she is, then
-         * we start immediately MainActivity without showing this screen
-         * */
+        /* We set the content view
+        * */
         setContentView(R.layout.activity_auth_choose_login);
         ButterKnife.bind(this);
 
-        // TODO: 22/07/2018 Might need to be moved to onStart()
-        Utils.showMainContent(progressBarContent, mainContent);
+        /* We check if the user is logged in in a background thread.
+        * */
+        checkIfUserIsLoggedInBackgroundThread();
 
-        buttonPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: Password Button clicked!");
+        /* We set the listeners
+        * */
+        buttonPassword.setOnClickListener(buttonPasswordOnClickListener);
 
-                startActivity(new Intent(AuthChooseLoginActivity.this, AuthSignInEmailPasswordActivity.class));
-
-            }
-        });
-
-        tvRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: Register textView clicked!");
-
-                Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class);
-
-                //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
-                intent.putExtra(RepoStrings.SentIntent.FLAG, true);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-
-            }
-        });
-
+        tvRegister.setOnClickListener(tvRegisterOnClickListener);
 
         /* Configure Google Sign In
          *  */
@@ -206,131 +160,109 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         buttonGoogle.setStyle(SignInButton.SIZE_WIDE,SignInButton.COLOR_DARK);
-        buttonGoogle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: Google Button clicked!");
+        buttonGoogle.setOnClickListener(buttonGoogleOnClickListener);
 
-                Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-                   @Override
-                   public void onNext(Boolean aBoolean) {
-                       Log.d(TAG, "onNext: ");
-
-                       if (aBoolean) {
-
-                           googleSignIn();
-
-                       } else {
-                           ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.noInternet));
-                       }
-
-                   }
-
-                   @Override
-                   public void onError(Throwable e) {
-                       Log.d(TAG, "onError: ");
-
-                   }
-
-                   @Override
-                   public void onComplete() {
-                       Log.d(TAG, "onComplete: ");
-
-                   }
-                });
-            }
-        });
-
-        // TODO: 16/06/2018 Read https://stackoverflow.com/questions/31327897/custom-facebook-login-button-android
-        // TODO: 16/06/2018 For custom button login
         mCallbackManager = CallbackManager.Factory.create();
         buttonFacebook.setReadPermissions("email", "public_profile", "user_friends");
-        buttonFacebook.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(final LoginResult loginResult) {
-                Log.d(TAG, "onSuccess: " + loginResult);
-
-                Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-
-                    @Override
-                    public void onNext(Boolean aBoolean) {
-                        Log.d(TAG, "onNext: " + aBoolean);
-
-                        if (!aBoolean) {
-                            Log.d(TAG, "onNext: internet not available");
-
-                            ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.noInternet));
-
-                        } else {
-                            Log.d(TAG, "onNext: internet available");
-
-                            handleFacebookAccessToken(loginResult.getAccessToken());
-
-                        }
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, "onError: ");
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.d(TAG, "onComplete: ");
-
-                    }
-                });
-            }
-
-            @Override
-            public void onCancel() {
-                Log.d(TAG, "onCancel: ");
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.d(TAG, "onError: " + error);
-
-            }
-        });
-
+        buttonFacebook.registerCallback(mCallbackManager, facebookCallbackLoginResult);
 
     }
 
+
     @Override
     protected void onStart() {
-        Log.d(TAG, "onStart: called!");
         super.onStart();
+        Log.d(TAG, "onStart: called!");
 
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
         Utils.connectReceiver(AuthChooseLoginActivity.this, receiver, intentFilter, this);
-
-
 
     }
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "onStop: called!");
         super.onStop();
+        Log.d(TAG, "onStop: called!");
 
-        Utils.disconnectReceiver(
-                AuthChooseLoginActivity.this,
-                receiver,
-                AuthChooseLoginActivity.this);
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    AuthChooseLoginActivity.this,
+                    receiver,
+                    AuthChooseLoginActivity.this);
+        }
+
         receiver = null;
         intentFilter = null;
         snackbar = null;
 
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
 
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    AuthChooseLoginActivity.this,
+                    receiver,
+                    AuthChooseLoginActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+        buttonPassword.setOnClickListener(null);
+        tvRegister.setOnClickListener(null);
+        buttonGoogle.setOnClickListener(null);
+
+    }
+
+    /** Callback: listening to broadcast receiver
+     * */
+    @Override
+    public void update(Observable o, Object internetAvailableUpdate) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) internetAvailableUpdate == 0) {
+            Log.d(TAG, "update: Internet Not Available");
+
+            internetAvailable = false;
+
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        AuthChooseLoginActivity.this,
+                        mainContent,
+                        getResources().getString(R.string.noInternetFeaturesNotWork));
+
+            } else {
+                snackbar.show();
+            }
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            internetAvailable = true;
+
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+
+            /* We get the user info. If the user is already registered and we have his/her name
+            and last name,
+            we launch MainActivity
+            * */
+            getUserAndLaunchSpecificActivity();
+
+        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: called!");
 
 
         if (requestCode == RC_GOOGLE_SIGN_IN) {
@@ -355,33 +287,156 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         }
     }
 
-    /** Method called via
-     * the broadcast receiver (internet connectivity)
-     * */
-    @Override
-    public void update(Observable observable, Object data) {
-        Log.d(TAG, "update: called!");
+    /*******************************
+     * LISTENERS *******************
+     ******************************/
 
-        if ((int) data == 0) {
-            Log.d(TAG, "update: Internet Available");
+    private View.OnClickListener buttonPasswordOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: Password Button clicked!");
 
-            if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
-                        AuthChooseLoginActivity.this,
-                        mainContent,
-                        "Internet not available");
+            startActivity(new Intent(AuthChooseLoginActivity.this, AuthSignInEmailPasswordActivity.class));
+
+        }
+    };
+
+    private View.OnClickListener tvRegisterOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: Register textView clicked!");
+
+            Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class);
+
+            //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
+            intent.putExtra(RepoStrings.SentIntent.FLAG, true);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+
+        }
+    };
+
+
+    private View.OnClickListener buttonGoogleOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "onClick: Google Button clicked!");
+
+            if (internetAvailable) {
+                googleSignIn();
 
             } else {
-                snackbar.show();
+                ToastHelper.toastNoInternet(AuthChooseLoginActivity.this);
+
             }
+
+        }
+    };
+
+    private FacebookCallback<LoginResult> facebookCallbackLoginResult = new FacebookCallback<LoginResult>() {
+        @Override
+        public void onSuccess(LoginResult loginResult) {
+            Log.d(TAG, "onSuccess: called!");
+
+            if (internetAvailable) {
+                handleFacebookAccessToken(loginResult.getAccessToken());
+
+            } else {
+                ToastHelper.toastNoInternet(AuthChooseLoginActivity.this);
+            }
+
+        }
+
+        @Override
+        public void onCancel() {
+            Log.d(TAG, "onCancel: called!");
+
+        }
+
+        @Override
+        public void onError(FacebookException error) {
+            Log.e(TAG, "onError: " + error.toString() );
+
+        }
+    };
+
+
+    /** Method that checks if the user is currently
+     * logged in in a background thread
+     * */
+    private void checkIfUserIsLoggedInBackgroundThread() {
+        Log.d(TAG, "checkIfUserIsLoggedInBackgroundThread: called!");
+
+        /* We use this method instead of internetAvailable because we are still
+        * in onCreate() and internetAvailable would be false in both cases (with
+        * and without internet available)
+        * */
+        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+            @Override
+            public void onNext(Boolean internetAvailableBackgroundThread) {
+                Log.d(TAG, "onNext: called!");
+
+                if (!internetAvailableBackgroundThread) {
+                    ToastHelper.toastNoInternetFeaturesNotWorking(AuthChooseLoginActivity.this);
+                    Utils.showMainContent(progressBarContent, mainContent);
+
+                } else {
+                    /* Internet is available
+                    * */
+                    getUserAndLaunchSpecificActivity();
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: " + e.getMessage());
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: called!");
+
+            }
+        });
+    }
+
+    /** Method that gets the user and launches an specific activity if needed
+     * */
+    private void getUserAndLaunchSpecificActivity () {
+        Log.d(TAG, "getUserAndLaunchSpecificActivity: called!");
+
+        user = auth.getCurrentUser();
+
+        if (user == null) {
+            Log.d(TAG, "onCreate: user is null");
+            //We delete Shared preferences info
+            Utils.deleteSharedPreferencesInfo(sharedPref);
+            // TODO: 13/06/2018 Remove all info in SharedPref
+
+            /* If the user is null, we won't launch a new activity,
+             so we show the main layout
+            * */
+            Utils.showMainContent(progressBarContent, mainContent);
+
 
         } else {
-            Log.d(TAG, "update: Internet available");
 
-            if (snackbar != null) {
-                snackbar.dismiss();
+            if (user.getDisplayName() != null){
+                Log.d(TAG, "onCreate: user is not null");
+
+                //go directly to MainActivity
+                startActivity(new Intent(AuthChooseLoginActivity.this, MainActivity.class));
+                finish();
+
+
+            } else {
+
+                //go to AuthEnterNameActivity
+                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
+                finish();
+
             }
-
         }
     }
 
@@ -394,265 +449,194 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN);
     }
 
-    /** Method for google sign in authentication
+    /********************
+     * SIGN IN **********
+     * with google ******
+     * and facebook *****
+     * *****************/
+
+    /** Method that handles google sign in
      * */
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
+        Log.d(TAG, "firebaseAuthWithGoogle: called!");
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
-        /* We hide the main screen while the process runs
-        * */
-        Utils.hideMainContent(progressBarContent, mainContent);
+        if (internetAvailable) {
+            /* We hide the main screen while the process runs
+             * */
+            Utils.hideMainContent(progressBarContent, mainContent);
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-        auth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, updateItem UI with the signed-in user's information
-                            Log.d(TAG, "GOOGLE signInWithCredential:success");
-                            user = auth.getCurrentUser();
+            AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+            auth.signInWithCredential(credential)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success
+                                Log.d(TAG, "GOOGLE signInWithCredential: success");
+                                user = auth.getCurrentUser();
 
-                            if (user != null) {
-                                Log.d(TAG, "GOOGLE onComplete: user != null");
+                                if (user != null) {
+                                    checkIfUserExistsInDatabase(user);
 
-                                if (user.getDisplayName() == null && user.getDisplayName().equalsIgnoreCase("")) {
-                                    Log.d(TAG, "onComplete: GOOGLE user.getDisplayName() == null");
-                                    /** If the user has not chosen yet a first name and last name we
-                                     * launch AuthEnterNameActivity
-                                     * */
-                                    Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class);
-                                    startActivity(intent);
-
-                                } else {
-                                    Log.d(TAG, "onComplete: GOOGLE user.getDisplayName() = " + user.getDisplayName());
-                                     /** Two options. The user already exists
-                                     * in Firebase Database or not.
-                                     * */
-                                    fireDb = FirebaseDatabase.getInstance();
-                                    DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                                    fireDbUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            Log.d(TAG, "GOOGLE onDataChange: " + dataSnapshot.toString());
-
-                                            boolean userExists = false;
-
-                                            for (DataSnapshot item :
-                                                    dataSnapshot.getChildren()) {
-
-                                                if (Objects.requireNonNull(user.getEmail()).equalsIgnoreCase(
-                                                        Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
-                                                    Log.d(TAG, "GOOGLE onDataChange: user already exists");
-
-                                                    // TODO: 02/06/2018 Check this, might be able to be deleted
-                                                    userExists = true;
-
-                                                    Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                    break;
-
-                                                } else {
-
-                                                }
-                                            }
-
-                                            if (!userExists) {
-                                                /** If it is not in the foreach loop, then the user does not exist and we have to create him/her
-                                                 * */
-                                                Log.d(TAG, "GOOGLE onDataChange: user didn't exist");
-
-                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                                                String userKey = dbRefUsers.push().getKey();
-
-                                                String [] names = Utils.getFirstNameAndLastName(user.getDisplayName());
-
-                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                                                UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
-                                                        names[0],
-                                                        names[1],
-                                                        user.getEmail().toLowerCase(),
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "");
-
-                                                dbRefUsers = fireDb.getReference(
-                                                        RepoStrings.FirebaseReference.USERS
-                                                                + "/" + userKey
-                                                                + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                                                UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        0,
-                                                        "");
-
-                                                Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                                                startActivity(intent);
-                                                finish();
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-                                            Log.d(TAG, "GOOGLE onCancelled: " + databaseError.getCode());
-
-                                        }
-                                    });
                                 }
+
+                            } else {
+                                /* Something went wrong during sign in*/
+                                Log.d(TAG, "GOOGLE signInWithCredential: failure");
+                                ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
+                                Utils.showMainContent(progressBarContent, mainContent);
+
                             }
-
-                        } else {
-
-                            /* If sign in fails, display a message to the user
-                            * hide progress bar and enable onClick on views
-                            * */
-                            Log.w(TAG, "GOOGLE signInWithCredential:failure", task.getException());
-
-                            ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
-
-                            Utils.showMainContent(progressBarContent, mainContent);
-
                         }
+                    });
 
-                        // ...
-                    }
-                });
+        } else {
+            /* There is no internet
+            * */
+            ToastHelper.toastNoInternet(AuthChooseLoginActivity.this);
+        }
     }
 
-    /** Method for signing in with facebook
+    /** Method that handles facebook sign in
      * */
     private void handleFacebookAccessToken(AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
+        Log.d(TAG, "handleFacebookAccessToken: called!");
 
-        Utils.hideMainContent(progressBarContent, mainContent);
+        if (internetAvailable) {
 
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        auth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, updateItem UI with the signed-in user's information
-                            Log.d(TAG, "FACEBOOK signInWithCredential:success");
-                            user = auth.getCurrentUser();
+            Utils.hideMainContent(progressBarContent, mainContent);
 
-                            if (user != null) {
-                                Log.d(TAG, "onComplete: user != null");
+            AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+            auth.signInWithCredential(credential)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, updateItem UI with the signed-in user's information
+                                Log.d(TAG, "FACEBOOK signInWithCredential: success");
+                                user = auth.getCurrentUser();
 
-                                if (user.getDisplayName() == null && user.getDisplayName().equalsIgnoreCase("")) {
-                                    Log.d(TAG, "FACEBOOK onComplete: user.getDisplayName() == null");
-                                    /** If the user has not chosen yet a first name and last name we
-                                     * launch AuthEnterNameActivity
-                                     * */
-                                    Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class);
-                                    startActivity(intent);
+                                if (user != null) {
+                                    checkIfUserExistsInDatabase(user);
 
-                                } else {
-                                    Log.d(TAG, "FACEBOOK onComplete: user.getDisplayName() = " + user.getDisplayName());
-                                    /** Two options. The user already exists
-                                     * in Firebase Database or not.
-                                     * */
-                                    fireDb = FirebaseDatabase.getInstance();
-                                    DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                                    fireDbUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            Log.d(TAG, "FACEBOOK onDataChange: " + dataSnapshot.toString());
-
-                                            boolean userExists = false;
-
-                                            for (DataSnapshot item :
-                                                    dataSnapshot.getChildren()) {
-
-                                                if (Objects.requireNonNull(user.getEmail()).equalsIgnoreCase(
-                                                        Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
-                                                    Log.d(TAG, "onDataChange: user already exists");
-
-                                                    // TODO: 02/06/2018 Check this, might be able to be deleted
-                                                    userExists = true;
-
-                                                    Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                    break;
-
-                                                } else {
-
-                                                }
-                                            }
-
-                                            if (!userExists) {
-                                                /** If it is not in the foreach loop, then the user does not exist and we have to create him/her
-                                                 * */
-                                                Log.d(TAG, "FACEBOOK onDataChange: user didn't exist");
-
-                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                                                String userKey = dbRefUsers.push().getKey();
-
-                                                String [] names = Utils.getFirstNameAndLastName(user.getDisplayName());
-
-                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                                                UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
-                                                        names[0],
-                                                        names[1],
-                                                        user.getEmail().toLowerCase(),
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "");
-
-                                                dbRefUsers = fireDb.getReference(
-                                                        RepoStrings.FirebaseReference.USERS
-                                                                + "/" + userKey
-                                                                + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                                                UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        "",
-                                                        0,
-                                                        "");
-
-                                                Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                                                startActivity(intent);
-                                                finish();
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-                                            Log.d(TAG, "FACEBOOK onCancelled: " + databaseError.getCode());
-
-                                        }
-                                    });
                                 }
+
+                            } else {
+                                /* If sign in fails, display a message to the user
+                                 * hide progress bar and enable onClick on views
+                                 * */
+                                Log.w(TAG, "FACEBOOK signInWithCredential: failure", task.getException());
+                                ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
+                                Utils.showMainContent(progressBarContent, mainContent);
+
                             }
 
-                        } else {
-                            /* If sign in fails, display a message to the user
-                             * hide progress bar and enable onClick on views
-                             * */
-                            Log.w(TAG, "FACEBOOK signInWithCredential:failure", task.getException());
-
-                            ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
-
-                            Utils.showMainContent(progressBarContent, mainContent);
-
+                            // ...
                         }
+                    });
 
-                        // ...
+        } else {
+            ToastHelper.toastNoInternet(AuthChooseLoginActivity.this);
+        }
+
+    }
+
+    /** Method that checks if a user exists in the database.
+     * If the user does, MainActivity is launched. If the user doesn't,
+     * the user is created in the database and afterwards MainActivity is launched
+     * */
+    private void checkIfUserExistsInDatabase (final FirebaseUser user) {
+        Log.d(TAG, "checkIfUserExistsInDatabase: called!");
+
+        final DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        fireDbUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "GOOGLE onDataChange: " + dataSnapshot.toString());
+
+                boolean userExists = false;
+
+                for (DataSnapshot item :
+                        dataSnapshot.getChildren()) {
+
+                    if (Objects.requireNonNull(user.getEmail()).equalsIgnoreCase(
+                            Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
+
+                        /* The user already exists, so we launch MainActivity
+                         * */
+                        userExists = true;
+
+                        // TODO: 24/07/2018 Check!
+                        fireDbUsersRef.removeEventListener(this);
+
+                        Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                        break;
+
                     }
-                });
+                }
+
+                if (internetAvailable) {
+
+                    /* The for loop ends. If the user does not exist in the database, we insert the user
+                     * */
+                    if (!userExists) {
+                        Log.d(TAG, "GOOGLE onDataChange: user does not exist");
+
+                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                        String userKey = dbRefUsers.push().getKey();
+
+                        String[] names = Utils.getFirstNameAndLastName(user.getDisplayName());
+
+                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                        UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
+                                names[0],
+                                names[1],
+                                user.getEmail().toLowerCase(),
+                                "",
+                                "",
+                                "",
+                                "");
+
+                        dbRefUsers = fireDb.getReference(
+                                RepoStrings.FirebaseReference.USERS
+                                        + "/" + userKey
+                                        + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                "",
+                                0,
+                                "");
+
+                        Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    }
+
+                } else {
+                    /* Internet is not available
+                    * */
+                    ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
+                    Utils.showMainContent(progressBarContent, mainContent);
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "GOOGLE onCancelled: " + databaseError.getCode());
+
+            }
+        });
+
     }
 
 }

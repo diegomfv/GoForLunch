@@ -25,4 +25,12 @@ abstract public class ToastHelper {
         Toast.makeText(context, context.getResources().getString(R.string.noInternet), Toast.LENGTH_SHORT).show();
     }
 
+    public static void toastNoInternetFeaturesNotWorking (Context context) {
+        Toast.makeText(context, context.getResources().getString(R.string.noInternetFeaturesNotWork), Toast.LENGTH_SHORT).show();
+    }
+
+    public static void toastSomethingWentWrong (Context context) {
+        Toast.makeText(context, context.getResources().getString(R.string.somethingWentWrong), Toast.LENGTH_SHORT).show();
+    }
+
 }

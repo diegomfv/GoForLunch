@@ -2,22 +2,29 @@ package com.example.android.goforlunch.helpermethods;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.ActivityCompat;
+import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
-import com.example.android.goforlunch.activities.rest.JoinGroupActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.pojo.User;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -313,6 +320,64 @@ public class UtilsFirebase {
         }
     }
 
+    /** Method for saving images in Firebase Storage
+     * */
+    public static void startStorageProcessWithByteArray (final Context context, ImageView imageView, StorageReference stRefUser) {
+        Log.d(TAG, "startStorageProcessWithByteArray: called!");
+
+        imageView.setDrawingCacheEnabled(true);
+        imageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        imageView.layout(0, 0, imageView.getMeasuredWidth(), imageView.getMeasuredHeight());
+        imageView.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(imageView.getDrawingCache());
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+        byte[] data = outputStream.toByteArray();
+
+        UploadTask uploadTask = stRefUser.child("image").putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: something went wrong!");
+                ToastHelper.toastShort(context, context.getResources().getString(R.string.persInfoSomethingWrongImage));
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "onSuccess: file uploaded!");
+                ToastHelper.toastShort(context, context.getResources().getString(R.string.persInfoToastYourInfoUpdated));
+
+            }
+        });
+    }
+
+    /** Method that saves a image
+     * using inputStream in FirebaseStorage
+     * */
+    private void startStorageProcessWithInputStream (InputStream imageStream, StorageReference stRefUser) {
+        Log.d(TAG, "startStorageProcess: called!");
+
+        Log.i(TAG, "startStorageProcess: reference = " + stRefUser);
+        //Uploading image
+        UploadTask uploadTask = stRefUser.child("image").putStream(imageStream);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: something went wrong!");
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "onSuccess: file uploaded!");
+
+            }
+        });
+    }
+
+
     /** Method that logs out the user
      * */
     public static void logOut (FragmentActivity activity) {
@@ -320,7 +385,7 @@ public class UtilsFirebase {
         /** The user signs out
          *  and goes to AuthSignIn Activity
          *  */
-        ToastHelper.toastShort(activity, activity.getResources().getString(R.string.noInternetLoggingOut));
+        ToastHelper.toastShort(activity, activity.getResources().getString(R.string.noInternet));
 
         FirebaseAuth.getInstance().signOut();
         LoginManager.getInstance().logOut();

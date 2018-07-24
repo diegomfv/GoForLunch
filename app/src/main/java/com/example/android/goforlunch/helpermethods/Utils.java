@@ -77,7 +77,7 @@ public class Utils {
 
     // Background thread!!
     // TCP/HTTP/DNS (depending on the port, 53=DNS, 80=HTTP, etc.)
-    public static boolean isInternetAvailable() {
+    private static boolean isInternetAvailable() {
         Log.d(TAG, "isInternetAvailable: called!");
         try {
             int timeoutMs = 1500;

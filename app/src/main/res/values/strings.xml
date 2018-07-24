@@ -13,7 +13,7 @@
 
     <!-- GENERAL MESSAGES -->
     <string name="noInternet">Internet: NOT available</string>
-    <string name="noInternetLoggingOut">Sorry, logging out. No internet connection</string>
+    <string name="noInternetFeaturesNotWork">Internet not available. Some features might not work</string>
     <string name="storageNotGranted">Storage Access: NOT granted</string>
     <string name="storageGranted">Storage Access: GRANTED</string>
     <string name="notImplemented">Not implemented&#8230;</string>

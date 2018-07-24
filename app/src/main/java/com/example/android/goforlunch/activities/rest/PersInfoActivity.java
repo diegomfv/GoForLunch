@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
@@ -33,6 +35,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
@@ -59,15 +62,16 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.observers.DisposableObserver;
 
 /**
  * Created by Diego Fajardo on 09/05/2018.
  */
-public class PersInfoActivity extends AppCompatActivity{
+public class PersInfoActivity extends AppCompatActivity implements Observer{
 
     private static final String TAG = PersInfoActivity.class.getSimpleName();
 
@@ -139,6 +143,11 @@ public class PersInfoActivity extends AppCompatActivity{
     //Glide
     private RequestManager glide;
 
+    //InternetConnectionReceiver variables
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+    private Snackbar snackbar;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,6 +163,9 @@ public class PersInfoActivity extends AppCompatActivity{
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
 
         glide = Glide.with(PersInfoActivity.this);
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
 
         /* We set the content view
         * */
@@ -181,7 +193,6 @@ public class PersInfoActivity extends AppCompatActivity{
                     ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonToastEnterLastName));
 
                 } else {
-
                     alertDialogChangeData();
                 }
             }
@@ -222,61 +233,7 @@ public class PersInfoActivity extends AppCompatActivity{
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-            @Override
-            public void onNext(Boolean aBoolean) {
-                Log.d(TAG, "onNext: " + aBoolean);
-
-                if (aBoolean) {
-
-                    /** We get the user information
-                     * */
-                    currentUser = auth.getCurrentUser();
-                    Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
-
-                    if (currentUser != null) {
-
-                        userEmail = currentUser.getEmail();
-
-                        /* We get a reference to user's firebase storage
-                        * */
-                        if (userEmail != null) {
-                            stRefUser = stRefImageDir.child(userEmail);
-                        } else {
-                            stRefUser = null;
-                        }
-
-                        Log.d(TAG, "onNext: userProfilePictureUri = " + userProfilePictureUri);
-                        if (userProfilePictureUri == null) {
-                            userProfilePictureUri = currentUser.getPhotoUrl();
-                            Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
-                        }
-
-                        if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                            dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
-                        }
-                    }
-
-                } else {
-                    UtilsFirebase.logOut(PersInfoActivity.this);
-
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.d(TAG, "onError: " + Log.getStackTraceString(e));
-
-            }
-
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: ");
-
-            }
-        });
+        Utils.connectReceiver(PersInfoActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -284,6 +241,15 @@ public class PersInfoActivity extends AppCompatActivity{
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
+
+        Utils.disconnectReceiver(
+                PersInfoActivity.this,
+                receiver,
+                PersInfoActivity.this);
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
         dbRefUsers.removeEventListener(valueEventListenerGetInfoAndFillWidgets);
     }
 
@@ -432,33 +398,69 @@ public class PersInfoActivity extends AppCompatActivity{
 
     }
 
-    /** Method that shows the progress bar and disables a/some buttons
-     * */
-    private void showProgressBarAndDisableButtons (ProgressBar progressBar, Button button, TextView textView){
+    @Override
+    public void update(Observable o, Object internetAvailable) {
+        Log.d(TAG, "update: called!");
 
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.VISIBLE);
+        if ((int) internetAvailable == 0) {
+            Log.d(TAG, "update: Internet not Available");
 
-        /* We block the interaction with buttons
-         * */
-        button.setClickable(false);
-        textView.setClickable(false);
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        PersInfoActivity.this,
+                        mainContent,
+                        "Internet not available");
 
-    }
+                ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
+                Utils.showMainContent(progressBarContent, mainContent);
 
-    /** Method that hides the progress bar and enables a/some buttons
-     * */
-    private void hideProgressBarAndEnableButtons (ProgressBar progressBar, Button button, TextView textView){
+            } else {
+                snackbar.show();
+                ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
+                Utils.showMainContent(progressBarContent, mainContent);
+            }
 
-        /* We show the progress bar
-         * */
-        progressBar.setVisibility(View.INVISIBLE);
+        } else {
+            Log.d(TAG, "update: Internet available");
 
-        /* We block the interaction with buttons
-         * */
-        button.setClickable(true);
-        textView.setClickable(false);
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+
+            /* We get the user information
+            when internet comes back
+            */
+            Utils.hideMainContent(progressBarContent, mainContent);
+
+            currentUser = auth.getCurrentUser();
+            Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+            if (currentUser != null) {
+
+                userEmail = currentUser.getEmail();
+
+                /* We get a reference
+                to user's firebase storage
+                 * */
+                if (userEmail != null) {
+                    stRefUser = stRefImageDir.child(userEmail);
+                } else {
+                    stRefUser = null;
+                }
+
+                Log.d(TAG, "onNext: userProfilePictureUri = " + userProfilePictureUri);
+                if (userProfilePictureUri == null) {
+                    userProfilePictureUri = currentUser.getPhotoUrl();
+                    Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
+                }
+
+                if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
+                }
+            }
+        }
 
     }
 
@@ -479,54 +481,65 @@ public class PersInfoActivity extends AppCompatActivity{
                     public void onClick(DialogInterface dialog, int which) {
                         Log.d(TAG, "onClick: yes button clicked!");
 
-                        showProgressBarAndDisableButtons(progressBar, buttonSaveChanges, tvChangePassword);
+                        /* If the snackbar is not visible, it means internet is available
+                        * */
+                        if (!snackbar.isShown()) {
 
-                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                .setDisplayName(
-                                        Utils.capitalize(inputFirstName.getText().toString().trim())
-                                                + " "
-                                                + Utils.capitalize(inputLastName.getText().toString().trim()))
-                                .setPhotoUri(userProfilePictureUri)
-                                .build();
+                            Utils.hideMainContent(progressBarContent, mainContent);
 
-                        currentUser.updateProfile(profileUpdates)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (!task.isSuccessful()) {
-                                            Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(
+                                            Utils.capitalize(inputFirstName.getText().toString().trim())
+                                                    + " "
+                                                    + Utils.capitalize(inputLastName.getText().toString().trim()))
+                                    .setPhotoUri(userProfilePictureUri)
+                                    .build();
 
-                                            //We get the exception and display why it was not successful
-                                            FirebaseAuthException e = (FirebaseAuthException) task.getException();
+                            currentUser.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (!task.isSuccessful()) {
+                                                Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
 
-                                            if (e != null) {
-                                                Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                                //We get the exception and display why it was not successful
+                                                FirebaseAuthException e = (FirebaseAuthException) task.getException();
+
+                                                if (e != null) {
+                                                    Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                                }
+
+                                                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                                                Utils.showMainContent(progressBarContent, mainContent);
+
+
+                                            } else {
+                                                Log.d(TAG, "onComplete: task was successful");
+
+                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+
+                                                /* Updating the database
+                                                 * */
+                                                Map<String, Object> map = new HashMap<>();
+                                                map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
+                                                map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
+                                                UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
+
+                                                /* We save the image in the image view in the storage
+                                                 * */
+                                                startStorageProcessWithByteArray(iv_userImage);
+
                                             }
-
-                                            ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
-
-                                            hideProgressBarAndEnableButtons(progressBar, buttonSaveChanges, tvChangePassword);
-
-
-                                        } else {
-                                            Log.d(TAG, "onComplete: task was successful");
-
-                                            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-
-                                            /* Updating the database
-                                            * */
-                                            Map<String, Object> map = new HashMap<>();
-                                            map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
-                                            map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
-                                            UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
-
-                                            /* We save the image in the image view in the storage
-                                            * */
-                                            startStorageProcessWithByteArray(iv_userImage);
-
                                         }
-                                    }
-                                });
+                                    });
+                        } else {
+                            /* Snackbar is shown, therefore
+                            there is no internet connection*/
+
+                            ToastHelper.toastNoInternet(PersInfoActivity.this);
+
+                        }
                     }
                 })
                 .setNegativeButton(getResources().getString(R.string.persInfoDialogChangeDataNo), new DialogInterface.OnClickListener() {
@@ -541,7 +554,8 @@ public class PersInfoActivity extends AppCompatActivity{
         dialog.show();
     }
 
-    /** Method used to display a dialog for permissions request
+    /** Method used to display
+     * a dialog for permissions request
      * */
     public void showRequestPermissionsDialog(final String msg, final Context context,
                                              final String permission) {
@@ -563,30 +577,9 @@ public class PersInfoActivity extends AppCompatActivity{
         alert.show();
     }
 
-    /** Method that saves a imageStream in FirebaseStorage
+    /** Method for saving images
+     * in Firebase Storage
      * */
-    private void startStorageProcessWithInputStream (InputStream imageStream) {
-        Log.d(TAG, "startStorageProcess: called!");
-
-        Log.i(TAG, "startStorageProcess: reference = " + stRefUser);
-        //Uploading image
-        UploadTask uploadTask = stRefUser.child("image").putStream(imageStream);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "onFailure: something went wrong!");
-
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.d(TAG, "onSuccess: file uploaded!");
-
-            }
-        });
-    }
-
-
     private void startStorageProcessWithByteArray (ImageView imageView) {
         Log.d(TAG, "startStorageProcessWithByteArray: called!");
 
@@ -626,5 +619,4 @@ public class PersInfoActivity extends AppCompatActivity{
             }
         });
     }
-
 }
