@@ -3,6 +3,7 @@ package com.example.android.goforlunch.activities.rest;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,7 +14,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -23,12 +26,16 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
+import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
 import com.example.android.goforlunch.helpermethods.Utils;
@@ -48,6 +55,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,7 +69,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Diego Fajardo on 06/05/2018.
  */
 
-public class RestaurantActivity extends AppCompatActivity {
+public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = RestaurantActivity.class.getSimpleName();
 
@@ -85,6 +93,12 @@ public class RestaurantActivity extends AppCompatActivity {
 
     @BindView(R.id.restaurant_rating_id)
     RatingBar rbRestRating;
+
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarContent;
+
+    @BindView(R.id.main_layout_id)
+    CoordinatorLayout mainContent;
 
     //Variables
     private String userFirstName;
@@ -115,7 +129,7 @@ public class RestaurantActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
-    private DatabaseReference dbRefGroups;
+    private DatabaseReference dbRefUsersGetList;
 
     private SharedPreferences sharedPref;
 
@@ -134,102 +148,52 @@ public class RestaurantActivity extends AppCompatActivity {
     //Intent
     private Intent intent;
 
+    //InternetConnectionReceiver variables
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+    private Snackbar snackbar;
+
+    private boolean internetAvailable;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_restaurant);
-
-        ButterKnife.bind(this);
 
         context = RestaurantActivity.this;
-        
+
         fireDb = FirebaseDatabase.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+
+        glide = Glide.with(context);
+
+        ////////////////////////////////////////////
+        setContentView(R.layout.activity_restaurant);
+        ButterKnife.bind(this);
 
         this.configureRecyclerView();
         this.configureInternalStorage(context);
 
-        glide = Glide.with(context);
-
-        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
-
-        /** Instantiation of the fabs and set onClick listener*/
-        fab.setOnClickListener(mFabListener);
-
         listOfCoworkers = new ArrayList<>();
 
+        /* Listeners
+        * */
+        fab.setOnClickListener(mFabListener);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
 
-        /** We get the intent to display the information
+        /* We get the list of coworkers that will go to this Restaurant.
+         * They will be displayed in the recyclerView
+         * */
+        dbRefUsersGetList = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        dbRefUsersGetList.addValueEventListener(valueEventListenerGetListOfCoworkers);
+
+        /* We get the intent to display the information
          * */
         intent = getIntent();
         fillUIUsingIntent(intent);
         intentRestaurantName = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME);
-
-        /** We get the user information
-         * */
-        auth = FirebaseAuth.getInstance();
-        currentUser = auth.getCurrentUser();
-        Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
-
-        if (currentUser != null) {
-
-            userEmail = currentUser.getEmail();
-
-            if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                        userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
-                        userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
-                        userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
-                        userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
-                        userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
-                        userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                                .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
-
-                        setFabButtonState(intentRestaurantName);
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
-                    }
-                });
-
-            }
-        }
-
-        /** Reference to Firebase Database, users.
-         * We get the list of coworkers that will go to this Restaurant which
-         * will be displayed in the recyclerView
-         * */
-        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        dbRefUsers.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
-
-                listOfCoworkers = UtilsFirebase.fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser(dataSnapshot, userEmail, userGroup, intentRestaurantName);
-
-                /** We use the list in the adapter
-                 * */
-                mAdapter = new RVAdapterRestaurant(context, listOfCoworkers);
-                recyclerView.setAdapter(mAdapter);
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-            }
-        });
 
         Anim.crossFadeShortAnimation(recyclerView);
 
@@ -237,28 +201,108 @@ public class RestaurantActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        Log.d(TAG, "onStart: called!");
         super.onStart();
+        Log.d(TAG, "onStart: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        Utils.connectReceiver(RestaurantActivity.this, receiver, intentFilter, this);
+
     }
 
     @Override
     protected void onStop() {
-        Log.d(TAG, "onStop: called!");
         super.onStop();
+        Log.d(TAG, "onStop: called!");
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    RestaurantActivity.this,
+                    receiver,
+                    RestaurantActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
     }
 
-    /** disposeWhenDestroy() avoids memory leaks
-     * */
     @Override
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
+    protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    RestaurantActivity.this,
+                    receiver,
+                    RestaurantActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+        fab.setOnClickListener(null);
+        navigationView.setOnNavigationItemSelectedListener(null);
+        dbRefUsersGetList.removeEventListener(valueEventListenerGetListOfCoworkers);
+
         this.disposeWhenDestroy();
     }
 
     private void disposeWhenDestroy () {
         Utils.dispose(this.getImageFromInternalStorageDisposable);
 
+    }
+
+    /** Callback: listening to broadcast receiver
+     * */
+    @Override
+    public void update(java.util.Observable o, Object internetAvailableUpdate) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) internetAvailableUpdate == 0) {
+            Log.d(TAG, "update: Internet Not Available");
+
+            internetAvailable = false;
+
+            if (snackbar == null) {
+                snackbar = Utils.createSnackbar(
+                        RestaurantActivity.this,
+                        mainContent,
+                        getResources().getString(R.string.noInternet));
+
+            } else {
+                snackbar.show();
+            }
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            internetAvailable = true;
+
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+
+            /* We get the user information
+             * */
+            auth = FirebaseAuth.getInstance();
+            currentUser = auth.getCurrentUser();
+            Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+            if (currentUser != null) {
+
+                userEmail = currentUser.getEmail();
+
+                if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                }
+            }
+        }
     }
 
     @Override
@@ -274,84 +318,57 @@ public class RestaurantActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-                @Override
-                public void onNext(Boolean aBoolean) {
-                    Log.d(TAG, "onNext: " + aBoolean);
+            if (!internetAvailable) {
+                ToastHelper.toastNoInternet(RestaurantActivity.this);
 
-                    if (aBoolean) {
-                        Log.d(TAG, "onNext: internet state = " + aBoolean);
+            } else {
 
-                        Map<String,Object> map;
+                if (fabShowsCheck) {
+                    /* If we click the fab when it shows check it has to display "add".
+                     * Moreover, we modify the info in the database
+                     * */
+                    fabShowsCheck = false;
+                    Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
 
-                        if (fabShowsCheck) {
-                            /** If we click the fab when it shows check it has to display "add".
-                             * Moreover, we modify the info in the database
-                             * */
-                            fabShowsCheck = false;
-                            Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add, getApplicationContext().getTheme()));
+                        /* We delete the restaurant from the database (user's)
+                         **/
+                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
 
-                                /** We delete the restaurant from the database (user's)
-                                 **/
-                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                                UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
+                        ToastHelper.toastShort(context, getResources().getString(R.string.restaurantNotGoing));
+                    }
 
-                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantNotGoing));
-                            }
+                } else {
 
-                        } else {
+                    /* If we click the fab when it shows "add" it has to display "check".
+                     * Moreover, we modify the info in the database
+                     * */
+                    fabShowsCheck = true;
 
-                            /** If we click the fab when it shows "add" it has to display "check".
-                             * Moreover, we modify the info in the database
-                             * */
-                            fabShowsCheck = true;
-                            Log.d(TAG, "onClick: fabShowsCheck = " + fabShowsCheck);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check, getApplicationContext().getTheme()));
+                        /* We add the restaurant to the database (user's)
+                         * */
+                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
+                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
+                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
+                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
+                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
+                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
+                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
+                                getIntent().getIntExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, 0),
+                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
+                        );
 
-                                /** We add the restaurant to the database (user's)
-                                 * */
-                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                                UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
-                                        getIntent().getIntExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, 0),
-                                        Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
-                                );
-
-                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + " " + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) + "!");
-                            }
-                        }
-
-                    } else {
-                        Log.d(TAG, "onNext: internet state = " + aBoolean);
-                        ToastHelper.toastShort(RestaurantActivity.this, getResources().getString(R.string.noInternet));
-
+                        ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + " " + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) + "!");
                     }
                 }
-
-                @Override
-                public void onError(Throwable e) {
-                    Log.d(TAG, "onError: " + Log.getStackTraceString(e));
-
-                }
-
-                @Override
-                public void onComplete() {
-                    Log.d(TAG, "onComplete: ");
-
-                }
-            });
-
-
+            }
         }
     };
 
@@ -365,8 +382,10 @@ public class RestaurantActivity extends AppCompatActivity {
                         case R.id.restaurant_view_call_id: {
                             Log.d(TAG, "onNavigationItemSelected: callButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: phone = " + phoneToastString);
+
                             if (phoneToastString.equals("")) {
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantPhoneNotAvailable));
+
                             } else {
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantCallingTo) + " " + phoneToastString);
                             }
@@ -384,8 +403,10 @@ public class RestaurantActivity extends AppCompatActivity {
                         case R.id.restaurant_view_website_id: {
                             Log.d(TAG, "onNavigationItemSelected: websiteButton CLICKED!");
                             Log.d(TAG, "onNavigationItemSelected: web URL = " + webUrlToastString);
+
                             if (webUrlToastString.equals("")) {
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantWebsiteNotAvailable));
+
                             } else {
 
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlToastString));
@@ -401,10 +422,57 @@ public class RestaurantActivity extends AppCompatActivity {
                 }
             };
 
+    private ValueEventListener valueEventListenerGetUserInfo = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+            userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
+            userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
+            userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
+            userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
+            userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+            userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                    .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
+
+            setFabButtonState(intentRestaurantName);
+
+            dbRefUsers.removeEventListener(this);
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: " + databaseError.getCode());
+        }
+    };
+
+    private ValueEventListener valueEventListenerGetListOfCoworkers = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+            listOfCoworkers = UtilsFirebase.fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser(dataSnapshot, userEmail, userGroup, intentRestaurantName);
+
+            /* We use the list in the adapter
+             * */
+            mAdapter = new RVAdapterRestaurant(context, listOfCoworkers);
+            recyclerView.setAdapter(mAdapter);
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: " + databaseError.getCode());
+
+        }
+    };
+
+
+
     /******************************************************
      * CONFIGURATION
      *****************************************************/
-
 
     private void configureRecyclerView () {
 
@@ -462,12 +530,10 @@ public class RestaurantActivity extends AppCompatActivity {
             Log.d(TAG, "configureInternalStorage: mainPath = " + mainPath);
             Log.d(TAG, "configureInternalStorage: imageDirPath = " + imageDirPath);
 
-            ToastHelper.toastShort(context, getResources().getString(R.string.storageGranted));
+            //ToastHelper.toastShort(context, getResources().getString(R.string.storageGranted));
 
         }
     }
-
-
 
     /** Method used to fill the UI using the intent
      * */
@@ -476,7 +542,7 @@ public class RestaurantActivity extends AppCompatActivity {
         if (intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) == null
                 || intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME).equals("")) {
 
-            tvRestName.setText("Restaurant name not available");
+            tvRestName.setText(getResources().getString(R.string.restaurantNameNotAvailable));
 
         } else {
 
@@ -486,7 +552,7 @@ public class RestaurantActivity extends AppCompatActivity {
             for (int i = 0; i < tokens.length; i++) {
                 if (displayedName.length() < 27) {
 
-                    /** 1 is the space between words
+                    /* 1 is the space between words
                      * */
                     if ((displayedName.length() + tokens[i].length()) + 1 < 27) {
                         displayedName.append(" ").append(tokens[i]);
@@ -505,7 +571,7 @@ public class RestaurantActivity extends AppCompatActivity {
         if (intent.getStringExtra(RepoStrings.SentIntent.ADDRESS) == null
                 || intent.getStringExtra(RepoStrings.SentIntent.ADDRESS).equals("")) {
 
-            tvRestAddress.setText("Address not available");
+            tvRestAddress.setText(getResources().getString(R.string.restaurantAddressNotAvailable));
 
         } else {
 
@@ -550,10 +616,11 @@ public class RestaurantActivity extends AppCompatActivity {
             Log.d(TAG, "loadImage: file does exist in the directory");
             getAndDisplayImageFromInternalStorage(imageDirPath + intent.getStringExtra((RepoStrings.SentIntent.PLACE_ID)));
 
+            showMainContent(progressBarContent, mainContent);
+
         } else {
             Log.d(TAG, "loadImage: file does not exist in the directory");
             loadImageWithUrl(intent);
-
 
         }
     }
@@ -573,10 +640,14 @@ public class RestaurantActivity extends AppCompatActivity {
 
             glide.load(R.drawable.lunch_image).into(ivRestPicture);
 
+            showMainContent(progressBarContent, mainContent);
+
         } else {
             Log.d(TAG, "loadImageWithUrl: image is not null or empty");
 
             glide.load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL)).into(ivRestPicture);
+
+            showMainContent(progressBarContent, mainContent);
 
         }
     }
@@ -620,6 +691,16 @@ public class RestaurantActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    /** Method for showing the main content. We cannot use Utils because
+     * the mainContent Layout is not a Linear Layout
+     * */
+    private void showMainContent (LinearLayout progressBarContent, CoordinatorLayout mainContent) {
+        Log.d(TAG, "showMainContent: called!");
+
+        progressBarContent.setVisibility(View.GONE);
+        mainContent.setVisibility(View.VISIBLE);
     }
 
 }
