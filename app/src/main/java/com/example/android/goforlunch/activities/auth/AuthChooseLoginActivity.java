@@ -430,10 +430,11 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
 
             } else {
+                // TODO: 24/07/2018 Probably, this code will never be executed
 
                 //go to AuthEnterNameActivity
-                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
-                finish();
+//                startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
+//                finish();
 
             }
         }
@@ -481,7 +482,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                                 }
 
                             } else {
-                                /* Something went wrong during sign in*/
+                                /* Something went wrong during sign in */
                                 Log.d(TAG, "GOOGLE signInWithCredential: failure");
                                 ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
                                 Utils.showMainContent(progressBarContent, mainContent);

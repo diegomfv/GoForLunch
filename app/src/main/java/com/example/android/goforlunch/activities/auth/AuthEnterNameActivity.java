@@ -70,7 +70,7 @@ import butterknife.ButterKnife;
  * Created by Diego Fajardo on 09/05/2018.
  */
 // TODO: 24/07/2018 This code might be modified to be more readable
-public class AuthEnterNameActivity extends AppCompatActivity implements Observer{
+public class AuthEnterNameActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = AuthEnterNameActivity.class.getSimpleName();
 
@@ -112,10 +112,6 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     //List of Emails to store all the emails and check if an user already exists in the database
     private List<String> listOfEmails;
 
-    //true, we came from Google or Facebook
-    //false, we came from password sign up or sign in
-    private boolean flag = false;
-
     //Firebase User
     private FirebaseAuth auth;
     private FirebaseUser user;
@@ -131,10 +127,12 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     private StorageReference stRefMain;
     private StorageReference stRefImageDir;
 
+    //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
     private IntentFilter intentFilter;
-
     private Snackbar snackbar;
+
+    private boolean internetAvailable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -160,24 +158,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputEmail);
         Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputPassword);
 
-        /* If we have sign in with google or facebook first time, the user needs to fill some
-         * information. This code will fill the email and password fields for the user automatically.
-         * This fields cannot be modified
-         * */
-        if (user != null) {
-
-            if (user.getDisplayName() == null) {
-                email = user.getEmail();
-                password = "*******";
-
-                stRefUser = stRefImageDir.child(email);
-            }
-        }
-
         /* If we come from SignUp Activity (email and password login) then the intent won't be null.
          * Otherwise, it will.
          * We fill the email and password info for the user automatically.
-         * Both fields cannot be changed.
          * */
         final Intent intent = getIntent();
         if (intent != null) {
@@ -188,38 +171,20 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                 email = intent.getStringExtra(RepoStrings.SentIntent.EMAIL);
                 password = intent.getStringExtra(RepoStrings.SentIntent.PASSWORD);
 
+                inputEmail.setText(email);
+                inputPassword.setText(password);
+
                 stRefUser = stRefImageDir.child(email);
 
             }
-
-            flag = intent.getBooleanExtra(RepoStrings.SentIntent.FLAG, false);
         }
 
-        Log.d(TAG, "onCreate: flag = " + flag);
-
-        inputEmail.setText(email);
-        inputPassword.setText(password);
-
-        /* After having the email and password info,
-        we show the content
-        * */
         Utils.showMainContent(progressBarContent, mainContent);
 
-        /* We get all users emails
-         * */
-        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        dbRefUsers.addValueEventListener(valueEventListenerGetEmails);
-
-        /* We set the listeners for the buttons
-         * */
+        /* We set the listeners
+        * */
         fab.setOnClickListener(fabOnClickListener);
         iv_userImage.setOnClickListener(ivOnClickListener);
-
-        /* When the user
-         * clicks the START button two things can happen.
-         * If the user is filling the info using a google or facebook account... todo
-         * If the user is filling the info using an email and password account... todo
-         * */
         buttonStart.setOnClickListener(buttonStartOnClickListener);
 
     }
@@ -240,10 +205,13 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        Utils.disconnectReceiver(
-                AuthEnterNameActivity.this,
-                receiver,
-                AuthEnterNameActivity.this);
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    AuthEnterNameActivity.this,
+                    receiver,
+                    AuthEnterNameActivity.this);
+        }
+
         receiver = null;
         intentFilter = null;
         snackbar = null;
@@ -255,7 +223,16 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        dbRefUsers.removeEventListener(valueEventListenerGetEmails);
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    AuthEnterNameActivity.this,
+                    receiver,
+                    AuthEnterNameActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
 
         fab.setOnClickListener(null);
         iv_userImage.setOnClickListener(null);
@@ -263,18 +240,23 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     }
 
+    /** Callback: listening to broadcast receiver
+     * */
     @Override
-    public void update(Observable observable, Object internetAvailable) {
+    public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
 
-        if ((int) internetAvailable == 0) {
-            Log.d(TAG, "update: There is no internet");
+        if ((int) internetAvailableUpdate == 0) {
+            Log.d(TAG, "update: Internet Not Available");
+
+            internetAvailable = false;
 
             if (snackbar == null) {
                 snackbar = Utils.createSnackbar(
                         AuthEnterNameActivity.this,
                         mainContent,
-                        "Internet not available");
+                        getResources().getString(R.string.noInternet));
+
             } else {
                 snackbar.show();
             }
@@ -282,14 +264,16 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         } else {
             Log.d(TAG, "update: Internet available");
 
+            internetAvailable = true;
+
             if (snackbar != null) {
                 snackbar.dismiss();
             }
 
-            /* We get the user information
+            /* We get the emails
             when internet comes back
             */
-            Utils.hideMainContent(progressBarContent, mainContent);
+            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
             dbRefUsers.addValueEventListener(valueEventListenerGetEmails);
 
         }
@@ -326,227 +310,37 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         @Override
         public void onClick(View view) {
 
-            if (!flag) {
-                Log.d(TAG, "onClick: flag = false ->" + flag);
-
-                /* flag is false, therefore we came from Google of Facebook SignIn and
-                 * we only have to update the user info
-                 * */
-                if (user != null) {
-                    Log.d(TAG, "onClick: We came from Google or Facebook login");
-
-                    if (checkMinimumRequisites()) {
-
-                        /* We show the progress bar
-                         * */
-                        Utils.hideMainContent(progressBarContent, mainContent);
-
-                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                .setDisplayName(
-                                        Utils.capitalize(inputFirstName.getText().toString().trim())
-                                                + " "
-                                                + Utils.capitalize(inputLastName.getText().toString().trim()))
-                                .setPhotoUri(userProfilePictureUri)
-                                .build();
-
-                        user.updateProfile(profileUpdates)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (!task.isSuccessful()) {
-                                            Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
-
-                                            //We get the exception and display why it was not successful
-                                            FirebaseAuthException e = (FirebaseAuthException) task.getException();
-
-                                            if (e != null) {
-                                                Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                            }
-
-                                            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
-
-                                            /* We hide the progress bar
-                                             * and enable user interaction
-                                             * */
-                                            Utils.showMainContent(progressBarContent, mainContent);
-
-
-                                        } else {
-                                            Log.d(TAG, "onComplete: task was successful");
-
-                                            dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-
-                                            String userKey = dbRefNewUser.push().getKey();
-
-                                            dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
-                                                    + "/" + userKey);
-
-                                            UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
-                                                    Utils.capitalize(inputFirstName.getText().toString().trim()),
-                                                    Utils.capitalize(inputLastName.getText().toString().trim()),
-                                                    inputEmail.getText().toString().toLowerCase().trim(),
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    "");
-
-                                            dbRefNewUser = fireDb.getReference(
-                                                    RepoStrings.FirebaseReference.USERS
-                                                            + "/" + userKey
-                                                            + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-
-                                            UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    0,
-                                                    "");
-
-                                            /* We store the image in firebase
-                                            * */
-                                            startStorageProcessWithByteArray(iv_userImage);
-
-//                                            startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
-//                                            finish();
-
-                                        }
-                                    }
-                                });
-                    }
-                }
+            if (!internetAvailable) {
+                ToastHelper.toastNoInternet(AuthEnterNameActivity.this);
 
             } else {
-                Log.d(TAG, "onClick: flag is true -> " + flag);
-                /* flag is true, therefore we came from email/password login. In this
-                 * case we have to check if the user exists.
-                 * If it does, we doesn't allow the user to continue.
-                 * If it doesn't we have to
-                 * create the user and update the info.
-                 * */
 
-                if (userAlreadyExists(listOfEmails, inputEmail.getText().toString().toLowerCase().trim())) {
-                    /* A user with this email already exists, so we don't let the user to continue with the process
-                     * (we cannot create two users with the same email) */
-                    ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameThisEmailAlreadyExists));
+                if (checkMinimumRequisites()) {
+                    /* Minimum requisites are fulfilled
+                    * */
+
+                    if (userAlreadyExists(listOfEmails, inputEmail.getText().toString().toLowerCase().trim())) {
+                        /* The listOfEmails will only be not empty if there is internet, but we can only access this part
+                        * of the code is internet is available, so listOfEmails will always be not empty */
+
+                        /* A user with this email already exists, so we don't let the user to continue with the process
+                         * (we cannot create two users with the same email) */
+                        ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.enterNameThisEmailAlreadyExists));
+
+                    } else {
+                        /* Minimum requisites are fulfilled and the user does not exist so
+                        * we proceed to create the user in the database
+                        * */
+                        createUser();
+
+                    }
 
                 } else {
-                    /* A user with this email DOES NOT exist, so we can continue with the process
-                     * */
-
-                    if (checkMinimumRequisites()) {
-
-                        /* We show the progress bar
-                         * and block the interaction
-                         * */
-                        Utils.hideMainContent(progressBarContent, mainContent);
-
-                        //We create the user
-                        auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
-                                .addOnCompleteListener(AuthEnterNameActivity.this, new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-
-                                        // If sign in fails, display a message to the user. If sign in succeeds
-                                        // the auth state listener will be notified and logic to handle the
-                                        // signed in user can be handled in the listener.
-                                        if (!task.isSuccessful()) {
-                                            Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
-
-                                            //We get the exception and display why it was not successful
-                                            FirebaseAuthException e = (FirebaseAuthException) task.getException();
-                                            if (e != null) {
-                                                Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                            }
-
-                                            ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
-
-                                            /* We hide the progress bar
-                                             * and enable interaction
-                                             * */
-                                            Utils.showMainContent(progressBarContent,mainContent);
-
-                                        } else {
-                                            /* Task was succesful
-                                            * */
-
-                                            user = auth.getCurrentUser();
-
-                                            if (user != null) {
-
-                                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                                        .setDisplayName(
-                                                                Utils.capitalize(inputFirstName.getText().toString().trim())
-                                                                        + " "
-                                                                        + Utils.capitalize(inputLastName.getText().toString().trim()))
-                                                        .setPhotoUri(userProfilePictureUri)
-                                                        .build();
-
-                                                user.updateProfile(profileUpdates)
-                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if (!task.isSuccessful()) {
-                                                                    Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
-
-                                                                    //We get the exception and display why it was not successful
-                                                                    FirebaseAuthException e = (FirebaseAuthException) task.getException();
-
-                                                                    if (e != null) {
-                                                                        Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
-                                                                    }
-
-                                                                    ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
-
-                                                                } else {
-                                                                    Log.d(TAG, "onComplete: task was successful");
-
-                                                                    dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-
-                                                                    String userKey = dbRefNewUser.push().getKey();
-
-                                                                    dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
-                                                                            + "/" + userKey);
-                                                                    UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
-                                                                            Utils.capitalize(inputFirstName.getText().toString().trim()),
-                                                                            Utils.capitalize(inputLastName.getText().toString().trim()),
-                                                                            inputEmail.getText().toString().toLowerCase().trim(),
-                                                                            "",
-                                                                            "",
-                                                                            "",
-                                                                            "");
-
-                                                                    dbRefNewUser = fireDb.getReference(
-                                                                            RepoStrings.FirebaseReference.USERS
-                                                                                    + "/" + userKey
-                                                                                    + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                                                                    UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefNewUser,
-                                                                            "",
-                                                                            "",
-                                                                            "",
-                                                                            "",
-                                                                            "",
-                                                                            "",
-                                                                            0,
-                                                                            "");
-
-                                                                    startStorageProcessWithByteArray(iv_userImage);
-
-//                                                                    startActivity(new Intent(AuthEnterNameActivity.this, MainActivity.class));
-//                                                                    finish();
-
-                                                                }
-                                                            }
-                                                        });
-                                            }
-                                        }
-                                    }
-                                });
-                    }
+                    /* Minimum requisites
+                    are not fulfilled. A toast would
+                    be already displayed
+                    */
                 }
-
             }
         }
     };
@@ -564,6 +358,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                 listOfEmails.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().toLowerCase().trim());
 
             }
+
+            dbRefUsers.removeEventListener(this);
+
         }
 
         @Override
@@ -576,8 +373,13 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
      * are fulfilled
      * */
     public boolean checkMinimumRequisites () {
+        Log.d(TAG, "checkMinimumRequisites: called!");
 
-        if (inputFirstName.getText().toString().length() == 0) {
+        if (!internetAvailable) {
+            ToastHelper.toastNoInternet(AuthEnterNameActivity.this);
+            return false;
+
+        } else if (inputFirstName.getText().toString().length() == 0) {
             ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonToastEnterFirstName));
             return false;
 
@@ -606,6 +408,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
      * check if the user email is already in the database.
      * */
     public boolean userAlreadyExists(List<String> listOfEmails, String inputString) {
+        Log.d(TAG, "userAlreadyExists: called!");
 
         if (listOfEmails.contains(inputString)) {
             return true;
@@ -616,10 +419,133 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         }
     }
 
+    /** Method that creates a user in firebase
+     * */
+    private void createUser() {
+        Log.d(TAG, "createUser: called!");
+
+        if (!internetAvailable) {
+            /* Internet is not available
+             * */
+            ToastHelper.toastSomethingWentWrong(AuthEnterNameActivity.this);
+
+        } else {
+            /* Internet is available
+            * */
+            Utils.hideMainContent(progressBarContent, mainContent);
+
+            //We create the user
+            auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
+                    .addOnCompleteListener(AuthEnterNameActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+
+                            if (!task.isSuccessful()) {
+                                Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                //We get the exception and display why it was not successful
+                                FirebaseAuthException e = (FirebaseAuthException) task.getException();
+                                if (e != null) {
+                                    Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                }
+
+                                ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                                /* We hide the progress bar
+                                 * and enable interaction
+                                 * */
+                                Utils.showMainContent(progressBarContent,mainContent);
+
+                            } else {
+                                /* Task was successful
+                                 * */
+
+                                user = auth.getCurrentUser();
+
+                                if (user != null) {
+
+                                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                            .setDisplayName(
+                                                    Utils.capitalize(inputFirstName.getText().toString().trim())
+                                                            + " "
+                                                            + Utils.capitalize(inputLastName.getText().toString().trim()))
+                                            .setPhotoUri(userProfilePictureUri)
+                                            .build();
+
+                                    user.updateProfile(profileUpdates)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (!task.isSuccessful()) {
+                                                        Log.d(TAG, "onComplete: task was NOT SUCCESSFUL");
+
+                                                        //We get the exception and display why it was not successful
+                                                        FirebaseAuthException e = (FirebaseAuthException) task.getException();
+
+                                                        if (e != null) {
+                                                            Log.e(TAG, "onComplete: task NOT SUCCESSFUL: " + e.getMessage());
+                                                        }
+
+                                                        ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
+
+                                                    } else {
+                                                        Log.d(TAG, "onComplete: task was successful");
+
+                                                        dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+
+                                                        String userKey = dbRefNewUser.push().getKey();
+
+                                                        dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
+                                                                + "/" + userKey);
+
+                                                        UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
+                                                                Utils.capitalize(inputFirstName.getText().toString().trim()),
+                                                                Utils.capitalize(inputLastName.getText().toString().trim()),
+                                                                inputEmail.getText().toString().toLowerCase().trim(),
+                                                                "",
+                                                                "",
+                                                                "",
+                                                                "");
+
+                                                        dbRefNewUser = fireDb.getReference(
+                                                                RepoStrings.FirebaseReference.USERS
+                                                                        + "/" + userKey
+                                                                        + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+
+                                                        UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefNewUser,
+                                                                "",
+                                                                "",
+                                                                "",
+                                                                "",
+                                                                "",
+                                                                "",
+                                                                0,
+                                                                "");
+
+                                                        startStorageProcessWithByteArray(iv_userImage);
+
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        }
+                    });
+
+        }
+
+
+    }
+
     /** Method that checks if we have permission to read external storage
      * **/
     public boolean checkPermissionREAD_EXTERNAL_STORAGE (
             final Context context) {
+        Log.d(TAG, "checkPermissionREAD_EXTERNAL_STORAGE: called!");
+
         int currentAPIVersion = Build.VERSION.SDK_INT;
         if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(context,
@@ -648,9 +574,12 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     }
 
     /** Method used to display a dialog
+     * for permissions request
      * */
     public void showDialog(final String msg, final Context context,
                            final String permission) {
+        Log.d(TAG, "showDialog: called!");
+
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setCancelable(true);
         alertBuilder.setTitle(getResources().getString(R.string.permissionPermissionNecessary));
@@ -667,15 +596,13 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         alert.show();
     }
 
-    /******************
-    * CALLBACKS *******
-     * ***************/
-
-    /** External Storage permission
+    /** External Storage permission request
      * */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: called!");
+
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -695,6 +622,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: called!");
 
         if (resultCode == RESULT_OK) {
             try {
