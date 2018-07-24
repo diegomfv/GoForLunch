@@ -49,6 +49,7 @@
     <string name="mainDialogLoggingOutYes">YES, I am sure</string>
     <string name="mainDialogLoggingOutNo">NO</string>
 
+
     <!--
      These 2 methods save in sharedPreferences that the two alarms have been created
      (the notifications alarm has nothing to do with Settings Activity (the preferences fragment
@@ -145,6 +146,8 @@
     <string name="navDrawerYourLunch">YOUR LUNCH</string>
     <string name="navDrawerJoinGroup">JOIN GROUP</string>
     <string name="navDrawerPersInfo">PERSONAL INFO</string>
+    <string name="navDrawerSearchRestaurants">SEARCH RESTAURANTS</string>
+    <string name="navDrawerStartSearch">START SEARCH</string>
     <string name="navDrawerSystem">SYSTEM</string>
     <string name="navDrawerSettings">SETTINGS</string>
     <string name="navDrawerLogOut">LOG OUT</string>
@@ -207,6 +210,7 @@
     <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
     <string name="joinNewGroupIs">Your new group is</string>
+    <string name="mainCurrentPositionNotAvailable">Current Position not available</string>
 
 
 </resources>

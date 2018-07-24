@@ -119,6 +119,14 @@ import static com.example.android.goforlunch.repository.RepoStrings.Keys.NEARBY_
  * */
 public class FragmentRestaurantMapView extends Fragment {
 
+    /* Interface to communicate with Main Activity
+     * */
+    public interface OnCurrentPositionObtainedListener {
+        void onCurrentPositionObtained (LatLngForRetrofit myPosition);
+    }
+
+    //////////////////////////////
+
     private static final String TAG = FragmentRestaurantMapView.class.getSimpleName();
 
     //ERROR that we are going to handle if the user doesn't have the correct version of the
@@ -216,6 +224,9 @@ public class FragmentRestaurantMapView extends Fragment {
     private String mainPath;
     private String imageDirPath;
     private boolean accessInternalStorageGranted;
+
+    //MainActivity
+    OnCurrentPositionObtainedListener mCallback;
 
     /** ------------------------------------------------ */
 
@@ -670,6 +681,10 @@ public class FragmentRestaurantMapView extends Fragment {
 
                         Log.d(TAG, "onComplete: current location: getLatitude(), getLongitude() " + (currentLocation.getLatitude()) + ", " + (currentLocation.getLongitude()));
                         myPosition = new LatLngForRetrofit(currentLocation.getLatitude(), currentLocation.getLongitude());
+
+                        /* We share myPosition with MainActivity
+                        * */
+                        mCallback.onCurrentPositionObtained(myPosition);
 
                         moveCamera(
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),

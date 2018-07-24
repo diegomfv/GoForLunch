@@ -40,7 +40,9 @@ import com.example.android.goforlunch.job.NotificationDailyJob;
 import com.example.android.goforlunch.pageFragments.FragmentCoworkers;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
+import com.example.android.goforlunch.remote.models.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.services.FetchingService;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -76,7 +78,7 @@ import io.reactivex.observers.DisposableObserver;
 //3
 // TODO: 12/07/2018 Offline challenge! Connect using broadcast receiver
 
-public class MainActivity extends AppCompatActivity implements Observer {
+public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMapView.OnCurrentPositionObtainedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -126,6 +128,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private String userKey;
     private String userGroup;
     private String userGroupKey;
+
+    //Current Position
+    private LatLngForRetrofit myPosition;
 
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
@@ -282,6 +287,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
             }
 
         }
+    }
+
+    /** Callback: gets the current position obtained in Map Fragment
+     * */
+    @Override
+    public void onCurrentPositionObtained(LatLngForRetrofit myPosition) {
+        Log.d(TAG, "onCurrentPositionObtained: called!");
+        this.myPosition = myPosition;
+
     }
 
     /** Method used to update the NavDrawer info
@@ -502,16 +516,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
                             startActivity(new Intent(MainActivity.this, JoinGroupActivity.class));
 
-                            // TODO: 12/07/2018 Modify this!
-
-//                            Intent intent = new Intent(MainActivity.this, FetchingService.class);
-//
-//                            intent.putExtra("latitude", 51.457202);
-//                            intent.putExtra("longitude", -2.606345);
-//                            intent.putExtra("accessInternalStorage", true);
-//
-//                            startService(intent);
-
                             return true;
 
                         }
@@ -523,6 +527,23 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
                             // TODO: 12/07/2018 Delete if necessary
                             DebugDB.getAddressLog();
+
+                            return true;
+                        }
+
+                        case R.id.nav_start_search: {
+
+                            if (myPosition != null) {
+                                Intent intent = new Intent(MainActivity.this, FetchingService.class);
+                                intent.putExtra("latitude", myPosition.getLat());
+                                intent.putExtra("longitude", myPosition.getLng());
+                                intent.putExtra("accessInternalStorage", true);
+                                startService(intent);
+
+                            } else {
+                                ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
+
+                            }
 
                             return true;
                         }
