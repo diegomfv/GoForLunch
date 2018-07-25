@@ -91,11 +91,13 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     //For facebook login
     private CallbackManager mCallbackManager;
 
+    //Firebase
     private FirebaseAuth auth;
     private FirebaseUser user;
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
 
+    //Shared Preferences
     private SharedPreferences sharedPref;
 
     //InternetConnectionReceiver variables
@@ -559,13 +561,25 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                     if (Objects.requireNonNull(user.getEmail()).equalsIgnoreCase(
                             Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
 
-                        /* The user already exists, so we launch MainActivity
+                        /* The user already exists,
                          * */
                         userExists = true;
 
                         // TODO: 24/07/2018 Check!
                         fireDbUsersRef.removeEventListener(this);
 
+                        /* We update shared preferences (notifications) according to the information
+                        * of the user in firebase. This is the only moment in which notifications
+                        * in firebase will affect preferences in the app. From this moment on,
+                        * the variations in the preference fragment will affect firebase (and not
+                        * the other way around).
+                        * */
+                        Utils.updateSharedPreferences(sharedPref,
+                                getResources().getString(R.string.key_alarmNotificationsAreOn),
+                                item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString());
+
+                        /* We launch Main Activity
+                        * */
                         Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
@@ -629,6 +643,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "GOOGLE onCancelled: " + databaseError.getCode());
+
+                ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
 
             }
         });

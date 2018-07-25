@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -22,7 +21,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.amitshekhar.DebugDB;
@@ -42,7 +40,6 @@ import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.remote.models.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.repository.RepoStrings;
-import com.example.android.goforlunch.services.FetchingService;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -59,12 +56,10 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.observers.DisposableObserver;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/05/2018 Translations
 // TODO: 12/07/2018 DistanceMatrix in ListView - Take care what it shows when there is no info! Might show -- --
-// TODO: 12/07/2018 Modify UI when using FacebookButton
 // TODO: 29/05/2018 General cleanup
 // TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
 // TODO: 02/07/2018 User image has to be displayed in coworkers
@@ -120,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRefUsers;
     private DatabaseReference fireDbRefGroups;
+    private DatabaseReference fireDbRefUserNotif;
 
     //Variables
     private String userFirstName;
@@ -146,6 +142,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         fireDb = FirebaseDatabase.getInstance();
+
+        /* We update users notifications information in Firebase according to the preference fragment
+        * */
+
+        Utils.printSharedPreferences(sharedPref);
 
         //////////////////////////////////////
         setContentView(R.layout.activity_main);
@@ -368,6 +369,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
+                    /* We update firebase database using notifications information
+                    * */
+
+
+
                     userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
                     userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
                     userKey = item.getKey();
@@ -375,9 +381,16 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
                     Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
 
+                    /* We update SharedPreferences (notifications) according to the user's information in firebase
+                    * */
+                    Utils.updateSharedPreferences(
+                            sharedPref,
+                            getResources().getString(R.string.key_alarmNotificationsAreOn),
+                            Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue()).toString());
+
                     /* We check that alarms are running
                     * */
-                    checkAddRestaurantAt4pmDailyJob(sharedPref);
+                    checkAddRestaurantsAt4pmDailyJob(sharedPref);
                     checkNotifications(sharedPref);
 
                     updateNavDrawerViews();
@@ -534,16 +547,21 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         case R.id.nav_start_search: {
 
                             if (myPosition != null) {
-                                Intent intent = new Intent(MainActivity.this, FetchingService.class);
-                                intent.putExtra("latitude", myPosition.getLat());
-                                intent.putExtra("longitude", myPosition.getLng());
-                                intent.putExtra("accessInternalStorage", true);
-                                startService(intent);
-
-                            } else {
-                                ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
+                                Log.i(TAG, "onNavigationItemSelected: my Position = " + myPosition.toString());
 
                             }
+
+//                            if (myPosition != null) {
+//                                Intent intent = new Intent(MainActivity.this, FetchingService.class);
+//                                intent.putExtra("latitude", myPosition.getLat());
+//                                intent.putExtra("longitude", myPosition.getLng());
+//                                intent.putExtra("accessInternalStorage", true);
+//                                startService(intent);
+//
+//                            } else {
+//                                ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
+//
+//                            }
 
                             return true;
                         }
@@ -700,27 +718,41 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * NOTIFICATIONS *****
      * ******************/
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * This method creates a new job to add restaurants to the database every day at 4pm if it
      * has not been created yet
      * */
-    private void checkAddRestaurantAt4pmDailyJob(SharedPreferences sharedPreferences) {
-        Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: called!");
+    private void checkAddRestaurantsAt4pmDailyJob(SharedPreferences sharedPreferences) {
+        Log.d(TAG, "checkAddRestaurantsAt4pmDailyJob: called!");
 
         boolean addRestaurantAlarmIsTrue = sharedPreferences.getBoolean(getResources().getString(R.string.key_alarmAddRestaurantIsOn), false);
 
-        /* The first time this method is called, it will run the else statement because there would not be
-         * any info in SharedPreferences. When running the "else" part, it will fill SharedPreferences
+        /* The first time this method is called, it will always be false.
+         * When running the "else" part, it will fill SharedPreferences
          * and from that moment on it will do nothing because the alarm will already be set and this
          * alarm will be "true" in SharedPreferences
          * */
 
         if (addRestaurantAlarmIsTrue){
-            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: do nothing!");
+            Log.d(TAG, "checkAddRestaurantsAt4pmDailyJob: do nothing!");
             //do nothing since alarm is currently running
 
         } else {
-            Log.d(TAG, "checkAddRestaurantAt4pmDailyJob: create job!");
+            Log.d(TAG, "checkAddRestaurantsAt4pmDailyJob: create job!");
 
              /* We cancel the job to avoid
             creating more than one (just in case) */
@@ -733,7 +765,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
              *  */
             Utils.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmAddRestaurantIsOn), true);
 
-            Log.i(TAG, "checkAddRestaurantAt4pmDailyJob: ALARM IS ON!");
+            Log.i(TAG, "checkAddRestaurantsAt4pmDailyJob: ALARM IS ON!");
         }
     }
 
@@ -746,6 +778,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         boolean notificationsAlarmIsTrue = sharedPreferences.getBoolean(getResources().getString(R.string.key_alarmNotificationsAreOn), false);
 
+        Log.i(TAG, "checkNotifications: notificationsAlarmIsTrue = " + notificationsAlarmIsTrue);
+
         /* The first time this method is called, it will run the else statement because there would not be
          * any info in SharedPreferences. When running the "else" part, it will fill SharedPreferences
          * and from that moment on it will do nothing because the alarm will already be set and this
@@ -753,26 +787,59 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
          * */
 
         if (notificationsAlarmIsTrue) {
-            Log.d(TAG, "checkNotifications: do nothing!");
-            //do nothing since alarm is currently running
+            Log.d(TAG, "checkNotifications: notificationsAlarmIsTrue = true");
 
-        } else {
-            Log.d(TAG, "checkNotifications: cancel job and create alarm");
+//            /* We change the notifications information in firebase about the user. This way,
+//            we can keep track of all the users that are using the device
+//             */
+//            fireDbRefUserNotif = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey);
+//            fireDbRefUserNotif.setValue(RepoStrings.FirebaseReference.USER_NOTIFICATIONS, notificationsAlarmIsTrue);
+//
+//            // TODO: 25/07/2018 Change this!!!!!
 
-            /* We cancel the job to avoid
-            creating more than one (just in case) */
+            fireDbRefUserNotif = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey).child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS);
+            fireDbRefUserNotif.setValue(true);
+
+
+
+
+
+
+
+            /* We change sharedPref in the Database and and the user.
+            Now, when the alarm is triggered, the system will search for the current user's email
+            and the same email in shared preferences. If they match, the notification
+            will be shown (see alarm).
+            */
+            Utils.updateSharedPreferences(sharedPref, userEmail, true);
+
+            /* The notifications are on.
+            We cancel the job to avoid
+            creating more than one (just in case)
+            and set the alarm
+            */
             cancelJob(jobIdNotifications);
 
+            Log.i(TAG, "checkNotifications: ALARM CANCELLED");
+
             /* We create the alarm for notifications
-            using Evernote Android Job Library */
+            using Evernote Android Job Library
+            */
             JobManager.create(MainActivity.this).addJobCreator(new AlertJobCreator());
             jobIdNotifications = NotificationDailyJob.scheduleNotificationDailyJob();
 
-            /* We change sharedPref in the Database. The alarm is set so, from now on, we won't do anything
-             *  */
-            Utils.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmNotificationsAreOn), true);
-
             Log.i(TAG, "checkNotifications: ALARM IS ON!");
+
+        } else {
+            Log.d(TAG, "checkNotifications: notificationsAlarmIsTrue = false");
+
+            /* The notifications are off.
+            Then, we cancel the job
+            * */
+            cancelJob(jobIdNotifications);
+
+            Log.i(TAG, "checkNotifications: ALARM CANCELLED AND NOT SCHEDULED");
+
 
         }
     }

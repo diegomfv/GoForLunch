@@ -30,6 +30,7 @@ import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.ToastHelper;
+import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.helpermethods.UtilsFirebase;
 import com.example.android.goforlunch.repository.RepoStrings;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -56,6 +57,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+
+import okhttp3.internal.Util;
 
 import static com.example.android.goforlunch.helpermethods.Utils.getStringFromSharedPreferences;
 import static com.example.android.goforlunch.helpermethods.Utils.updateSharedPreferences;
@@ -417,11 +420,6 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                     }
                 });
-
-
-
-
-
             }
         });
 
@@ -429,6 +427,36 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button 8 clicked!");
+
+                String userKey = "-LIFt4UPNY3CwP-wQLnj";
+
+                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
+                        .child(userKey);
+
+                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+                        String o1 = dataSnapshot.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString();
+
+                        Log.i(TAG, "onDataChange: o1 = " + o1);
+
+                        Utils.updateSharedPreferences(sharedPref,
+                                getResources().getString(R.string.key_alarmNotificationsAreOn),
+                                dataSnapshot.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString());
+
+                        Utils.printSharedPreferences(sharedPref);
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.e(TAG, "onCancelled: " + databaseError.getMessage());
+
+                    }
+                });
+
 
 
 

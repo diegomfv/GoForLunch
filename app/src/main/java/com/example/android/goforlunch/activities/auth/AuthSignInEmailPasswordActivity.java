@@ -2,7 +2,9 @@ package com.example.android.goforlunch.activities.auth;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -30,7 +32,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -70,6 +79,13 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     @BindView(R.id.signin_main_content)
     LinearLayout mainContent;
 
+    //Firebase
+    private FirebaseDatabase fireDb;
+    private DatabaseReference dbRefUsers;
+
+    //Shared Preferences
+    private SharedPreferences sharedPref;
+
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
     private IntentFilter intentFilter;
@@ -80,8 +96,16 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_auth_signin_email_password);
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthSignInEmailPasswordActivity.this);
+
+        /* We establish the entry points
+        to get the user information
+        * */
+        fireDb = FirebaseDatabase.getInstance();
+
+        /////////////////////////////////////////////////////////////
+        setContentView(R.layout.activity_auth_signin_email_password);
         ButterKnife.bind(this);
 
         Utils.showMainContent(progressBarContent, mainContent);
@@ -274,12 +298,51 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                     Utils.showMainContent(progressBarContent, mainContent);
 
                                 } else {
-                                    Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    /* Sign in was successful
+                                    * */
 
-                                    startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
-                                    finish();
+                                    /* We update shared preferences (notifications) according to the information
+                                     * of the user in firebase. This is the only moment in which notifications
+                                     * in firebase will affect preferences in the app. From this moment on,
+                                     * the variations in the preference fragment will affect firebase (and not
+                                     * the other way around).
+                                     * */
+                                    final DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                    fireDbUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
+                                            for (DataSnapshot item :
+                                                    dataSnapshot.getChildren()) {
+
+                                                if (Objects.requireNonNull(inputEmail.getText().toString()).equalsIgnoreCase(
+                                                        Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
+
+                                                    Utils.updateSharedPreferences(sharedPref,
+                                                            getResources().getString(R.string.key_alarmNotificationsAreOn),
+                                                            item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString());
+
+                                                    dbRefUsers.removeEventListener(this);
+
+                                                    Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
+                                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                                                    startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
+                                                    finish();
+
+                                                }
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            Log.e(TAG, "onComplete: " + databaseError.getMessage());
+
+                                            ToastHelper.toastSomethingWentWrong(AuthSignInEmailPasswordActivity.this);
+
+                                        }
+                                    });
                                 }
                             }
                         });

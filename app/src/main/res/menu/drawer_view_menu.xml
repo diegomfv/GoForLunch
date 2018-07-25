@@ -22,7 +22,7 @@
         <menu>
             <item
                 android:id="@+id/nav_start_search"
-                android:icon="@drawable/ic_settings"
+                android:icon="@drawable/ic_search_color_primary_24dp"
                 android:title="@string/navDrawerStartSearch" />
         </menu>
     </item>

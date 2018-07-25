@@ -238,8 +238,6 @@ public class FragmentRestaurantMapView extends Fragment {
         return fragment;
     }
 
-    /** onCreate()...
-     * */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -406,6 +404,28 @@ public class FragmentRestaurantMapView extends Fragment {
         });
 
         return view;
+    }
+
+    /** We prepare the callback for listening to changes in Position
+     * */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(TAG, "onAttach: called!");
+
+        try {
+            mCallback = (OnCurrentPositionObtainedListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnHeadlineSelectedListener\")");
+        }
+    }
+
+    /** When the fragment is detached from the activity, we nullify the callback
+     * */
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
     }
 
     /** disposeWhenDestroy() avoids memory leaks

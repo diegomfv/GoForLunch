@@ -4,6 +4,8 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.helpermethods.Anim;
 import com.example.android.goforlunch.helpermethods.Utils;
 import com.example.android.goforlunch.repository.RepoStrings;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -613,8 +615,5 @@ public class UnitTests {
 
 
     }
-
-
-
 
 }
