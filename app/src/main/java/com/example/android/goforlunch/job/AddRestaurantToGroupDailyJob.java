@@ -117,6 +117,7 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
                     fireDbRefUserRestInfo = fireDbRefUser.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
                     UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(fireDbRefUserRestInfo);
 
+                    fireDbRefUser.removeEventListener(this);
                 }
             }
 
