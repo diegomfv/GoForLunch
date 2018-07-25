@@ -118,6 +118,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear().apply();
 
+        // TODO: 25/07/2018 DO NOT DELETE THE USER KEY, WE NEED IT FOR ADDING RESTAURANTS TO DATABASE (ALARM)
+
         /* We establish the entry points
         to get the user information
         * */

@@ -16,6 +16,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -70,16 +73,33 @@ public class FirebaseTests {
 
     }
 
+//    @Test
+//    public void modifySingleField () {
+//
+//        String userKey = "-LIFt4UPNY3CwP-wQLnj";
+//        dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey).child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS);
+//        dbRef.setValue(true);
+//
+//        //Sets "user_notifications" with the value true (it's a boolean, not "true" which will be a string)
+//
+//    }
+
     @Test
-    public void addSimpleValue () {
+    public void addRestaurantToGroup () {
 
-        String userKey = "-LIFt4UPNY3CwP-wQLnj";
-        dbRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey).child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS);
-        dbRef.setValue(true);
+        String groupKey = "-LExsXwCe89xGdtaIK-I";
+        String restaurant = "La Orza";
 
-        //Sets "user_notifications" with the value true (it's a boolean, not "true" which will be a string)
+        Map<String, Object> map = new HashMap<>();
+        map.put(restaurant, true);
+
+        dbRef = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS)
+                .child(groupKey);
+                //.child(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+        dbRef.updateChildren(map);
 
     }
+
 
     @After
     public void tearDown() throws Exception {

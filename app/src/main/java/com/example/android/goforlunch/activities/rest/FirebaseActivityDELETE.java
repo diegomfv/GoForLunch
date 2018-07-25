@@ -428,36 +428,55 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button 8 clicked!");
 
-                String userKey = "-LIFt4UPNY3CwP-wQLnj";
+                final DatabaseReference fireDbRefUser;
+                String userKey = "-LF4QY7Ql0-8rOYAlPp1";
 
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
+                fireDbRefUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
                         .child(userKey);
 
-                dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                fireDbRefUser.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                        String o1 = dataSnapshot.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString();
+                        String userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+                        String userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                                .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
 
-                        Log.i(TAG, "onDataChange: o1 = " + o1);
+                        if (userGroupKey == null) {
+                            //do nothing because the user has no group
 
-                        Utils.updateSharedPreferences(sharedPref,
-                                getResources().getString(R.string.key_alarmNotificationsAreOn),
-                                dataSnapshot.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString());
+                        } else {
+                            /* The user has a group
+                             * */
 
-                        Utils.printSharedPreferences(sharedPref);
+                            /* We update the restaurants visited of the group in the database
+                             * */
+                            DatabaseReference fireDbRefGroup;
 
+                            fireDbRefGroup = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS)
+                                    .child(userGroupKey)
+                                    .child(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+
+                            Map <String, Object> map = new HashMap<>();
+                            map.put(userRestaurant, true);
+
+                            fireDbRefGroup.updateChildren(map);
+
+                            /* We delete the restaurant info of the user in firebase
+                             * */
+                            DatabaseReference fireDbRefUser2 = fireDbRefUser.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                            UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(fireDbRefUser2);
+
+                        }
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG, "onCancelled: " + databaseError.getMessage());
+                        Log.e(TAG, "onCancelled: " + databaseError.toString() );
 
                     }
                 });
-
-
 
 
             }

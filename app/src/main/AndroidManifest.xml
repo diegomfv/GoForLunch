@@ -37,10 +37,7 @@
         <!-- ////////////////////////////////////////////////////////////////// -->
 
         <activity android:name=".activities.auth.AuthChooseLoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
 
         <activity android:name=".activities.auth.AuthEnterNameActivity"
@@ -84,7 +81,10 @@
 
         <activity android:name=".activities.rest.FirebaseActivityDELETE"
             android:screenOrientation="portrait">
-
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <activity android:name=".data.sqlite.AndroidDatabaseManager"
