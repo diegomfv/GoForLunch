@@ -59,19 +59,14 @@ import butterknife.ButterKnife;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/05/2018 Translations
-// TODO: 12/07/2018 DistanceMatrix in ListView - Take care what it shows when there is no info! Might show -- --
+// TODO: 25/07/2018 Check list of elements / translations (might be a problem when searching for a Restaurant)
+// TODO: 25/07/2018 Add progress bars in fragments
+// TODO: 12/07/2018 Check what is shown when restaurants are wrongly fetched
 // TODO: 29/05/2018 General cleanup
-// TODO: 12/06/2018 Make NOTIFICATIONS false in SharedPref if the user leaves
-// TODO: 02/07/2018 User image has to be displayed in coworkers
+// TODO: 02/07/2018 User image has to be displayed in coworkers fragment!!!!
 
 //1
 // TODO: 12/07/2018 Changing Fetching process to Service. Information will be displayed using a ViewModel in the Fragment (pins)
-
-//2
-// TODO: 12/07/2018 Problem when leaving the app because there is no internet
-
-//3
-// TODO: 12/07/2018 Offline challenge! Connect using broadcast receiver
 
 public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMapView.OnCurrentPositionObtainedListener {
 
@@ -157,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
         mNavigationView.setNavigationItemSelectedListener(navViewListener);
+        navUserProfilePicture.setOnClickListener(profilePictureListener);
 
         if (savedInstanceState != null) {
             flagToSpecifyCurrentFragment = savedInstanceState.getInt(RepoStrings.FLAG_SPECIFY_FRAGMENT, 0);
@@ -351,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         return mainDrawerLayout;
     }
 
+
     /*****************
      * LISTENERS *****
      * **************/
@@ -531,9 +528,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                             startActivity(new Intent(MainActivity.this, PersInfoActivity.class));
 
-                            // TODO: 12/07/2018 Delete if necessary
-                            DebugDB.getAddressLog();
-
                             return true;
                         }
 
@@ -586,6 +580,20 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     return true;
                 }
             };
+
+    // TODO: 25/07/2018 Can be deleted!
+    /** Listener that prints in the
+     * logcat a link to the database
+     * */
+    private View.OnClickListener profilePictureListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "onClick: profilePictureListener Clicked");
+
+            DebugDB.getAddressLog();
+
+        }
+    };
 
     /** Method for showing the main content.
      * We cannot use Utils because
