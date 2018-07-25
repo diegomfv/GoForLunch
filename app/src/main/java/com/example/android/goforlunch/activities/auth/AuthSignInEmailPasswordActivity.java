@@ -320,10 +320,10 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                                         Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
 
                                                     Utils.updateSharedPreferences(sharedPref,
-                                                            getResources().getString(R.string.key_alarmNotificationsAreOn),
-                                                            item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString());
+                                                            getResources().getString(R.string.pref_key_notifications),
+                                                            (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
 
-                                                    dbRefUsers.removeEventListener(this);
+                                                    fireDbUsersRef.removeEventListener(this);
 
                                                     Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);

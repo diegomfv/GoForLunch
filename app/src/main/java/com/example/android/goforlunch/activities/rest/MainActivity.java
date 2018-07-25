@@ -143,9 +143,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         fireDb = FirebaseDatabase.getInstance();
 
-        /* We update users notifications information in Firebase according to the preference fragment
-        * */
-
+        // TODO: 25/07/2018 Delete!
         Utils.printSharedPreferences(sharedPref);
 
         //////////////////////////////////////
@@ -369,11 +367,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
-                    /* We update firebase database using notifications information
-                    * */
-
-
-
                     userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
                     userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
                     userKey = item.getKey();
@@ -381,12 +374,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
                     Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
 
-                    /* We update SharedPreferences (notifications) according to the user's information in firebase
-                    * */
-                    Utils.updateSharedPreferences(
-                            sharedPref,
-                            getResources().getString(R.string.key_alarmNotificationsAreOn),
-                            Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue()).toString());
+                    /* We update Firebase according to the preference fragment
+                     * (remember that the shared pref "notifications" was updated before using
+                     * firebase)
+                     * */
+                    fireDbRefUserNotif = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey).child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS);
+                    fireDbRefUserNotif.setValue(sharedPref.getBoolean(getResources().getString(R.string.pref_key_notifications), false));
 
                     /* We check that alarms are running
                     * */
@@ -776,42 +769,15 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     private void checkNotifications (SharedPreferences sharedPreferences) {
         Log.d(TAG, "checkNotifications: called!");
 
-        boolean notificationsAlarmIsTrue = sharedPreferences.getBoolean(getResources().getString(R.string.key_alarmNotificationsAreOn), false);
+        /* We have to do the conversion to boolean this time because it comes from
+         * the preference fragment
+          * */
+        boolean notificationsAlarmIsTrue = sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false);
 
         Log.i(TAG, "checkNotifications: notificationsAlarmIsTrue = " + notificationsAlarmIsTrue);
 
-        /* The first time this method is called, it will run the else statement because there would not be
-         * any info in SharedPreferences. When running the "else" part, it will fill SharedPreferences
-         * and from that moment on it will do nothing because the alarm will already be set and this
-         * alarm will be "true" in SharedPreferences
-         * */
-
-        if (notificationsAlarmIsTrue) {
+            if (notificationsAlarmIsTrue) {
             Log.d(TAG, "checkNotifications: notificationsAlarmIsTrue = true");
-
-//            /* We change the notifications information in firebase about the user. This way,
-//            we can keep track of all the users that are using the device
-//             */
-//            fireDbRefUserNotif = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey);
-//            fireDbRefUserNotif.setValue(RepoStrings.FirebaseReference.USER_NOTIFICATIONS, notificationsAlarmIsTrue);
-//
-//            // TODO: 25/07/2018 Change this!!!!!
-
-            fireDbRefUserNotif = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey).child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS);
-            fireDbRefUserNotif.setValue(true);
-
-
-
-
-
-
-
-            /* We change sharedPref in the Database and and the user.
-            Now, when the alarm is triggered, the system will search for the current user's email
-            and the same email in shared preferences. If they match, the notification
-            will be shown (see alarm).
-            */
-            Utils.updateSharedPreferences(sharedPref, userEmail, true);
 
             /* The notifications are on.
             We cancel the job to avoid

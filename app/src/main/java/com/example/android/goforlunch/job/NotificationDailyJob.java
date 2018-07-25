@@ -111,7 +111,8 @@ public class NotificationDailyJob extends DailyJob {
                                     if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null &&
                                             dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString() != null) {
 
-                                        /* If there is restaurant info available, we create the notification
+                                        /* If there is restaurant info available,
+                                        * we create the notification
                                         * */
                                         createNotification(dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
                                                 dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
@@ -189,7 +190,7 @@ public class NotificationDailyJob extends DailyJob {
                     }
                 }
 
-                /* We check if the user chose a restaurant.
+                /* We check if the user has chosen a restaurant.
                 * If there is a restaurant linked to the user, we continue with the process.
                 * If not, we stop the process
                 * */

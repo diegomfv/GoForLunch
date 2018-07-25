@@ -575,8 +575,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                         * the other way around).
                         * */
                         Utils.updateSharedPreferences(sharedPref,
-                                getResources().getString(R.string.key_alarmNotificationsAreOn),
-                                item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString());
+                                getResources().getString(R.string.pref_key_notifications),
+                                (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
 
                         /* We launch Main Activity
                         * */

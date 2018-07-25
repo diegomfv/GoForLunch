@@ -56,7 +56,6 @@
      updates pref_key_notifications which is used to determine if the notification has to appear)
      -->
     <string name="key_alarmAddRestaurantIsOn" translatable="false">alarmAddRestaurantOn</string>
-    <string name="key_alarmNotificationsAreOn" translatable="false">alarmNotificationsOn</string>
 
     <!-- FRAGMENTS -->
     <string name="autoCompleteSearchText">Search</string>
