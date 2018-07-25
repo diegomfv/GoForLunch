@@ -126,6 +126,5 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
 
             }
         });
-
     }
 }
