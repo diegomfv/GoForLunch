@@ -820,4 +820,3 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     }
 
 }
-

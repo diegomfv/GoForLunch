@@ -718,7 +718,4 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
         alert.show();
     }
 
-
-
-
 }
