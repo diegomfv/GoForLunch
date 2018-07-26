@@ -170,15 +170,15 @@ public class FragmentRestaurantListView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
 
-        /** Butterknife binding
+        /* Butterknife binding
          * */
         ButterKnife.bind(this, view);
 
-        /** Activates the toolbar menu for the fragment
+        /* Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
 
-        /** Configure databases*/
+        /* Configure databases*/
         this.configureDatabases(getActivity());
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
@@ -186,17 +186,17 @@ public class FragmentRestaurantListView extends Fragment {
         listOfRestaurantsByType = new ArrayList<>();
         listOfRestaurantsByCoworker = new ArrayList<>();
 
-        /** Configure toolbar */
+        /* Configure toolbar */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
 
-        /** We get an array of restaurant types from RESOURCES
+        /* We get an array of restaurant types from RESOURCES
          * */
         this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
 
-        /** Glide configuration*/
+        /* Glide configuration*/
         glide = Glide.with(getActivity());
 
-        /** Configure RecyclerView*/
+        /* Configure RecyclerView*/
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
 
@@ -206,14 +206,14 @@ public class FragmentRestaurantListView extends Fragment {
             public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
                 Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
 
-                if (restaurantEntries != null) {
+                if (restaurantEntries != null && restaurantEntries.size() != 0) {
                     Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
 
-                    /** We fill the list with the Restaurants in the database
+                    /* We fill the list with the Restaurants in the database
                      * */
                     listOfRestaurants = restaurantEntries;
 
-                    /** We update the recyclerView with the new list
+                    /* We update the recyclerView with the new list
                      * */
                     updateRecyclerViewWithNewRestaurantsList(restaurantEntries);
 
@@ -223,12 +223,8 @@ public class FragmentRestaurantListView extends Fragment {
             }
         });
 
-        /** Configuration process */
+        /* Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
-
-        progressBarFragmentContent.setVisibility(View.GONE);
-
-        Anim.showCrossFadeShortAnimation(recyclerView);
 
         return view;
 
@@ -649,6 +645,9 @@ public class FragmentRestaurantListView extends Fragment {
 
             adapter.notifyDataSetChanged();
 
+            Anim.hideCrossFadeShortAnimation(progressBarFragmentContent);
+            Anim.showCrossFadeShortAnimation(recyclerView);
+
         }
     }
 
@@ -674,6 +673,7 @@ public class FragmentRestaurantListView extends Fragment {
     /** Method that creates an intent and fills it with all the necessary info to be displayed
      * in Restaurant Activity
      * */
+    // TODO: 26/07/2018 Can be done with a Parcelable
     private Intent createAndFillIntentWithUserInfo(RVAdapterList adapter, int position) {
         Log.d(TAG, "createAndFillIntentWithUserInfo: called!");
 
