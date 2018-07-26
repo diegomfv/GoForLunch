@@ -1,15 +1,11 @@
 package com.example.android.goforlunch;
 
 import android.support.test.rule.ActivityTestRule;
-import android.util.Log;
 
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
-import com.example.android.goforlunch.repository.RepoStrings;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.example.android.goforlunch.constants.RepoStrings;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.junit.After;
 import org.junit.Before;

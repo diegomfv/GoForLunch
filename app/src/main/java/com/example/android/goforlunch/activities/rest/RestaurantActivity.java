@@ -27,21 +27,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
-import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.helpermethods.Anim;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.recyclerviewadapter.RVAdapterRestaurant;
-import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.utils.Anim;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.UtilsFirebase;
+import com.example.android.goforlunch.adapters.RVAdapterRestaurant;
+import com.example.android.goforlunch.constants.RepoStrings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -54,7 +52,6 @@ import com.snatik.storage.Storage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Observer;
 
 import butterknife.BindView;
@@ -206,7 +203,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        Utils.connectReceiver(RestaurantActivity.this, receiver, intentFilter, this);
+        UtilsGeneral.connectReceiver(RestaurantActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -216,7 +213,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onStop: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     RestaurantActivity.this,
                     receiver,
                     RestaurantActivity.this);
@@ -234,7 +231,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onDestroy: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     RestaurantActivity.this,
                     receiver,
                     RestaurantActivity.this);
@@ -252,7 +249,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     }
 
     private void disposeWhenDestroy () {
-        Utils.dispose(this.getImageFromInternalStorageDisposable);
+        UtilsGeneral.dispose(this.getImageFromInternalStorageDisposable);
 
     }
 
@@ -268,7 +265,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
+                snackbar = UtilsGeneral.createSnackbar(
                         RestaurantActivity.this,
                         mainContent,
                         getResources().getString(R.string.noInternet));
@@ -355,14 +352,14 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                          * */
                         dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
-                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
-                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
-                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
-                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
-                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
                                 getIntent().getIntExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, 0),
-                                Utils.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
                         );
 
                         ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + " " + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) + "!");
@@ -694,7 +691,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                 });
     }
 
-    /** Method for showing the main content. We cannot use Utils because
+    /** Method for showing the main content. We cannot use UtilsGeneral because
      * the mainContent Layout is not a Linear Layout
      * */
     private void showMainContent (LinearLayout progressBarContent, CoordinatorLayout mainContent) {

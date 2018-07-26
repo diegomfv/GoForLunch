@@ -22,24 +22,26 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amitshekhar.DebugDB;
 import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
-import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.job.AddRestaurantToGroupDailyJob;
-import com.example.android.goforlunch.job.AlertJobCreator;
-import com.example.android.goforlunch.job.NotificationDailyJob;
-import com.example.android.goforlunch.pageFragments.FragmentCoworkers;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantListView;
-import com.example.android.goforlunch.pageFragments.FragmentRestaurantMapView;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.sync.FetchingService;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.UtilsFirebase;
+import com.example.android.goforlunch.sync.AddRestaurantToGroupDailyJob;
+import com.example.android.goforlunch.sync.AlertJobCreator;
+import com.example.android.goforlunch.sync.NotificationDailyJob;
+import com.example.android.goforlunch.fragments.FragmentCoworkers;
+import com.example.android.goforlunch.fragments.FragmentRestaurantListView;
+import com.example.android.goforlunch.fragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.remote.models.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.constants.RepoStrings;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -139,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         fireDb = FirebaseDatabase.getInstance();
 
         // TODO: 25/07/2018 Delete!
-        Utils.printSharedPreferences(sharedPref);
+        UtilsGeneral.printSharedPreferences(sharedPref);
 
         //////////////////////////////////////
         setContentView(R.layout.activity_main);
@@ -172,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        Utils.connectReceiver(MainActivity.this, receiver, intentFilter, this);
+        UtilsGeneral.connectReceiver(MainActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -182,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "onStop: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     MainActivity.this,
                     receiver,
                     MainActivity.this);
@@ -200,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "onDestroy: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     MainActivity.this,
                     receiver,
                     MainActivity.this);
@@ -246,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
+                snackbar = UtilsGeneral.createSnackbar(
                         MainActivity.this,
                         mainDrawerLayout,
                         getResources().getString(R.string.noInternet));
@@ -371,7 +373,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     userKey = item.getKey();
                     userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
                     userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
-                    Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
+                    UtilsGeneral.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
 
                     /* We update Firebase according to the preference fragment
                      * (remember that the shared pref "notifications"
@@ -419,7 +421,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                      * */
                     Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
                     Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
-                    startActivity(Utils.fillIntentUsingMapInfo(intent, map));
+                    startActivity(UtilsGeneral.fillIntentUsingMapInfo(intent, map));
                     fireDbRefUsers.removeEventListener(this);
                 }
             }
@@ -536,21 +538,28 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         case R.id.nav_start_search: {
 
                             if (myPosition != null) {
-                                Log.i(TAG, "onNavigationItemSelected: my Position = " + myPosition.toString());
+
+                                if (myPosition.getLat() != 0.0 && myPosition.getLng() != 0.0) {
+                                    Log.d(TAG, "onNavigationItemSelected: myPosition = " + myPosition.toString());
+
+                                    ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainStartRequestProcess));
+
+                                    // TODO: 26/07/2018 Change the names of the intent info
+                                    Intent intent = new Intent(MainActivity.this, FetchingService.class);
+                                    intent.putExtra("latitude", myPosition.getLat());
+                                    intent.putExtra("longitude", myPosition.getLng());
+                                    intent.putExtra("accessInternalStorage", true);
+                                    startService(intent);
+
+                                } else {
+                                    ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
+
+                                }
+
+                            } else {
+                                ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
 
                             }
-
-//                            if (myPosition != null) {
-//                                Intent intent = new Intent(MainActivity.this, FetchingService.class);
-//                                intent.putExtra("latitude", myPosition.getLat());
-//                                intent.putExtra("longitude", myPosition.getLng());
-//                                intent.putExtra("accessInternalStorage", true);
-//                                startService(intent);
-//
-//                            } else {
-//                                ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
-//
-//                            }
 
                             return true;
                         }
@@ -598,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     };
 
     /** Method for showing the main content.
-     * We cannot use Utils because
+     * We cannot use UtilsGeneral because
      * the mainContent Layout is not a Linear Layout
      * */
     private void showMainContent (LinearLayout progressBarContent, DrawerLayout mainContent) {
@@ -721,20 +730,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * NOTIFICATIONS *****
      * ******************/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * This method creates a new job to add restaurants to the database every day at 4pm if it
      * has not been created yet
@@ -765,7 +760,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
             /* We change sharedPref in the Database. The alarm is set so, from now on, we won't do anything
              *  */
-            Utils.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmAddRestaurantIsOn), true);
+            UtilsGeneral.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmAddRestaurantIsOn), true);
 
             Log.i(TAG, "checkAddRestaurantsAt4pmDailyJob: ALARM IS ON!");
         }

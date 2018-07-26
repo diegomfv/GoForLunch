@@ -203,6 +203,7 @@
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
     <string name="joinNewGroupIs">Your new group is</string>
     <string name="mainCurrentPositionNotAvailable">Current Position not available</string>
+    <string name="mainStartRequestProcess">Starting Request Process</string>
 
 
 </resources>

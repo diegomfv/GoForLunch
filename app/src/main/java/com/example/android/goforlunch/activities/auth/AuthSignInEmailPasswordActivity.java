@@ -17,22 +17,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
-import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.broadcastreceivers.ObservableObject;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.constants.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,7 +42,6 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.observers.DisposableObserver;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.
@@ -108,7 +104,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         setContentView(R.layout.activity_auth_signin_email_password);
         ButterKnife.bind(this);
 
-        Utils.showMainContent(progressBarContent, mainContent);
+        UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
         // TODO: 29/06/2018 Delete this! Do it with Shared Preferences
         inputEmail.setText("diego.fajardo@hotmail.com");
@@ -116,8 +112,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
         /** Configuring textInputEditTexts: hide keyboard
          * */
-        Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputEmail);
-        Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputPassword);
+        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputEmail);
+        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputPassword);
 
         fab.setOnClickListener(fabOnClickOnClickListener);
         buttonSignIn.setOnClickListener(buttonSignInOnClickListener);
@@ -133,7 +129,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        Utils.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
+        UtilsGeneral.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -143,7 +139,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         Log.d(TAG, "onStop: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     AuthSignInEmailPasswordActivity.this,
                     receiver,
                     AuthSignInEmailPasswordActivity.this);
@@ -161,7 +157,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         Log.d(TAG, "onDestroy: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     AuthSignInEmailPasswordActivity.this,
                     receiver,
                     AuthSignInEmailPasswordActivity.this);
@@ -190,7 +186,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
+                snackbar = UtilsGeneral.createSnackbar(
                         AuthSignInEmailPasswordActivity.this,
                         mainContent,
                         getResources().getString(R.string.noInternet));
@@ -269,7 +265,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
                 }
 
-                Utils.hideMainContent(progressBarContent, mainContent);
+                UtilsGeneral.hideMainContent(progressBarContent, mainContent);
 
                 //authenticate user
                 FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -295,7 +291,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                         ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
                                     }
 
-                                    Utils.showMainContent(progressBarContent, mainContent);
+                                    UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
                                 } else {
                                     /* Sign in was successful
@@ -319,7 +315,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                                 if (Objects.requireNonNull(inputEmail.getText().toString()).equalsIgnoreCase(
                                                         Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
 
-                                                    Utils.updateSharedPreferences(sharedPref,
+                                                    UtilsGeneral.updateSharedPreferences(sharedPref,
                                                             getResources().getString(R.string.pref_key_notifications),
                                                             (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
 

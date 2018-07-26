@@ -19,12 +19,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.repository.RepoStrings;
-import com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.UtilsFirebase;
+import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.utils.TextInputAutoCompleteTextView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -109,7 +109,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         setContentView(R.layout.activity_join_group);
         ButterKnife.bind(this);
 
-        Utils.showMainContent(progressBarContent, mainContent);
+        UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
         listOfGroups = new ArrayList<>();
 
@@ -126,7 +126,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        Utils.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
+        UtilsGeneral.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -136,7 +136,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onStop: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     JoinGroupActivity.this,
                     receiver,
                     JoinGroupActivity.this);
@@ -154,7 +154,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onDestroy: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     JoinGroupActivity.this,
                     receiver,
                     JoinGroupActivity.this);
@@ -186,7 +186,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
+                snackbar = UtilsGeneral.createSnackbar(
                         JoinGroupActivity.this,
                         mainContent,
                         getResources().getString(R.string.noInternet));
@@ -245,10 +245,10 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
                 } else {
 
-                    if (listOfGroups.contains(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()))) {
+                    if (listOfGroups.contains(UtilsGeneral.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()))) {
                         /* The group exists and we create a dialog to join group
                          * */
-                        alertDialogJoinGroup(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()));
+                        alertDialogJoinGroup(UtilsGeneral.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()));
 
                     } else {
                         /* The group does not exist*/
@@ -361,7 +361,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                         /* We only hide the keyboard if the group length (inputted) is long enough
                         * */
                         if (group.length() > 3) {
-                            Utils.hideKeyboard(JoinGroupActivity.this);
+                            UtilsGeneral.hideKeyboard(JoinGroupActivity.this);
                         }
                     }
 
@@ -399,7 +399,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
                         } else {
 
-                            Utils.hideMainContent(progressBarContent, mainContent);
+                            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
 
                             dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
                             dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {

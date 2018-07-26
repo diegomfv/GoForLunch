@@ -29,10 +29,9 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsFirebase;
+import com.example.android.goforlunch.constants.RepoStrings;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -58,10 +57,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import okhttp3.internal.Util;
-
-import static com.example.android.goforlunch.helpermethods.Utils.getStringFromSharedPreferences;
-import static com.example.android.goforlunch.helpermethods.Utils.updateSharedPreferences;
+import static com.example.android.goforlunch.utils.UtilsGeneral.getStringFromSharedPreferences;
+import static com.example.android.goforlunch.utils.UtilsGeneral.updateSharedPreferences;
 
 /**
  * Created by Diego Fajardo on 07/05/2018.

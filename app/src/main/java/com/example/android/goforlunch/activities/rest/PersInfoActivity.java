@@ -29,17 +29,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.UtilsFirebase;
+import com.example.android.goforlunch.constants.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -184,7 +183,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        Utils.connectReceiver(PersInfoActivity.this, receiver, intentFilter, this);
+        UtilsGeneral.connectReceiver(PersInfoActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -194,7 +193,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onStop: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     PersInfoActivity.this,
                     receiver,
                     PersInfoActivity.this);
@@ -212,7 +211,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onDestroy: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     PersInfoActivity.this,
                     receiver,
                     PersInfoActivity.this);
@@ -239,18 +238,18 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
+                snackbar = UtilsGeneral.createSnackbar(
                         PersInfoActivity.this,
                         mainContent,
                         "Internet not available");
 
                 ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
-                Utils.showMainContent(progressBarContent, mainContent);
+                UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
             } else {
                 snackbar.show();
                 ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
-                Utils.showMainContent(progressBarContent, mainContent);
+                UtilsGeneral.showMainContent(progressBarContent, mainContent);
             }
 
         } else {
@@ -265,7 +264,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
             /* We get the user information
             when internet comes back
             */
-            Utils.hideMainContent(progressBarContent, mainContent);
+            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
 
             currentUser = auth.getCurrentUser();
             Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
@@ -382,7 +381,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 glide.load(userProfilePictureUri).into(ivUserImage);
             }
 
-            Utils.showMainContent (progressBarContent, mainContent);
+            UtilsGeneral.showMainContent (progressBarContent, mainContent);
 
             /* We remove the listener (probably not needed because it's a SingleValueEvent Listener)
             * */
@@ -513,13 +512,13 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                         * */
                         if (internetAvailable) {
 
-                            Utils.hideMainContent(progressBarContent, mainContent);
+                            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
 
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(
-                                            Utils.capitalize(inputFirstName.getText().toString().trim())
+                                            UtilsGeneral.capitalize(inputFirstName.getText().toString().trim())
                                                     + " "
-                                                    + Utils.capitalize(inputLastName.getText().toString().trim()))
+                                                    + UtilsGeneral.capitalize(inputLastName.getText().toString().trim()))
                                     .setPhotoUri(userProfilePictureUri)
                                     .build();
 
@@ -539,7 +538,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
                                                 ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
 
-                                                Utils.showMainContent(progressBarContent, mainContent);
+                                                UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
 
                                             } else {

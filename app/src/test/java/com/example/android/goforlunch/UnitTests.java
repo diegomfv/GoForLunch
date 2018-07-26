@@ -1,17 +1,13 @@
 package com.example.android.goforlunch;
 
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.helpermethods.Anim;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.repository.RepoStrings;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.constants.RepoStrings;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.RoundingMode;
-import java.security.PublicKey;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -490,7 +486,7 @@ public class UnitTests {
     public void capitalize() {
 
         String str = "goforlunch";
-        assertTrue(Utils.capitalize(str).equals("Goforlunch"));
+        assertTrue(UtilsGeneral.capitalize(str).equals("Goforlunch"));
 
     }
 

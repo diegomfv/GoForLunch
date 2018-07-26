@@ -12,7 +12,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -28,15 +27,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
-import com.example.android.goforlunch.broadcastreceivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.helpermethods.ToastHelper;
-import com.example.android.goforlunch.helpermethods.Utils;
-import com.example.android.goforlunch.helpermethods.UtilsFirebase;
-import com.example.android.goforlunch.repository.RepoStrings;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.UtilsFirebase;
+import com.example.android.goforlunch.constants.RepoStrings;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -154,10 +152,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
         /* Configuring textInputEditTexts: hide keyboard
          * */
-        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputFirstName);
-        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputLastName);
-        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputEmail);
-        Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputPassword);
+        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputFirstName);
+        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputLastName);
+        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputEmail);
+        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputPassword);
 
         /* If we come from SignUp Activity (email and password login) then the intent won't be null.
          * Otherwise, it will.
@@ -180,7 +178,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
             }
         }
 
-        Utils.showMainContent(progressBarContent, mainContent);
+        UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
         /* We set the listeners
         * */
@@ -197,7 +195,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        Utils.connectReceiver(AuthEnterNameActivity.this, receiver, intentFilter, this);
+        UtilsGeneral.connectReceiver(AuthEnterNameActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -207,7 +205,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         Log.d(TAG, "onStop: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     AuthEnterNameActivity.this,
                     receiver,
                     AuthEnterNameActivity.this);
@@ -225,7 +223,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         Log.d(TAG, "onDestroy: called!");
 
         if (receiver != null) {
-            Utils.disconnectReceiver(
+            UtilsGeneral.disconnectReceiver(
                     AuthEnterNameActivity.this,
                     receiver,
                     AuthEnterNameActivity.this);
@@ -253,7 +251,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = Utils.createSnackbar(
+                snackbar = UtilsGeneral.createSnackbar(
                         AuthEnterNameActivity.this,
                         mainContent,
                         getResources().getString(R.string.noInternet));
@@ -487,7 +485,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         } else {
             /* Internet is available
             * */
-            Utils.hideMainContent(progressBarContent, mainContent);
+            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
 
             //We create the user
             auth.createUserWithEmailAndPassword(inputEmail.getText().toString().toLowerCase().trim(), inputPassword.getText().toString().trim())
@@ -512,7 +510,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                                 /* We hide the progress bar
                                  * and enable interaction
                                  * */
-                                Utils.showMainContent(progressBarContent,mainContent);
+                                UtilsGeneral.showMainContent(progressBarContent,mainContent);
 
                             } else {
                                 /* Task was successful
@@ -524,9 +522,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
                                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                             .setDisplayName(
-                                                    Utils.capitalize(inputFirstName.getText().toString().trim())
+                                                    UtilsGeneral.capitalize(inputFirstName.getText().toString().trim())
                                                             + " "
-                                                            + Utils.capitalize(inputLastName.getText().toString().trim()))
+                                                            + UtilsGeneral.capitalize(inputLastName.getText().toString().trim()))
                                             .setPhotoUri(userProfilePictureUri)
                                             .build();
 
@@ -557,8 +555,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                                                                 + "/" + userKey);
 
                                                         UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
-                                                                Utils.capitalize(inputFirstName.getText().toString().trim()),
-                                                                Utils.capitalize(inputLastName.getText().toString().trim()),
+                                                                UtilsGeneral.capitalize(inputFirstName.getText().toString().trim()),
+                                                                UtilsGeneral.capitalize(inputLastName.getText().toString().trim()),
                                                                 inputEmail.getText().toString().toLowerCase().trim(),
                                                                 "",
                                                                 "",

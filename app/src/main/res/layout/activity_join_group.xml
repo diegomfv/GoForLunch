@@ -31,7 +31,7 @@
             style="@style/textInputLayoutStyle"
             android:layout_margin="30dp">
 
-            <com.example.android.goforlunch.widgets.TextInputAutoCompleteTextView
+            <com.example.android.goforlunch.utils.TextInputAutoCompleteTextView
                 android:id="@+id/join_textInputAutocompleteTextView"
                 style="@style/textInputEditTextStyle"
                 android:inputType="text"

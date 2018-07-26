@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.services.FetchingService;
+import com.example.android.goforlunch.sync.FetchingService;
 
 /**
  * Created by Diego Fajardo on 11/07/2018.
