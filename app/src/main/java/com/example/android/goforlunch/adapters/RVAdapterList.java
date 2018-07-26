@@ -97,7 +97,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
         Log.d(TAG, "onBindViewHolder: position# " + position);
 
-        Anim.crossFadeShortAnimation(holder.itemView);
+        Anim.showCrossFadeShortAnimation(holder.itemView);
 
         holder.updateItem(position);
     }

@@ -62,7 +62,7 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
         holder.updateItem(position);
 
-        Anim.crossFadeShortAnimation(holder.itemView);
+        Anim.showCrossFadeShortAnimation(holder.itemView);
     }
 
     @Override

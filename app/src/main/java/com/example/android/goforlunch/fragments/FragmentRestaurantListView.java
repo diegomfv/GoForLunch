@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
@@ -90,6 +91,9 @@ public class FragmentRestaurantListView extends Fragment {
 
     @BindView(R.id.list_toolbar_search_id)
     RelativeLayout toolbar2;
+
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarFragmentContent;
 
     private ActionBar actionBar;
 
@@ -158,7 +162,7 @@ public class FragmentRestaurantListView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_list_view, container, false);
 
-        /**Butterknife binding
+        /** Butterknife binding
          * */
         ButterKnife.bind(this, view);
 
@@ -214,7 +218,9 @@ public class FragmentRestaurantListView extends Fragment {
         /** Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
 
-        Anim.crossFadeShortAnimation(recyclerView);
+        progressBarFragmentContent.setVisibility(View.GONE);
+
+        Anim.showCrossFadeShortAnimation(recyclerView);
 
         return view;
 
@@ -279,8 +285,7 @@ public class FragmentRestaurantListView extends Fragment {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
-        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
+
 
     }
 
@@ -288,6 +293,11 @@ public class FragmentRestaurantListView extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
+
+        // TODO: 26/07/2018 Giving problems
+//        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
+//        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
+
     }
 
 
@@ -321,7 +331,7 @@ public class FragmentRestaurantListView extends Fragment {
             case R.id.list_search_button_id: {
                 Log.d(TAG, "onOptionsItemSelected: search button clicked");
                 toolbar.setVisibility(View.GONE);
-                Anim.crossFadeShortAnimation(toolbar2);
+                Anim.showCrossFadeShortAnimation(toolbar2);
                 return true;
             }
         }

@@ -1,11 +1,13 @@
 package com.example.android.goforlunch.fragments;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
@@ -17,19 +19,22 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
-import com.example.android.goforlunch.utils.Anim;
-import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
-import com.example.android.goforlunch.utils.UtilsConfiguration;
-import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.adapters.RVAdapterCoworkers;
 import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.network.models.pojo.User;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ItemClickSupport;
+import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.UtilsConfiguration;
+import com.example.android.goforlunch.utils.UtilsFirebase;
+import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -38,10 +43,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,7 +57,7 @@ import io.reactivex.observers.DisposableObserver;
  * Created by Diego Fajardo on 27/04/2018.
  */
 
-public class FragmentCoworkers extends Fragment {
+public class FragmentCoworkers extends Fragment implements Observer {
 
     private static final String TAG = FragmentCoworkers.class.getSimpleName();
 
@@ -63,6 +69,9 @@ public class FragmentCoworkers extends Fragment {
     //RecyclerView
     @BindView(R.id.coworkers_recycler_view_id)
     RecyclerView recyclerView;
+
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarFragmentContent;
 
     private RVAdapterCoworkers adapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -87,6 +96,12 @@ public class FragmentCoworkers extends Fragment {
 
     //List of Coworkers
     private List<User> listOfCoworkers;
+
+    //InternetConnectionReceiver variables
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+
+    private boolean internetAvailable;
 
     /******************************
      * STATIC METHOD FOR **********
@@ -126,8 +141,6 @@ public class FragmentCoworkers extends Fragment {
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
 
-        Anim.crossFadeShortAnimation(recyclerView);
-
         return view;
     }
 
@@ -136,65 +149,82 @@ public class FragmentCoworkers extends Fragment {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-            @Override
-            public void onNext(Boolean aBoolean) {
-                Log.d(TAG, "onNext: ");
-
-                if(aBoolean) {
-
-                    /** We get the user information
-                     * */
-                    auth = FirebaseAuth.getInstance();
-                    currentUser = auth.getCurrentUser();
-                    Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
-
-                    if (currentUser != null) {
-
-                        userEmail = currentUser.getEmail();
-
-                        if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                            dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
-                            dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
-                        }
-                    }
-
-                    /** We set a listener for listening for changes in the database (coworkers list)
-                     * */
-                    dbRefUsersGetCoworkers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                    dbRefUsersGetCoworkers.addValueEventListener(valueEventListenerGetCoworkers);
-
-                } else {
-                    UtilsFirebase.logOut(getActivity());
-
-                }
-
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.d(TAG, "onError: " + Log.getStackTraceString(e));
-
-            }
-
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: ");
-
-            }
-        });
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
 
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
-        dbRefUsersGetCoworkers.removeEventListener(valueEventListenerGetCoworkers);
         Log.d(TAG, "onStop: called!");
 
+        if (receiver != null && getActivity() != null) {
+            UtilsGeneral.disconnectReceiver(
+                    getActivity(),
+                    receiver,
+                    this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+
+//        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
+//        dbRefUsersGetCoworkers.removeEventListener(valueEventListenerGetCoworkers);
+
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
+
+        if (receiver != null && getActivity() != null) {
+            UtilsGeneral.disconnectReceiver(
+                    getActivity(),
+                    receiver,
+                    this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+    }
+
+    @Override
+    public void update(Observable o, Object internetAvailableUpdate) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) internetAvailableUpdate == 0) {
+            Log.d(TAG, "update: Internet Not Available");
+
+            internetAvailable = false;
+
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            internetAvailable = true;
+
+            /* We get the user information
+             * */
+            auth = FirebaseAuth.getInstance();
+            currentUser = auth.getCurrentUser();
+            Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+
+            if (currentUser != null) {
+
+                userEmail = currentUser.getEmail();
+
+                if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
+
+                    dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
+                }
+            }
+
+        }
     }
 
     @Override
@@ -229,11 +259,10 @@ public class FragmentCoworkers extends Fragment {
             userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
             userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
 
-            /** We fill the list of the coworkers using the group of the user
-             * (this is a singleEventListener)
+            /* We fill the list of the coworkers using the group of the user
              *  */
             dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-            dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetCoworkers);
+            dbRefUsersGetUserInfo.addValueEventListener(valueEventListenerGetCoworkers);
 
         }
 
@@ -258,6 +287,10 @@ public class FragmentCoworkers extends Fragment {
                 if (getActivity() != null) {
                     adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
                     recyclerView.setAdapter(adapter);
+
+                    Anim.hideCrossFadeShortAnimation(progressBarFragmentContent);
+                    Anim.showCrossFadeShortAnimation(recyclerView);
+
                 }
 
             }
@@ -315,6 +348,31 @@ public class FragmentCoworkers extends Fragment {
 
     }
 
+    private void connectBroadcastReceiverFragment () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
+
+    }
+
+
+    private void disconnectBroadcastReceiverFragment () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null && getActivity() != null) {
+            UtilsGeneral.disconnectReceiver(
+                    getActivity(),
+                    receiver,
+                    this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+
+    }
+
     /** Method that creates an intent and fills it with all the necessary info to be displayed
      * in Restaurant Activity
      * */
@@ -343,5 +401,4 @@ public class FragmentCoworkers extends Fragment {
         return intent;
 
     }
-
 }

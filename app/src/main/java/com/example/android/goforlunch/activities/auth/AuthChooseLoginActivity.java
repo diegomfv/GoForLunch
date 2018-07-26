@@ -172,9 +172,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(AuthChooseLoginActivity.this, receiver, intentFilter, this);
+        connectBroadcastReceiver();
 
     }
 
@@ -183,16 +181,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    AuthChooseLoginActivity.this,
-                    receiver,
-                    AuthChooseLoginActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
     }
 
@@ -201,16 +190,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    AuthChooseLoginActivity.this,
-                    receiver,
-                    AuthChooseLoginActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
         buttonPassword.setOnClickListener(null);
         tvRegister.setOnClickListener(null);
@@ -286,6 +266,40 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     }
 
     /*******************************
+     * CONFIGURATION ***************
+     ******************************/
+
+    /** Method that connects a broadcastReceiver to the activity.
+     * It allows to notify the user about the internet state
+     * */
+    private void connectBroadcastReceiver () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(AuthChooseLoginActivity.this, receiver, intentFilter, this);
+
+    }
+
+    /** Method that disconnects the broadcastReceiver from the activity.
+     * */
+    private void disconnectBroadcastReceiver () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null) {
+            UtilsGeneral.disconnectReceiver(
+                    AuthChooseLoginActivity.this,
+                    receiver,
+                    AuthChooseLoginActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+    }
+
+    /*******************************
      * LISTENERS *******************
      ******************************/
 
@@ -358,6 +372,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         }
     };
 
+    /*******************************
+     * METHODS *********************
+     ******************************/
 
     /** Method that checks if the user is currently
      * logged in in a background thread
@@ -554,9 +571,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         } else {
 
             /* We check if the user exists in the database.
-            * If the user does, we launch Main Activity directly.
-            * If the user does not, we create the user and launch Main Activity
-            * */
+             * If the user does, we launch Main Activity directly.
+             * If the user does not, we create the user and launch Main Activity
+             * */
             dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
             dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -604,7 +621,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                     if (!userExists) {
 
                         /* User does not exist. We create the user in firebase and launch MainActivity
-                        * */
+                         * */
                         dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                         String userKey = dbRefUsers.push().getKey();
 
@@ -645,20 +662,20 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                                 userNotifInfo);
 
                         /* We remove the listener
-                        * */
+                         * */
                         dbRefUsers.removeEventListener(this);
 
                         /* We launch Main Activity
                          * */
                         Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
 
                     } else {
 
                         /* User exists. We launch Main Activity
-                        * */
+                         * */
 
                         /* We update shared preferences (notifications) according to the information
                          * of the user in firebase. This is the only moment in which notifications
@@ -677,7 +694,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                         /* We launch Main Activity
                          * */
                         Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
 
@@ -699,7 +716,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
                 }
             });
-
 
         }
     }

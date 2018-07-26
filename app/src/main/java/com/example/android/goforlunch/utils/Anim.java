@@ -21,7 +21,7 @@ public class Anim {
     private static int mediumAnim = 400;
     private static int longAnim = 500;
 
-    public static void crossFadeShortAnimation(View view) {
+    public static void showCrossFadeShortAnimation(View view) {
 
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
@@ -36,6 +36,27 @@ public class Anim {
                 .setListener(null);
 
     }
+
+    public static void hideCrossFadeShortAnimation(View view) {
+
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        view.setAlpha(1f);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        view.animate()
+                .alpha(0f)
+                .setDuration(shortAnim)
+                .setListener(null);
+
+        view.setVisibility(View.GONE);
+
+    }
+
+
+
+
 
     public static void crossFadeMediumAnimation(View view) {
 

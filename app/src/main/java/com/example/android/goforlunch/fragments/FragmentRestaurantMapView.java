@@ -767,7 +767,7 @@ public class FragmentRestaurantMapView extends Fragment {
                 Log.d(TAG, "onOptionsItemSelected: search button clicked");
 
                 toolbar.setVisibility(View.GONE);
-                Anim.crossFadeShortAnimation(toolbar2);
+                Anim.showCrossFadeShortAnimation(toolbar2);
                 return true;
             }
         }

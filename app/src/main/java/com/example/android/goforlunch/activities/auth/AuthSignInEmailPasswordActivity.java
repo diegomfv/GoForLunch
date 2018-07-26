@@ -127,9 +127,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
+        connectBroadcastReceiver();
 
     }
 
@@ -138,16 +136,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    AuthSignInEmailPasswordActivity.this,
-                    receiver,
-                    AuthSignInEmailPasswordActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
     }
 
@@ -156,16 +145,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    AuthSignInEmailPasswordActivity.this,
-                    receiver,
-                    AuthSignInEmailPasswordActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
         buttonSignIn.setOnClickListener(null);
         buttonSignUp.setOnClickListener(null);
@@ -204,6 +184,40 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                 snackbar.dismiss();
             }
         }
+    }
+
+    /*******************************
+     * CONFIGURATION ***************
+     ******************************/
+
+    /** Method that connects a broadcastReceiver to the activity.
+     * It allows to notify the user about the internet state
+     * */
+    private void connectBroadcastReceiver () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
+
+    }
+
+    /** Method that disconnects the broadcastReceiver from the activity.
+     * */
+    private void disconnectBroadcastReceiver () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null) {
+            UtilsGeneral.disconnectReceiver(
+                    AuthSignInEmailPasswordActivity.this,
+                    receiver,
+                    AuthSignInEmailPasswordActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
     }
 
     /*******************************

@@ -193,9 +193,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(AuthEnterNameActivity.this, receiver, intentFilter, this);
+        connectBroadcastReceiver();
 
     }
 
@@ -204,16 +202,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    AuthEnterNameActivity.this,
-                    receiver,
-                    AuthEnterNameActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
     }
 
@@ -222,16 +211,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    AuthEnterNameActivity.this,
-                    receiver,
-                    AuthEnterNameActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
         fab.setOnClickListener(null);
         iv_userImage.setOnClickListener(null);
@@ -325,6 +305,40 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         } else {
             ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
         }
+
+    }
+
+    /*******************************
+     * CONFIGURATION ***************
+     ******************************/
+
+    /** Method that connects a broadcastReceiver to the activity.
+     * It allows to notify the user about the internet state
+     * */
+    private void connectBroadcastReceiver () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(AuthEnterNameActivity.this, receiver, intentFilter, this);
+
+    }
+
+    /** Method that disconnects the broadcastReceiver from the activity.
+     * */
+    private void disconnectBroadcastReceiver () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null) {
+            UtilsGeneral.disconnectReceiver(
+                    AuthEnterNameActivity.this,
+                    receiver,
+                    AuthEnterNameActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
 
     }
 

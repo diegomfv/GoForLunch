@@ -192,7 +192,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         fillUIUsingIntent(intent);
         intentRestaurantName = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME);
 
-        Anim.crossFadeShortAnimation(recyclerView);
+        Anim.showCrossFadeShortAnimation(recyclerView);
 
     }
 

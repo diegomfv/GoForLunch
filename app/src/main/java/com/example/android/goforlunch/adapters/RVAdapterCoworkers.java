@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,9 +21,6 @@ import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.network.models.pojo.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -100,7 +96,7 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
 
         holder.updateItem(position);
 
-        Anim.crossFadeShortAnimation(holder.itemView);
+        Anim.showCrossFadeShortAnimation(holder.itemView);
 
     }
 

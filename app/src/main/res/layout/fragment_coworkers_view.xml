@@ -17,12 +17,20 @@
         app:titleTextColor="@android:color/white"
         app:layout_collapseMode="pin" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/coworkers_recycler_view_id"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
+        android:layout_height="match_parent">
 
-    </android.support.v7.widget.RecyclerView>
+        <include layout="@layout/progress_bar_fragment_content"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/coworkers_recycler_view_id"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+        </android.support.v7.widget.RecyclerView>
+
+    </FrameLayout>
 
 </LinearLayout>
