@@ -32,13 +32,10 @@ public class InternetConnectionReceiver extends BroadcastReceiver {
                 if (!aBoolean) {
 
                     ObservableObject.getInstance().update(0);
-//                    ToastHelper.toastShort(context, "There is no internet");
 
                 } else {
 
                     ObservableObject.getInstance().update(1);
-
-//                    ToastHelper.toastShort(context, "Internet Available");
 
                 }
 
