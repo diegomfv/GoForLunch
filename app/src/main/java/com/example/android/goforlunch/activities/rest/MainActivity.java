@@ -64,7 +64,6 @@ import butterknife.ButterKnife;
 // TODO: 25/07/2018 Add progress bars in fragments
 // TODO: 12/07/2018 Check what is shown when restaurants are wrongly fetched
 // TODO: 29/05/2018 General cleanup
-// TODO: 02/07/2018 User image has to be displayed in coworkers fragment!!!!
 
 //1
 // TODO: 12/07/2018 Changing Fetching process to Service. Information will be displayed using a ViewModel in the Fragment (pins)

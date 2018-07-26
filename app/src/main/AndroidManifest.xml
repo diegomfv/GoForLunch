@@ -83,9 +83,7 @@
         <!-- ////////////////////////////////////////////////////////////////// -->
 
         <activity android:name=".activities.rest.FirebaseActivityDELETE"
-            android:screenOrientation="portrait">
-
-        </activity>
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".data.sqlite.AndroidDatabaseManager"
             android:screenOrientation="portrait" />

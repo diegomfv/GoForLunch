@@ -582,22 +582,22 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                             /* We get the notifications information and will use it to update SharedPreferences.
                              */
 
-                            if (!item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
-                                    .equalsIgnoreCase("")) {
+                            if (item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                    .equals("")
+                                    || item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                    .equals("false")) {
 
-                                /* If notifications user information can be transformed into a boolean (is not ""),
-                                 * we use the info for SharedPreferences
+                                /* If notifications user information is "" or "false",
+                                 * we leave userNotifInfo as false.
                                  * */
-
-                                userNotifInfo = (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue();
 
                             } else {
-
-                                /* If notifications user information cannot be transformed into a boolean, we leave userNotifInfo as false
+                                /* If notifications user information is not "" or "false" then it's true.
+                                 * We set userNotifInfo as true
                                  * */
+                                userNotifInfo = true;
 
                             }
-
                         }
                     }
 

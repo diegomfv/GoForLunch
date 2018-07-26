@@ -321,25 +321,26 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                                         item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString())) {
 
                                                     if (item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
-                                                            .equalsIgnoreCase("")) {
+                                                            .equals("")
+                                                            || item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                                            .equals("false")) {
 
-                                                        /* If notifications user information cannot be transformed into a boolean, we directly
-                                                         * set the notifications in shared Preferences as false
-                                                         * */
+                                                        /* If notifications user information is "" or "false",
+                                                        * we set the notifications in shared Preferences as false
+                                                        * */
                                                         UtilsGeneral.updateSharedPreferences(
                                                                 sharedPref,
                                                                 getResources().getString(R.string.pref_key_notifications),
                                                                 false);
 
                                                     } else {
-
-                                                        /* If notifications user information can be transformed into a boolean (is not ""),
-                                                         * we use the info for SharedPreferences
+                                                        /* If notifications user information is not "" or "false" then it's true.
+                                                         * We set the notifications in shared Preferences as true
                                                          * */
                                                         UtilsGeneral.updateSharedPreferences(
                                                                 sharedPref,
                                                                 getResources().getString(R.string.pref_key_notifications),
-                                                                (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
+                                                                true);
 
                                                     }
                                                 }

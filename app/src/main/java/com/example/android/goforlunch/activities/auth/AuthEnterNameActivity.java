@@ -463,13 +463,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     public boolean userAlreadyExists(List<String> listOfEmails, String inputString) {
         Log.d(TAG, "userAlreadyExists: called!");
 
-        if (listOfEmails.contains(inputString)) {
-            return true;
+        Log.i(TAG, "userAlreadyExists: listOfEmails = " + listOfEmails);
+        Log.i(TAG, "userAlreadyExists: inputString = " + inputString);
 
-        } else {
-            return false;
-
-        }
+        return listOfEmails.contains(inputString);
     }
 
     /** Method that creates a user in firebase
@@ -656,6 +653,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
      * */
     private void startStorageProcessWithByteArray (ImageView imageView) {
         Log.d(TAG, "startStorageProcessWithByteArray: called!");
+
+        stRefUser = stRefImageDir.child(inputEmail.getText().toString());
 
         imageView.setDrawingCacheEnabled(true);
         imageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
