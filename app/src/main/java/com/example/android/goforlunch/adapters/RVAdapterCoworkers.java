@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -116,6 +118,9 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.coworkers_cardview_id)
+        CardView cardView;
+
         @BindView(R.id.cv_coworkers_textview_id)
         TextView textView;
 
@@ -137,8 +142,16 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             textView.setTextColor(setColor(position));
             getUserImage(position);
 
+            if (listOfCoworkers.size() - 1 == position) {
+                addBelowMarginToLastItem();
+            }
+
         }
 
+        //////////////////////
+
+        /** Method to fill the textView
+         * */
         private String setInfo(int position) {
             Log.d(TAG, "setInfo: called!");
 
@@ -163,6 +176,9 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             }
         }
 
+        /** Method that changes the color of the textView depending on
+         * if the user has chosen a restaurant or not
+         * */
         private int setColor (int position) {
             Log.d(TAG, "setColor: called!");
 
@@ -176,6 +192,8 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             }
         }
 
+        /** Method that loads the user image into the imageView
+         * */
         private void getUserImage (int position) {
             Log.d(TAG, "getUserImage: called!");
 
@@ -204,24 +222,24 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
 
                 }
             });
+        }
 
+        /** Method that adds below margin to the last cardView
+         * */
+        private void addBelowMarginToLastItem () {
+            Log.d(TAG, "addBelowMarginToLastItem: called!");
 
+            CardView.LayoutParams params = new CardView.LayoutParams(
+                    CardView.LayoutParams.MATCH_PARENT,
+                    (int) UtilsGeneral.convertDpToPixel(90, mContext));
 
+            int margin10 = (int) UtilsGeneral.convertDpToPixel(10, mContext);
 
-
+            params.setMargins(margin10, margin10, margin10, margin10);
+            cardView.setLayoutParams(params);
 
         }
 
-
-
-
-
-
     }
-
-
-
-
-    // ------------------------- METHODS -------------------------------
 
 }
