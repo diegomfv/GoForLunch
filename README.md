@@ -34,7 +34,7 @@ It allows Google Sign in and Facebook Sign in.
 
 Diego Fajardo
 
-Copyright 2018 Bapusaheb Patil
+Copyright 2018 Diego Fajardo
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
