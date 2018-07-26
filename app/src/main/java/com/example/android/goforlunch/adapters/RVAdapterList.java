@@ -42,8 +42,6 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
     private static final String TAG = RVAdapterList.class.getSimpleName();
 
-    private int mShortAnimationDuration;
-
     private Context mContext;
     private List<RestaurantEntry> listOfRestaurants;
     private List<String> listOfRestaurantsByCoworkers;
@@ -53,6 +51,8 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
     private String mainPath;
     private String imageDirPath;
     private Disposable getImageFromInternalStorageDisposable;
+
+    private int mShortAnimationDuration;
 
     public RVAdapterList(
             Context context,
@@ -114,8 +114,9 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
     }
 
 
-    /** Take care. If "ViewHolder class is static", you cannot access listOfRestaurants
-     * */
+    /* Take care!!!!!
+    * If "ViewHolder class is static", you cannot access listOfRestaurants
+    * */
     public class ViewHolder extends RecyclerView.ViewHolder {
 
        @BindView(R.id.list_cardview_id)
@@ -159,6 +160,10 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
            coworkersJoining.setText(getCoworkersJoining(position));
            ratingBar.setRating(getRating(position));
            loadImage(position, photo);
+
+           if (listOfRestaurants.size() - 1 == position) {
+               addBelowMarginToLastItem();
+           }
 
        }
 
@@ -300,5 +305,22 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
                 return "?";
             }
         }
+
+        /** Method that adds below margin to the last cardView
+         * */
+        private void addBelowMarginToLastItem () {
+            Log.d(TAG, "addBelowMarginToLastItem: called!");
+
+            CardView.LayoutParams params = new CardView.LayoutParams(
+                    CardView.LayoutParams.MATCH_PARENT,
+                    (int) UtilsGeneral.convertDpToPixel(90, mContext));
+
+            int margin10 = (int) UtilsGeneral.convertDpToPixel(10, mContext);
+
+            params.setMargins(margin10, margin10, margin10, margin10);
+            cardView.setLayoutParams(params);
+
+        }
+
     }
 }

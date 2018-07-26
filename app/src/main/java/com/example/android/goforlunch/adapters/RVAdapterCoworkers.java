@@ -39,9 +39,7 @@ import butterknife.ButterKnife;
 
 public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.ViewHolder> {
 
-    private static final String TAG = "RVAdapterCoworkers";
-
-    private int mShortAnimationDuration;
+    private static final String TAG = RVAdapterCoworkers.class.getSimpleName();
 
     private Context mContext;
 
@@ -52,6 +50,8 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
     private StorageReference stRef;
     private StorageReference stRefImages;
     private StorageReference stRefUserImage;
+
+    private int mShortAnimationDuration;
 
     //Glide
     private RequestManager glide;
