@@ -297,46 +297,69 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                     /* Sign in was successful
                                     * */
 
-                                    /* We update shared preferences (notifications) according to the information
-                                     * of the user in firebase. This is the only moment in which notifications
-                                     * in firebase will affect preferences in the app. From this moment on,
-                                     * the variations in the preference fragment will affect firebase (and not
-                                     * the other way around).
-                                     * */
-                                    final DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                                    fireDbUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    /* We get the user notifications state in firebase to update Shared Preferences
+                                    */
+                                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                    dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+                                            Log.d(TAG, "onDataChange: called!");
+
+                                            /* We update shared preferences (notifications) according to the information
+                                             * of the user in firebase. This is the only moment in which notifications
+                                             * in firebase will affect preferences in the app. From this moment on,
+                                             * the variations in the preference fragment will affect firebase (and not
+                                             * the other way around).
+                                             * */
 
                                             for (DataSnapshot item :
                                                     dataSnapshot.getChildren()) {
 
-                                                if (Objects.requireNonNull(inputEmail.getText().toString()).equalsIgnoreCase(
-                                                        Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
+                                                /* We get the user
+                                                 * */
+                                                if (inputEmail.getText().toString().equalsIgnoreCase(
+                                                        item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString())) {
 
-                                                    UtilsGeneral.updateSharedPreferences(sharedPref,
-                                                            getResources().getString(R.string.pref_key_notifications),
-                                                            (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
+                                                    if (item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                                            .equalsIgnoreCase("")) {
 
-                                                    fireDbUsersRef.removeEventListener(this);
+                                                        /* If notifications user information cannot be transformed into a boolean, we directly
+                                                         * set the notifications in shared Preferences as false
+                                                         * */
+                                                        UtilsGeneral.updateSharedPreferences(
+                                                                sharedPref,
+                                                                getResources().getString(R.string.pref_key_notifications),
+                                                                false);
 
-                                                    Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
-                                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                    } else {
 
-                                                    startActivity(new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class));
-                                                    finish();
+                                                        /* If notifications user information can be transformed into a boolean (is not ""),
+                                                         * we use the info for SharedPreferences
+                                                         * */
+                                                        UtilsGeneral.updateSharedPreferences(
+                                                                sharedPref,
+                                                                getResources().getString(R.string.pref_key_notifications),
+                                                                (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
 
+                                                    }
                                                 }
                                             }
+
+                                            /* We launch Main Activity
+                                             * */
+                                            Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            startActivity(intent);
+                                            finish();
+
                                         }
 
                                         @Override
                                         public void onCancelled(DatabaseError databaseError) {
-                                            Log.e(TAG, "onComplete: " + databaseError.getMessage());
+                                            Log.d(TAG, "onCancelled: called!");
 
                                             ToastHelper.toastSomethingWentWrong(AuthSignInEmailPasswordActivity.this);
-
+                                            UtilsGeneral.showMainContent(progressBarContent, mainContent);
                                         }
                                     });
                                 }

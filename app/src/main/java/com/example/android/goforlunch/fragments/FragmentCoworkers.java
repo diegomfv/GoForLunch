@@ -76,9 +76,6 @@ public class FragmentCoworkers extends Fragment {
     private DatabaseReference dbRefUsersGetUserInfo;
     private DatabaseReference dbRefUsersGetCoworkers;
 
-    private StorageReference stRef;
-    private StorageReference stRefImages;
-
     private String userFirstName;
     private String userLastName;
     private String userKey;
@@ -111,7 +108,7 @@ public class FragmentCoworkers extends Fragment {
 
         ButterKnife.bind(this, view);
 
-        /** Activates the toolbar menu for the fragment
+        /* Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
 
@@ -119,13 +116,7 @@ public class FragmentCoworkers extends Fragment {
         fireStorage = FirebaseStorage.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-        stRef = fireStorage.getReference();
-        stRefImages = stRef.child("profilePictures");
-        stRefImages.getPath();
-
-
-
-        /** Configure toolbar */
+        /* Configure toolbar */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
 
         userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");

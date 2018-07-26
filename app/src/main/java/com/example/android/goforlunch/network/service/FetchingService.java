@@ -203,40 +203,47 @@ public class FetchingService extends Service {
 
                                 List<Result> listOfResults = placesByNearby.getResults();
 
-                                for (int i = 0; i < listOfResults.size(); i++) {
+                                if (listOfResults.size() == 0) {
+                                    // TODO: 26/07/2018 Change this!
+                                    ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.overQueryLimit));
 
-                                    listOfPlacesIdsOfRestaurants.add(UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getPlaceId()));
+                                } else {
 
-                                    listOfRestaurantsEntries.add(
-                                            new RestaurantEntry(
-                                                    UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
-                                                    UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getName()),
-                                                    13,
-                                                    UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getVicinity()),
-                                                    RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                    RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                    UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getRating()),
-                                                    RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                    RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                    RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                    UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
-                                                    UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
-                                    );
+                                    for (int i = 0; i < listOfResults.size(); i++) {
 
-                                }
+                                        listOfPlacesIdsOfRestaurants.add(UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getPlaceId()));
 
-                                /* Fetching nearby places has ended,
-                                we start Text Search Process
-                                */
+                                        listOfRestaurantsEntries.add(
+                                                new RestaurantEntry(
+                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
+                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getName()),
+                                                        13,
+                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getVicinity()),
+                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getRating()),
+                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
+                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
+                                        );
 
-                                Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED!");
-                                Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED! Restaurants.size() = " + listOfRestaurantsEntries.size());
+                                    }
 
-                                for (int i = 1; i < arrayOfTypes.length - 1; i++) {
-                                    //-1 because we don't want to fetch "type OTHER" restaurants
+                                    /* Fetching nearby places has ended,
+                                    we start Text Search Process
+                                    */
 
-                                    startTextSearchProcess(i);
+                                    Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED!");
+                                    Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED! Restaurants.size() = " + listOfRestaurantsEntries.size());
 
+                                    for (int i = 1; i < arrayOfTypes.length - 1; i++) {
+                                        //-1 because we don't want to fetch "type OTHER" restaurants
+
+                                        startTextSearchProcess(i);
+
+                                    }
                                 }
 
                             }

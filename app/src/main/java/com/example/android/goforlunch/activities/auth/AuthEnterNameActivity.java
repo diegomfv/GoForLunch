@@ -560,7 +560,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                                                                 inputEmail.getText().toString().toLowerCase().trim(),
                                                                 "",
                                                                 "",
-                                                                "",
+                                                                "false",
                                                                 "");
 
                                                         dbRefNewUser = fireDb.getReference(

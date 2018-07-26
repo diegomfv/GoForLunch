@@ -204,6 +204,7 @@
     <string name="joinNewGroupIs">Your new group is</string>
     <string name="mainCurrentPositionNotAvailable">Current Position not available</string>
     <string name="mainStartRequestProcess">Starting Request Process</string>
+    <string name="overQueryLimit">Over Query Limit!</string>
 
 
 </resources>

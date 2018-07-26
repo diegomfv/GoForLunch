@@ -81,50 +81,57 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
         * If there are more users in the same device, their restaurants
         * won't be added
         * */
-        fireDbRefUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
-                .child(userKey);
 
-        fireDbRefUser.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+        if (userKey.equalsIgnoreCase("")) {
+            //do nothing
 
-                userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
-                userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
+        } else {
 
-                if (userGroupKey == null) {
-                    //do nothing because the user has no group
+            fireDbRefUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
+                    .child(userKey);
 
-                } else {
-                    /* The user has a group
-                    * */
+            fireDbRefUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                    /* We update the restaurants visited of the group in the database
-                    * */
-                    fireDbRefGroup = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS)
-                            .child(userGroupKey)
-                            .child(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+                    userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+                    userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
+                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
 
-                    Map <String, Object> map = new HashMap<>();
-                    map.put(userRestaurant, true);
+                    if (userGroupKey == null) {
+                        //do nothing because the user has no group
 
-                    fireDbRefGroup.updateChildren(map);
+                    } else {
+                        /* The user has a group
+                         * */
 
-                    /* We delete the restaurant info of the user in firebase
-                    * */
-                    fireDbRefUserRestInfo = fireDbRefUser.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
-                    UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(fireDbRefUserRestInfo);
+                        /* We update the restaurants visited of the group in the database
+                         * */
+                        fireDbRefGroup = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS)
+                                .child(userGroupKey)
+                                .child(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
 
-                    fireDbRefUser.removeEventListener(this);
+                        Map <String, Object> map = new HashMap<>();
+                        map.put(userRestaurant, true);
+
+                        fireDbRefGroup.updateChildren(map);
+
+                        /* We delete the restaurant info of the user in firebase
+                         * */
+                        fireDbRefUserRestInfo = fireDbRefUser.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(fireDbRefUserRestInfo);
+
+                        fireDbRefUser.removeEventListener(this);
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "onCancelled: " + databaseError.toString() );
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "onCancelled: " + databaseError.toString() );
 
-            }
-        });
+                }
+            });
+        }
     }
 }

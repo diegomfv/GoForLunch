@@ -585,18 +585,19 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                             if (!item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
                                     .equalsIgnoreCase("")) {
 
-                                /* If user notification information in Firebase is not equal to "",
-                                * then we can transform it to a boolean and store the info
-                                * */
+                                /* If notifications user information can be transformed into a boolean (is not ""),
+                                 * we use the info for SharedPreferences
+                                 * */
 
                                 userNotifInfo = (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue();
 
-                                UtilsGeneral.updateSharedPreferences(
-                                        sharedPref,
-                                        getResources().getString(R.string.pref_key_notifications),
-                                        (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
+                            } else {
+
+                                /* If notifications user information cannot be transformed into a boolean, we leave userNotifInfo as false
+                                 * */
 
                             }
+
                         }
                     }
 
@@ -650,6 +651,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                         /* We launch Main Activity
                          * */
                         Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
 
@@ -675,6 +677,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                         /* We launch Main Activity
                          * */
                         Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
 
@@ -685,7 +688,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
                     Log.e(TAG, "onCancelled: " + databaseError.getMessage());
+
                     ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
+
+                    UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
                     /* We remove the listener
                      * */
