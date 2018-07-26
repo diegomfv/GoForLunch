@@ -49,12 +49,7 @@
     <string name="mainDialogLoggingOutYes">YES, I am sure</string>
     <string name="mainDialogLoggingOutNo">NO</string>
 
-
-    <!--
-     These 2 methods save in sharedPreferences that the two alarms have been created
-     (the notifications alarm has nothing to do with Settings Activity (the preferences fragment
-     updates pref_key_notifications which is used to determine if the notification has to appear)
-     -->
+    <!-- EVERNOTE JOB -->
     <string name="key_alarmAddRestaurantIsOn" translatable="false">alarmAddRestaurantOn</string>
 
     <!-- FRAGMENTS -->
@@ -66,8 +61,6 @@
     <string name="avCowHasNotDecided">%1$s %2$s has not decided yet&#8230;</string>
     <string name="avCowHasDecided">%1$s %2$s is eating \"%3$s\" (%4$s)</string>
     <string name="noInfoAvailable">No information available</string>
-
-
 
 
     <!-- PREFERENCES FRAGMENT -->

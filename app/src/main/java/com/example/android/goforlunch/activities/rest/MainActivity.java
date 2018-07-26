@@ -364,6 +364,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
+                    /* We get the user information
+                    * */
                     userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
                     userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
                     userKey = item.getKey();
@@ -372,8 +374,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     Utils.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
 
                     /* We update Firebase according to the preference fragment
-                     * (remember that the shared pref "notifications" was updated before using
-                     * firebase)
+                     * (remember that the shared pref "notifications"
+                     * was updated before thanks to firebase)
                      * */
                     fireDbRefUserNotif = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey).child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS);
                     fireDbRefUserNotif.setValue(sharedPref.getBoolean(getResources().getString(R.string.pref_key_notifications), false));
@@ -747,7 +749,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
          * and from that moment on it will do nothing because the alarm will already be set and this
          * alarm will be "true" in SharedPreferences
          * */
-
         if (addRestaurantAlarmIsTrue){
             Log.d(TAG, "checkAddRestaurantsAt4pmDailyJob: do nothing!");
             //do nothing since alarm is currently running

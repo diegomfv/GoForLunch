@@ -549,54 +549,62 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     private void checkIfUserExistsInDatabase (final FirebaseUser user) {
         Log.d(TAG, "checkIfUserExistsInDatabase: called!");
 
-        final DatabaseReference fireDbUsersRef = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-        fireDbUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "GOOGLE onDataChange: " + dataSnapshot.toString());
+        if (!internetAvailable) {
+            ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
 
-                boolean userExists = false;
+        } else {
 
-                for (DataSnapshot item :
-                        dataSnapshot.getChildren()) {
+            /* We check if the user exists in the database.
+            * If the user does, we launch Main Activity directly.
+            * If the user does not, we create the user and launch Main Activity
+            * */
+            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+            dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                    if (Objects.requireNonNull(user.getEmail()).equalsIgnoreCase(
-                            Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString())) {
-
-                        /* The user already exists,
-                         * */
-                        userExists = true;
-
-                        // TODO: 24/07/2018 Check!
-                        fireDbUsersRef.removeEventListener(this);
-
-                        /* We update shared preferences (notifications) according to the information
-                        * of the user in firebase. This is the only moment in which notifications
-                        * in firebase will affect preferences in the app. From this moment on,
-                        * the variations in the preference fragment will affect firebase (and not
-                        * the other way around).
-                        * */
-                        Utils.updateSharedPreferences(sharedPref,
-                                getResources().getString(R.string.pref_key_notifications),
-                                (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
-
-                        /* We launch Main Activity
-                        * */
-                        Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                        break;
-
-                    }
-                }
-
-                if (internetAvailable) {
-
-                    /* The for loop ends. If the user does not exist in the database, we insert the user
+                    /* We use two variables to store if the user exists and, if the user does,
+                     * we store the user notification info in Firebase
                      * */
-                    if (!userExists) {
-                        Log.d(TAG, "GOOGLE onDataChange: user does not exist");
+                    boolean userExists = false;
+                    boolean userNotifInfo = false;
 
+                    for (DataSnapshot item :
+                            dataSnapshot.getChildren()) {
+
+                        /* If the email of the user exists in the database, it's the user
+                         * */
+                        if (user.getEmail().equalsIgnoreCase(
+                                item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString())) {
+
+                            userExists = true;
+
+                            /* We get the notifications information and will use it to update SharedPreferences.
+                             */
+
+                            if (!item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                    .equalsIgnoreCase("")) {
+
+                                /* If user notification information in Firebase is not equal to "",
+                                * then we can transform it to a boolean and store the info
+                                * */
+
+                                userNotifInfo = (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue();
+
+                                Utils.updateSharedPreferences(
+                                        sharedPref,
+                                        getResources().getString(R.string.pref_key_notifications),
+                                        (boolean) item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue());
+
+                            }
+                        }
+                    }
+
+                    if (!userExists) {
+
+                        /* User does not exist. We create the user in firebase and launch MainActivity
+                        * */
                         dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
                         String userKey = dbRefUsers.push().getKey();
 
@@ -609,7 +617,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                                 user.getEmail().toLowerCase(),
                                 "",
                                 "",
-                                "",
+                                "false",
                                 "");
 
                         dbRefUsers = fireDb.getReference(
@@ -626,31 +634,68 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                                 0,
                                 "");
 
+                        /* We update shared preferences (notifications) according to the information
+                         * of the user in firebase. This is the only moment in which notifications
+                         * in firebase will affect preferences in the app. From this moment on,
+                         * the variations in the preference fragment will affect firebase (and not
+                         * the other way around).
+                         * */
+                        Utils.updateSharedPreferences(sharedPref,
+                                getResources().getString(R.string.pref_key_notifications),
+                                userNotifInfo);
+
+                        /* We remove the listener
+                        * */
+                        dbRefUsers.removeEventListener(this);
+
+                        /* We launch Main Activity
+                         * */
+                        Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    } else {
+
+                        /* User exists. We launch Main Activity
+                        * */
+
+                        /* We update shared preferences (notifications) according to the information
+                         * of the user in firebase. This is the only moment in which notifications
+                         * in firebase will affect preferences in the app. From this moment on,
+                         * the variations in the preference fragment will affect firebase (and not
+                         * the other way around).
+                         * */
+                        Utils.updateSharedPreferences(sharedPref,
+                                getResources().getString(R.string.pref_key_notifications),
+                                userNotifInfo);
+
+                        /* We remove the listener
+                         * */
+                        dbRefUsers.removeEventListener(this); /* We remove the listener
+
+                        /* We launch Main Activity
+                         * */
                         Intent intent = new Intent(AuthChooseLoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
 
                     }
 
-                } else {
-                    /* Internet is not available
-                    * */
-                    ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
-                    Utils.showMainContent(progressBarContent, mainContent);
-
                 }
 
-            }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG, "onCancelled: " + databaseError.getMessage());
+                    ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "GOOGLE onCancelled: " + databaseError.getCode());
+                    /* We remove the listener
+                     * */
+                    dbRefUsers.removeEventListener(this);
 
-                ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
+                }
+            });
 
-            }
-        });
 
+        }
     }
-
 }
