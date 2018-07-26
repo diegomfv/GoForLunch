@@ -65,60 +65,62 @@
 
     </RelativeLayout>
 
-    <ProgressBar
-        android:id="@+id/map_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
-
-    <RelativeLayout
-        android:id="@+id/map_fragment_parent_relative_layout"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <fragment
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/map"
+        <include layout="@layout/progress_bar_fragment_content"/>
+
+        <RelativeLayout
+            android:id="@+id/map_fragment_parent_relative_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".MapsActivity"
-            android:name="com.google.android.gms.maps.SupportMapFragment">
+            android:visibility="gone">
 
-            <RelativeLayout
+            <fragment
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/map"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                >
+                tools:context=".MapsActivity"
+                android:name="com.google.android.gms.maps.SupportMapFragment">
 
-                <ImageButton
-                    android:id="@+id/map_fragment_refresh_button_id"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="12dp"
-                    android:padding="3dp"
-                    android:background="@drawable/button_map_border"
-                    android:src="@drawable/ic_refresh"
-                    android:alpha="0.7"
-                    android:elevation="4dp" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    >
 
-                <ImageButton
-                    android:id="@+id/map_fragment_database_button_id"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/map_fragment_refresh_button_id"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginLeft="12dp"
-                    android:padding="3dp"
-                    android:background="@drawable/button_map_border"
-                    android:src="@drawable/ic_database"
-                    android:alpha="0.7"
-                    android:elevation="4dp" />
+                    <ImageButton
+                        android:id="@+id/map_fragment_refresh_button_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="12dp"
+                        android:padding="3dp"
+                        android:background="@drawable/button_map_border"
+                        android:src="@drawable/ic_refresh"
+                        android:alpha="0.7"
+                        android:elevation="4dp" />
 
-            </RelativeLayout>
+                    <ImageButton
+                        android:id="@+id/map_fragment_database_button_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/map_fragment_refresh_button_id"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginLeft="12dp"
+                        android:padding="3dp"
+                        android:background="@drawable/button_map_border"
+                        android:src="@drawable/ic_database"
+                        android:alpha="0.7"
+                        android:elevation="4dp" />
 
-        </fragment>
+                </RelativeLayout>
 
-    </RelativeLayout>
+            </fragment>
+
+        </RelativeLayout>
+
+    </FrameLayout>
 
 </LinearLayout>

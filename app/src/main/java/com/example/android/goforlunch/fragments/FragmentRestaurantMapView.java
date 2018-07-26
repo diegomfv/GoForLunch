@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -119,7 +120,7 @@ import static com.example.android.goforlunch.constants.RepoStrings.Keys.NEARBY_K
 
 /** Fragment that displays the Google Map
  * */
-public class FragmentRestaurantMapView extends Fragment implements Observer {
+public class FragmentRestaurantMapView extends Fragment {
 
     /* Interface to communicate with Main Activity
      * */
@@ -207,8 +208,8 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
     @BindView(R.id.map_fragment_parent_relative_layout)
     RelativeLayout mapFragmentRelativeLayout;
 
-    @BindView(R.id.map_progress_bar)
-    ProgressBar progressBar;
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarFragmentContent;
 
     //Disposables
     private Disposable autocompleteTextViewDisposable;
@@ -227,14 +228,7 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
     private String imageDirPath;
     private boolean accessInternalStorageGranted;
 
-    //InternetConnectionReceiver variables
-    private InternetConnectionReceiver receiver;
-    private IntentFilter intentFilter;
-
-    private boolean internetAvailable;
-
-    ////////////////////////////////////////////
-    //MainActivity
+    //Listener: communicates from Main Activity (for when a search is started)
     OnCurrentPositionObtainedListener mCallback;
 
 
@@ -283,9 +277,6 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
 //                actionBar.setDisplayHomeAsUpEnabled(true);
 //            }
 //        }
-
-
-
 
         /* We get an array of restaurant types from RESOURCES
          * */
@@ -418,16 +409,12 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiverFragment();
-
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-
-        disconnectBroadcastReceiverFragment();
 
     }
 
@@ -461,7 +448,6 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
         Log.d(TAG, "onDestroy: called!");
         this.disposeWhenDestroy();
 
-        disconnectBroadcastReceiverFragment();
     }
 
     private void disposeWhenDestroy () {
@@ -472,24 +458,6 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
         UtilsGeneral.dispose(this.distanceMatrixDisposable);
         UtilsGeneral.dispose(this.nearbyDisposable);
 
-    }
-
-    @Override
-    public void update(java.util.Observable o, Object internetAvailableUpdate) {
-        Log.d(TAG, "update: called!");
-
-        if ((int) internetAvailableUpdate == 0) {
-            Log.d(TAG, "update: Internet Not Available");
-
-            internetAvailable = false;
-
-
-        } else {
-            Log.d(TAG, "update: Internet available");
-
-            internetAvailable = true;
-
-        }
     }
 
     /**************************
@@ -653,6 +621,9 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
+
+        progressBarFragmentContent.setVisibility(View.GONE);
+        mapFragmentRelativeLayout.setVisibility(View.VISIBLE);
 
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -905,38 +876,6 @@ public class FragmentRestaurantMapView extends Fragment implements Observer {
 
                     }
                 });
-
-    }
-
-    /** Method that connects a broadcastReceiver to the fragment.
-     * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiverFragment () {
-        Log.d(TAG, "connectBroadcastReceiver: called!");
-
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-
-        if (getActivity() != null) {
-            UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
-        }
-
-    }
-
-    /** Method that disconnects the broadcastReceiver from the fragment.
-     * */
-    private void disconnectBroadcastReceiverFragment () {
-        Log.d(TAG, "disconnectBroadcastReceiver: called!");
-
-        if (receiver != null && getActivity() != null) {
-            UtilsGeneral.disconnectReceiver(
-                    getActivity(),
-                    receiver,
-                    this);
-        }
-
-        receiver = null;
-        intentFilter = null;
 
     }
 
