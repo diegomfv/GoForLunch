@@ -149,9 +149,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
+        connectBroadcastReceiverFragment();
 
     }
 
@@ -160,15 +158,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        if (receiver != null && getActivity() != null) {
-            UtilsGeneral.disconnectReceiver(
-                    getActivity(),
-                    receiver,
-                    this);
-        }
-
-        receiver = null;
-        intentFilter = null;
+        disconnectBroadcastReceiverFragment();
 
 //        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
 //        dbRefUsersGetCoworkers.removeEventListener(valueEventListenerGetCoworkers);
@@ -181,15 +171,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        if (receiver != null && getActivity() != null) {
-            UtilsGeneral.disconnectReceiver(
-                    getActivity(),
-                    receiver,
-                    this);
-        }
-
-        receiver = null;
-        intentFilter = null;
+        disconnectBroadcastReceiverFragment();
     }
 
     @Override
@@ -348,16 +330,23 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
     }
 
+    /** Method that connects a broadcastReceiver to the fragment.
+     * It allows to notify the user about the internet state
+     * */
     private void connectBroadcastReceiverFragment () {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
+
+        if (getActivity() != null) {
+            UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
+        }
 
     }
 
-
+    /** Method that disconnects the broadcastReceiver from the fragment.
+     * */
     private void disconnectBroadcastReceiverFragment () {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 

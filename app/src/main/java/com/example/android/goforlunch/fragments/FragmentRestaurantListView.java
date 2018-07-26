@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -35,6 +36,7 @@ import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -141,6 +143,12 @@ public class FragmentRestaurantListView extends Fragment {
 
     //Glide
     private RequestManager glide;
+
+    //InternetConnectionReceiver variables
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+
+    private boolean internetAvailable;
 
 
     /** ------------------------------------------------ */
@@ -299,9 +307,6 @@ public class FragmentRestaurantListView extends Fragment {
 //        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
 
     }
-
-
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

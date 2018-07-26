@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -42,6 +43,7 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
+import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -90,6 +92,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -116,7 +119,7 @@ import static com.example.android.goforlunch.constants.RepoStrings.Keys.NEARBY_K
 
 /** Fragment that displays the Google Map
  * */
-public class FragmentRestaurantMapView extends Fragment {
+public class FragmentRestaurantMapView extends Fragment implements Observer {
 
     /* Interface to communicate with Main Activity
      * */
@@ -224,8 +227,16 @@ public class FragmentRestaurantMapView extends Fragment {
     private String imageDirPath;
     private boolean accessInternalStorageGranted;
 
+    //InternetConnectionReceiver variables
+    private InternetConnectionReceiver receiver;
+    private IntentFilter intentFilter;
+
+    private boolean internetAvailable;
+
+    ////////////////////////////////////////////
     //MainActivity
     OnCurrentPositionObtainedListener mCallback;
+
 
     /** ------------------------------------------------ */
 
@@ -276,7 +287,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
 
 
-        /** We get an array of restaurant types from RESOURCES
+        /* We get an array of restaurant types from RESOURCES
          * */
         this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
 
@@ -284,11 +295,11 @@ public class FragmentRestaurantMapView extends Fragment {
         this.listOfAllRestaurantsInDatabase = new ArrayList<>();
         this.listOfMarkers = new ArrayList<>();
 
-        /** Activates the toolbar menu for the fragment
+        /* Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
 
-        /** We get all the user information
+        /* We get all the user information
          * */
         this.currentUser = auth.getCurrentUser();
         if (currentUser != null) {
@@ -346,7 +357,7 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
 
-        /** Configuration process */
+        /* Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
         this.getPermissionsProcess();
 
@@ -402,6 +413,24 @@ public class FragmentRestaurantMapView extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: called!");
+
+        connectBroadcastReceiverFragment();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: called!");
+
+        disconnectBroadcastReceiverFragment();
+
+    }
+
     /** We prepare the callback for listening to changes in Position
      * */
     @Override
@@ -428,9 +457,11 @@ public class FragmentRestaurantMapView extends Fragment {
      * */
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
         super.onDestroy();
+        Log.d(TAG, "onDestroy: called!");
         this.disposeWhenDestroy();
+
+        disconnectBroadcastReceiverFragment();
     }
 
     private void disposeWhenDestroy () {
@@ -441,6 +472,24 @@ public class FragmentRestaurantMapView extends Fragment {
         UtilsGeneral.dispose(this.distanceMatrixDisposable);
         UtilsGeneral.dispose(this.nearbyDisposable);
 
+    }
+
+    @Override
+    public void update(java.util.Observable o, Object internetAvailableUpdate) {
+        Log.d(TAG, "update: called!");
+
+        if ((int) internetAvailableUpdate == 0) {
+            Log.d(TAG, "update: Internet Not Available");
+
+            internetAvailable = false;
+
+
+        } else {
+            Log.d(TAG, "update: Internet available");
+
+            internetAvailable = true;
+
+        }
     }
 
     /**************************
@@ -858,6 +907,39 @@ public class FragmentRestaurantMapView extends Fragment {
                 });
 
     }
+
+    /** Method that connects a broadcastReceiver to the fragment.
+     * It allows to notify the user about the internet state
+     * */
+    private void connectBroadcastReceiverFragment () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+
+        if (getActivity() != null) {
+            UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
+        }
+
+    }
+
+    /** Method that disconnects the broadcastReceiver from the fragment.
+     * */
+    private void disconnectBroadcastReceiverFragment () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null && getActivity() != null) {
+            UtilsGeneral.disconnectReceiver(
+                    getActivity(),
+                    receiver,
+                    this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+
+    }
+
 
     /******************************************************
      * INTERNAL STORAGE
