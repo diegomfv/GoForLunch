@@ -26,7 +26,7 @@ import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.models.pojo.User;
+import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.adapters.RVAdapterCoworkers;
 import com.example.android.goforlunch.constants.RepoStrings;
 import com.example.android.goforlunch.utils.ItemClickSupport;

@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.models.pojo.User;
+import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.constants.RepoStrings;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnFailureListener;

@@ -22,7 +22,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amitshekhar.DebugDB;
 import com.bumptech.glide.Glide;
@@ -30,7 +29,7 @@ import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.sync.FetchingService;
+import com.example.android.goforlunch.network.service.FetchingService;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsFirebase;
@@ -40,7 +39,7 @@ import com.example.android.goforlunch.sync.NotificationDailyJob;
 import com.example.android.goforlunch.fragments.FragmentCoworkers;
 import com.example.android.goforlunch.fragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.fragments.FragmentRestaurantMapView;
-import com.example.android.goforlunch.remote.models.placebynearby.LatLngForRetrofit;
+import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.constants.RepoStrings;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -544,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                                     ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainStartRequestProcess));
 
-                                    // TODO: 26/07/2018 Change the names of the intent info
+                                    // TODO: 26/07/2018 Change the names of the intent info to a constant
                                     Intent intent = new Intent(MainActivity.this, FetchingService.class);
                                     intent.putExtra("latitude", myPosition.getLat());
                                     intent.putExtra("longitude", myPosition.getLng());

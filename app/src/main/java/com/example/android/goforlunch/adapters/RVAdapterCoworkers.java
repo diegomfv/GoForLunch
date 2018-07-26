@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.UtilsGeneral;
-import com.example.android.goforlunch.models.pojo.User;
+import com.example.android.goforlunch.network.models.pojo.User;
 
 import java.util.List;
 

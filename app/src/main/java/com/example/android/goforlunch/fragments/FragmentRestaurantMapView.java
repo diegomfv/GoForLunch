@@ -47,18 +47,17 @@ import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.remote.models.distancematrix.DistanceMatrix;
-import com.example.android.goforlunch.remote.models.placebyid.PlaceById;
-import com.example.android.goforlunch.remote.models.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.remote.models.placebynearby.PlacesByNearby;
-import com.example.android.goforlunch.remote.models.placetextsearch.PlacesByTextSearch;
-import com.example.android.goforlunch.remote.models.placetextsearch.Result;
-import com.example.android.goforlunch.remote.remote.AllGoogleServices;
-import com.example.android.goforlunch.remote.remote.GoogleService;
-import com.example.android.goforlunch.remote.remote.GoogleServiceStreams;
+import com.example.android.goforlunch.network.models.distancematrix.DistanceMatrix;
+import com.example.android.goforlunch.network.models.placebyid.PlaceById;
+import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
+import com.example.android.goforlunch.network.models.placebynearby.PlacesByNearby;
+import com.example.android.goforlunch.network.models.placetextsearch.PlacesByTextSearch;
+import com.example.android.goforlunch.network.models.placetextsearch.Result;
+import com.example.android.goforlunch.network.remote.AllGoogleServices;
+import com.example.android.goforlunch.network.remote.GoogleService;
+import com.example.android.goforlunch.network.remote.GoogleServiceStreams;
 import com.example.android.goforlunch.constants.RepoConstants;
 import com.example.android.goforlunch.constants.RepoStrings;
-import com.example.android.goforlunch.sync.FetchingService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -1321,7 +1320,7 @@ public class FragmentRestaurantMapView extends Fragment {
             public void onNext(final PlaceById placeById) {
                 Log.d(TAG, "onNext: PLACEBYID: " + placeById.toString());
 
-                final com.example.android.goforlunch.remote.models.placebyid.Result result = placeById.getResult();
+                final com.example.android.goforlunch.network.models.placebyid.Result result = placeById.getResult();
                 Log.d(TAG, "onNext: PLACEBYID: result = " + result);
 
                 if (result != null) {
@@ -1491,7 +1490,7 @@ public class FragmentRestaurantMapView extends Fragment {
                     listOfPlaceIds.add(restaurantEntryList.get(i).getPlaceId());
                 }
 
-                List<com.example.android.goforlunch.remote.models.placebynearby.Result> listOfResults = placesByNearby.getResults();
+                List<com.example.android.goforlunch.network.models.placebynearby.Result> listOfResults = placesByNearby.getResults();
 
                 for (int i = 0; i < listOfResults.size(); i++) {
 

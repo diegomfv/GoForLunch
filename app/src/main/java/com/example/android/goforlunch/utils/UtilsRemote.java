@@ -1,6 +1,6 @@
 package com.example.android.goforlunch.utils;
 
-import com.example.android.goforlunch.remote.models.placebyid.Result;
+import com.example.android.goforlunch.network.models.placebyid.Result;
 import com.example.android.goforlunch.constants.RepoStrings;
 
 import java.util.Calendar;
