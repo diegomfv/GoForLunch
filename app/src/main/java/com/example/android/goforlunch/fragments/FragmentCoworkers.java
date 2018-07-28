@@ -51,6 +51,7 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.observers.DisposableObserver;
 
 /**
@@ -60,6 +61,8 @@ import io.reactivex.observers.DisposableObserver;
 public class FragmentCoworkers extends Fragment implements Observer {
 
     private static final String TAG = FragmentCoworkers.class.getSimpleName();
+
+    private Unbinder unbinder;
 
     @BindView(R.id.coworkers_toolbar_id)
     Toolbar toolbar;
@@ -120,8 +123,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         Log.i(TAG, "onCreateView: Map");
 
         View view = inflater.inflate(R.layout.fragment_coworkers_view, container, false);
-
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
         /* Activates the toolbar menu for the fragment
          * */
@@ -164,6 +166,13 @@ public class FragmentCoworkers extends Fragment implements Observer {
 //        dbRefUsersGetCoworkers.removeEventListener(valueEventListenerGetCoworkers);
 
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView: called!");
+        unbinder.unbind();
     }
 
     @Override

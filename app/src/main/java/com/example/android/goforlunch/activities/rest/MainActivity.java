@@ -61,7 +61,6 @@ import butterknife.ButterKnife;
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 29/05/2018 Translations
 // TODO: 25/07/2018 Check list of elements / translations (might be a problem when searching for a Restaurant)
-// TODO: 25/07/2018 Add progress bars in fragments
 // TODO: 12/07/2018 Check what is shown when restaurants are wrongly fetched
 // TODO: 29/05/2018 General cleanup
 

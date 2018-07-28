@@ -98,6 +98,7 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
 import io.reactivex.Observable;
@@ -187,6 +188,9 @@ public class FragmentRestaurantMapView extends Fragment {
     //Array of restaurant types (got from Resources, strings)
     private String[] arrayOfTypes;
 
+    //Butterknife
+    private Unbinder unbinder;
+
     //Widgets
     @BindView(R.id.map_autocomplete_id)
     AutoCompleteTextView autocompleteTextView;
@@ -251,7 +255,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
         /**Butterknife binding
          * */
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
         /** Storage configuration
          * */
@@ -416,6 +420,13 @@ public class FragmentRestaurantMapView extends Fragment {
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView: called!");
+        unbinder.unbind();
     }
 
     /** We prepare the callback for listening to changes in Position

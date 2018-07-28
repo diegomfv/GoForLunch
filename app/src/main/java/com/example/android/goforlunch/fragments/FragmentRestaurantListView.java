@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -83,6 +84,8 @@ public class FragmentRestaurantListView extends Fragment {
 
     //Array of restaurant types (got from Resources, strings)
     private String[] arrayOfTypes;
+
+    private Unbinder unbinder;
 
     //Widgets
     @BindView(R.id.list_autocomplete_id)
@@ -172,7 +175,7 @@ public class FragmentRestaurantListView extends Fragment {
 
         /* Butterknife binding
          * */
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
         /* Activates the toolbar menu for the fragment
          * */
@@ -291,6 +294,13 @@ public class FragmentRestaurantListView extends Fragment {
         Log.d(TAG, "onStop: called!");
 
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView: called!");
+        unbinder.unbind();
     }
 
     @Override
