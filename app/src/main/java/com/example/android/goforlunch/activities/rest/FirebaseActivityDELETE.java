@@ -31,7 +31,7 @@ import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -176,10 +176,10 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                 for (int i = 0; i < 45; i++) {
 
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                     String key = dbRefUsers.push().getKey();
 
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key);
+                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + key);
                     UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
                             listOfNames.get(i).getFirstName(),
                             listOfNames.get(i).getLastName(),
@@ -189,7 +189,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                             "",
                             "");
 
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + key + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
                     UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
                             "",
                             "",
@@ -211,14 +211,14 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button 2 CALLED!");
 
-                dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+                dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS);
                 Map<String, Object> map;
 
                 for (int i = 0; i < listOfGroups.size(); i++) {
 
                     map = new HashMap<>();
-                    map.put(RepoStrings.FirebaseReference.GROUP_NAME, listOfGroups.get(i));
-                    map.put(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
+                    map.put(Repo.FirebaseReference.GROUP_NAME, listOfGroups.get(i));
+                    map.put(Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED, "");
 
                     dbRefGroups.push().setValue(map);
                 }
@@ -233,10 +233,10 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button 3 CALLED!");
 
-                DatabaseReference dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                DatabaseReference dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                 String key = dbRefUsers.push().getKey();
 
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + key);
+                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + key);
                 UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
                         "Alfa",
                         "Beta",
@@ -256,8 +256,8 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button4 clicked!");
 
-                final DatabaseReference dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
-                final DatabaseReference dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+                final DatabaseReference dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
+                final DatabaseReference dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS);
 
                 final Map<String, Object> map = new HashMap<>();
                 dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -267,7 +267,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                         for (DataSnapshot item :
                                 dataSnapshot.getChildren()) {
-                            map.put(item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue().toString(), item.getKey());
+                            map.put(item.child(Repo.FirebaseReference.GROUP_NAME).getValue().toString(), item.getKey());
                         }
 
                         Log.d(TAG, "onDataChange: map!!!! = " + map.toString());
@@ -285,16 +285,16 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                                     for (DataSnapshot item :
                                             dataSnapshot.getChildren()) {
 
-                                        if (item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString()
+                                        if (item.child(Repo.FirebaseReference.USER_GROUP).getValue().toString()
                                                 .equalsIgnoreCase(listOfMapKeys.get(i))){
 
                                             Map <String, Object> newRestaurant = new HashMap<>();
 
-                                            if (!item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
-                                                newRestaurant.put(item.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(), true);
+                                            if (!item.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
+                                                newRestaurant.put(item.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString(), true);
                                             }
 
-                                            dbRefGroups.child(map.get(listOfMapKeys.get(i)).toString()).child(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED).setValue(newRestaurant);
+                                            dbRefGroups.child(map.get(listOfMapKeys.get(i)).toString()).child(Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED).setValue(newRestaurant);
 
                                         }
                                     }
@@ -330,18 +330,18 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                     public void run() {
                         AppDatabase mDb = AppDatabase.getInstance(getApplicationContext());
                         long value = mDb.restaurantDao().insertRestaurant(new RestaurantEntry(
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
                                13,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                RepoStrings.NOT_AVAILABLE_FOR_STRINGS
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                Repo.NOT_AVAILABLE_FOR_STRINGS
                         ));
 
                         Log.d(TAG, "run: VALUE = " + value);
@@ -355,9 +355,9 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                String userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+                String userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.GROUP_NAME);
+                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.GROUP_NAME);
                 dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -387,7 +387,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                 final String userKey = "-LEqJnfBmv5WGhGQGoC9";
                 final String userGroupKey = "-LEqJw9D1D6YwXUrdJb0";
 
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
                 dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -399,12 +399,12 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                         /** Inserting a new restaurant in the group
                          * */
-                        dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS + "/" + userGroupKey + "/" + RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
-                        UtilsFirebase.insertNewRestaurantInGroupInFirebase(dbRefGroups, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
+                        dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS + "/" + userGroupKey + "/" + Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+                        UtilsFirebase.insertNewRestaurantInGroupInFirebase(dbRefGroups, map.get(Repo.FirebaseReference.RESTAURANT_NAME).toString());
 
                         /** Deleting user info from database
                          * */
-                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
                         ToastHelper.toastShort(FirebaseActivityDELETE.this, "User Restaurant Deleted");
 
@@ -428,7 +428,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                 final DatabaseReference fireDbRefUser;
                 String userKey = "-LF4QY7Ql0-8rOYAlPp1";
 
-                fireDbRefUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
+                fireDbRefUser = fireDb.getReference(Repo.FirebaseReference.USERS)
                         .child(userKey);
 
                 fireDbRefUser.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -436,9 +436,9 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                        String userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
-                        String userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                                .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
+                        String userGroupKey = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+                        String userRestaurant = dataSnapshot.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                                .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString();
 
                         if (userGroupKey == null) {
                             //do nothing because the user has no group
@@ -451,9 +451,9 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                              * */
                             DatabaseReference fireDbRefGroup;
 
-                            fireDbRefGroup = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS)
+                            fireDbRefGroup = fireDb.getReference(Repo.FirebaseReference.GROUPS)
                                     .child(userGroupKey)
-                                    .child(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+                                    .child(Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED);
 
                             Map <String, Object> map = new HashMap<>();
                             map.put(userRestaurant, true);
@@ -462,7 +462,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
 
                             /* We delete the restaurant info of the user in firebase
                              * */
-                            DatabaseReference fireDbRefUser2 = fireDbRefUser.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                            DatabaseReference fireDbRefUser2 = fireDbRefUser.child(Repo.FirebaseReference.USER_RESTAURANT_INFO);
                             UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(fireDbRefUser2);
 
                         }
@@ -484,10 +484,10 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button 9 clicked!");
 
-                final String userGroup = getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP);
+                final String userGroup = getStringFromSharedPreferences(sharedPref, Repo.SharedPreferences.USER_GROUP);
                 Log.d(TAG, "onClick: userGroup: " + userGroup);
 
-                dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+                dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS);
                 dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -497,9 +497,9 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                                 dataSnapshot.getChildren()) {
                             Log.d(TAG, "onDataChange: groupKey = " + item.getKey());
 
-                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue()).equals(userGroup)){
-                                updateSharedPreferences(sharedPref ,RepoStrings.SharedPreferences.USER_GROUP_KEY, item.getKey());
-                                Log.d(TAG, "onDataChange: groupKeySharedPref " + getStringFromSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_GROUP_KEY));
+                            if (Objects.requireNonNull(item.child(Repo.FirebaseReference.GROUP_NAME).getValue()).equals(userGroup)){
+                                updateSharedPreferences(sharedPref , Repo.SharedPreferences.USER_GROUP_KEY, item.getKey());
+                                Log.d(TAG, "onDataChange: groupKeySharedPref " + getStringFromSharedPreferences(sharedPref, Repo.SharedPreferences.USER_GROUP_KEY));
                             }
 
 
@@ -525,7 +525,7 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: button10");
 
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child("-LF4O_-YbE0dFCUT-CE-");
+                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS).child("-LF4O_-YbE0dFCUT-CE-");
                 dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -539,9 +539,9 @@ public class FirebaseActivityDELETE extends AppCompatActivity {
                             Log.d(TAG, "onDataChange: " + "blablabla is null)");
                         }
 
-                        if (dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP) != null) {
-                            Log.d(TAG, "onDataChange: " + dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString());
-                            button10.setText(dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString());
+                        if (dataSnapshot.child(Repo.FirebaseReference.USER_GROUP) != null) {
+                            Log.d(TAG, "onDataChange: " + dataSnapshot.child(Repo.FirebaseReference.USER_GROUP).getValue().toString());
+                            button10.setText(dataSnapshot.child(Repo.FirebaseReference.USER_GROUP).getValue().toString());
                         }
 
                     }

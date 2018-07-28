@@ -10,7 +10,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
@@ -40,7 +40,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.example.android.goforlunch.constants.RepoStrings.Keys.NEARBY_KEY;
+import static com.example.android.goforlunch.constants.Repo.Keys.NEARBY_KEY;
 
 /**
  * Created by Diego Fajardo on 11/07/2018.
@@ -127,6 +127,7 @@ public class FetchingService extends Service {
                     Log.d(TAG, "onNext: " + aBoolean);
 
                     if (!aBoolean) {
+                        Log.i(TAG, "onNext: no internet");
                         //show "no internet message" and do nothing
                         mHandler.post(new Runnable() {
                             @Override
@@ -204,10 +205,21 @@ public class FetchingService extends Service {
                                 List<Result> listOfResults = placesByNearby.getResults();
 
                                 if (listOfResults.size() == 0) {
+                                    Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
+
                                     // TODO: 26/07/2018 Change this!
-                                    ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.overQueryLimit));
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Log.d(TAG, "run: handler running!");
+                                            ToastHelper.toastShort(FetchingService.this, "Restaurant size = 0");
+                                        }
+                                    });
+
+                                    stopSelf();
 
                                 } else {
+                                    Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
 
                                     for (int i = 0; i < listOfResults.size(); i++) {
 
@@ -219,12 +231,12 @@ public class FetchingService extends Service {
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getName()),
                                                         13,
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getVicinity()),
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getRating()),
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
                                         );
@@ -273,7 +285,7 @@ public class FetchingService extends Service {
                         arrayOfTypes[type] + "+" + "Restaurant",
                         myPosition,
                         20,
-                        RepoStrings.Keys.TEXTSEARCH_KEY)
+                        Repo.Keys.TEXTSEARCH_KEY)
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribeWith(new DisposableObserver<PlacesByTextSearch>() {
@@ -314,12 +326,12 @@ public class FetchingService extends Service {
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getName()),
                                                         type,
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getFormattedAddress()),
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getRating()),
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
-                                                        RepoStrings.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
                                                         UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
                                         );
@@ -418,7 +430,7 @@ public class FetchingService extends Service {
 
         disposable = GoogleServiceStreams.streamFetchPlaceById(
                 restaurantEntry.getPlaceId(),
-                RepoStrings.Keys.PLACEID_KEY)
+                Repo.Keys.PLACEID_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribeWith(new DisposableObserver<PlaceById>() {
@@ -478,7 +490,7 @@ public class FetchingService extends Service {
                         "imperial",
                         "place_id:" + restaurantEntry.getPlaceId(),
                         myPosition,
-                        RepoStrings.Keys.MATRIX_DISTANCE_KEY)
+                        Repo.Keys.MATRIX_DISTANCE_KEY)
                         .subscribeWith(new DisposableObserver<DistanceMatrix>() {
                             @Override
                             public void onNext(DistanceMatrix distanceMatrix) {
@@ -525,7 +537,7 @@ public class FetchingService extends Service {
         Call<ResponseBody> callPhoto = googleService.fetchDataPhoto(
                 "400",
                 restaurantEntry.getImageUrl(),
-                RepoStrings.Keys.PHOTO_KEY);
+                Repo.Keys.PHOTO_KEY);
         callPhoto.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(final Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -628,7 +640,7 @@ public class FetchingService extends Service {
 
         internalStorage = new Storage(getApplicationContext());
         mainPath = internalStorage.getInternalFilesDirectory() + File.separator;
-        imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR + File.separator;
+        imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR + File.separator;
 
         /* We delete the directory to delete all the information
         * */

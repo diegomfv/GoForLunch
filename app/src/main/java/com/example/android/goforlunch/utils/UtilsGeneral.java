@@ -28,7 +28,7 @@ import android.widget.TextView;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.rx.ObservableObject;
 import com.example.android.goforlunch.data.AppExecutors;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import com.jakewharton.rxbinding2.widget.TextViewTextChangeEvent;
 
@@ -206,14 +206,14 @@ public class UtilsGeneral {
    public static Intent fillIntentUsingMapInfo (Intent intent, Map <String, Object> map) {
 
        if (map != null) {
-           intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, map.get(RepoStrings.FirebaseReference.RESTAURANT_NAME).toString());
-           intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, map.get(RepoStrings.FirebaseReference.RESTAURANT_TYPE).toString());
-           intent.putExtra(RepoStrings.SentIntent.PLACE_ID, map.get(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID).toString());
-           intent.putExtra(RepoStrings.SentIntent.ADDRESS, map.get(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).toString());
-           intent.putExtra(RepoStrings.SentIntent.RATING, map.get(RepoStrings.FirebaseReference.RESTAURANT_RATING).toString());
-           intent.putExtra(RepoStrings.SentIntent.PHONE, map.get(RepoStrings.FirebaseReference.RESTAURANT_PHONE).toString());
-           intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, map.get(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL).toString());
-           intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, map.get(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL).toString());
+           intent.putExtra(Repo.SentIntent.RESTAURANT_NAME, map.get(Repo.FirebaseReference.RESTAURANT_NAME).toString());
+           intent.putExtra(Repo.SentIntent.RESTAURANT_TYPE, map.get(Repo.FirebaseReference.RESTAURANT_TYPE).toString());
+           intent.putExtra(Repo.SentIntent.PLACE_ID, map.get(Repo.FirebaseReference.RESTAURANT_PLACE_ID).toString());
+           intent.putExtra(Repo.SentIntent.ADDRESS, map.get(Repo.FirebaseReference.RESTAURANT_ADDRESS).toString());
+           intent.putExtra(Repo.SentIntent.RATING, map.get(Repo.FirebaseReference.RESTAURANT_RATING).toString());
+           intent.putExtra(Repo.SentIntent.PHONE, map.get(Repo.FirebaseReference.RESTAURANT_PHONE).toString());
+           intent.putExtra(Repo.SentIntent.WEBSITE_URL, map.get(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL).toString());
+           intent.putExtra(Repo.SentIntent.IMAGE_URL, map.get(Repo.FirebaseReference.RESTAURANT_IMAGE_URL).toString());
            return intent;
 
        } else {
@@ -270,7 +270,7 @@ public class UtilsGeneral {
         if (null != string) {
             return string;
         } else {
-            return RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+            return Repo.NOT_AVAILABLE_FOR_STRINGS;
         }
     }
 

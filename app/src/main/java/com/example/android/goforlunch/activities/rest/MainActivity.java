@@ -40,7 +40,7 @@ import com.example.android.goforlunch.fragments.FragmentCoworkers;
 import com.example.android.goforlunch.fragments.FragmentRestaurantListView;
 import com.example.android.goforlunch.fragments.FragmentRestaurantMapView;
 import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         navUserProfilePicture.setOnClickListener(profilePictureListener);
 
         if (savedInstanceState != null) {
-            flagToSpecifyCurrentFragment = savedInstanceState.getInt(RepoStrings.FLAG_SPECIFY_FRAGMENT, 0);
+            flagToSpecifyCurrentFragment = savedInstanceState.getInt(Repo.FLAG_SPECIFY_FRAGMENT, 0);
         }
 
         /* When we start main Activity, we always load map fragment
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "onStart: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
         UtilsGeneral.connectReceiver(MainActivity.this, receiver, intentFilter, this);
 
     }
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "onSaveInstanceState: called!");
-        outState.putInt(RepoStrings.FLAG_SPECIFY_FRAGMENT, flagToSpecifyCurrentFragment);
+        outState.putInt(Repo.FLAG_SPECIFY_FRAGMENT, flagToSpecifyCurrentFragment);
         super.onSaveInstanceState(outState);
 
     }
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                    fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                    fireDbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                     fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                 }
             }
@@ -361,22 +361,22 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
             for (DataSnapshot item :
                     dataSnapshot.getChildren()) {
 
-                if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
+                if (Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
                     /* We get the user information
                     * */
-                    userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
-                    userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                    userFirstName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                    userLastName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue()).toString();
                     userKey = item.getKey();
-                    userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
-                    userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
-                    UtilsGeneral.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userKey);
+                    userGroup = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString();
+                    userGroupKey = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                    UtilsGeneral.updateSharedPreferences(sharedPref, Repo.SharedPreferences.USER_ID_KEY, userKey);
 
                     /* We update Firebase according to the preference fragment
                      * (remember that the shared pref "notifications"
                      * was updated before thanks to firebase)
                      * */
-                    fireDbRefUserNotif = fireDb.getReference(RepoStrings.FirebaseReference.USERS).child(userKey).child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS);
+                    fireDbRefUserNotif = fireDb.getReference(Repo.FirebaseReference.USERS).child(userKey).child(Repo.FirebaseReference.USER_NOTIFICATIONS);
                     fireDbRefUserNotif.setValue(sharedPref.getBoolean(getResources().getString(R.string.pref_key_notifications), false));
 
                     /* We check that alarms are running
@@ -407,8 +407,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
             Log.d(TAG, "onDataChange: Internet is OK");
 
-            if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue() != null) {
-                if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
+            if (dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue() != null) {
+                if (dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
                     /* The user has not chosen a restaurant yet
                      * */
                     ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.navDrawerToastNotRestaurantYet));
@@ -507,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                                 ToastHelper.toastNoInternet(MainActivity.this);
 
                             } else {
-                                fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                fireDbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
                                 fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerNavLunch);
 
                             }

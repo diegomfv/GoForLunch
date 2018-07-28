@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -32,7 +31,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.example.android.goforlunch.R;
@@ -44,7 +42,6 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
-import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -59,8 +56,7 @@ import com.example.android.goforlunch.network.models.placetextsearch.Result;
 import com.example.android.goforlunch.network.remote.AllGoogleServices;
 import com.example.android.goforlunch.network.remote.GoogleService;
 import com.example.android.goforlunch.network.remote.GoogleServiceStreams;
-import com.example.android.goforlunch.constants.RepoConstants;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -93,7 +89,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -113,7 +108,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.example.android.goforlunch.utils.UtilsRemote.checkClosingTime;
-import static com.example.android.goforlunch.constants.RepoStrings.Keys.NEARBY_KEY;
+import static com.example.android.goforlunch.constants.Repo.Keys.NEARBY_KEY;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -261,7 +256,7 @@ public class FragmentRestaurantMapView extends Fragment {
          * */
         storage = new Storage(getActivity());
         mainPath = storage.getInternalFilesDirectory() + File.separator;
-        imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR;
+        imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR;
 
         /** Configure databases*/
         this.configureDatabases(getActivity());
@@ -302,7 +297,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
             if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                 dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -311,19 +306,19 @@ public class FragmentRestaurantMapView extends Fragment {
                         for (DataSnapshot item :
                                 dataSnapshot.getChildren()) {
 
-                            if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
+                            if (Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
-                                userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
-                                userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                                userFirstName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                                userLastName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue()).toString();
                                 userIdKey = item.getKey();
-                                userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
-                                userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
-                                UtilsGeneral.updateSharedPreferences(sharedPref, RepoStrings.SharedPreferences.USER_ID_KEY, userIdKey);
+                                userGroup = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString();
+                                userGroupKey = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                                UtilsGeneral.updateSharedPreferences(sharedPref, Repo.SharedPreferences.USER_ID_KEY, userIdKey);
 
                                 dbRefGroups = fireDb.getReference(
-                                        RepoStrings.FirebaseReference.GROUPS
+                                        Repo.FirebaseReference.GROUPS
                                                 + "/" + userGroupKey
-                                                + "/" + RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+                                                + "/" + Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED);
                                 dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -483,7 +478,7 @@ public class FragmentRestaurantMapView extends Fragment {
         switch (requestCode) {
 
             /* Location Permission request code */
-            case RepoConstants.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_: {
+            case Repo.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_: {
                 if (grantResults.length > 0) {
 
                     for (int i = 0; i < grantResults.length; i++) {
@@ -506,7 +501,7 @@ public class FragmentRestaurantMapView extends Fragment {
             } break;
 
             /* Write to storage request code */
-            case RepoConstants.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
+            case Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
                 accessInternalStorageGranted = false;
 
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -619,7 +614,7 @@ public class FragmentRestaurantMapView extends Fragment {
             }
 
         } else {
-            ActivityCompat.requestPermissions(getActivity(), permissions, RepoConstants.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_);
+            ActivityCompat.requestPermissions(getActivity(), permissions, Repo.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_);
 
         }
     }
@@ -680,14 +675,14 @@ public class FragmentRestaurantMapView extends Fragment {
                                         Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
                                         Map <String,Object> map = new HashMap<>();
-                                        map.put(RepoStrings.SentIntent.RESTAURANT_NAME, listOfAllRestaurantsInDatabase.get(i).getName());
-                                        map.put(RepoStrings.SentIntent.RESTAURANT_TYPE, listOfAllRestaurantsInDatabase.get(i).getType());
-                                        map.put(RepoStrings.SentIntent.PLACE_ID, listOfAllRestaurantsInDatabase.get(i).getPlaceId());
-                                        map.put(RepoStrings.SentIntent.ADDRESS, listOfAllRestaurantsInDatabase.get(i).getAddress());
-                                        map.put(RepoStrings.SentIntent.RATING, listOfAllRestaurantsInDatabase.get(i).getRating());
-                                        map.put(RepoStrings.SentIntent.PHONE, listOfAllRestaurantsInDatabase.get(i).getPhone());
-                                        map.put(RepoStrings.SentIntent.WEBSITE_URL, listOfAllRestaurantsInDatabase.get(i).getWebsiteUrl());
-                                        map.put(RepoStrings.SentIntent.IMAGE_URL, listOfAllRestaurantsInDatabase.get(i).getImageUrl());
+                                        map.put(Repo.SentIntent.RESTAURANT_NAME, listOfAllRestaurantsInDatabase.get(i).getName());
+                                        map.put(Repo.SentIntent.RESTAURANT_TYPE, listOfAllRestaurantsInDatabase.get(i).getType());
+                                        map.put(Repo.SentIntent.PLACE_ID, listOfAllRestaurantsInDatabase.get(i).getPlaceId());
+                                        map.put(Repo.SentIntent.ADDRESS, listOfAllRestaurantsInDatabase.get(i).getAddress());
+                                        map.put(Repo.SentIntent.RATING, listOfAllRestaurantsInDatabase.get(i).getRating());
+                                        map.put(Repo.SentIntent.PHONE, listOfAllRestaurantsInDatabase.get(i).getPhone());
+                                        map.put(Repo.SentIntent.WEBSITE_URL, listOfAllRestaurantsInDatabase.get(i).getWebsiteUrl());
+                                        map.put(Repo.SentIntent.IMAGE_URL, listOfAllRestaurantsInDatabase.get(i).getImageUrl());
 
                                         UtilsGeneral.fillIntentUsingMapInfo(intent, map);
 
@@ -907,7 +902,7 @@ public class FragmentRestaurantMapView extends Fragment {
         } else {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, RepoConstants.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION);
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION);
             }
         }
     }
@@ -1314,7 +1309,7 @@ public class FragmentRestaurantMapView extends Fragment {
                     placeIdDisposable =
                             GoogleServiceStreams.streamFetchPlaceById(
                                     listOfResults.get(i).getPlaceId(),
-                                    RepoStrings.Keys.PLACEID_KEY)
+                                    Repo.Keys.PLACEID_KEY)
                                     .subscribeWith(getPlaceByIdDisposableObserver());
 
                 }
@@ -1373,7 +1368,7 @@ public class FragmentRestaurantMapView extends Fragment {
                                     "imperial",
                                     "place_id:" + result.getPlaceId(),
                                     myPosition,
-                                    RepoStrings.Keys.MATRIX_DISTANCE_KEY)
+                                    Repo.Keys.MATRIX_DISTANCE_KEY)
                                     .subscribeWith(getDistanceMatrixDisposableObserver(result.getPlaceId()));
 
                     Log.d(TAG, "onNext: PLACEBYID: result.getPhotos() = " + result.getPhotos());
@@ -1392,7 +1387,7 @@ public class FragmentRestaurantMapView extends Fragment {
                                 GoogleService googleService = AllGoogleServices.getGooglePlacePhotoService();
                                 Call<ResponseBody> callPhoto = googleService.fetchDataPhoto( "400",
                                         result.getPhotos().get(0).getPhotoReference(),
-                                        RepoStrings.Keys.PHOTO_KEY);
+                                        Repo.Keys.PHOTO_KEY);
                                 callPhoto.enqueue(new Callback<ResponseBody>() {
                                     @Override
                                     public void onResponse(final Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -1551,7 +1546,7 @@ public class FragmentRestaurantMapView extends Fragment {
                         placeIdDisposable =
                                 GoogleServiceStreams.streamFetchPlaceById(
                                         listOfResults.get(i).getPlaceId(),
-                                        RepoStrings.Keys.PLACEID_KEY)
+                                        Repo.Keys.PLACEID_KEY)
                                         .subscribeWith(getPlaceByIdDisposableObserver());
 
                     }
@@ -1597,7 +1592,7 @@ public class FragmentRestaurantMapView extends Fragment {
                             arrayOfTypes[i] + "+" + "Restaurant",
                             myPosition,
                             20,
-                            RepoStrings.Keys.TEXTSEARCH_KEY)
+                            Repo.Keys.TEXTSEARCH_KEY)
                             .subscribeOn(Schedulers.io())
                             .observeOn(Schedulers.io())
                             .subscribeWith(getTextSearchDisposableObserver(

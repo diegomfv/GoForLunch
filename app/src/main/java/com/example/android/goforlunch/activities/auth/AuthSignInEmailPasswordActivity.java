@@ -24,7 +24,7 @@ import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -36,7 +36,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -197,7 +196,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
         UtilsGeneral.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
 
     }
@@ -237,11 +236,11 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         public void onClick(View view) {
 
             Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, AuthEnterNameActivity.class);
-            intent.putExtra(RepoStrings.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
-            intent.putExtra(RepoStrings.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
+            intent.putExtra(Repo.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
+            intent.putExtra(Repo.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
 
             //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
-            intent.putExtra(RepoStrings.SentIntent.FLAG, true);
+            intent.putExtra(Repo.SentIntent.FLAG, true);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }
@@ -313,7 +312,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
                                     /* We get the user notifications state in firebase to update Shared Preferences
                                     */
-                                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                                     dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -332,11 +331,11 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                                 /* We get the user
                                                  * */
                                                 if (inputEmail.getText().toString().equalsIgnoreCase(
-                                                        item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString())) {
+                                                        item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString())) {
 
-                                                    if (item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                                    if (item.child(Repo.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
                                                             .equals("")
-                                                            || item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                                            || item.child(Repo.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
                                                             .equals("false")) {
 
                                                         /* If notifications user information is "" or "false",

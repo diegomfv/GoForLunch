@@ -1,7 +1,7 @@
 package com.example.android.goforlunch.utils;
 
 import com.example.android.goforlunch.network.models.placebyid.Result;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 
 import java.util.Calendar;
 
@@ -26,8 +26,8 @@ public class UtilsRemote {
                         return UtilsGeneral.formatTime(result.getOpeningHours().getPeriods().get(i).getClose().getTime());
                     }
 
-                } return RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-            } else return RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-        } else return RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
+                } return Repo.NOT_AVAILABLE_FOR_STRINGS;
+            } else return Repo.NOT_AVAILABLE_FOR_STRINGS;
+        } else return Repo.NOT_AVAILABLE_FOR_STRINGS;
     }
 }

@@ -3,7 +3,7 @@ package com.example.android.goforlunch.constants;
 /**
  * Created by Diego Fajardo on 23/05/2018.
  */
-public interface RepoStrings {
+public interface Repo {
 
     String NOT_AVAILABLE_FOR_STRINGS = "";
 
@@ -108,6 +108,13 @@ public interface RepoStrings {
     interface Directories {
 
         String IMAGE_DIR = "imageDir";
+
+    }
+
+    interface RequestsCodes {
+
+        int REQ_CODE_LOCATION_PERMISSION_ = 1234;
+        int REQ_CODE_WRITE_EXTERNAL_PERMISSION = 1000;
 
     }
 

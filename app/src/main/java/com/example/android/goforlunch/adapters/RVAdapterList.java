@@ -19,7 +19,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.UtilsGeneral;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.snatik.storage.Storage;
 
 import java.io.File;
@@ -66,7 +66,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         this.glide = glide;
         this.storage = new Storage(mContext);
         this.mainPath = storage.getInternalFilesDirectory() + File.separator;
-        this.imageDirPath = mainPath + File.separator + RepoStrings.Directories.IMAGE_DIR + File.separator;
+        this.imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR + File.separator;
         this.mShortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 
@@ -205,7 +205,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         private Float getRating (int position) {
 
             if (listOfRestaurants.get(position).getRating() != null
-                    && !listOfRestaurants.get(position).getRating().equals(RepoStrings.NOT_AVAILABLE_FOR_STRINGS)) {
+                    && !listOfRestaurants.get(position).getRating().equals(Repo.NOT_AVAILABLE_FOR_STRINGS)) {
                 return UtilsGeneral.adaptRating(Float.parseFloat(listOfRestaurants.get(position).getRating()));
 
             } else {

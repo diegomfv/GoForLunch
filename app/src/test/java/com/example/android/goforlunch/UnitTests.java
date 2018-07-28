@@ -2,7 +2,7 @@ package com.example.android.goforlunch;
 
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.utils.UtilsGeneral;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -99,15 +99,15 @@ public class UnitTests {
         Random rand = new Random();
         int r = rand.nextInt(12) + 1;
 
-        String type = RepoStrings.NOT_AVAILABLE_FOR_STRINGS;
-        String urlTypePart = RepoStrings.RESTAURANT_TYPES[r].substring(0,4);
+        String type = Repo.NOT_AVAILABLE_FOR_STRINGS;
+        String urlTypePart = Repo.RESTAURANT_TYPES[r].substring(0,4);
 
-        for (int i = 1; i < RepoStrings.RESTAURANT_TYPES.length ; i++) {
+        for (int i = 1; i < Repo.RESTAURANT_TYPES.length ; i++) {
 
-            System.out.println(RepoStrings.RESTAURANT_TYPES[i].substring(0,4));
+            System.out.println(Repo.RESTAURANT_TYPES[i].substring(0,4));
 
-            if (urlTypePart.equals(RepoStrings.RESTAURANT_TYPES[i].substring(0,4))){
-                type = RepoStrings.RESTAURANT_TYPES[i];
+            if (urlTypePart.equals(Repo.RESTAURANT_TYPES[i].substring(0,4))){
+                type = Repo.RESTAURANT_TYPES[i];
             }
         }
 
@@ -458,21 +458,21 @@ public class UnitTests {
         Map <String, Object> mapOfLists = new HashMap<>();
         List<String> list;
 
-        for (int i = 0; i < RepoStrings.RESTAURANT_TYPES.length ; i++) {
+        for (int i = 0; i < Repo.RESTAURANT_TYPES.length ; i++) {
 
             list = new ArrayList<>();
 
-            for (int j = 0; j < RepoStrings.RESTAURANT_TYPES.length; j++) {
+            for (int j = 0; j < Repo.RESTAURANT_TYPES.length; j++) {
 
-                if (RepoStrings.RESTAURANT_TYPES[i].equalsIgnoreCase(RepoStrings.RESTAURANT_TYPES[j])){
+                if (Repo.RESTAURANT_TYPES[i].equalsIgnoreCase(Repo.RESTAURANT_TYPES[j])){
 
-                    list.add(RepoStrings.RESTAURANT_TYPES[i]);
+                    list.add(Repo.RESTAURANT_TYPES[i]);
 
                 }
 
             }
 
-            mapOfLists.put(RepoStrings.RESTAURANT_TYPES[i], list);
+            mapOfLists.put(Repo.RESTAURANT_TYPES[i], list);
 
         }
 

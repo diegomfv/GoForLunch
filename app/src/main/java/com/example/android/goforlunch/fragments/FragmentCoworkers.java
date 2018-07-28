@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
@@ -22,11 +21,10 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.adapters.RVAdapterCoworkers;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
@@ -52,7 +50,6 @@ import java.util.Observer;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import io.reactivex.observers.DisposableObserver;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -136,7 +133,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         /* Configure toolbar */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
 
-        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+        userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
         listOfCoworkers = new ArrayList<>();
 
@@ -210,7 +207,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
                 if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                    dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsersGetUserInfo = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                     dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                 }
             }
@@ -244,15 +241,15 @@ public class FragmentCoworkers extends Fragment implements Observer {
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-            userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
-            userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
-            userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
-            userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
-            userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+            userFirstName = dataSnapshot.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue().toString();
+            userLastName = dataSnapshot.child(Repo.FirebaseReference.USER_LAST_NAME).getValue().toString();
+            userEmail = dataSnapshot.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString();
+            userGroup = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP).getValue().toString();
+            userGroupKey = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue().toString();
 
             /* We fill the list of the coworkers using the group of the user
              *  */
-            dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+            dbRefUsersGetUserInfo = fireDb.getReference(Repo.FirebaseReference.USERS);
             dbRefUsersGetUserInfo.addValueEventListener(valueEventListenerGetCoworkers);
 
         }
@@ -322,7 +319,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
                         Log.d(TAG, "onItemClicked: item(" + position + ") clicked!");
 
                         if (null == adapter.getUser(position).getRestaurantName()
-                                || adapter.getUser(position).getRestaurantName().equalsIgnoreCase(RepoStrings.NOT_AVAILABLE_FOR_STRINGS)) {
+                                || adapter.getUser(position).getRestaurantName().equalsIgnoreCase(Repo.NOT_AVAILABLE_FOR_STRINGS)) {
 
                             if (null != getActivity()) {
                                 ToastHelper.toastShort(getActivity(), getActivity().getResources().getString(R.string.noInfoAvailable));
@@ -346,7 +343,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
 
         if (getActivity() != null) {
             UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
@@ -387,14 +384,14 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
         Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
-        intent.putExtra(RepoStrings.SentIntent.PLACE_ID, adapter.getUser(position).getPlaceId());
-        intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, adapter.getUser(position).getImageUrl());
-        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, adapter.getUser(position).getRestaurantName());
-        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, adapter.getUser(position).getRestaurantType());
-        intent.putExtra(RepoStrings.SentIntent.ADDRESS, adapter.getUser(position).getAddress());
-        intent.putExtra(RepoStrings.SentIntent.RATING, adapter.getUser(position).getRating());
-        intent.putExtra(RepoStrings.SentIntent.PHONE, adapter.getUser(position).getPhone());
-        intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, adapter.getUser(position).getWebsiteUrl());
+        intent.putExtra(Repo.SentIntent.PLACE_ID, adapter.getUser(position).getPlaceId());
+        intent.putExtra(Repo.SentIntent.IMAGE_URL, adapter.getUser(position).getImageUrl());
+        intent.putExtra(Repo.SentIntent.RESTAURANT_NAME, adapter.getUser(position).getRestaurantName());
+        intent.putExtra(Repo.SentIntent.RESTAURANT_TYPE, adapter.getUser(position).getRestaurantType());
+        intent.putExtra(Repo.SentIntent.ADDRESS, adapter.getUser(position).getAddress());
+        intent.putExtra(Repo.SentIntent.RATING, adapter.getUser(position).getRating());
+        intent.putExtra(Repo.SentIntent.PHONE, adapter.getUser(position).getPhone());
+        intent.putExtra(Repo.SentIntent.WEBSITE_URL, adapter.getUser(position).getWebsiteUrl());
 
         return intent;
 

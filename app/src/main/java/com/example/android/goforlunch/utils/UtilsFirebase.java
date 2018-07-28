@@ -13,7 +13,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.network.models.pojo.User;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -47,14 +47,14 @@ public class UtilsFirebase {
         // TODO: 28/05/2018 Take care, if sth is null it will be deleted from the database because it won't be added to the map
 
         Map<String, Object> map = new HashMap<>();
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, "");
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_NAME, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_ADDRESS, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_PLACE_ID, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_RATING, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_TYPE, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_IMAGE_URL, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_PHONE, "");
+        map.put(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL, "");
 
         dbRef.updateChildren(map);
         return true;
@@ -73,13 +73,13 @@ public class UtilsFirebase {
                                                     String userRestaurantInfo) {
 
         Map <String, Object> map = new HashMap<>();
-        map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, firstName);
-        map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, lastName);
-        map.put(RepoStrings.FirebaseReference.USER_EMAIL, email);
-        map.put(RepoStrings.FirebaseReference.USER_GROUP, group);
-        map.put(RepoStrings.FirebaseReference.USER_GROUP_KEY, groupKey);
-        map.put(RepoStrings.FirebaseReference.USER_NOTIFICATIONS, notifications);
-        map.put(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO, userRestaurantInfo);
+        map.put(Repo.FirebaseReference.USER_FIRST_NAME, firstName);
+        map.put(Repo.FirebaseReference.USER_LAST_NAME, lastName);
+        map.put(Repo.FirebaseReference.USER_EMAIL, email);
+        map.put(Repo.FirebaseReference.USER_GROUP, group);
+        map.put(Repo.FirebaseReference.USER_GROUP_KEY, groupKey);
+        map.put(Repo.FirebaseReference.USER_NOTIFICATIONS, notifications);
+        map.put(Repo.FirebaseReference.USER_RESTAURANT_INFO, userRestaurantInfo);
 
         dbRef.updateChildren(map);
         return true;
@@ -99,14 +99,14 @@ public class UtilsFirebase {
                                                                String websiteUrl) {
 
         Map <String, Object> map = new HashMap<>();
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, address);
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, imageUrl);
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, phone);
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, placeId);
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, rating);
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, restaurantName);
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, restaurantType);
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, websiteUrl);
+        map.put(Repo.FirebaseReference.RESTAURANT_ADDRESS, address);
+        map.put(Repo.FirebaseReference.RESTAURANT_IMAGE_URL, imageUrl);
+        map.put(Repo.FirebaseReference.RESTAURANT_PHONE, phone);
+        map.put(Repo.FirebaseReference.RESTAURANT_PLACE_ID, placeId);
+        map.put(Repo.FirebaseReference.RESTAURANT_RATING, rating);
+        map.put(Repo.FirebaseReference.RESTAURANT_NAME, restaurantName);
+        map.put(Repo.FirebaseReference.RESTAURANT_TYPE, restaurantType);
+        map.put(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL, websiteUrl);
 
         dbRef.updateChildren(map);
         return true;
@@ -119,14 +119,14 @@ public class UtilsFirebase {
 
         Map <String, Object> map = new HashMap<>();
 
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_RATING).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_PHONE).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL).getValue().toString());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_NAME, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_TYPE, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_TYPE).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_ADDRESS, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_RATING, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_RATING).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_PLACE_ID, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_PLACE_ID).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_PHONE, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_PHONE).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_IMAGE_URL, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_IMAGE_URL).getValue().toString());
+        map.put(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL, dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue().toString());
 
         return map;
     }
@@ -137,14 +137,14 @@ public class UtilsFirebase {
 
         Map<String, Object> map = new HashMap<>();
 
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_NAME, restaurant.getName());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_TYPE, restaurant.getType());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS, restaurant.getAddress());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_RATING, restaurant.getRating());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID, restaurant.getPlaceId());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_PHONE, restaurant.getPhone());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL, restaurant.getImageUrl());
-        map.put(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL, restaurant.getWebsiteUrl());
+        map.put(Repo.FirebaseReference.RESTAURANT_NAME, restaurant.getName());
+        map.put(Repo.FirebaseReference.RESTAURANT_TYPE, restaurant.getType());
+        map.put(Repo.FirebaseReference.RESTAURANT_ADDRESS, restaurant.getAddress());
+        map.put(Repo.FirebaseReference.RESTAURANT_RATING, restaurant.getRating());
+        map.put(Repo.FirebaseReference.RESTAURANT_PLACE_ID, restaurant.getPlaceId());
+        map.put(Repo.FirebaseReference.RESTAURANT_PHONE, restaurant.getPhone());
+        map.put(Repo.FirebaseReference.RESTAURANT_IMAGE_URL, restaurant.getImageUrl());
+        map.put(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL, restaurant.getWebsiteUrl());
 
         return map;
     }
@@ -200,39 +200,39 @@ public class UtilsFirebase {
         for (DataSnapshot item :
                 dataSnapshot.getChildren()) {
 
-            if (item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString().equalsIgnoreCase(group)
-                    && !item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(email)) {
+            if (item.child(Repo.FirebaseReference.USER_GROUP).getValue().toString().equalsIgnoreCase(group)
+                    && !item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(email)) {
 
                 User.Builder builder = new User.Builder();
 
                 /* User personal info
                 * */
-                builder.setFirstName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString());
-                builder.setLastName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString());
-                builder.setEmail(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString());
-                builder.setGroup(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString());
+                builder.setFirstName(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue()).toString());
+                builder.setLastName(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue()).toString());
+                builder.setEmail(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString());
+                builder.setGroup(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString());
 
                 /* User Restaurant info
                 * */
-                builder.setAddress(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue()).toString());
-                builder.setImageUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_IMAGE_URL).getValue()).toString());
-                builder.setPhone(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_PHONE).getValue()).toString());
-                builder.setPlaceId(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_PLACE_ID).getValue()).toString());
-                builder.setRating(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_RATING).getValue()).toString());
-                builder.setRestaurantName(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
-                builder.setWebsiteUrl(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue()).toString());
+                builder.setAddress(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_ADDRESS).getValue()).toString());
+                builder.setImageUrl(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_IMAGE_URL).getValue()).toString());
+                builder.setPhone(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_PHONE).getValue()).toString());
+                builder.setPlaceId(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_PLACE_ID).getValue()).toString());
+                builder.setRating(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_RATING).getValue()).toString());
+                builder.setRestaurantName(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
+                builder.setWebsiteUrl(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue()).toString());
 
                 /* We get the type from the int and convert it to string
                 * */
-                builder.setRestaurantType(setTypeIfPossible(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_TYPE).getValue()).toString()));
+                builder.setRestaurantType(setTypeIfPossible(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_TYPE).getValue()).toString()));
 
                 listOfUsers.add(builder.create());
             }
@@ -253,13 +253,13 @@ public class UtilsFirebase {
         for (DataSnapshot item :
                 dataSnapshot.getChildren()) {
 
-            if (item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString().equalsIgnoreCase(userGroup)
-                    && item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO).child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase(intentRestaurant)
-                    && !item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
+            if (item.child(Repo.FirebaseReference.USER_GROUP).getValue().toString().equalsIgnoreCase(userGroup)
+                    && item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO).child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase(intentRestaurant)
+                    && !item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
 
-                listOfCoworkers.add(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString()
+                listOfCoworkers.add(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue().toString()
                         + " "
-                        + item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString());
+                        + item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue().toString());
 
             }
         }
@@ -276,8 +276,8 @@ public class UtilsFirebase {
         for (DataSnapshot item :
                 dataSnapshot.getChildren()) {
 
-            if (item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue() != null) {
-                listOfGroups.add(item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue().toString());
+            if (item.child(Repo.FirebaseReference.GROUP_NAME).getValue() != null) {
+                listOfGroups.add(item.child(Repo.FirebaseReference.GROUP_NAME).getValue().toString());
             }
 
         }
@@ -293,7 +293,7 @@ public class UtilsFirebase {
         for (DataSnapshot item :
                 dataSnapshot.getChildren()) {
 
-            if (item.child(RepoStrings.FirebaseReference.GROUP_NAME).getValue().toString().equalsIgnoreCase(group)) {
+            if (item.child(Repo.FirebaseReference.GROUP_NAME).getValue().toString().equalsIgnoreCase(group)) {
                 return item.getKey();
 
             }

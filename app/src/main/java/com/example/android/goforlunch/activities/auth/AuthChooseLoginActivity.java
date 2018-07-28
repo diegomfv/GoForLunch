@@ -21,7 +21,7 @@ import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -276,7 +276,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
         UtilsGeneral.connectReceiver(AuthChooseLoginActivity.this, receiver, intentFilter, this);
 
     }
@@ -321,7 +321,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
             Intent intent = new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class);
 
             //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
-            intent.putExtra(RepoStrings.SentIntent.FLAG, true);
+            intent.putExtra(Repo.SentIntent.FLAG, true);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
@@ -574,7 +574,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
              * If the user does, we launch Main Activity directly.
              * If the user does not, we create the user and launch Main Activity
              * */
-            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+            dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
             dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -592,16 +592,16 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                         /* If the email of the user exists in the database, it's the user
                          * */
                         if (user.getEmail().equalsIgnoreCase(
-                                item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString())) {
+                                item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString())) {
 
                             userExists = true;
 
                             /* We get the notifications information and will use it to update SharedPreferences.
                              */
 
-                            if (item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                            if (item.child(Repo.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
                                     .equals("")
-                                    || item.child(RepoStrings.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
+                                    || item.child(Repo.FirebaseReference.USER_NOTIFICATIONS).getValue().toString()
                                     .equals("false")) {
 
                                 /* If notifications user information is "" or "false",
@@ -622,12 +622,12 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
                         /* User does not exist. We create the user in firebase and launch MainActivity
                          * */
-                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                         String userKey = dbRefUsers.push().getKey();
 
                         String[] names = UtilsGeneral.getFirstNameAndLastName(user.getDisplayName());
 
-                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                         UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
                                 names[0],
                                 names[1],
@@ -638,9 +638,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                                 "");
 
                         dbRefUsers = fireDb.getReference(
-                                RepoStrings.FirebaseReference.USERS
+                                Repo.FirebaseReference.USERS
                                         + "/" + userKey
-                                        + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                        + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
                                 "",
                                 "",

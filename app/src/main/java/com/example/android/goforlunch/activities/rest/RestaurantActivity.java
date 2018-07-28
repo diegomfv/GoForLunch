@@ -39,7 +39,7 @@ import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.adapters.RVAdapterRestaurant;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -162,7 +162,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         fireDb = FirebaseDatabase.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
-        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+        userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
         glide = Glide.with(context);
 
@@ -183,14 +183,14 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         /* We get the list of coworkers that will go to this Restaurant.
          * They will be displayed in the recyclerView
          * */
-        dbRefUsersGetList = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+        dbRefUsersGetList = fireDb.getReference(Repo.FirebaseReference.USERS);
         dbRefUsersGetList.addValueEventListener(valueEventListenerGetListOfCoworkers);
 
         /* We get the intent to display the information
          * */
         intent = getIntent();
         fillUIUsingIntent(intent);
-        intentRestaurantName = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME);
+        intentRestaurantName = intent.getStringExtra(Repo.SentIntent.RESTAURANT_NAME);
 
         Anim.showCrossFadeShortAnimation(recyclerView);
 
@@ -202,7 +202,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onStart: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
         UtilsGeneral.connectReceiver(RestaurantActivity.this, receiver, intentFilter, this);
 
     }
@@ -295,7 +295,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                 if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                     dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                 }
             }
@@ -332,7 +332,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                         /* We delete the restaurant from the database (user's)
                          **/
-                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
 
                         ToastHelper.toastShort(context, getResources().getString(R.string.restaurantNotGoing));
@@ -350,19 +350,19 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                         /* We add the restaurant to the database (user's)
                          * */
-                        dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
-                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.ADDRESS)),
-                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.IMAGE_URL)),
-                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PHONE)),
-                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.PLACE_ID)),
-                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RATING)),
-                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME)),
-                                getIntent().getIntExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, 0),
-                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(RepoStrings.SentIntent.WEBSITE_URL))
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.ADDRESS)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.IMAGE_URL)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.PHONE)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.PLACE_ID)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.RATING)),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.RESTAURANT_NAME)),
+                                getIntent().getIntExtra(Repo.SentIntent.RESTAURANT_TYPE, 0),
+                                UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.WEBSITE_URL))
                         );
 
-                        ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + " " + intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) + "!");
+                        ToastHelper.toastShort(context, getResources().getString(R.string.restaurantGoing) + " " + intent.getStringExtra(Repo.SentIntent.RESTAURANT_NAME) + "!");
                     }
                 }
             }
@@ -424,13 +424,13 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-            userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
-            userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
-            userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
-            userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
-            userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
-            userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                    .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
+            userFirstName = dataSnapshot.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue().toString();
+            userLastName = dataSnapshot.child(Repo.FirebaseReference.USER_LAST_NAME).getValue().toString();
+            userEmail = dataSnapshot.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString();
+            userGroup = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP).getValue().toString();
+            userGroupKey = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+            userRestaurant = dataSnapshot.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                    .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString();
 
             setFabButtonState(intentRestaurantName);
 
@@ -522,7 +522,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
             accessToInternalStorageGranted = true;
             storage = new Storage(context);
             mainPath = storage.getInternalFilesDirectory() + File.separator;
-            imageDirPath = mainPath + RepoStrings.Directories.IMAGE_DIR + File.separator;
+            imageDirPath = mainPath + Repo.Directories.IMAGE_DIR + File.separator;
 
             Log.d(TAG, "configureInternalStorage: mainPath = " + mainPath);
             Log.d(TAG, "configureInternalStorage: imageDirPath = " + imageDirPath);
@@ -537,15 +537,15 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     private boolean fillUIUsingIntent(Intent intent) {
         Log.d(TAG, "fillUIUsingIntent: called!");
 
-        if (intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME) == null
-                || intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME).equals("")) {
+        if (intent.getStringExtra(Repo.SentIntent.RESTAURANT_NAME) == null
+                || intent.getStringExtra(Repo.SentIntent.RESTAURANT_NAME).equals("")) {
 
             tvRestName.setText(getResources().getString(R.string.restaurantNameNotAvailable));
 
         } else {
 
             StringBuilder displayedName = new StringBuilder();
-            String tokens[] = intent.getStringExtra(RepoStrings.SentIntent.RESTAURANT_NAME).split(" ");
+            String tokens[] = intent.getStringExtra(Repo.SentIntent.RESTAURANT_NAME).split(" ");
 
             for (int i = 0; i < tokens.length; i++) {
                 if (displayedName.length() < 27) {
@@ -566,29 +566,29 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
             tvRestName.setText(transformedName);
         }
 
-        if (intent.getStringExtra(RepoStrings.SentIntent.ADDRESS) == null
-                || intent.getStringExtra(RepoStrings.SentIntent.ADDRESS).equals("")) {
+        if (intent.getStringExtra(Repo.SentIntent.ADDRESS) == null
+                || intent.getStringExtra(Repo.SentIntent.ADDRESS).equals("")) {
 
             tvRestAddress.setText(getResources().getString(R.string.restaurantAddressNotAvailable));
 
         } else {
 
-            tvRestAddress.setText(intent.getStringExtra(RepoStrings.SentIntent.ADDRESS));
+            tvRestAddress.setText(intent.getStringExtra(Repo.SentIntent.ADDRESS));
         }
 
-        if (intent.getStringExtra(RepoStrings.SentIntent.RATING) == null
-                || intent.getStringExtra(RepoStrings.SentIntent.RATING).equals("")) {
+        if (intent.getStringExtra(Repo.SentIntent.RATING) == null
+                || intent.getStringExtra(Repo.SentIntent.RATING).equals("")) {
 
             rbRestRating.setRating(0f);
 
         } else {
 
-            float rating = Float.parseFloat(intent.getStringExtra(RepoStrings.SentIntent.RATING));
+            float rating = Float.parseFloat(intent.getStringExtra(Repo.SentIntent.RATING));
             rbRestRating.setRating(rating);
         }
 
-        phoneToastString = intent.getStringExtra(RepoStrings.SentIntent.PHONE);
-        webUrlToastString = intent.getStringExtra(RepoStrings.SentIntent.WEBSITE_URL);
+        phoneToastString = intent.getStringExtra(Repo.SentIntent.PHONE);
+        webUrlToastString = intent.getStringExtra(Repo.SentIntent.WEBSITE_URL);
 
         if (accessToInternalStorageGranted) {
             loadImage(intent);
@@ -610,9 +610,9 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
         //if file exists in the directory -> load with storage
         if (storage.isFileExist(
-                imageDirPath + intent.getStringExtra(RepoStrings.SentIntent.PLACE_ID))) {
+                imageDirPath + intent.getStringExtra(Repo.SentIntent.PLACE_ID))) {
             Log.d(TAG, "loadImage: file does exist in the directory");
-            getAndDisplayImageFromInternalStorage(imageDirPath + intent.getStringExtra((RepoStrings.SentIntent.PLACE_ID)));
+            getAndDisplayImageFromInternalStorage(imageDirPath + intent.getStringExtra((Repo.SentIntent.PLACE_ID)));
 
             showMainContent(progressBarContent, mainContent);
 
@@ -630,10 +630,10 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     private void loadImageWithUrl (Intent intent) {
         Log.d(TAG, "loadImageWithUrl: called!");
 
-        Log.i(TAG, "loadImageWithUrl: " + intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL));
+        Log.i(TAG, "loadImageWithUrl: " + intent.getStringExtra(Repo.SentIntent.IMAGE_URL));
 
-        if (intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL) == null
-                || intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL).equals("")) {
+        if (intent.getStringExtra(Repo.SentIntent.IMAGE_URL) == null
+                || intent.getStringExtra(Repo.SentIntent.IMAGE_URL).equals("")) {
             Log.d(TAG, "loadImageWithUrl: image is null");
 
             glide.load(R.drawable.lunch_image).into(ivRestPicture);
@@ -643,7 +643,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         } else {
             Log.d(TAG, "loadImageWithUrl: image is not null or empty");
 
-            glide.load(intent.getStringExtra(RepoStrings.SentIntent.IMAGE_URL)).into(ivRestPicture);
+            glide.load(intent.getStringExtra(Repo.SentIntent.IMAGE_URL)).into(ivRestPicture);
 
             showMainContent(progressBarContent, mainContent);
 

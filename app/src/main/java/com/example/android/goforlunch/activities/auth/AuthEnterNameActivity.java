@@ -34,7 +34,7 @@ import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -142,7 +142,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
         fireStorage = FirebaseStorage.getInstance();
         stRefMain = fireStorage.getReference();
-        stRefImageDir = stRefMain.child(RepoStrings.Directories.IMAGE_DIR);
+        stRefImageDir = stRefMain.child(Repo.Directories.IMAGE_DIR);
 
         /////////////////////////////////////////////
         /* We set the content view
@@ -164,11 +164,11 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         final Intent intent = getIntent();
         if (intent != null) {
 
-            if (intent.getStringExtra(RepoStrings.SentIntent.EMAIL) != null
-                    && intent.getStringExtra(RepoStrings.SentIntent.PASSWORD) != null) {
+            if (intent.getStringExtra(Repo.SentIntent.EMAIL) != null
+                    && intent.getStringExtra(Repo.SentIntent.PASSWORD) != null) {
 
-                email = intent.getStringExtra(RepoStrings.SentIntent.EMAIL);
-                password = intent.getStringExtra(RepoStrings.SentIntent.PASSWORD);
+                email = intent.getStringExtra(Repo.SentIntent.EMAIL);
+                password = intent.getStringExtra(Repo.SentIntent.PASSWORD);
 
                 inputEmail.setText(email);
                 inputPassword.setText(password);
@@ -252,7 +252,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
             /* We get the emails
             when internet comes back
             */
-            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+            dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
             dbRefUsers.addValueEventListener(valueEventListenerGetEmails);
 
         }
@@ -319,7 +319,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
         UtilsGeneral.connectReceiver(AuthEnterNameActivity.this, receiver, intentFilter, this);
 
     }
@@ -418,7 +418,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
             for (DataSnapshot item :
                     dataSnapshot.getChildren()) {
 
-                listOfEmails.add(Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().toLowerCase().trim());
+                listOfEmails.add(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString().toLowerCase().trim());
 
             }
 
@@ -558,11 +558,11 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                                                     } else {
                                                         Log.d(TAG, "onComplete: task was successful");
 
-                                                        dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                                                        dbRefNewUser = fireDb.getReference(Repo.FirebaseReference.USERS);
 
                                                         String userKey = dbRefNewUser.push().getKey();
 
-                                                        dbRefNewUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS
+                                                        dbRefNewUser = fireDb.getReference(Repo.FirebaseReference.USERS
                                                                 + "/" + userKey);
 
                                                         UtilsFirebase.updateUserInfoInFirebase(dbRefNewUser,
@@ -575,9 +575,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                                                                 "");
 
                                                         dbRefNewUser = fireDb.getReference(
-                                                                RepoStrings.FirebaseReference.USERS
+                                                                Repo.FirebaseReference.USERS
                                                                         + "/" + userKey
-                                                                        + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                                                        + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
 
                                                         UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefNewUser,
                                                                 "",

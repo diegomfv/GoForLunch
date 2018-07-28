@@ -19,7 +19,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -94,24 +94,24 @@ public class NotificationDailyJob extends DailyJob {
                             fireDb = FirebaseDatabase.getInstance();
                             sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-                            userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+                            userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
-                            fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
+                            fireDbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS)
                                     .child(userKey)
-                                    .child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                                    .child(Repo.FirebaseReference.USER_RESTAURANT_INFO);
                             fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                                    if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null &&
-                                            dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString() != null) {
+                                    if (dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null &&
+                                            dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString() != null) {
 
                                         /* If there is restaurant info available,
                                         * we create the notification
                                         * */
-                                        createNotification(dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
-                                                dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
+                                        createNotification(dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString(),
+                                                dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_ADDRESS).getValue().toString());
 
                                     }
                                 }
@@ -167,7 +167,7 @@ public class NotificationDailyJob extends DailyJob {
     private void createNotification (final String title, final String address) {
         Log.d(TAG, "createNotification: called!");
 
-        fireDbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey + "/" + RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+        fireDbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
         fireDbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -190,8 +190,8 @@ public class NotificationDailyJob extends DailyJob {
                 * If there is a restaurant linked to the user, we continue with the process.
                 * If not, we stop the process
                 * */
-                if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue() != null) {
-                    if (dataSnapshot.child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
+                if (dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue() != null) {
+                    if (dataSnapshot.child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")) {
                         //do nothing because there is no restaurant chosen
 
                     } else {

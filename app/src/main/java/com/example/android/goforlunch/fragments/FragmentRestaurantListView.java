@@ -43,7 +43,7 @@ import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.adapters.RVAdapterList;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.utils.ItemClickSupport;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -256,13 +256,13 @@ public class FragmentRestaurantListView extends Fragment {
 
                         if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                            dbRefUsersGetUserInfo = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                            dbRefUsersGetUserInfo = fireDb.getReference(Repo.FirebaseReference.USERS);
                             dbRefUsersGetUserInfo.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                         }
 
                     }
 
-                    dbRefUsersGetListOfRestaurantsByCoworkers = fireDb.getReference(RepoStrings.FirebaseReference.USERS);
+                    dbRefUsersGetListOfRestaurantsByCoworkers = fireDb.getReference(Repo.FirebaseReference.USERS);
                     dbRefUsersGetListOfRestaurantsByCoworkers.addValueEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
 
                 } else {
@@ -362,13 +362,13 @@ public class FragmentRestaurantListView extends Fragment {
             for (DataSnapshot item :
                     dataSnapshot.getChildren()) {
 
-                if (Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
+                if (Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
-                    userFirstName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
-                    userLastName = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue()).toString();
+                    userFirstName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
+                    userLastName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue()).toString();
                     userKey = item.getKey();
-                    userGroup = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP).getValue()).toString();
-                    userGroupKey = Objects.requireNonNull(item.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+                    userGroup = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString();
+                    userGroupKey = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
                 }
             }
         }
@@ -390,18 +390,18 @@ public class FragmentRestaurantListView extends Fragment {
             for (DataSnapshot item :
                     dataSnapshot.getChildren()) {
 
-                if (item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null
-                        && !item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")
-                        && !item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
+                if (item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null
+                        && !item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")
+                        && !item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
 
                     /** We create a list with all the restaurants that the users are going to.
                      * If several coworkers are going to the same restaurant, it will appear in the UI
                      * */
-                    Log.d(TAG, "onDataChange: " + item.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString());
-                    listOfRestaurantsByCoworker.add(item.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString());
+                    Log.d(TAG, "onDataChange: " + item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString());
+                    listOfRestaurantsByCoworker.add(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                            .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString());
 
                 }
             }
@@ -524,7 +524,7 @@ public class FragmentRestaurantListView extends Fragment {
                         Log.d(TAG, "onItemClicked: item(" + position + ") clicked!");
 
                         if (null == adapter.getRestaurant(position).getName()
-                                || adapter.getRestaurant(position).getName().equalsIgnoreCase(RepoStrings.NOT_AVAILABLE_FOR_STRINGS)) {
+                                || adapter.getRestaurant(position).getName().equalsIgnoreCase(Repo.NOT_AVAILABLE_FOR_STRINGS)) {
 
                             if (null != getActivity()) {
                                 ToastHelper.toastShort(getActivity(), getActivity().getResources().getString(R.string.noInfoAvailable));
@@ -698,14 +698,14 @@ public class FragmentRestaurantListView extends Fragment {
 
         Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
-        intent.putExtra(RepoStrings.SentIntent.PLACE_ID, adapter.getRestaurant(position).getPlaceId());
-        intent.putExtra(RepoStrings.SentIntent.IMAGE_URL, adapter.getRestaurant(position).getImageUrl());
-        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_NAME, adapter.getRestaurant(position).getName());
-        intent.putExtra(RepoStrings.SentIntent.RESTAURANT_TYPE, adapter.getRestaurant(position).getType());
-        intent.putExtra(RepoStrings.SentIntent.ADDRESS, adapter.getRestaurant(position).getAddress());
-        intent.putExtra(RepoStrings.SentIntent.RATING, adapter.getRestaurant(position).getRating());
-        intent.putExtra(RepoStrings.SentIntent.PHONE, adapter.getRestaurant(position).getPhone());
-        intent.putExtra(RepoStrings.SentIntent.WEBSITE_URL, adapter.getRestaurant(position).getWebsiteUrl());
+        intent.putExtra(Repo.SentIntent.PLACE_ID, adapter.getRestaurant(position).getPlaceId());
+        intent.putExtra(Repo.SentIntent.IMAGE_URL, adapter.getRestaurant(position).getImageUrl());
+        intent.putExtra(Repo.SentIntent.RESTAURANT_NAME, adapter.getRestaurant(position).getName());
+        intent.putExtra(Repo.SentIntent.RESTAURANT_TYPE, adapter.getRestaurant(position).getType());
+        intent.putExtra(Repo.SentIntent.ADDRESS, adapter.getRestaurant(position).getAddress());
+        intent.putExtra(Repo.SentIntent.RATING, adapter.getRestaurant(position).getRating());
+        intent.putExtra(Repo.SentIntent.PHONE, adapter.getRestaurant(position).getPhone());
+        intent.putExtra(Repo.SentIntent.WEBSITE_URL, adapter.getRestaurant(position).getWebsiteUrl());
 
         return intent;
 

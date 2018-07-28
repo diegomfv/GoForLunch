@@ -8,7 +8,7 @@ import android.util.Log;
 import com.evernote.android.job.DailyJob;
 import com.evernote.android.job.JobRequest;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -52,7 +52,7 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
 
         /* We get the user key
         * */
-        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+        userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
         /* We add the restaurant as a visited restaurant to the database and delete the restaurant info
         * of the user
@@ -87,7 +87,7 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
 
         } else {
 
-            fireDbRefUser = fireDb.getReference(RepoStrings.FirebaseReference.USERS)
+            fireDbRefUser = fireDb.getReference(Repo.FirebaseReference.USERS)
                     .child(userKey);
 
             fireDbRefUser.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -95,9 +95,9 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-                    userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
-                    userRestaurant = dataSnapshot.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO)
-                            .child(RepoStrings.FirebaseReference.RESTAURANT_NAME).getValue().toString();
+                    userGroupKey = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+                    userRestaurant = dataSnapshot.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                            .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString();
 
                     if (userGroupKey == null) {
                         //do nothing because the user has no group
@@ -108,9 +108,9 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
 
                         /* We update the restaurants visited of the group in the database
                          * */
-                        fireDbRefGroup = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS)
+                        fireDbRefGroup = fireDb.getReference(Repo.FirebaseReference.GROUPS)
                                 .child(userGroupKey)
-                                .child(RepoStrings.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+                                .child(Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED);
 
                         Map <String, Object> map = new HashMap<>();
                         map.put(userRestaurant, true);
@@ -119,7 +119,7 @@ public class AddRestaurantToGroupDailyJob extends DailyJob {
 
                         /* We delete the restaurant info of the user in firebase
                          * */
-                        fireDbRefUserRestInfo = fireDbRefUser.child(RepoStrings.FirebaseReference.USER_RESTAURANT_INFO);
+                        fireDbRefUserRestInfo = fireDbRefUser.child(Repo.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(fireDbRefUserRestInfo);
 
                         fireDbRefUser.removeEventListener(this);

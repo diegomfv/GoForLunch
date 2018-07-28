@@ -23,7 +23,7 @@ import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.utils.TextInputAutoCompleteTextView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -102,7 +102,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
         fireDb = FirebaseDatabase.getInstance();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(JoinGroupActivity.this);
-        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+        userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
         Log.d(TAG, "onCreate: userKey = " + userKey);
 
         /////////////////////////////////////////////
@@ -125,7 +125,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onStart: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
         UtilsGeneral.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
 
     }
@@ -207,7 +207,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
             /* We get the user's group and
             a list with the rest of groups
              * */
-            dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+            dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
             dbRefUsers.addValueEventListener(valueEventListenerGetUserGroupAndRestOfGroups);
 
         }
@@ -278,12 +278,12 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
             /* We get the user's group and display it
              * */
-            userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
+            userGroup = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP).getValue().toString();
             textInputAutoCompleteTextView.setText(userGroup);
 
             /* We get a list with all the groups
              * */
-            dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+            dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS);
             dbRefGroups.addValueEventListener(valueEventListenerGetAllGroups);
 
             dbRefUsers.removeEventListener(this);
@@ -401,7 +401,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
                             UtilsGeneral.hideMainContent(progressBarContent, mainContent);
 
-                            dbRefGroups = fireDb.getReference(RepoStrings.FirebaseReference.GROUPS);
+                            dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS);
                             dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -410,10 +410,10 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                                     String groupKey = UtilsFirebase.getGroupKeyFromDataSnapshot(dataSnapshot, group);
 
                                     Map<String,Object> map = new HashMap<>();
-                                    map.put(RepoStrings.FirebaseReference.USER_GROUP, group);
-                                    map.put(RepoStrings.FirebaseReference.USER_GROUP_KEY, groupKey);
+                                    map.put(Repo.FirebaseReference.USER_GROUP, group);
+                                    map.put(Repo.FirebaseReference.USER_GROUP_KEY, groupKey);
 
-                                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                                     UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
 
                                     ToastHelper.toastShort(JoinGroupActivity.this, getResources().getString(R.string.joinNewGroupIs) + " " + group + "!");

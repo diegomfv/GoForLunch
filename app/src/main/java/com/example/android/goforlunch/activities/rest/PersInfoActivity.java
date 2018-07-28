@@ -38,7 +38,7 @@ import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.RepoStrings;
+import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -155,10 +155,10 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         fireStorage = FirebaseStorage.getInstance();
         stRefMain = fireStorage.getReference();
-        stRefImageDir = stRefMain.child(RepoStrings.Directories.IMAGE_DIR);
+        stRefImageDir = stRefMain.child(Repo.Directories.IMAGE_DIR);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
-        userKey = sharedPref.getString(RepoStrings.SharedPreferences.USER_ID_KEY, "");
+        userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
         glide = Glide.with(PersInfoActivity.this);
 
@@ -182,7 +182,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onStart: called!");
 
         receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(RepoStrings.CONNECTIVITY_CHANGE_STATUS);
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
         UtilsGeneral.connectReceiver(PersInfoActivity.this, receiver, intentFilter, this);
 
     }
@@ -290,7 +290,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
                 if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                    dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                     dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
                 }
             }
@@ -361,11 +361,11 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-            userFirstName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_FIRST_NAME).getValue().toString();
-            userLastName = dataSnapshot.child(RepoStrings.FirebaseReference.USER_LAST_NAME).getValue().toString();
-            userEmail = dataSnapshot.child(RepoStrings.FirebaseReference.USER_EMAIL).getValue().toString();
-            userGroup = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP).getValue().toString();
-            userGroupKey = dataSnapshot.child(RepoStrings.FirebaseReference.USER_GROUP_KEY).getValue().toString();
+            userFirstName = dataSnapshot.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue().toString();
+            userLastName = dataSnapshot.child(Repo.FirebaseReference.USER_LAST_NAME).getValue().toString();
+            userEmail = dataSnapshot.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString();
+            userGroup = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP).getValue().toString();
+            userGroupKey = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue().toString();
 
             /* We fill the widgets with the user's info
              * */
@@ -544,13 +544,13 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                                             } else {
                                                 Log.d(TAG, "onComplete: task was successful");
 
-                                                dbRefUsers = fireDb.getReference(RepoStrings.FirebaseReference.USERS + "/" + userKey);
+                                                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
 
                                                 /* Updating the database
                                                  * */
                                                 Map<String, Object> map = new HashMap<>();
-                                                map.put(RepoStrings.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
-                                                map.put(RepoStrings.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
+                                                map.put(Repo.FirebaseReference.USER_FIRST_NAME, inputFirstName.getText().toString().trim());
+                                                map.put(Repo.FirebaseReference.USER_LAST_NAME, inputLastName.getText().toString().trim());
                                                 UtilsFirebase.updateInfoWithMapInFirebase(dbRefUsers, map);
 
                                                 /* We save the image in the image view in the storage
