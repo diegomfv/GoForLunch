@@ -855,7 +855,7 @@ public class FragmentRestaurantMapView extends Fragment {
                         Log.d(TAG, "onNext: type = " + type);
                         Log.d(TAG, "onNext: typeAsInt = " + UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
 
-                        if (Arrays.asList(arrayOfTypes).contains(type)
+                        if (Arrays.asList(arrayOfTypes).contains(UtilsGeneral.getTypeInSpecificLanguage(getActivity(), type))
                                 && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes) != 0) {
                             Log.d(TAG, "onNext: getting restaurant by type");
                             getRestaurantsByTypeAndDisplayPins(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));

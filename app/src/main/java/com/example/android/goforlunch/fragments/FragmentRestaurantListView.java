@@ -194,7 +194,7 @@ public class FragmentRestaurantListView extends Fragment {
 
         /* We get an array of restaurant types from RESOURCES
          * */
-        this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
+        this.arrayOfTypes = Repo.RESTAURANT_TYPES;
 
         /* Glide configuration*/
         glide = Glide.with(getActivity());
@@ -226,7 +226,7 @@ public class FragmentRestaurantListView extends Fragment {
             }
         });
 
-        /* Configuration process */
+        /* Configuring autocompleteTextView */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
 
         return view;
@@ -464,7 +464,7 @@ public class FragmentRestaurantListView extends Fragment {
                         Log.d(TAG, "onNext: type = " + type);
                         Log.d(TAG, "onNext: typeAsInt = " + UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
 
-                        if (Arrays.asList(arrayOfTypes).contains(type)
+                        if (Arrays.asList(arrayOfTypes).contains(UtilsGeneral.getTypeInSpecificLanguage(getActivity(), type))
                                 && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes) != 0) {
                             Log.d(TAG, "onNext: getting restaurant by type");
                             getRestaurantsByTypeAndDisplayThemInRecyclerView(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));

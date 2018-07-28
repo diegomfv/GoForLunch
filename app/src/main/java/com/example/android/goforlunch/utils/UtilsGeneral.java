@@ -506,4 +506,27 @@ public class UtilsGeneral {
         return px;
     }
 
+    public static String getTypeInSpecificLanguage (Context context, String type) {
+
+        int position = 0;
+
+        String[] constantTypes = Repo.RESTAURANT_TYPES;
+        String[] typesInOtherLanguage = context.getResources().getStringArray(R.array.typesOfRestaurants);
+
+        for (int i = 0; i < typesInOtherLanguage.length; i++) {
+
+            if (typesInOtherLanguage[i].equalsIgnoreCase(type)) {
+                position = i;
+            }
+        }
+
+        if (position != 0) {
+            return constantTypes[position];
+
+        } else {
+            return "";
+
+        }
+    }
+
 }

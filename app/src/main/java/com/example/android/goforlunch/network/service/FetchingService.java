@@ -86,8 +86,7 @@ public class FetchingService extends Service {
 
         /* We pass the NON TRANSLATABLE ARRAY!
         * */
-        // TODO: 26/07/2018 Might do this as constants
-        arrayOfTypes = getResources().getStringArray(R.array.fetchTypesOfRestaurants);
+        arrayOfTypes = Repo.RESTAURANT_TYPES;
 
         /* We will use this to show a Toast in Map Fragment
         * if there is no internet

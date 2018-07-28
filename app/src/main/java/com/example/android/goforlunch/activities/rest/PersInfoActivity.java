@@ -447,7 +447,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // do your stuff
                 } else {
-                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.getAccountsDenied));
+                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.storageNotGranted));
                 }
                 break;
             default:
@@ -591,8 +591,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setCancelable(true);
-        alertBuilder.setTitle(getResources().getString(R.string.permissionPermissionNecessary));
-        alertBuilder.setMessage(msg + " " + getResources().getString(R.string.permissionPermissionIsNecessary));
+        alertBuilder.setTitle(getResources().getString(R.string.permissionDialogTitlePermissionNecessary));
+        alertBuilder.setMessage(msg + " " + getResources().getString(R.string.permissionDialogMessagePermissionIsNecessary));
         alertBuilder.setPositiveButton(android.R.string.yes,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

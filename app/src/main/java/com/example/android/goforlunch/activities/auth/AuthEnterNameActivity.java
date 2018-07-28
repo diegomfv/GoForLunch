@@ -152,10 +152,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
         /* Configuring textInputEditTexts: hide keyboard
          * */
-        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputFirstName);
-        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputLastName);
-        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputEmail);
-        UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputPassword);
+        //UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputFirstName);
+        //UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputLastName);
+        //UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputEmail);
+        //UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputPassword);
 
         /* If we come from SignUp Activity (email and password login) then the intent won't be null.
          * Otherwise, it will.
@@ -270,7 +270,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // do your stuff
                 } else {
-                    ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.getAccountsDenied));
+                    ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.storageNotGranted));
                 }
                 break;
             default:
@@ -646,8 +646,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
         alertBuilder.setCancelable(true);
-        alertBuilder.setTitle(getResources().getString(R.string.permissionPermissionNecessary));
-        alertBuilder.setMessage(msg + getResources().getString(R.string.permissionPermissionIsNecessary));
+        alertBuilder.setTitle(getResources().getString(R.string.permissionDialogTitlePermissionNecessary));
+        alertBuilder.setMessage(msg + getResources().getString(R.string.permissionDialogMessagePermissionIsNecessary));
         alertBuilder.setPositiveButton(android.R.string.yes,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

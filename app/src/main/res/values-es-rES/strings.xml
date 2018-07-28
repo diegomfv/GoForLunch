@@ -1,21 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+    <string name="app_name">GoForLunch</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="notif_notification_channel_name">Notification Channel Name</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- GENERAL MESSAGES -->
+    <string name="noInternet">Internet NO disponible</string>
+    <string name="noInternetFeaturesNotWork">Internet no disponible. Algunas funcionalidades pueden fallar</string>
+    <string name="storageNotGranted">Acceso a la memoria DENEGADO</string>
+    <string name="storageGranted">Acceso a la memoria ACEPTADO</string>
+    <string name="notImplemented">No implementado&#8230;</string>
+    <string name="somethingWentWrong">Algo ha ido mal&#8230; Por favor, prueba otra vez</string>
+    <string name="permissionDialogTitlePermissionNecessary">Permisos necesarios</string>
+    <string name="permissionDialogMessagePermissionIsNecessary">Se necesitan permisos</string>
+    <string name="loading_please_wait">Cargando&#8230;por favor, espera&#8230;</string>
+
+    <!-- COMMON -->
+    <string name="commonToastEnterFirstName">Introduce un nombre</string>
+    <string name="commonToastEnterLastName">Introduce un apellido</string>
+    <string name="commonToastEnterEmail">Introduce un email</string>
+    <string name="commonToastEnterPassword">Introduce un password</string>
+    <string name="commonToastPasswordTooShort">El password es demasiado corto</string>
+    <string name="commonYouNotPickedImage">No has elegido una imagen</string>
+
+    <string name="commonFirstName">Nombre</string>
+    <string name="commonLastName">Apellido</string>
+    <string name="commonEmail">Email</string>
+    <string name="commonPassword">Password</string>
+    <string name="commonGroup">Grupo</string>
+
+    <string name="snackbarNoInternetText">No hay conexión a internet</string>
+    <string name="snackbarNoInternetButton">OCULTAR</string>
+
+    <!-- MAIN ACTIVITY -->
+    <string name="mainBottomMapView">Mapa</string>
+    <string name="mainBottomListView">Lista</string>
+    <string name="mainBottomWorkmates">Compañeros</string>
+    <string name="mainDialogAreYouSureLogOut">Seguro que quieres cerrar sesión?</string>
+    <string name="mainDialogLoggingOut">Cerrando sesion</string>
+    <string name="mainDialogLoggingOutYes">SÍ</string>
+    <string name="mainDialogLoggingOutNo">NO</string>
+
+    <!-- EVERNOTE JOB -->
+    <string name="key_alarmAddRestaurantIsOn" translatable="false">alarmAddRestaurantOn</string>
+
+    <!-- FRAGMENTS -->
+    <string name="autoCompleteSearchText">Busqueda</string>
+    <string name="toolbarImHungry">¡Tengo hambre!</string>
+    <string name="toolbarAvailableWorkmates">Compañeros disponibles</string>
+
+    <!-- FRAGMENTS: Coworkers -->
+    <string name="avCowHasNotDecided">%1$s %2$s aán no se ha decidido&#8230;</string>
+    <string name="avCowHasDecided">%1$s %2$s comerá \"%3$s\" (%4$s)</string>
+    <string name="noInfoAvailable">Información no disponible</string>
+
 
     <!-- PREFERENCES FRAGMENT -->
     <string name="pref_summaryOff">Notificaciones desactivadas</string>
     <string name="pref_summaryOn">Notificaciones activadas</string>
-    <string name="pref_key_notifications">Notificationes</string>
+    <string name="pref_title">Notificaciones</string>
+    <string name="pref_key_notifications" translatable="false">alarmNotifications</string>
 
 
-    <!-- GENERAL MESSAGES -->
-    <string name="noInternet">No hay conexión a INTERNET</string>
+    <!-- INTENT RECYCLER VIEW -> USER_RESTAURANT_NAME IMAGE_LOAD_TYPE -->
+    <string name="i_image_url" translatable="false">image_url</string>
+    <string name="i_name" translatable="false">name</string>
+    <string name="i_address" translatable="false">address</string>
+    <string name="i_rating" translatable="false">rating</string>
+    <string name="i_phone" translatable="false">phone</string>
+    <string name="i_website" translatable="false">website</string>
 
+
+    <!-- FACEBOOK SIGN IN -->
+    <string name="facebook_app_id">622449801446185</string>
+    <string name="fb_login_protocol_scheme">fb622449801446185</string>
 
     <!-- RESTAURANT TYPES -->
     <string name="typeAll">Todos</string>
-    <string name="typeAmerican">Americano</string>
-    <string name="typeChinese">Chino</string>
+    <string name="typeAmerican">AmericanO</string>
+    <string name="typeChinese">ChinO</string>
     <string name="typeEnglish">Inglés</string>
     <string name="typeFrench">Francés</string>
     <string name="typeGerman">Alemán</string>
@@ -46,42 +118,76 @@
     </string-array>
 
     <!-- NAVIGATION DRAWER -->
-    <string name="navDrawerYourLunch">TU COMIDA!</string>
-    <string name="navDrawerJoinGroup">ÚNETE AL GRUPO!</string>
+    <string name="navDrawerYourLunch">TU COMIDA</string>
+    <string name="navDrawerJoinGroup">ÚNETE A UN GRUPO</string>
     <string name="navDrawerPersInfo">INFORMACIÓN PERSONAL</string>
+    <string name="navDrawerSearchRestaurants">BUSCAR RESTAURANTES</string>
+    <string name="navDrawerStartSearch">INICIAR BÚSQUEDA</string>
     <string name="navDrawerSystem">SISTEMA</string>
     <string name="navDrawerSettings">AJUSTES</string>
     <string name="navDrawerLogOut">CERRAR SESIÓN</string>
 
-    <string name="navDrawerToastNotGroupYet">You haven\'t chosen a group yet!</string>
+    <string name="navDrawerToastNotRestaurantYet">¡Aun no has elegido un restaurante!</string>
+
+    <!-- CHOOSE LOGIN ACTIVITY -->
+    <string name="choose_register">Registrarse</string>
+    <string name="choose_signInWithEmail">Inicia sesión con email</string>
 
     <!-- AUTH SIGN IN ACTIVITY -->
     <string name="signInEmail">Email</string>
     <string name="signInPassword">Password</string>
-    <string name="signInButtonSignIn">INICIAR SESIÓN</string>
-    <string name="signInButtonResetPassword">RESETEAR PASSWORD</string>
-    <string name="signInButtonRegister">REGISTRARSE</string>
+    <string name="signInButtonSignIn">Iniciar sesión</string>
+    <string name="signInTextViewForgotPassword">¿Has olvidado tu password_</string>
+    <string name="signInButtonSignUp">Registrarse</string>
 
     <!-- AUTH ENTER NAME ACTIVITY -->
-    <string name="commonFirstName">Nombre</string>
-    <string name="commonLastName">Apellidos</string>
-    <string name="commonEmail">Email</string>
-    <string name="commonPassword">Password</string>
-    <string name="enterNameStart">EMPIEZA!</string>
+    <string name="enterNameStart">¡Empezar!</string>
+    <string name="enterNameThisEmailAlreadyExists">Ya existe un usuario con este email&#8230;</string>
 
     <!-- JOIN GROUP ACTIVITY -->
-    <string name="joinGroupJoinGroup">UNIRSE AL GRUPO</string>
-    <string name="joinGroupCreateNewGroup">CREAR NUEVO GRUPO</string>
+    <string name="joinGroupJoinGroup">Unirse</string>
+    <string name="joinGroupCreateNewGroup">Crear nuevo grupo</string>
 
     <!-- RESTAURANT ACTIVITY -->
     <string name="restaurantBottomCall">LLAMAR</string>
     <string name="restaurantBottomLike">LIKE</string>
     <string name="restaurantBottomWebsite">WEB</string>
 
-    <string name="restaurantNotGoing">Restaurante eliminado</string>
-    <string name="restaurantGoing">A comer en </string>
+    <string name="restaurantNotGoing">Cambiando de idea&#8230;</string>
+    <string name="restaurantGoing">Vamos a</string>
     <string name="restaurantCallingTo">Llamando a</string>
     <string name="restaurantPhoneNotAvailable">Teléfono no disponible</string>
     <string name="restaurantWebsiteNotAvailable">Web no disponible</string>
 
+    <string name="restaurantNoCoworkersJoining">Por ahora no se unen compis</string>
+    <string name="restaurantUserIsJoining">¡%1$s se viene!</string>
+
+    <string name="restaurantNameNotAvailable">Nombre no disponible</string>
+    <string name="restaurantAddressNotAvailable">Dirección no disponible</string>
+
+    <!-- PERS INFO ACTIVITY -->
+    <string name="persSaveChanges">Guardar</string>
+    <string name="persChangePassword">Cambiar password</string>
+    <string name="persInfoToastYourInfoUpdated">Información actualizada</string>
+    <string name="persInfoDialogAreYouChangeData">¿Seguro que quieres seguir adelante?</string>
+    <string name="persInfoDialogChangingData">Modificando el perfil</string>
+    <string name="persInfoDialogChangeDataYes">¡SÍ, ADELANTE!</string>
+    <string name="persInfoDialogChangeDataNo">NO</string>
+    <string name="persInfoSomethingWrongImage">Algo ha ido mal subiendo la imagen&#8230;</string>
+    <string name="persInfoNotUpdated">Perfil no actualizado</string>
+
+    <!-- JOIN GROUP ACTIVITY -->
+    <string name="joinGroupDoesNotExist">Ese grupo no existe</string>
+    <string name="joinWouldYouLikeJoin">Quieres unirte a este grupo</string>
+    <string name="joinJoinGroup">UNIRSE</string>
+    <string name="joinYes">SÍ</string>
+    <string name="joinNo">NO</string>
+    <string name="joinThisCurrentlyYourGroup">¡Éste es ya tu grupo!</string>
+    <string name="joinNotChosenGroup">Aún no tienes grupo&#8230;!</string>
+    <string name="joinNewGroupIs">Tu nuevo grupo es</string>
+    <string name="mainCurrentPositionNotAvailable">Posición actual no disponible</string>
+    <string name="mainStartRequestProcess">Iniciando búsqueda&#8230;</string>
+    <string name="overQueryLimit">¡Límite sobrepasado!</string>
+
 </resources>
+
