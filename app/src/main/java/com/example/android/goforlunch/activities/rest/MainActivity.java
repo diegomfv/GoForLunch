@@ -59,10 +59,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
-// TODO: 29/05/2018 Translations
-// TODO: 25/07/2018 Check list of elements / translations (might be a problem when searching for a Restaurant)
+// TODO: 28/07/2018 Fetching process..
 // TODO: 12/07/2018 Check what is shown when restaurants are wrongly fetched
-// TODO: 29/05/2018 General cleanup
+// TODO: 28/07/2018 Storage problem (not very important)
+// TODO: 28/07/2018 Delete user entering the first time
 
 //1
 // TODO: 12/07/2018 Changing Fetching process to Service. Information will be displayed using a ViewModel in the Fragment (pins)
@@ -169,9 +169,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(MainActivity.this, receiver, intentFilter, this);
+        connectBroadcastReceiver();
 
     }
 
@@ -180,16 +178,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    MainActivity.this,
-                    receiver,
-                    MainActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
     }
 
@@ -198,16 +187,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    MainActivity.this,
-                    receiver,
-                    MainActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
         bottomNavigationView.setOnNavigationItemSelectedListener(null);
         mNavigationView.setNavigationItemSelectedListener(null);
@@ -721,6 +701,40 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    /*******************************
+     * CONFIGURATION ***************
+     ******************************/
+
+    /** Method that connects a broadcastReceiver to the activity.
+     * It allows to notify the user about the internet state
+     * */
+    private void connectBroadcastReceiver () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(MainActivity.this, receiver, intentFilter, this);
+
+    }
+
+    /** Method that disconnects the broadcastReceiver from the activity.
+     * */
+    private void disconnectBroadcastReceiver () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null) {
+            UtilsGeneral.disconnectReceiver(
+                    MainActivity.this,
+                    receiver,
+                    MainActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
     }
 
     /*********************
