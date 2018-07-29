@@ -59,13 +59,15 @@ public class FetchingService extends Service {
 
     private Handler mHandler;
 
-    private boolean accessInternalStorageGranted = false;
-
     private AppDatabase localDatabase;
 
     private Storage internalStorage;
     private String mainPath;
     private String imageDirPath;
+
+    private double latitude;
+    private double longitude;
+    private boolean accessInternalStorageGranted;
 
 
     @Override
@@ -100,21 +102,26 @@ public class FetchingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: called!");
 
-        double latitude = (double) intent.getExtras().get("latitude");
-        double longitude = (double) intent.getExtras().get("longitude");
+        double latitude = intent.getDoubleExtra(Repo.SentIntent.LATITUDE, 0.0d);
+        double longitude = intent.getDoubleExtra(Repo.SentIntent.LONGITUDE, 0.0d);
 
         Log.i(TAG, "onStartCommand: latitude = " + latitude);
         Log.i(TAG, "onStartCommand: longitude = " + longitude);
 
-        accessInternalStorageGranted = intent.getBooleanExtra("accessInternalStorage", false);
-        Log.i(TAG, "onStartCommand: accessInternalStorageGranted = " + accessInternalStorageGranted);
+        accessInternalStorageGranted = intent.getBooleanExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, false);
+        Log.d(TAG, "onStartCommand: accessInternatStorageGranted = " + accessInternalStorageGranted);
 
         if (latitude == 0.0 || longitude == 0.0) {
-            Log.i(TAG, "onStartCommand: latitude = " + latitude);
-            Log.i(TAG, "onStartCommand: longitude = " + longitude);
-            //position is incorrect, do nothing
+            Log.d(TAG, "onStartCommand: latitude or longitude are 0");
 
+            //position is incorrect, do nothing
             ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.mainCurrentPositionNotAvailable));
+
+        } else if (!accessInternalStorageGranted){
+            Log.d(TAG, "onStartCommand: internalStorageAccess not granted");
+
+            //storage access not granted, do nothing
+            ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.storageNotGranted));
 
         } else {
 

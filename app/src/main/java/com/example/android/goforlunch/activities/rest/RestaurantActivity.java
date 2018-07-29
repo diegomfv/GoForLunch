@@ -33,6 +33,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
@@ -66,6 +67,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Diego Fajardo on 06/05/2018.
  */
 
+// TODO: 29/07/2018 Clean code connect receiver
 public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = RestaurantActivity.class.getSimpleName();
@@ -201,9 +203,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(RestaurantActivity.this, receiver, intentFilter, this);
+        connectBroadcastReceiver();
 
     }
 
@@ -212,16 +212,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    RestaurantActivity.this,
-                    receiver,
-                    RestaurantActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
     }
 
@@ -230,16 +221,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    RestaurantActivity.this,
-                    receiver,
-                    RestaurantActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
         fab.setOnClickListener(null);
         navigationView.setOnNavigationItemSelectedListener(null);
@@ -476,6 +458,36 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         recyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(mLayoutManager);
+
+    }
+
+    /** Method that connects a broadcastReceiver to the activity.
+     * It allows to notify the user about the internet state
+     * */
+    private void connectBroadcastReceiver () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(RestaurantActivity.this, receiver, intentFilter, this);
+
+    }
+
+    /** Method that disconnects the broadcastReceiver from the activity.
+     * */
+    private void disconnectBroadcastReceiver () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null) {
+            UtilsGeneral.disconnectReceiver(
+                    RestaurantActivity.this,
+                    receiver,
+                    RestaurantActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
 
     }
 

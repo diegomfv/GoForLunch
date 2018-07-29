@@ -77,6 +77,10 @@ public interface Repo {
         String PHONE = "phone";
         String WEBSITE_URL = "website_url";
 
+        String LATITUDE = "latitude";
+        String LONGITUDE = "longitude";
+        String ACCESS_INTERNAL_STORAGE_GRANTED = "access_internal_storage";
+
     }
 
     interface FirebaseReference {

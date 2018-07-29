@@ -1,15 +1,19 @@
 package com.example.android.goforlunch.activities.rest;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -28,6 +32,7 @@ import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.network.service.FetchingService;
 import com.example.android.goforlunch.utils.ToastHelper;
@@ -129,6 +134,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     private boolean internetAvailable;
 
+    private boolean accessInternalStorageGranted;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,6 +150,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         //////////////////////////////////////
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        //We get the permissions to wrtie to InternalStorage
+        getInternalStorageAccessPermission();
 
         View headerView = mNavigationView.getHeaderView(0);
         navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
@@ -263,12 +273,38 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     }
 
+    /**************************
+     * REQUEST PERMISSIONS ****
+     * ***********************/
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: called");
+
+        switch (requestCode) {
+
+            /* Write to storage request code */
+            case Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
+                accessInternalStorageGranted = false;
+
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.storageGranted));
+                    accessInternalStorageGranted = true;
+
+                }
+                break;
+            }
+        }
+    }
+
     /** Callback: gets the current position obtained in Map Fragment
      * */
     @Override
     public void onCurrentPositionObtained(LatLngForRetrofit myPosition) {
         Log.d(TAG, "onCurrentPositionObtained: called!");
         this.myPosition = myPosition;
+
+        Log.i(TAG, "onCurrentPositionObtained: myPosition = " + myPosition);
 
     }
 
@@ -521,11 +557,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                                     ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainStartRequestProcess));
 
-                                    // TODO: 26/07/2018 Change the names of the intent info to a constant
+                                    // TODO: 28/07/2018 Could be done with PARCELABLE
                                     Intent intent = new Intent(MainActivity.this, FetchingService.class);
-                                    intent.putExtra("latitude", myPosition.getLat());
-                                    intent.putExtra("longitude", myPosition.getLng());
-                                    intent.putExtra("accessInternalStorage", true);
+                                    intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
+                                    intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
+                                    intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
                                     startService(intent);
 
                                 } else {
@@ -736,6 +772,28 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         snackbar = null;
 
     }
+
+    /******************************************************
+     * INTERNAL STORAGE
+     *****************************************************/
+
+    /** Method that launches a dialog asking for storage permissions if they have not been
+     * granted before
+     * */
+    private void getInternalStorageAccessPermission () {
+        Log.d(TAG, "getInternalStorageAccessPermission: called!");
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this.getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            accessInternalStorageGranted = true;
+
+        } else {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION);
+            }
+        }
+    }
+
 
     /*********************
      * NOTIFICATIONS *****

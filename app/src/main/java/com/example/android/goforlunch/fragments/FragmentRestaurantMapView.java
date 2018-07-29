@@ -533,7 +533,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
 
                 } else {
-                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission NOT GRANTED");
+                    ToastHelper.toastShort(getActivity(), getActivity().getResources().getString(R.string.storageGranted));
                     accessInternalStorageGranted = false;
 
                     /* After storage permission process, we ask for device location permissions
@@ -731,6 +731,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
                         /* We share myPosition with MainActivity
                         * */
+                        Log.d(TAG, "onComplete: Sending position to MainActivity");
                         mCallback.onCurrentPositionObtained(myPosition);
 
                         moveCamera(
