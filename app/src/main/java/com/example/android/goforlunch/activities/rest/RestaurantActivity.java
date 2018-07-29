@@ -67,7 +67,6 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Diego Fajardo on 06/05/2018.
  */
 
-// TODO: 29/07/2018 Clean code connect receiver
 public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = RestaurantActivity.class.getSimpleName();
