@@ -277,7 +277,8 @@ public class UtilsFirebase {
                 dataSnapshot.getChildren()) {
 
             if (item.child(Repo.FirebaseReference.GROUP_NAME).getValue() != null) {
-                listOfGroups.add(item.child(Repo.FirebaseReference.GROUP_NAME).getValue().toString());
+                listOfGroups.add(UtilsGeneral.capitalize(item.child(Repo.FirebaseReference.GROUP_NAME).getValue().toString().toLowerCase().trim()));
+
             }
 
         }

@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -124,9 +125,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
+        connectBroadcastReceiver();
 
     }
 
@@ -135,16 +134,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    JoinGroupActivity.this,
-                    receiver,
-                    JoinGroupActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
+        disconnectBroadcastReceiver();
 
     }
 
@@ -153,20 +143,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
-                    JoinGroupActivity.this,
-                    receiver,
-                    JoinGroupActivity.this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-        snackbar = null;
-
-        fab.setOnClickListener(null);
-        buttonJoinGroup.setOnClickListener(null);
-        buttonCreateGroup.setOnClickListener(null);
+        disconnectBroadcastReceiver();
 
         if (null != disposable) {
             disposable.dispose();
@@ -244,6 +221,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                     ToastHelper.toastNoInternet(JoinGroupActivity.this);
 
                 } else {
+                    Log.i(TAG, "onClick: listOfGroups = " + listOfGroups.toString());
 
                     if (listOfGroups.contains(UtilsGeneral.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()))) {
                         /* The group exists and we create a dialog to join group
@@ -325,9 +303,39 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         }
     };
 
-    /*************************
-     * CONFIGURATION *********
-     ************************/
+    /*******************************
+     * CONFIGURATION ***************
+     ******************************/
+
+    /** Method that connects a broadcastReceiver to the activity.
+     * It allows to notify the user about the internet state
+     * */
+    private void connectBroadcastReceiver () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new InternetConnectionReceiver();
+        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
+        UtilsGeneral.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
+
+    }
+
+    /** Method that disconnects the broadcastReceiver from the activity.
+     * */
+    private void disconnectBroadcastReceiver () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null) {
+            UtilsGeneral.disconnectReceiver(
+                    JoinGroupActivity.this,
+                    receiver,
+                    JoinGroupActivity.this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+        snackbar = null;
+
+    }
 
     /** Method that configures the autocompleteTextView
      * */
