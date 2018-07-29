@@ -102,19 +102,6 @@
                         android:alpha="0.7"
                         android:elevation="4dp" />
 
-                    <ImageButton
-                        android:id="@+id/map_fragment_database_button_id"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/map_fragment_refresh_button_id"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginLeft="12dp"
-                        android:padding="3dp"
-                        android:background="@drawable/button_map_border"
-                        android:src="@drawable/ic_database"
-                        android:alpha="0.7"
-                        android:elevation="4dp" />
-
                 </RelativeLayout>
 
             </fragment>

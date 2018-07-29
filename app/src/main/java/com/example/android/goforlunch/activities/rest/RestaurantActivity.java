@@ -498,7 +498,6 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
      * */
     private boolean setFabButtonState (String intentRestaurantName) {
 
-        // TODO: 28/05/2018 See another way of doing things for lower versions
         if (userRestaurant.equals(intentRestaurantName)) {
             fabShowsCheck = true;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

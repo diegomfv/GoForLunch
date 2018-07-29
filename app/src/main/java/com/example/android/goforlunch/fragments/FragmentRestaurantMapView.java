@@ -39,7 +39,6 @@ import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.data.sqlite.AndroidDatabaseManager;
 import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.utils.Anim;
@@ -200,9 +199,6 @@ public class FragmentRestaurantMapView extends Fragment {
 
     @BindView(R.id.map_fragment_refresh_button_id)
     ImageButton buttonRefreshMap;
-
-    @BindView(R.id.map_fragment_database_button_id)
-    ImageButton buttonDatabase;
 
     @BindView(R.id.map_fragment_parent_relative_layout)
     RelativeLayout mapFragmentRelativeLayout;
@@ -370,33 +366,6 @@ public class FragmentRestaurantMapView extends Fragment {
                 //deleteAllFilesInStorage();
                 //deleteAllRestaurantsAndStartRequestProcess();
 
-            }
-        });
-
-        // TODO: 07/06/2018 Delete!
-        buttonDatabase.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: database button clicked!");
-
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d(TAG, "run: ");
-                        
-                        listOfAllRestaurantsInDatabase = localDatabase.restaurantDao().getAllRestaurantsNotLiveDataOrderPlaceId();
-
-                        for (int i = 0; i < listOfAllRestaurantsInDatabase.size() ; i++) {
-                            Log.i(TAG, "run:"
-                                    + "PLACE ID: " + listOfAllRestaurantsInDatabase.get(i).getPlaceId()
-                                    + " NAME: " + listOfAllRestaurantsInDatabase.get(i).getName()
-                                    + " TYPE: " + arrayOfTypes[listOfAllRestaurantsInDatabase.get(i).getType()]);
-                        }
-                    }
-                });
-
-                startActivity(new Intent(getActivity(), AndroidDatabaseManager.class));
-                
             }
         });
 
@@ -1681,14 +1650,4 @@ public class FragmentRestaurantMapView extends Fragment {
         }
 
     }
-
-//    // TODO: 10/05/2018 Explain better
-//    /** stopAutoManage() is used to avoid the app to crash when coming back to the
-//     * fragment*/
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//    }
-//}
-
 }

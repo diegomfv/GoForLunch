@@ -60,7 +60,6 @@ public class UtilsGeneral {
     public static void checkInternetInBackgroundThread (final DisposableObserver disposableObserver) {
         Log.d(TAG, "checkInternetInBackgroundThread: called! ");
 
-        // TODO: 27/06/2018 If I don't use AppExecutors it crashes
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -149,36 +148,6 @@ public class UtilsGeneral {
         return snackbar;
 
     }
-
-
-    // TODO: 22/07/2018 Delete!
-       /** Method that shows progress bar and disables user interaction
-     * */
-    public static void showProgressBarAndDisableUserInteraction (AppCompatActivity appCompatActivity, ProgressBar progressBar) {
-
-        progressBar.setVisibility(View.VISIBLE);
-
-        appCompatActivity
-                .getWindow()
-                .setFlags(
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-
-    }
-
-    /**  Method that hides progress bar and enables user interaction
-     * */
-    public static void hideProgressBarAndEnableUserInteraction (AppCompatActivity appCompatActivity, ProgressBar progressBar) {
-
-        progressBar.setVisibility(View.INVISIBLE);
-
-        appCompatActivity
-                .getWindow()
-                .clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-    }
-    // TODO: 22/07/2018 Delete!
 
     /**
      * Method that hides the keyboard

@@ -446,7 +446,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
 
             } else {
-                // TODO: 24/07/2018 Probably, this code wwill
+                // TODO: 24/07/2018 Probably, this code will never run
 
                 //go to AuthEnterNameActivity
                 startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));

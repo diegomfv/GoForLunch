@@ -20,7 +20,6 @@ import android.util.Log;
  * you'll need a "type converter" (See Android Architecture Components,
  * Android Development Course, UDACITY)
  * */
-// TODO: 13/06/2018 Remember to not allow doing queries in the main thread!
 
 @Database(entities = {RestaurantEntry.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
@@ -44,7 +43,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 Log.d(TAG, "getInstance: Creating new Database Instance");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
-                        .allowMainThreadQueries() //allows queries in the main thread, test purposes
+                        //.allowMainThreadQueries() //allows queries in the main thread, test purposes
                         .build();
             }
         }
