@@ -889,5 +889,4 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "cancelJob: called!");
         JobManager.instance().cancel(JobId);
     }
-
 }

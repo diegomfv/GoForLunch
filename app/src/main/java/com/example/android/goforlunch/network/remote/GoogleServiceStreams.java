@@ -5,12 +5,14 @@ import com.example.android.goforlunch.network.models.placebyid.PlaceById;
 import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.network.models.placebynearby.PlacesByNearby;
 import com.example.android.goforlunch.network.models.placetextsearch.PlacesByTextSearch;
+import com.google.android.gms.location.places.Place;
 
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
+import retrofit2.Response;
 
 /**
  * Created by Diego Fajardo on 19/06/2018.
@@ -96,8 +98,14 @@ public class GoogleServiceStreams {
 
     }
 
+    public static Observable<Response<PlaceById>> streamTrial(String placeId,
+                                                              String key) {
+
+        GoogleService googleService = AllGoogleServices.getGooglePlaceIdService();
+
+        return googleService.fetchDataTrial(placeId, key)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .timeout(10, TimeUnit.SECONDS);
+    }
 }
-
-
-
-

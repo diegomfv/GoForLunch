@@ -79,7 +79,14 @@ public class FetchingService extends Service {
 
         /* We delete the database
         * */
-        localDatabase.clearAllTables();
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: called!");
+                localDatabase.clearAllTables();
+            }
+        });
+
 
         configuringInternalStorage();
 

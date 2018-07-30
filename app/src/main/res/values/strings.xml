@@ -62,7 +62,7 @@
 
     <!-- FRAGMENTS: Coworkers -->
     <string name="avCowHasNotDecided">%1$s %2$s has not decided yet&#8230;</string>
-    <string name="avCowHasDecided">%1$s %2$s is eating \"%3$s\" (%4$s)</string>
+    <string name="avCowHasDecided">%1$s %2$sis eating \"%3$s\" (%4$s)</string>
     <string name="noInfoAvailable">No information available</string>
 
 

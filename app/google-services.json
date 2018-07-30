@@ -23,14 +23,6 @@
           }
         },
         {
-          "client_id": "584277922343-dverp11kfrk226c69g7k7uojvck9g4vu.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.android.goforlunch",
-            "certificate_hash": "a9a878162c87c747c2864e8c826757d32f88b1bd"
-          }
-        },
-        {
           "client_id": "584277922343-do6fdq431lgfup73lv2cicc161gj5d4q.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -244,7 +244,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
-        /**Butterknife binding
+        /** Butterknife binding
          * */
         unbinder = ButterKnife.bind(this, view);
 
@@ -254,11 +254,13 @@ public class FragmentRestaurantMapView extends Fragment {
         mainPath = storage.getInternalFilesDirectory() + File.separator;
         imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR;
 
-        /** Configure databases*/
+        /** Configure databases
+         * */
         this.configureDatabases(getActivity());
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
-        /** Configure toolbar */
+        /** Configure toolbar
+         * */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
 
 //        if (((AppCompatActivity) getActivity()) != null) {
@@ -611,6 +613,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
                     /* We share myPosition with MainActivity.
                      * */
+                    // TODO: 30/07/2018 Check this
                     mCallback.onCurrentPositionObtained(myPosition);
 
                     getDeviceLocation();

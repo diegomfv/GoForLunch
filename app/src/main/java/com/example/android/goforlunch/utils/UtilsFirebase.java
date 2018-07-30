@@ -242,13 +242,13 @@ public class UtilsFirebase {
 
     }
 
-    public static List<String> fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser
+    public static List<User> fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser
             (DataSnapshot dataSnapshot,
              String userEmail,
              String userGroup,
              String intentRestaurant) {
 
-        List<String> listOfCoworkers = new ArrayList<>();
+        List<User> listOfCoworkers = new ArrayList<>();
 
         for (DataSnapshot item :
                 dataSnapshot.getChildren()) {
@@ -257,9 +257,38 @@ public class UtilsFirebase {
                     && item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO).child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase(intentRestaurant)
                     && !item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
 
-                listOfCoworkers.add(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue().toString()
-                        + " "
-                        + item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue().toString());
+                User.Builder builder = new User.Builder();
+
+                /* User personal info
+                 * */
+                builder.setFirstName(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue()).toString());
+                builder.setLastName(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue()).toString());
+                builder.setEmail(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString());
+                builder.setGroup(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString());
+
+                /* User Restaurant info
+                 * */
+                builder.setAddress(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_ADDRESS).getValue()).toString());
+                builder.setImageUrl(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_IMAGE_URL).getValue()).toString());
+                builder.setPhone(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_PHONE).getValue()).toString());
+                builder.setPlaceId(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_PLACE_ID).getValue()).toString());
+                builder.setRating(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_RATING).getValue()).toString());
+                builder.setRestaurantName(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
+                builder.setWebsiteUrl(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_WEBSITE_URL).getValue()).toString());
+
+                /* We get the type from the int and convert it to string
+                 * */
+                builder.setRestaurantType(setTypeIfPossible(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_TYPE).getValue()).toString()));
+
+                listOfCoworkers.add(builder.create());
 
             }
         }

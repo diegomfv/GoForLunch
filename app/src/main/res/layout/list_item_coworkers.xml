@@ -30,7 +30,7 @@
             android:id="@+id/cv_coworkers_textview_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Homer is eating french (Le Zinc)"
+            android:hint="@string/restaurantNoCoworkersJoining"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/cv_coworkers_image_id"
             android:layout_marginLeft="10dp"

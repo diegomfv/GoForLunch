@@ -34,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
+import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
@@ -109,11 +110,11 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     private String intentRestaurantName;
 
     private boolean fabShowsCheck;
-    private String phoneToastString = "No phone available";
-    private String webUrlToastString = "No web available";
+    private String phoneToastString;
+    private String webUrlToastString;
     private String likeToastString = "Liked!";
 
-    private List<String> listOfCoworkers;
+    private List<User> listOfCoworkers;
 
     //RecyclerView
     @BindView(R.id.restaurant_recycler_view_id)
@@ -173,6 +174,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
         this.configureRecyclerView();
         this.configureInternalStorage(context);
+        this.configurePhoneAndWebsite();
 
         listOfCoworkers = new ArrayList<>();
 
@@ -181,17 +183,11 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         fab.setOnClickListener(mFabListener);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
 
-        /* We get the list of coworkers that will go to this Restaurant.
-         * They will be displayed in the recyclerView
-         * */
-        dbRefUsersGetList = fireDb.getReference(Repo.FirebaseReference.USERS);
-        dbRefUsersGetList.addValueEventListener(valueEventListenerGetListOfCoworkers);
-
         /* We get the intent to display the information
          * */
         intent = getIntent();
-        fillUIUsingIntent(intent);
         intentRestaurantName = intent.getStringExtra(Repo.SentIntent.RESTAURANT_NAME);
+        fillUIUsingIntent(intent);
 
         Anim.showCrossFadeShortAnimation(recyclerView);
 
@@ -276,9 +272,15 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                 if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
-                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
+                    dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS).child(userKey);
                     dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                 }
+
+                /* We get the list of coworkers that will go to this Restaurant.
+                 * They will be displayed in the recyclerView
+                 * */
+                dbRefUsersGetList = fireDb.getReference(Repo.FirebaseReference.USERS);
+                dbRefUsersGetList.addValueEventListener(valueEventListenerGetListOfCoworkers);
             }
         }
     }
@@ -387,6 +389,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                             } else {
 
+                                // TODO: 30/07/2018 Web fails
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlToastString));
                                 startActivity(browserIntent);
 
@@ -540,6 +543,19 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
             //ToastHelper.toastShort(context, getResources().getString(R.string.storageGranted));
 
         }
+    }
+
+    /** Method to configure strings
+     * */
+    private void configurePhoneAndWebsite() {
+        Log.d(TAG, "configurePhoneAndWebsite: called!");
+
+        /* We set this to avoid null exceptions.
+         * The intent will fill this information
+         * */
+        phoneToastString = "Not available";
+        webUrlToastString = "Not available";
+
     }
 
     /** Method used to fill the UI using the intent

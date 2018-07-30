@@ -203,6 +203,9 @@ public class FragmentRestaurantListView extends Fragment {
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
 
+        /* Configuring autocompleteTextView */
+        this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
+
         mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
             @Override
@@ -225,9 +228,6 @@ public class FragmentRestaurantListView extends Fragment {
                 }
             }
         });
-
-        /* Configuring autocompleteTextView */
-        this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
 
         return view;
 
@@ -301,6 +301,7 @@ public class FragmentRestaurantListView extends Fragment {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView: called!");
         unbinder.unbind();
+        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
     }
 
     @Override
@@ -406,6 +407,7 @@ public class FragmentRestaurantListView extends Fragment {
                 }
             }
 
+            // TODO: 30/07/2018 Error
             /** We update the recyclerView with the new list
              * */
             updateRecyclerViewWithNewListOfRestaurantsByCoworker(

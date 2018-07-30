@@ -17,6 +17,9 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.network.models.placebyid.PlaceById;
+import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
+import com.example.android.goforlunch.network.remote.GoogleServiceStreams;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -54,7 +57,9 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Diego Fajardo on 24/07/2018.
@@ -719,4 +724,42 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         }
     }
+
+//    // TODO: 30/07/2018 Delete!
+//    private void fetchData () {
+//        Log.d(TAG, "fetchData: called!");
+//
+//        LatLngForRetrofit myPosition = new LatLngForRetrofit(51.459558,-2.599193);
+//
+//        Disposable disposable = GoogleServiceStreams.streamFetchPlaceById(
+//                "ChIJo8eWxtqNcUgRqzOCyl2ECWg",
+//                Repo.Keys.PLACEID_KEY)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(Schedulers.io())
+//                .subscribeWith(new DisposableObserver<PlaceById>() {
+//                    @Override
+//                    public void onNext(PlaceById placeById) {
+//                        Log.d(TAG, "onNext: ");
+//
+//                        com.example.android.goforlunch.network.models.placebyid.Result result =
+//                                placeById.getResult();
+//
+//                        Log.i(TAG, "onNext: placeById = " + result);
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        Log.e(TAG, "onError: " + e.getMessage());
+//
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//                        Log.d(TAG, "onComplete: ");
+//
+//                    }
+//
+//                });
+//
+//    }
 }

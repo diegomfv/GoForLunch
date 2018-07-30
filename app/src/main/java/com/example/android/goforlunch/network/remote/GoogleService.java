@@ -9,6 +9,7 @@ import com.example.android.goforlunch.network.models.placetextsearch.PlacesByTex
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -38,6 +39,14 @@ public interface GoogleService {
             @Query("placeid") String placeId,
             @Query("key") String key
     );
+
+    // TODO: 30/07/2018 Delete
+    @GET("json")
+    Observable<Response<PlaceById>> fetchDataTrial(
+            @Query("placeid") String placeId,
+            @Query("key") String key
+    );
+
 
     @GET("json")
     Observable<DistanceMatrix> fetchDistanceMatrix(
