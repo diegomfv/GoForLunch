@@ -65,8 +65,6 @@ public class FetchingService extends Service {
     private String mainPath;
     private String imageDirPath;
 
-    private double latitude;
-    private double longitude;
     private boolean accessInternalStorageGranted;
 
 
@@ -87,7 +85,6 @@ public class FetchingService extends Service {
             }
         });
 
-
         configuringInternalStorage();
 
         listOfRestaurantsEntries = new ArrayList<>();
@@ -101,7 +98,6 @@ public class FetchingService extends Service {
         * if there is no internet
         * */
         mHandler = new Handler();
-
 
     }
 
@@ -678,43 +674,5 @@ public class FetchingService extends Service {
         localDatabase.restaurantDao().insertRestaurant(restaurantEntry);
 
     }
-
-    // TODO: 30/07/2018 Check this!
-
-    /** Method that deletes all files in the internal storage: "imageDir" path */
-//    public void deleteAllFilesInStorage () {
-//        Log.d(TAG, "deleteAllFilesInStorage: called!");
-//
-//        if (accessInternalStorageGranted) {
-//            Log.d(TAG, "deleteAllFilesInStorage: access to storage GRANTED!");
-//
-//            if (storage.isDirectoryExists(imageDirPath)) {
-//                UtilsGeneral.printFiles(imageDirPath);
-//
-//                /* We delete the directory (which will delete all the files in it)
-//                 */
-//                storage.deleteDirectory(imageDirPath);
-//                UtilsGeneral.printFiles(imageDirPath);
-//
-//                /* We create it again
-//                 * */
-//                storage.createDirectory(imageDirPath);
-//                UtilsGeneral.printFiles(imageDirPath);
-//
-//            } else {
-//
-//                /* Since the directory does not exist yet, we create it
-//                 * */
-//                storage.createDirectory(imageDirPath);
-//                UtilsGeneral.printFiles(imageDirPath);
-//
-//            }
-//
-//        } else {
-//            Log.d(TAG, "deleteAllFilesInStorage: access to internal storage NOT GRANTED!");
-//
-//        }
-//    }
-
 }
 

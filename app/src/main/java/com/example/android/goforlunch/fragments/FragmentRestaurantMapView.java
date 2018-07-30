@@ -2,12 +2,12 @@ package com.example.android.goforlunch.fragments;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,22 +39,13 @@ import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.data.sqlite.DatabaseHelper;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.network.models.distancematrix.DistanceMatrix;
-import com.example.android.goforlunch.network.models.placebyid.PlaceById;
 import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.network.models.placebynearby.PlacesByNearby;
-import com.example.android.goforlunch.network.models.placetextsearch.PlacesByTextSearch;
-import com.example.android.goforlunch.network.models.placetextsearch.Result;
-import com.example.android.goforlunch.network.remote.AllGoogleServices;
-import com.example.android.goforlunch.network.remote.GoogleService;
-import com.example.android.goforlunch.network.remote.GoogleServiceStreams;
 import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -83,7 +74,6 @@ import com.snatik.storage.Storage;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,19 +85,11 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static com.example.android.goforlunch.utils.UtilsRemote.checkClosingTime;
-import static com.example.android.goforlunch.constants.Repo.Keys.NEARBY_KEY;
 
 /**
  * Created by Diego Fajardo on 27/04/2018.
@@ -155,9 +137,6 @@ public class FragmentRestaurantMapView extends Fragment {
     //Used for Retrofit
     private LatLngForRetrofit myPosition;
 
-    //ViewModel to get info from the database
-    private MainViewModel mapFragmentViewModel;
-
     //SharedPreferences
     private SharedPreferences sharedPref;
 
@@ -179,7 +158,7 @@ public class FragmentRestaurantMapView extends Fragment {
     private String userGroup;
     private String userGroupKey;
 
-    //Array of restaurant types (got from Resources, strings)
+    //Array of restaurant types
     private String[] arrayOfTypes;
 
     //Butterknife
@@ -197,9 +176,6 @@ public class FragmentRestaurantMapView extends Fragment {
 
     private ActionBar actionBar;
 
-    @BindView(R.id.map_fragment_refresh_button_id)
-    ImageButton buttonRefreshMap;
-
     @BindView(R.id.map_fragment_parent_relative_layout)
     RelativeLayout mapFragmentRelativeLayout;
 
@@ -208,11 +184,6 @@ public class FragmentRestaurantMapView extends Fragment {
 
     //Disposables
     private Disposable autocompleteTextViewDisposable;
-    private Disposable textSearchDisposable;
-    private Disposable placeIdDisposable;
-    private Disposable distanceMatrixDisposable;
-    private Disposable nearbyDisposable;
-    private Disposable deleteDisposable;
 
     //Observers
     private MaybeObserver restaurantsObserver;
@@ -223,9 +194,12 @@ public class FragmentRestaurantMapView extends Fragment {
     private String imageDirPath;
     private boolean accessInternalStorageGranted;
 
-    //Listener: communicates from Main Activity (for when a search is started)
-    OnCurrentPositionObtainedListener mCallback;
+    //Listener: communicates from Main Activity (it passes the position to MainActivity
+    // so it can start the service. Then, the service communicates with Map Fragment)
+    private OnCurrentPositionObtainedListener mCallback;
 
+    //ViewModel
+    private MainViewModel mainViewModel;
 
     /** ------------------------------------------------ */
 
@@ -240,7 +214,7 @@ public class FragmentRestaurantMapView extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.i(TAG, "onCreateView: Map");
+        Log.i(TAG, "onCreateView: called!");
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
@@ -250,9 +224,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
         /* Storage configuration
          * */
-        storage = new Storage(getActivity());
-        mainPath = storage.getInternalFilesDirectory() + File.separator;
-        imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR;
+        this.configureStorage();
 
         /* Configure databases
          * */
@@ -263,21 +235,9 @@ public class FragmentRestaurantMapView extends Fragment {
          * */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
 
-//        if (((AppCompatActivity) getActivity()) != null) {
-//            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-//        }
-//
-//        if (((AppCompatActivity) getActivity()) != null) {
-//            actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-//            if (actionBar != null) {
-//                actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-//                actionBar.setDisplayHomeAsUpEnabled(true);
-//            }
-//        }
-
         /* We get an array of restaurant types from RESOURCES
          * */
-        this.arrayOfTypes = getActivity().getResources().getStringArray(R.array.typesOfRestaurants);
+        this.arrayOfTypes = Repo.RESTAURANT_TYPES;
 
         this.listOfVisitedRestaurantsByTheUsersGroup = new ArrayList<>();
         this.listOfAllRestaurantsInDatabase = new ArrayList<>();
@@ -334,31 +294,33 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
 
-        /* Configuration process */
-        this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
-        this.getPermissionsProcess();
-
-//        /* STARTING THE MAP:
-//         * First, we check that the user has the correct Google Play Services Version.
-//         * If the user does, we start the map*/
-//        if (isGooglePlayServicesOK()) {
-//            getLocationPermission();
-//        }
-
-        /*************************
-         * LISTENERS *************
-         * **********************/
-
-        buttonRefreshMap.setOnClickListener(new View.OnClickListener() {
+        mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
+        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
             @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: refresh button clicked!");
-                ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Nothing happens...");
-                //deleteAllFilesInStorage();
-                //deleteAllRestaurantsAndStartRequestProcess();
+            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
 
+                if (restaurantEntries != null && restaurantEntries.size() != 0) {
+                    Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+
+                    /* We fill the list with the Restaurants in the database
+                     * */
+                    listOfAllRestaurantsInDatabase = restaurantEntries;
+
+                    /* We update the UI
+                     * */
+                    updateMapWithPins();
+
+                } else {
+                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                }
             }
         });
+
+
+        /* Configuration process */
+        this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
+        this.startStoragePermissionsProcess();
 
         return view;
     }
@@ -419,10 +381,6 @@ public class FragmentRestaurantMapView extends Fragment {
     private void disposeWhenDestroy () {
         Log.d(TAG, "disposeWhenDestroy: called!");
         UtilsGeneral.dispose(this.autocompleteTextViewDisposable);
-        UtilsGeneral.dispose(this.textSearchDisposable);
-        UtilsGeneral.dispose(this.placeIdDisposable);
-        UtilsGeneral.dispose(this.distanceMatrixDisposable);
-        UtilsGeneral.dispose(this.nearbyDisposable);
 
     }
 
@@ -514,8 +472,8 @@ public class FragmentRestaurantMapView extends Fragment {
     /** This method starts both, internal storage permission process and
      * device location permission process
      * */
-    public void getPermissionsProcess () {
-        Log.d(TAG, "getPermissionsProcess: called!");
+    public void startStoragePermissionsProcess() {
+        Log.d(TAG, "startStoragePermissionsProcess: called!");
         this.getInternalStorageAccessPermission();
     }
 
@@ -765,16 +723,6 @@ public class FragmentRestaurantMapView extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Method that returns true if local database is empty
-     * */
-    public boolean localDatabaseIsEmpty() {
-        Log.d(TAG, "localDatabaseIsEmpty: called!");
-
-        DatabaseHelper dbH = new DatabaseHelper(getActivity());
-        return dbH.isTableEmpty("restaurant");
-
-    }
 
     /********************
      * CONFIGURATION
@@ -842,6 +790,17 @@ public class FragmentRestaurantMapView extends Fragment {
 
     }
 
+    /** Method that configures storage to persist images
+     * to disk
+     * */
+    private void configureStorage () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        storage = new Storage(getActivity());
+        mainPath = storage.getInternalFilesDirectory() + File.separator;
+        imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR;
+
+    }
 
     /******************************************************
      * INTERNAL STORAGE
@@ -861,62 +820,6 @@ public class FragmentRestaurantMapView extends Fragment {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION);
             }
-        }
-    }
-
-    /** Saves an image in the
-     * internal storage using a background thread
-     * */
-    public void saveImageInInternalStorage (final String filePath, final Bitmap bm) {
-        Log.d(TAG, "saveImageInInternalStorage: called!");
-
-           if (filePath != null && bm != null) {
-
-               AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                   @Override
-                   public void run() {
-                       Log.d(TAG, "run: Saving file...");
-                       boolean isFileCreated = storage.createFile(imageDirPath + File.separator + filePath, bm);
-                       Log.d(TAG, "run: file saved = " + isFileCreated);
-
-                   }
-               });
-
-           }
-    }
-
-    /** Method that deletes all files in the internal storage: "imageDir" path */
-    public void deleteAllFilesInStorage () {
-        Log.d(TAG, "deleteAllFilesInStorage: called!");
-
-        if (accessInternalStorageGranted) {
-            Log.d(TAG, "deleteAllFilesInStorage: access to storage GRANTED!");
-
-            if (storage.isDirectoryExists(imageDirPath)) {
-                UtilsGeneral.printFiles(imageDirPath);
-
-                /* We delete the directory (which will delete all the files in it)
-                */
-                storage.deleteDirectory(imageDirPath);
-                UtilsGeneral.printFiles(imageDirPath);
-
-                /* We create it again
-                * */
-                storage.createDirectory(imageDirPath);
-                UtilsGeneral.printFiles(imageDirPath);
-
-            } else {
-
-                /* Since the directory does not exist yet, we create it
-                * */
-                storage.createDirectory(imageDirPath);
-                UtilsGeneral.printFiles(imageDirPath);
-
-            }
-
-        } else {
-            Log.d(TAG, "deleteAllFilesInStorage: access to internal storage NOT GRANTED!");
-
         }
     }
 

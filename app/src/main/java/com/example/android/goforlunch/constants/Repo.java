@@ -9,10 +9,6 @@ public interface Repo {
 
     String CONNECTIVITY_CHANGE_STATUS = "android.net.conn.CONNECTIVITY_CHANGE";
 
-    /** This string is used in for requests (TextSearch)
-     * */
-    String ADD_RESTAURANT_STRING = "+Restaurant";
-
     /** This array stores the different types of restaurants available for filtering
      * */
     String[] RESTAURANT_TYPES = {
@@ -32,9 +28,11 @@ public interface Repo {
             "Other" //13
     };
 
-    String RESTAURANT_TABLE_NAME = "restaurant";
-
     String FLAG_SPECIFY_FRAGMENT = "flagToSpecifyFragment";
+
+    /* Used to communicate between the fetching service and map fragment
+    * */
+    String INTENT_ACTION_UPDATE_MAP = "com.example.android.goforlunch.INTENT_ACTION_UPLOAD";
 
     interface Keys {
 
