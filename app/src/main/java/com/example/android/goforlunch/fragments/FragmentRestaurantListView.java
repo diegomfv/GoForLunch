@@ -464,12 +464,12 @@ public class FragmentRestaurantListView extends Fragment {
                     @Override
                     public void onNext(String type) {
                         Log.d(TAG, "onNext: type = " + type);
-                        Log.d(TAG, "onNext: typeAsInt = " + UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
+                        Log.d(TAG, "onNext: typeAsInt = " + UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type));
 
                         if (Arrays.asList(arrayOfTypes).contains(UtilsGeneral.getTypeInSpecificLanguage(getActivity(), type))
-                                && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes) != 0) {
+                                && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
                             Log.d(TAG, "onNext: getting restaurant by type");
-                            getRestaurantsByTypeAndDisplayThemInRecyclerView(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
+                            getRestaurantsByTypeAndDisplayThemInRecyclerView(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type));
 
                         } else {
                             Log.d(TAG, "onNext: getting all restaurants");
@@ -667,9 +667,9 @@ public class FragmentRestaurantListView extends Fragment {
         Log.d(TAG, "updateRecyclerViewWithNewListOfRestaurantsByCoworker: called!");
 
         if (Arrays.asList(arrayOfTypes).contains(type)
-                && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes) != 0) {
+                && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
             Log.d(TAG, "onNext: getting restaurant by type");
-            getRestaurantsByTypeAndDisplayThemInRecyclerView(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type, arrayOfTypes));
+            getRestaurantsByTypeAndDisplayThemInRecyclerView(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type));
 
         } else {
             Log.d(TAG, "onNext: getting all restaurants");

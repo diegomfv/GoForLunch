@@ -255,38 +255,36 @@ public class UtilsGeneral {
 
     /** Method that transforms a restaurant type from String type to int type
      * */
-    public static int getTypeAsStringAndReturnTypeAsInt (String type, String[] arrayOfTypes) {
+    public static int getTypeAsStringAndReturnTypeAsInt (String type) {
         Log.d(TAG, "getTypeAsStringAndReturnTypeAsInt: called!");
 
-        if (Arrays.asList(arrayOfTypes).contains(type)) {
-            return Arrays.asList(arrayOfTypes).indexOf(type);
+        if (Arrays.asList(Repo.RESTAURANT_TYPES).contains(type)) {
+            return Arrays.asList(Repo.RESTAURANT_TYPES).indexOf(type);
         } else return 0;
 
     }
 
     /** This method transforms the type of the restaurant from an int to a String
      * */
-    public static String transformTypeToString (Context context, int type) {
-
-        String[] arrayOfTypes = context.getResources().getStringArray(R.array.typesOfRestaurants);
+    public static String transformTypeAsIntToString(int type) {
 
         switch (type) {
 
-            case 0: return arrayOfTypes[0];
-            case 1: return arrayOfTypes[1];
-            case 2: return arrayOfTypes[2];
-            case 3: return arrayOfTypes[3];
-            case 4: return arrayOfTypes[4];
-            case 5: return arrayOfTypes[5];
-            case 6: return arrayOfTypes[6];
-            case 7: return arrayOfTypes[7];
-            case 8: return arrayOfTypes[8];
-            case 9: return arrayOfTypes[9];
-            case 10: return arrayOfTypes[10];
-            case 11: return arrayOfTypes[11];
-            case 12: return arrayOfTypes[12];
-            case 13: return arrayOfTypes[13];
-            default: return arrayOfTypes[13];
+            case 0: return Repo.RESTAURANT_TYPES[0];
+            case 1: return Repo.RESTAURANT_TYPES[1];
+            case 2: return Repo.RESTAURANT_TYPES[2];
+            case 3: return Repo.RESTAURANT_TYPES[3];
+            case 4: return Repo.RESTAURANT_TYPES[4];
+            case 5: return Repo.RESTAURANT_TYPES[5];
+            case 6: return Repo.RESTAURANT_TYPES[6];
+            case 7: return Repo.RESTAURANT_TYPES[7];
+            case 8: return Repo.RESTAURANT_TYPES[8];
+            case 9: return Repo.RESTAURANT_TYPES[9];
+            case 10: return Repo.RESTAURANT_TYPES[10];
+            case 11: return Repo.RESTAURANT_TYPES[11];
+            case 12: return Repo.RESTAURANT_TYPES[12];
+            case 13: return Repo.RESTAURANT_TYPES[13];
+            default: return Repo.RESTAURANT_TYPES[13];
 
         }
     }
@@ -475,7 +473,14 @@ public class UtilsGeneral {
         return px;
     }
 
+    /** Method that returns a constant type (type in english)
+     * getting a type in any language
+     * */
     public static String getTypeInSpecificLanguage (Context context, String type) {
+
+        if (type == null) {
+            return "";
+        }
 
         int position = 0;
 
@@ -486,6 +491,7 @@ public class UtilsGeneral {
 
             if (typesInOtherLanguage[i].equalsIgnoreCase(type)) {
                 position = i;
+                break;
             }
         }
 

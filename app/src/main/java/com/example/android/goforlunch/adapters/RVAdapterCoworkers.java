@@ -166,7 +166,7 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
                         .getString(R.string.avCowHasDecided,
                                 listOfCoworkers.get(position).getFirstName(),
                                 listOfCoworkers.get(position).getLastName() + '\n',
-                                UtilsGeneral.transformTypeToString(mContext, listOfCoworkers.get(position).getRestaurantType()),
+                                UtilsGeneral.transformTypeAsIntToString(listOfCoworkers.get(position).getRestaurantType()),
                                 listOfCoworkers.get(position).getRestaurantName());
 
             }

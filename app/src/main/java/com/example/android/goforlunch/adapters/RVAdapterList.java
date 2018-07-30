@@ -194,7 +194,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
          */
         private String getTypeAndAdress (int position) {
 
-            return UtilsGeneral.transformTypeToString(mContext,listOfRestaurants.get(position).getType())
+            return UtilsGeneral.transformTypeAsIntToString(listOfRestaurants.get(position).getType())
                     + " - "
                     +  listOfRestaurants.get(position).getAddress().substring(0, listOfRestaurants.get(position).getAddress().indexOf(","));
 
