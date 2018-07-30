@@ -33,7 +33,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
@@ -110,8 +109,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     private String intentRestaurantName;
 
     private boolean fabShowsCheck;
-    private String phoneToastString;
-    private String webUrlToastString;
+    private String phoneString;
+    private String webUrlString;
     private String likeToastString = "Liked!";
 
     private List<User> listOfCoworkers;
@@ -361,13 +360,13 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                         case R.id.restaurant_view_call_id: {
                             Log.d(TAG, "onNavigationItemSelected: callButton CLICKED!");
-                            Log.d(TAG, "onNavigationItemSelected: phone = " + phoneToastString);
+                            Log.d(TAG, "onNavigationItemSelected: phone = " + phoneString);
 
-                            if (phoneToastString.equals("")) {
+                            if (phoneString.equals("")) {
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantPhoneNotAvailable));
 
                             } else {
-                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantCallingTo) + " " + phoneToastString);
+                                ToastHelper.toastShort(context, getResources().getString(R.string.restaurantCallingTo) + " " + phoneString);
                             }
 
                         } break;
@@ -382,16 +381,21 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                         case R.id.restaurant_view_website_id: {
                             Log.d(TAG, "onNavigationItemSelected: websiteButton CLICKED!");
-                            Log.d(TAG, "onNavigationItemSelected: web URL = " + webUrlToastString);
+                            Log.d(TAG, "onNavigationItemSelected: web URL = " + webUrlString);
 
-                            if (webUrlToastString.equals("")) {
+                            if (webUrlString.equals("")) {
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantWebsiteNotAvailable));
 
                             } else {
 
                                 // TODO: 30/07/2018 Web fails
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlToastString));
-                                startActivity(browserIntent);
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlString));
+                                if (browserIntent.resolveActivity(getPackageManager()) != null) {
+                                    startActivity(browserIntent);
+
+                                } else {
+                                    ToastHelper.toastShort(context, getResources().getString(R.string.restaurantWebsiteNotAvailable));
+                                }
 
                             }
 
@@ -449,12 +453,52 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         }
     };
 
+    /*******************************
+     * CONFIGURATION ***************
+     ******************************/
 
+    /** Method that sets the directory variables and creates the directory that will
+     * store images if needed
+     * */
+    private void configureInternalStorage (Context context) {
+        Log.d(TAG, "configureInternalStorage: ");
 
-    /******************************************************
-     * CONFIGURATION
-     *****************************************************/
+        //If we don't have storage permissions, we don't continue
+        if (ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ToastHelper.toastShort(context, getResources().getString(R.string.storageNotGranted));
+            return;
 
+        } else {
+            Log.d(TAG, "configureInternalStorage: access to Internal storage granted");
+            accessToInternalStorageGranted = true;
+            storage = new Storage(context);
+            mainPath = storage.getInternalFilesDirectory() + File.separator;
+            imageDirPath = mainPath + Repo.Directories.IMAGE_DIR + File.separator;
+
+            Log.d(TAG, "configureInternalStorage: mainPath = " + mainPath);
+            Log.d(TAG, "configureInternalStorage: imageDirPath = " + imageDirPath);
+
+            //ToastHelper.toastShort(context, getResources().getString(R.string.storageGranted));
+
+        }
+    }
+
+    /** Method to configure strings
+     * */
+    private void configurePhoneAndWebsite() {
+        Log.d(TAG, "configurePhoneAndWebsite: called!");
+
+        /* We set this to avoid null exceptions.
+         * The intent will fill this information
+         * */
+        phoneString = "Not available";
+        webUrlString = "Not available";
+
+    }
+
+    /** Method to configure the recycler view
+     * */
     private void configureRecyclerView () {
 
         recyclerView.setHasFixedSize(true);
@@ -518,46 +562,6 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method that sets the directory variables and creates the directory that will
-     * store images if needed
-     * */
-    private void configureInternalStorage (Context context) {
-        Log.d(TAG, "configureInternalStorage: ");
-
-        //If we don't have storage permissions, we don't continue
-        if (ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ToastHelper.toastShort(context, getResources().getString(R.string.storageNotGranted));
-            return;
-
-        } else {
-            Log.d(TAG, "configureInternalStorage: access to Internal storage granted");
-            accessToInternalStorageGranted = true;
-            storage = new Storage(context);
-            mainPath = storage.getInternalFilesDirectory() + File.separator;
-            imageDirPath = mainPath + Repo.Directories.IMAGE_DIR + File.separator;
-
-            Log.d(TAG, "configureInternalStorage: mainPath = " + mainPath);
-            Log.d(TAG, "configureInternalStorage: imageDirPath = " + imageDirPath);
-
-            //ToastHelper.toastShort(context, getResources().getString(R.string.storageGranted));
-
-        }
-    }
-
-    /** Method to configure strings
-     * */
-    private void configurePhoneAndWebsite() {
-        Log.d(TAG, "configurePhoneAndWebsite: called!");
-
-        /* We set this to avoid null exceptions.
-         * The intent will fill this information
-         * */
-        phoneToastString = "Not available";
-        webUrlToastString = "Not available";
-
-    }
-
     /** Method used to fill the UI using the intent
      * */
     private boolean fillUIUsingIntent(Intent intent) {
@@ -613,8 +617,12 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
             rbRestRating.setRating(rating);
         }
 
-        phoneToastString = intent.getStringExtra(Repo.SentIntent.PHONE);
-        webUrlToastString = intent.getStringExtra(Repo.SentIntent.WEBSITE_URL);
+        phoneString = intent.getStringExtra(Repo.SentIntent.PHONE);
+        webUrlString = intent.getStringExtra(Repo.SentIntent.WEBSITE_URL);
+
+        /* We adapt the web url to be able to be launched with the intent
+        * */
+        transformWebUrlString();
 
         if (accessToInternalStorageGranted) {
             loadImage(intent);
@@ -625,6 +633,14 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         }
 
         return true;
+    }
+
+    private void transformWebUrlString() {
+        Log.d(TAG, "transformWebUrlString: called!");
+
+        if (!webUrlString.startsWith("http://")) {
+            webUrlString = "http://" + webUrlString;
+        }
     }
 
     /** Method that tries to load an image using the storage.

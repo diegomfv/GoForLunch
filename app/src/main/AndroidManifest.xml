@@ -65,7 +65,7 @@
         <activity android:name=".activities.rest.RestaurantActivity"
             android:label="Restaurant Activity"
             android:parentActivityName=".activities.rest.MainActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".activities.rest.SettingsActivity"
             android:label="Settings Activity"
