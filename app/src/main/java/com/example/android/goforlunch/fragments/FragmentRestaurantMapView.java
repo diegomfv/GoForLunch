@@ -244,22 +244,22 @@ public class FragmentRestaurantMapView extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_map_view, container, false);
 
-        /** Butterknife binding
+        /* Butterknife binding
          * */
         unbinder = ButterKnife.bind(this, view);
 
-        /** Storage configuration
+        /* Storage configuration
          * */
         storage = new Storage(getActivity());
         mainPath = storage.getInternalFilesDirectory() + File.separator;
         imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR;
 
-        /** Configure databases
+        /* Configure databases
          * */
         this.configureDatabases(getActivity());
         Log.d(TAG, "onCreate: " + sharedPref.getAll().toString());
 
-        /** Configure toolbar
+        /* Configure toolbar
          * */
         UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
 
@@ -311,27 +311,16 @@ public class FragmentRestaurantMapView extends Fragment {
                                 userIdKey = item.getKey();
                                 userGroup = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString();
                                 userGroupKey = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
+
                                 UtilsGeneral.updateSharedPreferences(sharedPref, Repo.SharedPreferences.USER_ID_KEY, userIdKey);
 
-                                dbRefGroups = fireDb.getReference(
-                                        Repo.FirebaseReference.GROUPS
-                                                + "/" + userGroupKey
-                                                + "/" + Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED);
-                                dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+                                /* STARTING THE MAP:
+                                 * First, we check that the user has the correct Google Play Services Version.
+                                 * If the user does, we start the map*/
+                                if (isGooglePlayServicesOK()) {
+                                    getLocationPermission();
+                                }
 
-                                        listOfVisitedRestaurantsByTheUsersGroup = UtilsFirebase.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-                                        Log.d(TAG, "onCancelled: " + databaseError.getCode());
-
-                                    }
-                                });
                             }
                         }
                     }
@@ -349,12 +338,12 @@ public class FragmentRestaurantMapView extends Fragment {
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
         this.getPermissionsProcess();
 
-        /* STARTING THE MAP:
-         * First, we check that the user has the correct Google Play Services Version.
-         * If the user does, we start the map*/
-        if (isGooglePlayServicesOK()) {
-            getLocationPermission();
-        }
+//        /* STARTING THE MAP:
+//         * First, we check that the user has the correct Google Play Services Version.
+//         * If the user does, we start the map*/
+//        if (isGooglePlayServicesOK()) {
+//            getLocationPermission();
+//        }
 
         /*************************
          * LISTENERS *************
@@ -364,7 +353,7 @@ public class FragmentRestaurantMapView extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: refresh button clicked!");
-                ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Deleting db and starting request process");
+                ToastHelper.toastShort(getActivity(), "Refresh Button clicked! Nothing happens...");
                 //deleteAllFilesInStorage();
                 //deleteAllRestaurantsAndStartRequestProcess();
 
@@ -624,13 +613,16 @@ public class FragmentRestaurantMapView extends Fragment {
                         return;
                     }
 
+                    /* Updating the map
+                    * */
+                    updateMapWithPins();
+
                     mMap.setMyLocationEnabled(true); //displays the blue marker at your location
                     //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
 
                 }
 
-                /**
-                 * Listener for when clicking the info window in a map
+                /*Listener for when clicking the info window in a map
                  * */
                 if (mMap != null) {
                     mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -712,7 +704,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
                         /** We start the request process if the database is empty
                          * */
-                        initRequestProcessIfNecessary();
+                        //initRequestProcessIfNecessary();
 
                     } else {
                         Log.d(TAG, "onComplete: current location is null");
@@ -1078,8 +1070,7 @@ public class FragmentRestaurantMapView extends Fragment {
             public void onSuccess(List<RestaurantEntry> restaurantEntryList) {
                 Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
 
-                updateMapWithPins(restaurantEntryList,
-                        listOfVisitedRestaurantsByTheUsersGroup);
+                updateMapWithPins();
 
             }
 
@@ -1152,8 +1143,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
                     /* We updateItem the UI
                     * */
-                    updateMapWithPins(restaurantEntryList,
-                            listOfVisitedRestaurantsByTheUsersGroup);
+                    updateMapWithPins();
                 }
 
             }
@@ -1579,78 +1569,136 @@ public class FragmentRestaurantMapView extends Fragment {
      * *****************/
 
     /** Method that updates the map with pins.
-     * Additionally, it fills the listOfAllRestaurantsInDatabase
+     * It firstly fills gets the restaurants visited by the group and
+     * afterwards all the restaurants in the database
      * */
-    public void updateMapWithPins(List<RestaurantEntry> restaurantEntryList,
-                                  List<String> listOfVisitedRestaurantsByTheUsersGroup) {
+    public void updateMapWithPins() {
         Log.d(TAG, "updateMapWithPins: called!");
 
-        /* We updateItem a list of restaurants with all the restaurants of the database
-        * */
-        // TODO: 25/06/2018 Didn't find another place to be sure the database was completely
-        // TODO: 25/06/2018 filled before updating the list
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run: updating \"listOfAllRestaurantsInDatabase\"...");
-                listOfAllRestaurantsInDatabase = localDatabase
-                        .restaurantDao()
-                        .getAllRestaurantsNotLiveDataOrderDistance();
+        if (userGroupKey != null) {
+            Log.i(TAG, "updateMapWithPins: userGroupKey is not null");
+
+            dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS)
+                    .child(userGroupKey)
+                    .child(Repo.FirebaseReference.GROUP_RESTAURANTS_VISITED);
+
+            dbRefGroups.addListenerForSingleValueEvent(singleValueEventListenerGetRestaurantsVisited);
+
+        } else {
+            Log.i(TAG, "updateMapWithPins: userGroupKey is null");
+
+        }
+    }
+
+    /** Listener for getting the restaurants visited by a group,
+     * get all the restaurants in the database and start
+     * filling the map
+     * */
+    private ValueEventListener singleValueEventListenerGetRestaurantsVisited = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+
+            listOfVisitedRestaurantsByTheUsersGroup = UtilsFirebase.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
+
+            /* We updateItem the map's pins
+             * */
+            if (mMap != null) {
+                Log.d(TAG, "updateMapWithPins: the map is not null");
+
+                restaurantsObserver = getAllRestaurantsInDatabase()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(getMaybeObserverGetAllRestaurantsInDatabase());
+
+            } else {
+                Log.d(TAG, "updateMapWithPins: the map IS NULL!");
+                ToastHelper.toastShort(getActivity(), "The map is not ready...");
             }
-        });
+        }
 
-        /* We updateItem the map's pins
-        * */
-        if (mMap != null) {
-            Log.d(TAG, "updateMapWithPins: the map is not null");
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "onCancelled: " + databaseError.getCode());
 
-            if (restaurantEntryList != null
-                    && !restaurantEntryList.isEmpty()) {
-                Log.d(TAG, "displayPinsInMap: listOfRestaurants IS NOT NULL and IS NOT EMPTY");
+        }
+    };
 
-                /* We delete all the elements of the listOfMarkers and clear the map
-                 * */
-                listOfMarkers.clear();
-                mMap.clear();
+    /** This Observer is used
+     * to get all the restaurants in the database
+     * */
+    private MaybeObserver<List<RestaurantEntry>> getMaybeObserverGetAllRestaurantsInDatabase() {
+        Log.d(TAG, "getMaybeObserverThatStartsRequestProcessIfNecessary: called!");
 
-                for (int i = 0; i < restaurantEntryList.size(); i++) {
+        return new MaybeObserver<List<RestaurantEntry>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: ");
 
-                    MarkerOptions options;
+            }
 
-                    LatLng latLng = new LatLng(
-                            Double.parseDouble(restaurantEntryList.get(i).getLatitude()),
-                            Double.parseDouble(restaurantEntryList.get(i).getLongitude()));
+            @Override
+            public void onSuccess(List<RestaurantEntry> restaurantEntryList) {
+                Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
 
-                    if (listOfVisitedRestaurantsByTheUsersGroup.contains(restaurantEntryList.get(i).getName())) {
-                        Log.d(TAG, "displayPinsInMap: The place has been visited by somebody before");
+                if (!restaurantEntryList.isEmpty()) {
+                    Log.i(TAG, "displayPinsInMap: listOfRestaurants IS NOT EMPTY");
 
-                        options = new MarkerOptions()
-                                .position(latLng)
-                                .title(restaurantEntryList.get(i).getName())
-                                .snippet(restaurantEntryList.get(i).getAddress())
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)); //Different colour
-                    } else {
-                        Log.d(TAG, "displayPinsInMap: The place has not been visited yet");
+                    /* We delete all the elements of the listOfMarkers and clear the map
+                     * */
+                    listOfMarkers.clear();
+                    mMap.clear();
 
-                        options = new MarkerOptions()
-                                .position(latLng)
-                                .title(restaurantEntryList.get(i).getName())
-                                .snippet(restaurantEntryList.get(i).getAddress())
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                    for (int i = 0; i < restaurantEntryList.size(); i++) {
+
+                        MarkerOptions options;
+
+                        LatLng latLng = new LatLng(
+                                Double.parseDouble(restaurantEntryList.get(i).getLatitude()),
+                                Double.parseDouble(restaurantEntryList.get(i).getLongitude()));
+
+                        if (listOfVisitedRestaurantsByTheUsersGroup.contains(restaurantEntryList.get(i).getName())) {
+                            Log.d(TAG, "displayPinsInMap: The place has been visited by somebody before");
+
+                            options = new MarkerOptions()
+                                    .position(latLng)
+                                    .title(restaurantEntryList.get(i).getName())
+                                    .snippet(restaurantEntryList.get(i).getAddress())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)); //Different colour
+                        } else {
+                            Log.d(TAG, "displayPinsInMap: The place has not been visited yet");
+
+                            options = new MarkerOptions()
+                                    .position(latLng)
+                                    .title(restaurantEntryList.get(i).getName())
+                                    .snippet(restaurantEntryList.get(i).getAddress())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+                        }
+
+                        /* We fill the listOfMarkers and the map with the markers
+                         * */
+                        listOfMarkers.add(mMap.addMarker(options));
 
                     }
 
-                    /* We fill the listOfMarkers and the map with the markers
-                     * */
-                    listOfMarkers.add(mMap.addMarker(options));
-
+                } else {
+                    Log.d(TAG, "displayPinsInMap: listOfRestaurants IS EMPTY");
                 }
             }
 
-        } else {
-            Log.d(TAG, "updateMapWithPins: the map IS NULL!");
-            ToastHelper.toastShort(getActivity(), "The map is not ready...");
-        }
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: " + Log.getStackTraceString(e));
 
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+
+            }
+        };
     }
+
 }

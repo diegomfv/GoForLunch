@@ -38,6 +38,8 @@ public interface Repo {
 
     interface Keys {
 
+        String KEY_GOOGLE_MAPS_PLATFORM = "AIzaSyDq9-hsHk6dNzZDILqfB9rGuv54xuGX7vM";
+
         String NEARBY_KEY = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
         String MATRIX_DISTANCE_KEY = "AIzaSyCebroRUS4VPwvDky6QXHoNfEr0bPHKkYc";
         String PHOTO_KEY = "AIzaSyDuv5PtP5uwugkDW189v9_ycrp8A0nlwkU";
