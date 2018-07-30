@@ -111,7 +111,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     private boolean fabShowsCheck;
     private String phoneString;
     private String webUrlString;
-    private String likeToastString = "Liked!";
+    private String likeString;
 
     private List<User> listOfCoworkers;
 
@@ -173,7 +173,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
         this.configureRecyclerView();
         this.configureInternalStorage(context);
-        this.configurePhoneAndWebsite();
+        this.configureStrings();
 
         listOfCoworkers = new ArrayList<>();
 
@@ -374,7 +374,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                         case R.id.restaurant_view_like_id: {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
 
-                            ToastHelper.toastShort(context, likeToastString);
+                            ToastHelper.toastShort(context, likeString);
 
 
                         } break;
@@ -486,14 +486,15 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     /** Method to configure strings
      * */
-    private void configurePhoneAndWebsite() {
-        Log.d(TAG, "configurePhoneAndWebsite: called!");
+    private void configureStrings() {
+        Log.d(TAG, "configureStrings: called!");
 
         /* We set this to avoid null exceptions.
          * The intent will fill this information
          * */
         phoneString = "Not available";
         webUrlString = "Not available";
+        likeString = "Liked!";
 
     }
 
@@ -635,6 +636,9 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         return true;
     }
 
+    /** Adds http:// to the beginning of the web url if it
+     * did not start like that
+     * */
     private void transformWebUrlString() {
         Log.d(TAG, "transformWebUrlString: called!");
 
