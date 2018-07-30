@@ -407,7 +407,7 @@ public class FragmentRestaurantListView extends Fragment {
                 }
             }
 
-            // TODO: 30/07/2018 Error
+            // TODO: 30/07/2018 Error!! Whe
             /** We update the recyclerView with the new list
              * */
             updateRecyclerViewWithNewListOfRestaurantsByCoworker(
