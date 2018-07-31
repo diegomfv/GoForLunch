@@ -16,7 +16,7 @@ The app uses Firebase to keep the data synchronized and allows Google and Facebo
 <img src="./screenshots/restaurant.png" width="30%" height="30%">&ensp;<img src="./screenshots/mapviewsearch.png" width="30%" height="30%">&ensp;<img src="./screenshots/listivewsearch.png" width="30%" height="30%">
 
 
-## Libraries Used
+## Libraries
 
 * [ButterKnife](https://github.com/JakeWharton/butterknife/)
 * [Android Support Library](https://developer.android.com/topic/libraries/support-library/)
