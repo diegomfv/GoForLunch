@@ -1,10 +1,9 @@
 # GoForLunch
-A collaborative app that allows to find restaurants near you and to share your restaurant choice with coworkers.
+A collaborative app that allows to find restaurants near you and to share your restaurant choice with coworkers. It uses google maps to display the restaurants' locations.
 
 You'll also be able to check out where your coworkers are headed for lunch and decide if you want to go with them.
-Just before the lunch break, the app will notify different employees and invite them to join their coworkers.
 
-It allows Google Sign in and Facebook Sign in.
+The app uses Firebase to keep the data synchronized and allows Google and Facebook Sign in.
 
 ## Screenshots
 
