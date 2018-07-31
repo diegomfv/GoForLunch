@@ -10,41 +10,11 @@ It allows Google Sign in and Facebook Sign in.
 
 <img src="./screenshots/signin.png" width="30%" height="30%">&ensp;<img src="./screenshots/signinpassword.png" width="30%" height="30%">&ensp;<img src="./screenshots/signup.png" width="30%" height="30%">
 
+<img src="./screenshots/mapview.png" width="30%" height="30%">&ensp;<img src="./screenshots/listview.png" width="30%" height="30%">&ensp;<img src="./screenshots/availableworkmates.png" width="30%" height="30%">
 
+<img src="./screenshots/navdrawer.png" width="30%" height="30%">&ensp;<img src="./screenshots/modifyprofile.png" width="30%" height="30%">&ensp;<img src="./screenshots/joingroup.png" width="30%" height="30%">
 
-## Screenshots
-
-<img src="./screenshots/notifications.png" width="30% height="30%">&ensp;
-
-<img src="./design/screen1.png">
-
-
-
-<a href='https://play.google.com/store/apps/details?id=bapspatil.silverscreener&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' width="30%" height="30%"/></a>
-
-
-
-<img src="./design/screen0.png">&ensp;<img src="./design/screen1.png">
-<img src="./design/screen2.png">&ensp;<img src="./design/screen3.png">
-<img src="./design/screen4.png">&ensp;<img src="./design/screen5.png">
-<img src="./design/screen6.png">
-
-
-
-
-
-
-
-<a href='https://play.google.com/store/apps/details?id=bapspatil.silverscreener&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' width="30%" height="30%"/></a>
-
-
-
-<img src="./design/screen0.png">&ensp;<img src="./design/screen1.png">
-<img src="./design/screen2.png">&ensp;<img src="./design/screen3.png">
-<img src="./design/screen4.png">&ensp;<img src="./design/screen5.png">
-<img src="./design/screen6.png">
-
-
+<img src="./screenshots/restaurant.png" width="30%" height="30%">&ensp;<img src="./screenshots/mapviewsearch.png" width="30%" height="30%">&ensp;<img src="./screenshots/listivewsearch.png" width="30%" height="30%">
 
 
 ## Libraries Used
