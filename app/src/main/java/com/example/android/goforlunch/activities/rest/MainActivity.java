@@ -32,7 +32,8 @@ import com.bumptech.glide.Glide;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
-import com.example.android.goforlunch.data.AppExecutors;
+import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.network.service.FetchingService;
 import com.example.android.goforlunch.utils.ToastHelper;
@@ -55,6 +56,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Observable;
@@ -62,6 +64,11 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 // TODO: 29/05/2018 YET TO DO -------------------------------------------------------
 // TODO: 28/07/2018 Fetching process..
@@ -108,6 +115,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     //Shared Preferences
     private SharedPreferences sharedPref;
 
+    //Local database
+    private AppDatabase localDatabase;
+
     //Firebase
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
@@ -144,8 +154,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         fireDb = FirebaseDatabase.getInstance();
 
-        // TODO: 25/07/2018 Delete!
-        UtilsGeneral.printSharedPreferences(sharedPref);
+        localDatabase = AppDatabase.getInstance(MainActivity.this);
 
         //////////////////////////////////////
         setContentView(R.layout.activity_main);
@@ -304,6 +313,13 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "onCurrentPositionObtained: called!");
         this.myPosition = myPosition;
 
+        /* We check if the database is empty.
+        * */
+        MaybeObserver<List<RestaurantEntry>> restaurantsObserver = getAllRestaurantsInDatabase()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(maybeObserverStartFetchProcessIfNecessary());
+
         Log.i(TAG, "onCurrentPositionObtained: myPosition = " + myPosition);
 
     }
@@ -362,6 +378,66 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         return mainDrawerLayout;
     }
 
+    /**************************
+     * Rx JAVA ****************
+     *************************/
+
+    /** Method that returns all restaurants in database of a specific type
+     * */
+    private Maybe<List<RestaurantEntry>> getAllRestaurantsInDatabase() {
+        Log.d(TAG, "getRestaurantsByType: called!");
+        return localDatabase.restaurantDao().getAllRestaurantsRxJava();
+
+    }
+
+    private MaybeObserver<List<RestaurantEntry>> maybeObserverStartFetchProcessIfNecessary() {
+        Log.d(TAG, "maybeObserverUpdateUI: called1");
+
+        return new MaybeObserver<List<RestaurantEntry>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: called!");
+
+            }
+
+            @Override
+            public void onSuccess(List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onSuccess: called!");
+
+                if (restaurantEntries.size() == 0) {
+                    Log.i(TAG, "onSuccess: the database is EMPTY ++++++++++++");
+
+                    if (internetAvailable) {
+
+                        Intent intent = new Intent(MainActivity.this, FetchingService.class);
+                        intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
+                        intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
+                        intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
+                        startService(intent);
+
+                    } else {
+                        //do nothing, there is no internet
+                    }
+
+                } else {
+                    Log.i(TAG, "onSuccess: the database is FULL ++++++++++++");
+                    //do nothing, the database is already full
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "onError: called!");
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: called!");
+
+            }
+        };
+    }
 
     /*****************
      * LISTENERS *****
@@ -557,7 +633,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                                     ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainStartRequestProcess));
 
-                                    // TODO: 28/07/2018 Could be done with PARCELABLE
                                     Intent intent = new Intent(MainActivity.this, FetchingService.class);
                                     intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
                                     intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());

@@ -190,6 +190,7 @@
 
     <!-- FETCHING SERVICE -->
     <string name="overQueryLimit">Over Query Limit!</string>
+    <string name="serviceProblemServer">There is a problem with the server, please try again later</string>
 
 </resources>
 

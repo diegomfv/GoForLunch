@@ -44,7 +44,7 @@ public class UtilsFirebase {
      * all the restaurant info from a user in Firebase
      * */
     public static boolean deleteRestaurantInfoOfUserInFirebase(DatabaseReference dbRef) {
-        // TODO: 28/05/2018 Take care, if sth is null it will be deleted from the database because it won't be added to the map
+        Log.d(TAG, "deleteRestaurantInfoOfUserInFirebase: called!");
 
         Map<String, Object> map = new HashMap<>();
         map.put(Repo.FirebaseReference.RESTAURANT_NAME, "");

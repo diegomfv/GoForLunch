@@ -294,7 +294,7 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
 
-        mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
+        mainViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
         mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
             @Override
             public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
@@ -316,7 +316,6 @@ public class FragmentRestaurantMapView extends Fragment {
                 }
             }
         });
-
 
         /* Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
@@ -560,7 +559,6 @@ public class FragmentRestaurantMapView extends Fragment {
 
                     /* We share myPosition with MainActivity.
                      * */
-                    // TODO: 30/07/2018 Check this
                     mCallback.onCurrentPositionObtained(myPosition);
 
                     getDeviceLocation();
@@ -570,10 +568,6 @@ public class FragmentRestaurantMapView extends Fragment {
                             getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
-
-                    /* Updating the map
-                    * */
-                    updateMapWithPins();
 
                     mMap.setMyLocationEnabled(true); //displays the blue marker at your location
                     //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
@@ -660,9 +654,9 @@ public class FragmentRestaurantMapView extends Fragment {
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                 DEFAULT_ZOOM);
 
-                        /** We start the request process if the database is empty
-                         * */
-                        //initRequestProcessIfNecessary();
+                        /* We update the UI
+                        * */
+                        updateMapWithPins();
 
                     } else {
                         Log.d(TAG, "onComplete: current location is null");

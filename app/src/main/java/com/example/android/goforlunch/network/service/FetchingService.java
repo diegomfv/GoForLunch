@@ -216,12 +216,11 @@ public class FetchingService extends Service {
                                 if (listOfResults.size() == 0) {
                                     Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
 
-                                    // TODO: 26/07/2018 Change this!
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             Log.d(TAG, "run: handler running!");
-                                            ToastHelper.toastShort(FetchingService.this, "Restaurant size = 0");
+                                            ToastHelper.toastShort(FetchingService.this, getResources().getString(R.string.serviceProblemServer));
                                         }
                                     });
 
