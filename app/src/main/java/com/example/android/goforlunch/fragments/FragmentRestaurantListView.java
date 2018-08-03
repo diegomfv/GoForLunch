@@ -245,7 +245,7 @@ public class FragmentRestaurantListView extends Fragment {
 
                 if (aBoolean) {
 
-                    /** We get the user information
+                    /* We get the user information
                      * */
                     currentUser = auth.getCurrentUser();
                     Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
@@ -396,7 +396,7 @@ public class FragmentRestaurantListView extends Fragment {
                         .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")
                         && !item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
 
-                    /** We create a list with all the restaurants that the users are going to.
+                    /* We create a list with all the restaurants that the users are going to.
                      * If several coworkers are going to the same restaurant, it will appear in the UI
                      * */
                     Log.d(TAG, "onDataChange: " + item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString());
@@ -407,7 +407,7 @@ public class FragmentRestaurantListView extends Fragment {
             }
 
             // TODO: 30/07/2018 Error!!
-            /** We update the recyclerView with the new list
+            /* We update the recyclerView with the new list
              * */
             updateRecyclerViewWithNewListOfRestaurantsByCoworker(
                     autocompleteTextView.getText().toString().trim());
@@ -599,6 +599,19 @@ public class FragmentRestaurantListView extends Fragment {
 
     }
 
+    /** Method that fetches all the restaurants from the database and displays a Toast
+     * if needed
+     * */
+    private void getRestaurantsAndDisplayToastIfNeeded() {
+        Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
+
+        restaurantsObserver = getAllRestaurantsInDatabase()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(getMaybeObserverToUpdateRecyclerView());
+
+    }
+
     //********************************
     // OBSERVERS
     //********************************
@@ -620,6 +633,43 @@ public class FragmentRestaurantListView extends Fragment {
             public void onSuccess(List<RestaurantEntry> restaurantEntryList) {
                 Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
                 updateRecyclerViewWithNewRestaurantsList(restaurantEntryList);
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: ");
+
+            }
+        };
+    }
+
+    /** This observer returns all the restaurants in the database
+     * and allows sending a toast to the user telling him to user the StartSearch Button
+     * */
+    private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToSendAToastToTheUserIfNeeded() {
+        Log.d(TAG, "getMaybeObserverToSendAToastToTheUserIfNeeded: called!");
+
+        return new MaybeObserver<List<RestaurantEntry>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: ");
+
+            }
+
+            @Override
+            public void onSuccess(List<RestaurantEntry> restaurantEntryList) {
+                Log.d(TAG, "onSuccess: " + restaurantEntryList.toString());
+
+                if (restaurantEntryList.size() == 0) {
+                    ToastHelper.toastLong(getActivity(), getActivity().getResources().getString(R.string.startFetchingService));
+                }
 
             }
 

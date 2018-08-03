@@ -276,8 +276,6 @@ public class FragmentRestaurantMapView extends Fragment {
                                         mLocationPermissionGranted = true;
                                         initMap();
 
-                                        //if database is empty
-                                        //send toast, please use the navigation drawer to start a search
                                     }
                                 }
 
@@ -612,10 +610,7 @@ public class FragmentRestaurantMapView extends Fragment {
                         if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
                             /* We check if the database is empty. If it is, we start the fetching process
                             * */
-                            MaybeObserver<List<RestaurantEntry>> restaurantsObserver = getRestaurantsByType(0)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribeWith(maybeObserverCheckIfDatabaseIsEmpty());
+                            getRestaurantsAndDisplayToastIfNeeded();
 
                         } else {
                             //do nothing, permissions are not granted
@@ -764,6 +759,19 @@ public class FragmentRestaurantMapView extends Fragment {
     /******************************************************
      * RX JAVA
      *****************************************************/
+
+    /** Method that fetches all the restaurants from the database and displays a Toast
+     * if needed
+     * */
+    private void getRestaurantsAndDisplayToastIfNeeded() {
+        Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
+
+        restaurantsObserver = getRestaurantsByType(0)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(maybeObserverCheckIfDatabaseIsEmpty());
+
+    }
 
     /** Method that returns all restaurants in database of a specific type
      * */
