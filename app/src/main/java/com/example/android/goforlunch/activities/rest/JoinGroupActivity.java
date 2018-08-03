@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
@@ -74,6 +75,8 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
     @BindView(R.id.progressBar_content)
     LinearLayout progressBarContent;
+
+    private Unbinder unbinder;
 
     private String userKey;
     private String userGroup;
@@ -125,7 +128,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiver();
+        this.connectBroadcastReceiver();
 
     }
 
@@ -134,7 +137,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -143,11 +146,17 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
         if (null != disposable) {
-            disposable.dispose();
+            this.disposable.dispose();
         }
+
+        this.fab.setOnClickListener(null);
+        this.buttonJoinGroup.setOnClickListener(null);
+        this.buttonCreateGroup.setOnClickListener(null);
+
+        this.unbinder.unbind();
 
     }
 

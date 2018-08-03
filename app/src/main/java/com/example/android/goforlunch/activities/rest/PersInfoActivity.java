@@ -67,6 +67,7 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by Diego Fajardo on 09/05/2018.
@@ -110,6 +111,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
     @BindView(R.id.pers_main_content)
     LinearLayout mainContent;
+
+    private Unbinder unbinder;
 
     //Variables
     private String userFirstName;
@@ -167,7 +170,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         /* We set the content view
         * */
         setContentView(R.layout.activity_pers_info);
-        ButterKnife.bind(this);
+        unbinder = ButterKnife.bind(this);
 
         /* We set the listeners
         * */
@@ -182,7 +185,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiver();
+        this.connectBroadcastReceiver();
 
     }
 
@@ -191,7 +194,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -200,12 +203,14 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
-        fab.setOnClickListener(null);
-        buttonSaveChanges.setOnClickListener(null);
-        tvChangePassword.setOnClickListener(null);
-        ivUserImage.setOnClickListener(null);
+        this.fab.setOnClickListener(null);
+        this.buttonSaveChanges.setOnClickListener(null);
+        this.tvChangePassword.setOnClickListener(null);
+        this.ivUserImage.setOnClickListener(null);
+
+        this.unbinder.unbind();
 
     }
 

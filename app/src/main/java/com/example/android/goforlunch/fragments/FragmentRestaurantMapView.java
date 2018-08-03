@@ -19,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,6 +34,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.example.android.goforlunch.App;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
@@ -40,6 +42,7 @@ import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
+import com.example.android.goforlunch.network.service.FetchingService;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -102,7 +105,7 @@ public class FragmentRestaurantMapView extends Fragment {
     /* Interface to communicate with Main Activity
      * */
     public interface OnCurrentPositionObtainedListener {
-        void onCurrentPositionObtained (LatLngForRetrofit myPosition);
+        void onCurrentPositionObtained(LatLngForRetrofit myPosition, boolean locationPermission, boolean storageAccessPermission);
     }
 
     //////////////////////////////
@@ -276,9 +279,16 @@ public class FragmentRestaurantMapView extends Fragment {
 
                                 /* STARTING THE MAP:
                                  * First, we check that the user has the correct Google Play Services Version.
-                                 * If the user does, we start the map*/
+                                 * If the user does, check for permissions
+                                 * */
                                 if (isGooglePlayServicesOK()) {
-                                    getLocationPermission();
+
+                                    if (!UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
+                                        UtilsGeneral.getPermissions((AppCompatActivity)getActivity());
+
+                                    } else {
+                                        initMap();
+                                    }
                                 }
 
                             }
@@ -319,7 +329,6 @@ public class FragmentRestaurantMapView extends Fragment {
 
         /* Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
-        this.startStoragePermissionsProcess();
 
         return view;
     }
@@ -394,87 +403,53 @@ public class FragmentRestaurantMapView extends Fragment {
 
         switch (requestCode) {
 
-            /* Location Permission request code */
-            case Repo.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_: {
+            case Repo.REQUEST_CODE_ALL_PERMISSIONS: {
+
                 if (grantResults.length > 0) {
 
-                    for (int i = 0; i < grantResults.length; i++) {
-
-                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                            mLocationPermissionGranted = false;
-                            ToastHelper.toastShort(getActivity(), "Location Permission NOT granted");
-
-                            Log.d(TAG, "onRequestPermissionsResult: permission failed");
-                            return;
-                        }
-
-                    }
-                    //if everything is ok (all permissions are granted),
-                    // we want to initialise the map
-                    Log.d(TAG, "onRequestPermissionsResult: permission granted");
-                    mLocationPermissionGranted = true;
-                    ToastHelper.toastShort(getActivity(), "Location Permission GRANTED");
-                }
-            } break;
-
-            /* Write to storage request code */
-            case Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
-                accessInternalStorageGranted = false;
-
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ToastHelper.toastShort(getActivity(), "Write to Storage Permission GRANTED");
-                    accessInternalStorageGranted = true;
-
-                    if (!storage.isDirectoryExists(imageDirPath)) {
-                        Log.d(TAG, "configureInternalStorage: imageDir does not exist. Creating directory...");
-                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.d(TAG, "run: creating directory...");
-                                boolean isCreated = storage.createDirectory(imageDirPath);
-                                Log.d(TAG, "run: directory created = " + isCreated);
-                            }
-                        });
-
-                    } else {
-                        Log.d(TAG, "configureInternalStorage: imageDir already exists!");
-                        //do nothing
-
-                    }
-
-                    /* After storage permission process, we ask for device location permissions
+                    /* We initialize and assign 0 to a counter to see if any permission is not
+                     * granted (value = -1). If counter is higher than 0, then not all permissions
+                     * are granted and we don't proceed with the fetching process
                      * */
-                    if (isGooglePlayServicesOK()) {
-                        getLocationPermission();
+                    int counter = 0;
+
+                    for (int i = 0; i < grantResults.length; i++) {
+                        if (grantResults[i] == -1) {
+                            //-1 means access NOT GRANTED
+                            counter++;
+                        } else {
+
+                            if (grantResults[0] == 0) {
+                                /* This grantResults ([0]) has to do with WRITE_EXTERNAL_STORAGE permission.
+                                 * == 0 means this permission is granted */
+                                UtilsGeneral.createImageDirectory(storage, imageDirPath);
+                            }
+
+                        }
                     }
 
+                    if (counter > 0) {
+                        ToastHelper.toastNotNecessaryPermissionsAvailable(getActivity());
+                    } else {
+                        Log.i(TAG, "onRequestPermissionsResult: necessary permissions available");
+
+                        /* We init the map
+                        * */
+                        initMap();
+                    }
 
                 } else {
-                    ToastHelper.toastShort(getActivity(), getActivity().getResources().getString(R.string.storageGranted));
-                    accessInternalStorageGranted = false;
+                    ToastHelper.toastNotNecessaryPermissionsAvailable(getActivity());
 
-                    /* After storage permission process, we ask for device location permissions
-                     * */
-                    if (isGooglePlayServicesOK()) {
-                        getLocationPermission();
-                    }
                 }
-
-            } break;
+                break;
+            }
         }
     }
 
     /**************************
      * MAP RELATED METHODS ****
      * ***********************/
-
-    /** This method starts both, internal storage permission process and
-     * device location permission process
-     * */
-    public void startStoragePermissionsProcess() {
-        Log.d(TAG, "startStoragePermissionsProcess: called!");
-        this.getInternalStorageAccessPermission();
-    }
 
     /**
      * Checks if the user has the correct
@@ -499,41 +474,11 @@ public class FragmentRestaurantMapView extends Fragment {
 
         } else {
             Log.d(TAG, "isGooglePlayServicesOK: an error occurred; you cannot make map requests");
-            ToastHelper.toastLong(getActivity(), "You can't make map requests");
+            // TODO: 03/08/2018 !
+            ToastHelper.toastLong(getActivity(), getActivity().getResources().getString(R.string.cantMakeMapRequests));
 
         }
         return false;
-    }
-
-    /**
-     * Method used to get the necessary permissions to get device location
-     * */
-    private void getLocationPermission() {
-        Log.d(TAG, "getLocationPermission: getting location permission");
-
-        /**
-         * We can also check first if the Android Version of the device is equal or higher than Marshmallow:
-         * if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { "rest of code" } */
-
-        String[] permissions = {
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-        };
-
-        if (ContextCompat.checkSelfPermission(
-                this.getActivity().getApplicationContext(), FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            if (ContextCompat.checkSelfPermission(
-                    this.getActivity().getApplicationContext(), COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "getLocationPermission: locationPermission Granted!; initializing map");
-                mLocationPermissionGranted = true;
-                initMap();
-            }
-
-        } else {
-            ActivityCompat.requestPermissions(getActivity(), permissions, Repo.RequestsCodes.REQ_CODE_LOCATION_PERMISSION_);
-
-        }
     }
 
     /**
@@ -557,10 +502,8 @@ public class FragmentRestaurantMapView extends Fragment {
 
                 if (mLocationPermissionGranted) {
 
-                    /* We share myPosition with MainActivity.
-                     * */
-                    mCallback.onCurrentPositionObtained(myPosition);
-
+                    /* We get the device's location
+                    * */
                     getDeviceLocation();
 
                     if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -627,7 +570,9 @@ public class FragmentRestaurantMapView extends Fragment {
     private void getDeviceLocation() {
         Log.d(TAG, "getDeviceLocation: getting device's current location");
 
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        if (getActivity() != null) {
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        }
 
         try {
 
@@ -648,15 +593,29 @@ public class FragmentRestaurantMapView extends Fragment {
                         /* We share myPosition with MainActivity
                         * */
                         Log.d(TAG, "onComplete: Sending position to MainActivity");
-                        mCallback.onCurrentPositionObtained(myPosition);
+                        mCallback.onCurrentPositionObtained(myPosition, mLocationPermissionGranted, accessInternalStorageGranted);
 
                         moveCamera(
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                 DEFAULT_ZOOM);
 
-                        /* We update the UI
-                        * */
-                        updateMapWithPins();
+                        /* We check if we have permissions.
+                        * If we have, we can start fetching process if the
+                        * database is empty
+                         */
+                        if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
+                            /* We check if the database is empty. If it is, we start the fetching process
+                            * */
+                            MaybeObserver<List<RestaurantEntry>> restaurantsObserver = getRestaurantsByType(0)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeWith(maybeObserverStartFetchProcessIfNecessary());
+
+                        } else {
+                            //do nothing, permissions are not granted
+                            ToastHelper.toastNotNecessaryPermissionsAvailable(getActivity());
+
+                        }
 
                     } else {
                         Log.d(TAG, "onComplete: current location is null");
@@ -797,27 +756,6 @@ public class FragmentRestaurantMapView extends Fragment {
     }
 
     /******************************************************
-     * INTERNAL STORAGE
-     *****************************************************/
-
-    /** Method that launches a dialog asking for storage permissions if they have not been
-     * granted before
-     * */
-    private void getInternalStorageAccessPermission () {
-        Log.d(TAG, "getInternalStorageAccessPermission: called!");
-
-        if (ContextCompat.checkSelfPermission(this.getActivity().getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            accessInternalStorageGranted = true;
-
-        } else {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION);
-            }
-        }
-    }
-
-    /******************************************************
      * RX JAVA
      *****************************************************/
 
@@ -830,6 +768,77 @@ public class FragmentRestaurantMapView extends Fragment {
         } else {
             return localDatabase.restaurantDao().getAllRestaurantsByTypeRxJava(String.valueOf(type));
         }
+    }
+
+    private MaybeObserver<List<RestaurantEntry>> maybeObserverStartFetchProcessIfNecessary() {
+        Log.d(TAG, "maybeObserverUpdateUI: called1");
+
+        return new MaybeObserver<List<RestaurantEntry>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: called!");
+
+            }
+
+            @Override
+            public void onSuccess(List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onSuccess: called!");
+
+                if (restaurantEntries.size() == 0) {
+                    Log.i(TAG, "onSuccess: the database is EMPTY ++++++++++++");
+
+                    UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+                        @Override
+                        public void onNext(Boolean aBoolean) {
+                            Log.d(TAG, "onNext: called!");
+
+                            if (!aBoolean) {
+                                ToastHelper.toastNoInternet(getActivity());
+
+                            } else {
+
+                                Intent intent = new Intent(getActivity(), FetchingService.class);
+                                intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
+                                intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
+                                intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
+                                Objects.requireNonNull(getActivity()).startService(intent);
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "onError: " + e.getMessage());
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            Log.d(TAG, "onComplete: called!");
+
+                        }
+                    });
+
+                } else {
+                    Log.i(TAG, "onSuccess: the database is FULL ++++++++++++");
+
+                    /* We update the UI
+                     * */
+                    updateMapWithPins();
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "onError: called!");
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: called!");
+
+            }
+        };
     }
 
     /********************
@@ -973,4 +982,5 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         };
     }
+
 }

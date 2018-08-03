@@ -7,12 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -26,11 +29,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.rx.ObservableObject;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.constants.Repo;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import com.jakewharton.rxbinding2.widget.TextViewTextChangeEvent;
+import com.snatik.storage.Storage;
 
 import java.io.File;
 import java.io.IOException;
@@ -502,5 +507,58 @@ public class UtilsGeneral {
 
         }
     }
+
+    /** Method to check permissions and, if the app doesn't have them,
+     * ask for them
+     * */
+    public static void getPermissions (AppCompatActivity appCompatActivity) {
+        Log.d(TAG, "getCheckAndGetPermissions: called!");
+
+        ActivityCompat.requestPermissions(appCompatActivity,
+                Repo.PERMISSIONS,
+                Repo.REQUEST_CODE_ALL_PERMISSIONS);
+
+    }
+
+    /** Method yo check if the app has necessary permissions
+     * */
+    public static boolean hasPermissions(Context context, String... permissions) {
+        Log.d(TAG, "hasPermissions: called!");
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /** Method to create image directory
+     * to store the images when downloaded from internet
+     * */
+    public static void createImageDirectory(final Storage storage, final String imageDirPath) {
+
+        /* Creating image directories if they don't exist
+         * */
+        if (!storage.isDirectoryExists(imageDirPath)) {
+            Log.d(TAG, "configureInternalStorage: imageDir does not exist. Creating directory...");
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "run: creating directory...");
+                    boolean isCreated = storage.createDirectory(imageDirPath);
+                    Log.d(TAG, "run: directory created = " + isCreated);
+                }
+            });
+
+        } else {
+            Log.d(TAG, "configureInternalStorage: imageDir already exists!");
+            //do nothing
+
+        }
+
+    }
+
 
 }

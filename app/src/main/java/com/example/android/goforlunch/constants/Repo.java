@@ -1,9 +1,19 @@
 package com.example.android.goforlunch.constants;
 
+import android.Manifest;
+
 /**
  * Created by Diego Fajardo on 23/05/2018.
  */
 public interface Repo {
+
+    String[] PERMISSIONS = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+    };
+
+    int REQUEST_CODE_ALL_PERMISSIONS = 105;
 
     String NOT_AVAILABLE_FOR_STRINGS = "";
 

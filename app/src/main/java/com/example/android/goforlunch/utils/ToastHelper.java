@@ -33,4 +33,10 @@ abstract public class ToastHelper {
         Toast.makeText(context, context.getResources().getString(R.string.somethingWentWrong), Toast.LENGTH_SHORT).show();
     }
 
+    public static void toastNotNecessaryPermissionsAvailable (Context context) {
+        Toast.makeText(context, context.getResources().getString(R.string.necessaryPermissionsNotGranted), Toast.LENGTH_SHORT).show();
+    }
+
+
+
 }

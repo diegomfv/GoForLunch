@@ -64,6 +64,7 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by Diego Fajardo on 09/05/2018.
@@ -101,6 +102,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     @BindView(R.id.enter_main_content)
     LinearLayout mainContent;
+
+    private Unbinder unbinder;
 
     private String email;
     private String password;
@@ -148,7 +151,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         /* We set the content view
         * */
         setContentView(R.layout.activity_auth_enter_name);
-        ButterKnife.bind(this);
+        unbinder = ButterKnife.bind(this);
 
         /* Configuring textInputEditTexts: hide keyboard
          * */
@@ -216,6 +219,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         fab.setOnClickListener(null);
         iv_userImage.setOnClickListener(null);
         buttonStart.setOnClickListener(null);
+
+        unbinder.unbind();
 
     }
 

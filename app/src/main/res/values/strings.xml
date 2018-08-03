@@ -191,6 +191,9 @@
     <!-- FETCHING SERVICE -->
     <string name="overQueryLimit">Over Query Limit!</string>
     <string name="serviceProblemServer">There is a problem with the server, please try again later</string>
+    <string name="locationNotGranted">Location Permission NOT granted</string>
+    <string name="necessaryPermissionsNotGranted">Necessary permissions NOT granted</string>
+    <string name="cantMakeMapRequests">You can\'t make map requests</string>
 
 </resources>
 

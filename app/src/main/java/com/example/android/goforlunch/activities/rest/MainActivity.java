@@ -33,6 +33,7 @@ import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.data.AppDatabase;
+import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.network.service.FetchingService;
@@ -55,7 +56,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.snatik.storage.Storage;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,6 +67,7 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -89,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     @BindView(R.id.progressBar_content)
     LinearLayout progressBarContent;
+
+    private Unbinder unbinder;
 
     private TextView navUserName;
     private TextView navUserEmail;
@@ -135,7 +141,15 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     private boolean internetAvailable;
 
-    private boolean accessInternalStorageGranted;
+    private boolean accessInternalStorageGranted = false;
+    private boolean mLocationPermissionGranted = false;
+
+    //Internal Storage
+    private Storage storage;
+    private String mainPath;
+    private String imageDirPath;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,12 +161,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         localDatabase = AppDatabase.getInstance(MainActivity.this);
 
+        this.configureStorage();
+
         //////////////////////////////////////
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-
-        //We get the permissions to wrtie to InternalStorage
-        getInternalStorageAccessPermission();
+        unbinder = ButterKnife.bind(this);
 
         View headerView = mNavigationView.getHeaderView(0);
         navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
@@ -179,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiver();
+        this.connectBroadcastReceiver();
 
     }
 
@@ -188,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -197,11 +210,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(null);
-        mNavigationView.setNavigationItemSelectedListener(null);
+        this.bottomNavigationView.setOnNavigationItemSelectedListener(null);
+        this.mNavigationView.setNavigationItemSelectedListener(null);
 
+        this.unbinder.unbind();
     }
 
     @Override
@@ -273,46 +287,67 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     }
 
-    /**************************
-     * REQUEST PERMISSIONS ****
-     * ***********************/
+    /** Callback: gets the current position obtained in Map Fragment
+     * */
+    @Override
+    public void onCurrentPositionObtained(LatLngForRetrofit myPosition, boolean locationPermission, boolean storageAccessPermission) {
+        Log.d(TAG, "onCurrentPositionObtained: called!");
+        this.myPosition = myPosition;
+        this.mLocationPermissionGranted = locationPermission;
+        this.accessInternalStorageGranted = storageAccessPermission;
+
+        Log.i(TAG, "onCurrentPositionObtained: myPosition = " + myPosition);
+
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult: called");
+        Log.d(TAG, "onRequestPermissionsResult: called!");
 
         switch (requestCode) {
 
-            /* Write to storage request code */
-            case Repo.RequestsCodes.REQ_CODE_WRITE_EXTERNAL_PERMISSION: {
-                accessInternalStorageGranted = false;
+            case Repo.REQUEST_CODE_ALL_PERMISSIONS: {
 
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.storageGranted));
-                    accessInternalStorageGranted = true;
+                if (grantResults.length > 0) {
+
+                    /* We initialize and assign 0 to a counter to see if any permission is not
+                    * granted (value = -1). If counter is higher than 0, then not all permissions
+                    * are granted and we don't proceed with the fetching process
+                    * */
+                    int counter = 0;
+
+                    for (int i = 0; i < grantResults.length; i++) {
+                        if (grantResults[i] == -1) {
+                            //-1 means access NOT GRANTED
+                            counter++;
+                        } else {
+
+                            if (grantResults[0] == 0) {
+                                /* This grantResults ([0]) has to do with WRITE_EXTERNAL_STORAGE permission.
+                                * == 0 means this permission is granted */
+                                UtilsGeneral.createImageDirectory(storage, imageDirPath);
+                            }
+
+                        }
+                    }
+
+                    if (counter > 0) {
+                        ToastHelper.toastNotNecessaryPermissionsAvailable(MainActivity.this);
+                    } else {
+                        Log.i(TAG, "onRequestPermissionsResult: necessary permissions available");
+
+                        /* We start the request fetching process
+                         * */
+                        startFetchingProcess();
+                    }
+
+                } else {
+                    ToastHelper.toastNotNecessaryPermissionsAvailable(MainActivity.this);
 
                 }
                 break;
             }
         }
-    }
-
-    /** Callback: gets the current position obtained in Map Fragment
-     * */
-    @Override
-    public void onCurrentPositionObtained(LatLngForRetrofit myPosition) {
-        Log.d(TAG, "onCurrentPositionObtained: called!");
-        this.myPosition = myPosition;
-
-        /* We check if the database is empty.
-        * */
-        MaybeObserver<List<RestaurantEntry>> restaurantsObserver = getAllRestaurantsInDatabase()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(maybeObserverStartFetchProcessIfNecessary());
-
-        Log.i(TAG, "onCurrentPositionObtained: myPosition = " + myPosition);
-
     }
 
     /** Method used to update the NavDrawer info
@@ -616,30 +651,15 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         }
 
                         case R.id.nav_start_search: {
+                            Log.d(TAG, "onNavigationItemSelected: start search clicked!");
 
-                            if (myPosition != null) {
-
-                                if (myPosition.getLat() != 0.0 && myPosition.getLng() != 0.0) {
-                                    Log.d(TAG, "onNavigationItemSelected: myPosition = " + myPosition.toString());
-
-                                    ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainStartRequestProcess));
-
-                                    Intent intent = new Intent(MainActivity.this, FetchingService.class);
-                                    intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
-                                    intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
-                                    intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
-                                    startService(intent);
-
-                                } else {
-                                    ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
-
-                                }
+                            if (!UtilsGeneral.hasPermissions(MainActivity.this, Repo.PERMISSIONS)) {
+                                UtilsGeneral.getPermissions(MainActivity.this);
 
                             } else {
-                                ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
+                                startFetchingProcess();
 
                             }
-
                             return true;
                         }
 
@@ -957,4 +977,40 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "cancelJob: called!");
         JobManager.instance().cancel(JobId);
     }
+
+    /** Method to start fetching process from MainActivity when button is clicked
+     * */
+    private void startFetchingProcess () {
+        Log.i(TAG, "startFetchingProcess: called!");
+
+        if (myPosition != null && myPosition.getLat() != 0.0 && myPosition.getLng() != 0.0) {
+            Log.d(TAG, "onNavigationItemSelected: myPosition = " + myPosition.toString());
+
+            ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainStartRequestProcess));
+
+            Intent intent = new Intent(MainActivity.this, FetchingService.class);
+            intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
+            intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
+            intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
+            startService(intent);
+
+        } else {
+            ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
+        }
+
+    }
+
+    /** Method that configures storage to persist images
+     * to disk
+     * */
+    private void configureStorage () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        storage = new Storage(MainActivity.this);
+        mainPath = storage.getInternalFilesDirectory() + File.separator;
+        imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR;
+
+    }
+
+
 }

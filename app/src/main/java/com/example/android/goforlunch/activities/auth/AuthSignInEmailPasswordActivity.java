@@ -105,8 +105,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
         UtilsGeneral.showMainContent(progressBarContent, mainContent);
 
-        //inputEmail.setText("diego.fajardo@hotmail.com");
-        //inputPassword.setText("123456");
+        inputEmail.setText("diego.fajardo@hotmail.com");
+        inputPassword.setText("123456");
 
         /* Configuring textInputEditTexts: hide keyboard
          * */

@@ -57,6 +57,7 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -97,6 +98,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     @BindView(R.id.main_layout_id)
     CoordinatorLayout mainContent;
+
+    private Unbinder unbinder;
 
     //Variables
     private String userFirstName;
@@ -169,7 +172,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
         ////////////////////////////////////////////
         setContentView(R.layout.activity_restaurant);
-        ButterKnife.bind(this);
+        unbinder = ButterKnife.bind(this);
 
         this.configureRecyclerView();
         this.configureInternalStorage(context);
@@ -197,7 +200,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiver();
+        this.connectBroadcastReceiver();
 
     }
 
@@ -206,7 +209,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -215,13 +218,15 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
-        fab.setOnClickListener(null);
-        navigationView.setOnNavigationItemSelectedListener(null);
-        dbRefUsersGetList.removeEventListener(valueEventListenerGetListOfCoworkers);
+        this.fab.setOnClickListener(null);
+        this.navigationView.setOnNavigationItemSelectedListener(null);
+        this.dbRefUsersGetList.removeEventListener(valueEventListenerGetListOfCoworkers);
 
         this.disposeWhenDestroy();
+
+        this.unbinder.unbind();
     }
 
     private void disposeWhenDestroy () {
