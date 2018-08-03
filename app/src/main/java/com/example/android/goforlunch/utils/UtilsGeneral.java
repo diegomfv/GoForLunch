@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -508,13 +509,25 @@ public class UtilsGeneral {
         }
     }
 
-    /** Method to check permissions and, if the app doesn't have them,
+    /** Method to check permissions in ACTIVITIES and, if the app doesn't have them,
      * ask for them
      * */
-    public static void getPermissions (AppCompatActivity appCompatActivity) {
+    public static void getPermissionsInActivity(AppCompatActivity appCompatActivity) {
         Log.d(TAG, "getCheckAndGetPermissions: called!");
 
         ActivityCompat.requestPermissions(appCompatActivity,
+                Repo.PERMISSIONS,
+                Repo.REQUEST_CODE_ALL_PERMISSIONS);
+
+    }
+
+    /** Method to check permissions in FRAGMENTS and, if the app doesn't have them,
+     * ask for them
+     * */
+    public static void getPermissionsInFragment(Fragment fragment) {
+        Log.d(TAG, "getCheckAndGetPermissions: called!");
+
+        fragment.requestPermissions(
                 Repo.PERMISSIONS,
                 Repo.REQUEST_CODE_ALL_PERMISSIONS);
 

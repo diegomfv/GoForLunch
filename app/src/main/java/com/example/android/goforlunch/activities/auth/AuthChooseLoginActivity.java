@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -29,7 +28,6 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -136,7 +134,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         /* We check if the user is logged in in a background thread.
          * */
         if (!UtilsGeneral.hasPermissions(AuthChooseLoginActivity.this, Repo.PERMISSIONS)) {
-            UtilsGeneral.getPermissions(AuthChooseLoginActivity.this);
+            UtilsGeneral.getPermissionsInActivity(AuthChooseLoginActivity.this);
         }
 
         checkIfUserIsLoggedInInBackgroundThread();

@@ -16,14 +16,20 @@ public class UtilsRemote {
 
     public static String checkClosingTime (Result result) {
 
-        if (null != result.getOpeningHours()) {
-            if (result.getOpeningHours().getPeriods().size() > 0) {
+        if (result.getOpeningHours() != null) {
+            if (result.getOpeningHours().getPeriods() != null
+                    && result.getOpeningHours().getPeriods().size() > 0) {
 
                 for (int i = 0; i < result.getOpeningHours().getPeriods().size(); i++) {
 
-                    if (result.getOpeningHours().getPeriods().get(i).getClose().getDay().toString()
-                            .equalsIgnoreCase(String.valueOf(day))) {
-                        return UtilsGeneral.formatTime(result.getOpeningHours().getPeriods().get(i).getClose().getTime());
+                    if (result.getOpeningHours().getPeriods().get(i).getClose() != null) {
+
+                        if (result.getOpeningHours().getPeriods().get(i).getClose().getDay() != null
+                                && result.getOpeningHours().getPeriods().get(i).getClose().getDay().toString().equalsIgnoreCase(String.valueOf(day))) {
+
+                            return UtilsGeneral.formatTime(result.getOpeningHours().getPeriods().get(i).getClose().getTime());
+                        }
+
                     }
 
                 } return Repo.NOT_AVAILABLE_FOR_STRINGS;

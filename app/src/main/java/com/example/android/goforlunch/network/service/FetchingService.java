@@ -105,16 +105,25 @@ public class FetchingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: called!");
 
-        double latitude = intent.getDoubleExtra(Repo.SentIntent.LATITUDE, 0.0d);
-        double longitude = intent.getDoubleExtra(Repo.SentIntent.LONGITUDE, 0.0d);
+        double latitude;
+        double longitude;
+
+        if (intent != null) {
+            latitude = intent.getDoubleExtra(Repo.SentIntent.LATITUDE, 0.0d);
+            longitude = intent.getDoubleExtra(Repo.SentIntent.LONGITUDE, 0.0d);
+            accessInternalStorageGranted = intent.getBooleanExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, false);
+
+        } else {
+            latitude = 0.0d;
+            longitude = 0.0d;
+
+        }
 
         Log.i(TAG, "onStartCommand: latitude = " + latitude);
         Log.i(TAG, "onStartCommand: longitude = " + longitude);
+        Log.d(TAG, "onStartCommand: accessInternalStorageGranted = " + accessInternalStorageGranted);
 
-        accessInternalStorageGranted = intent.getBooleanExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, false);
-        Log.d(TAG, "onStartCommand: accessInternatStorageGranted = " + accessInternalStorageGranted);
-
-        if (latitude == 0.0 || longitude == 0.0) {
+        if (latitude == 0.0d || longitude == 0.0d) {
             Log.d(TAG, "onStartCommand: latitude or longitude are 0");
 
             //position is incorrect, do nothing

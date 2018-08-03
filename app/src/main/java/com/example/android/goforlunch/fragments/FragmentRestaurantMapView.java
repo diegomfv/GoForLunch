@@ -1,22 +1,18 @@
 package com.example.android.goforlunch.fragments;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -30,16 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.example.android.goforlunch.App;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.network.service.FetchingService;
@@ -179,12 +172,6 @@ public class FragmentRestaurantMapView extends Fragment {
 
     private ActionBar actionBar;
 
-    @BindView(R.id.map_fragment_parent_relative_layout)
-    RelativeLayout mapFragmentRelativeLayout;
-
-    @BindView(R.id.progressBar_content)
-    LinearLayout progressBarFragmentContent;
-
     //Disposables
     private Disposable autocompleteTextViewDisposable;
 
@@ -284,9 +271,12 @@ public class FragmentRestaurantMapView extends Fragment {
                                 if (isGooglePlayServicesOK()) {
 
                                     if (!UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
-                                        UtilsGeneral.getPermissions((AppCompatActivity)getActivity());
+                                        Log.i(TAG, "onDataChange: asking for permissions");
+                                        UtilsGeneral.getPermissionsInFragment(FragmentRestaurantMapView.this);
 
                                     } else {
+                                        accessInternalStorageGranted = true;
+                                        mLocationPermissionGranted = true;
                                         initMap();
                                     }
                                 }
@@ -400,10 +390,13 @@ public class FragmentRestaurantMapView extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.d(TAG, "onRequestPermissionsResult: called");
         mLocationPermissionGranted = false;
+        accessInternalStorageGranted = false;
 
         switch (requestCode) {
 
             case Repo.REQUEST_CODE_ALL_PERMISSIONS: {
+
+                Log.i(TAG, "onRequestPermissionsResult: grantResults.length = " + grantResults.length);
 
                 if (grantResults.length > 0) {
 
@@ -428,18 +421,32 @@ public class FragmentRestaurantMapView extends Fragment {
                         }
                     }
 
+                    Log.i(TAG, "onRequestPermissionsResult: counter = " + counter);
+
                     if (counter > 0) {
                         ToastHelper.toastNotNecessaryPermissionsAvailable(getActivity());
+                        /* We init the map anyway, but it will display no information
+                         * */
+                        initMap();
+
                     } else {
                         Log.i(TAG, "onRequestPermissionsResult: necessary permissions available");
+
+                        mLocationPermissionGranted = true;
+                        accessInternalStorageGranted = true;
 
                         /* We init the map
                         * */
                         initMap();
+                        Log.i(TAG, "onDataChange: mapFragment, initiating map from onRequestPermissionResult");
                     }
 
                 } else {
                     ToastHelper.toastNotNecessaryPermissionsAvailable(getActivity());
+
+                    /* We init the map anyway, but it will display no information
+                    * */
+                    initMap();
 
                 }
                 break;
@@ -474,7 +481,6 @@ public class FragmentRestaurantMapView extends Fragment {
 
         } else {
             Log.d(TAG, "isGooglePlayServicesOK: an error occurred; you cannot make map requests");
-            // TODO: 03/08/2018 !
             ToastHelper.toastLong(getActivity(), getActivity().getResources().getString(R.string.cantMakeMapRequests));
 
         }
@@ -490,29 +496,25 @@ public class FragmentRestaurantMapView extends Fragment {
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
 
-        progressBarFragmentContent.setVisibility(View.GONE);
-        mapFragmentRelativeLayout.setVisibility(View.VISIBLE);
-
         mapFragment.getMapAsync(new OnMapReadyCallback() {
+            //This SuppressLint removes the compiler request asking for a explicit permission for mMap.setMyLocationEnabled(true)
+            // which is not needed because "if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS))" already checks
+            // the permission
+            @SuppressLint("MissingPermission")
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 Log.d(TAG, "onMapReady: map is ready");
                 ToastHelper.toastShort(getActivity(), "Map is ready");
                 mMap = googleMap;
 
-                if (mLocationPermissionGranted) {
+                if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
+                    Log.i(TAG, "onDataChange: have permissions to getDeviceLocation()");
 
                     /* We get the device's location
                     * */
                     getDeviceLocation();
 
-                    if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                            getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-
-                    mMap.setMyLocationEnabled(true); //displays the blue marker at your location
+                    //mMap.setMyLocationEnabled(true); //displays the blue marker at your location
                     //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
 
                 }
@@ -568,7 +570,7 @@ public class FragmentRestaurantMapView extends Fragment {
      * Method used to get the user's location
      */
     private void getDeviceLocation() {
-        Log.d(TAG, "getDeviceLocation: getting device's current location");
+        Log.d(TAG, "getDeviceLocation: called!");
 
         if (getActivity() != null) {
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -594,6 +596,15 @@ public class FragmentRestaurantMapView extends Fragment {
                         * */
                         Log.d(TAG, "onComplete: Sending position to MainActivity");
                         mCallback.onCurrentPositionObtained(myPosition, mLocationPermissionGranted, accessInternalStorageGranted);
+
+                        mMap.setMyLocationEnabled(true); //displays the blue marker at your location
+                        //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
+
+                        /* We update the map
+                        * if possible*/
+                        updateMapWithPins();
+
+                        Log.i(TAG, "onDataChange: myPosition = " + myPosition);
 
                         moveCamera(
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),

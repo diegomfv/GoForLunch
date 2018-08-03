@@ -65,31 +65,15 @@
 
     </RelativeLayout>
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <fragment
+        android:id="@+id/map"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:context=".MapsActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment">
 
-        <include layout="@layout/progress_bar_fragment_content"/>
-
-        <RelativeLayout
-            android:id="@+id/map_fragment_parent_relative_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-
-            <fragment
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/map"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".MapsActivity"
-                android:name="com.google.android.gms.maps.SupportMapFragment">
-
-            </fragment>
-
-        </RelativeLayout>
-
-    </FrameLayout>
+    </fragment>
 
 </LinearLayout>

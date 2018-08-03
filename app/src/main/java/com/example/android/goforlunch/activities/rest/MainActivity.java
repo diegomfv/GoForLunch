@@ -33,7 +33,6 @@ import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.network.service.FetchingService;
@@ -70,9 +69,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMapView.OnCurrentPositionObtainedListener {
 
@@ -303,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.d(TAG, "onRequestPermissionsResult: called!");
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
 
         switch (requestCode) {
 
@@ -654,7 +652,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                             Log.d(TAG, "onNavigationItemSelected: start search clicked!");
 
                             if (!UtilsGeneral.hasPermissions(MainActivity.this, Repo.PERMISSIONS)) {
-                                UtilsGeneral.getPermissions(MainActivity.this);
+                                UtilsGeneral.getPermissionsInActivity(MainActivity.this);
 
                             } else {
                                 startFetchingProcess();
