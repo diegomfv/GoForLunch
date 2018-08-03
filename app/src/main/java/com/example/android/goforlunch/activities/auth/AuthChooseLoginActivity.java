@@ -17,9 +17,6 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
-import com.example.android.goforlunch.network.models.placebyid.PlaceById;
-import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.network.remote.GoogleServiceStreams;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -29,7 +26,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -57,9 +53,7 @@ import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Diego Fajardo on 24/07/2018.
@@ -122,17 +116,21 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear().apply();
 
-        // TODO: 25/07/2018 DO NOT DELETE THE USER KEY, WE NEED IT FOR ADDING RESTAURANTS TO DATABASE (ALARM)
-
         /* We establish the entry points
         to get the user information
         * */
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // TODO: 29/06/2018 Delete signOut()
-        auth.signOut();
-        LoginManager.getInstance().logOut();
+        /* Leave this two lines of code uncommented to do trials without
+        * logging in directly
+        * */
+//        auth.signOut();
+//        LoginManager.getInstance().logOut();
+
+        /* We check if the user is logged in in a background thread.
+         * */
+        checkIfUserIsLoggedInInBackgroundThread();
 
         /* internetAvailable is false till the update() callback changes it
         * */
@@ -143,10 +141,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         * */
         setContentView(R.layout.activity_auth_choose_login);
         ButterKnife.bind(this);
-
-        /* We check if the user is logged in in a background thread.
-        * */
-        checkIfUserIsLoggedInBackgroundThread();
 
         /* We set the listeners
         * */
@@ -384,8 +378,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     /** Method that checks if the user is currently
      * logged in in a background thread
      * */
-    private void checkIfUserIsLoggedInBackgroundThread() {
-        Log.d(TAG, "checkIfUserIsLoggedInBackgroundThread: called!");
+    private void checkIfUserIsLoggedInInBackgroundThread() {
+        Log.d(TAG, "checkIfUserIsLoggedInInBackgroundThread: called!");
 
         /* We use this method instead of internetAvailable because we are still
         * in onCreate() and internetAvailable would be false in both cases (with
@@ -432,7 +426,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
             Log.d(TAG, "onCreate: user is null");
             //We delete Shared preferences info
             UtilsGeneral.deleteSharedPreferencesInfo(sharedPref);
-            // TODO: 13/06/2018 Remove all info in SharedPref
 
             /* If the user is null, we won't launch a new activity,
              so we show the main layout
@@ -451,8 +444,6 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
 
             } else {
-                // TODO: 24/07/2018 Probably, this code will never run
-
                 //go to AuthEnterNameActivity
                 startActivity(new Intent(AuthChooseLoginActivity.this, AuthEnterNameActivity.class));
                 finish();
@@ -725,41 +716,4 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         }
     }
 
-//    // TODO: 30/07/2018 Delete!
-//    private void fetchData () {
-//        Log.d(TAG, "fetchData: called!");
-//
-//        LatLngForRetrofit myPosition = new LatLngForRetrofit(51.459558,-2.599193);
-//
-//        Disposable disposable = GoogleServiceStreams.streamFetchPlaceById(
-//                "ChIJo8eWxtqNcUgRqzOCyl2ECWg",
-//                Repo.Keys.PLACEID_KEY)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(Schedulers.io())
-//                .subscribeWith(new DisposableObserver<PlaceById>() {
-//                    @Override
-//                    public void onNext(PlaceById placeById) {
-//                        Log.d(TAG, "onNext: ");
-//
-//                        com.example.android.goforlunch.network.models.placebyid.Result result =
-//                                placeById.getResult();
-//
-//                        Log.i(TAG, "onNext: placeById = " + result);
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        Log.e(TAG, "onError: " + e.getMessage());
-//
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//                        Log.d(TAG, "onComplete: ");
-//
-//                    }
-//
-//                });
-//
-//    }
 }

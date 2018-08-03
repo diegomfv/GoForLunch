@@ -668,8 +668,6 @@ public class FetchingService extends Service {
     private void insertRestaurantEntryInDatabase (RestaurantEntry restaurantEntry) {
         Log.d(TAG, "insertRestaurantEntryInDatabase: called!");
 
-        // TODO: 12/07/2018 We can increase a counter here. When it is exactly the same as the number of restaurants inserted -1, we reactivate the map
-
         localDatabase.restaurantDao().insertRestaurant(restaurantEntry);
 
     }

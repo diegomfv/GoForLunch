@@ -309,7 +309,6 @@ public class FragmentRestaurantListView extends Fragment {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        // TODO: 26/07/2018 Giving problems
 //        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
 //        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
 
@@ -407,7 +406,7 @@ public class FragmentRestaurantListView extends Fragment {
                 }
             }
 
-            // TODO: 30/07/2018 Error!! Whe
+            // TODO: 30/07/2018 Error!!
             /** We update the recyclerView with the new list
              * */
             updateRecyclerViewWithNewListOfRestaurantsByCoworker(
@@ -685,7 +684,7 @@ public class FragmentRestaurantListView extends Fragment {
     /** Method that creates an intent and fills it with all the necessary info to be displayed
      * in Restaurant Activity
      * */
-    // TODO: 26/07/2018 Can be done with a Parcelable
+    /* Could be done with a Parcelable */
     private Intent createAndFillIntentWithUserInfo(RVAdapterList adapter, int position) {
         Log.d(TAG, "createAndFillIntentWithUserInfo: called!");
 

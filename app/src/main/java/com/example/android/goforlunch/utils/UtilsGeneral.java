@@ -226,7 +226,6 @@ public class UtilsGeneral {
             for (Map.Entry<String, ?> entry :
                     map.entrySet()) {
 
-                // TODO: 10/07/2018 Take care!! What if it's boolean!?
                 updateSharedPreferences(sharedPref, entry.getKey(), "");
 
             }

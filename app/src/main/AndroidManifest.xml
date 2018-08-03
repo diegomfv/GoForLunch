@@ -82,9 +82,6 @@
 
         <!-- ////////////////////////////////////////////////////////////////// -->
 
-        <activity android:name=".activities.rest.FirebaseActivityDELETE"
-            android:screenOrientation="portrait"/>
-
     </application>
 
 </manifest>

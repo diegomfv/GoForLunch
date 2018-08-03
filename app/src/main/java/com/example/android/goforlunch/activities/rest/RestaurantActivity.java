@@ -388,7 +388,6 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                             } else {
 
-                                // TODO: 30/07/2018 Web fails
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrlString));
                                 if (browserIntent.resolveActivity(getPackageManager()) != null) {
                                     startActivity(browserIntent);

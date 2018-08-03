@@ -358,7 +358,7 @@ public class UnitTests {
     }
 
 
-    // TODO: 31/05/2018
+
     @Test
     public void increaseByOneTheValueIfACoworkerJoins () {
 
@@ -373,9 +373,6 @@ public class UnitTests {
             System.out.println(listOfRestaurants.get(i));
 
         }
-        //name
-        //group
-        //restaurant
 
     }
 

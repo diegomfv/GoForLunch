@@ -70,15 +70,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-// TODO: 29/05/2018 YET TO DO -------------------------------------------------------
-// TODO: 28/07/2018 Fetching process..
-// TODO: 12/07/2018 Check what is shown when restaurants are wrongly fetched
-// TODO: 28/07/2018 Storage problem (not very important)
-// TODO: 28/07/2018 Delete user entering the first time
-
-//1
-// TODO: 12/07/2018 Changing Fetching process to Service. Information will be displayed using a ViewModel in the Fragment (pins)
-
 public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMapView.OnCurrentPositionObtainedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -680,10 +671,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 }
             };
 
-    // TODO: 25/07/2018 Can be deleted!
+
     /** Listener that prints in the
      * logcat a link to the database
      * */
+    /* This listener can be deleted
+    * */
     private View.OnClickListener profilePictureListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

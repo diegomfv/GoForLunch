@@ -47,7 +47,6 @@ public interface GoogleService {
             @Query("key") String key
     );
 
-
     @GET("json")
     Observable<DistanceMatrix> fetchDistanceMatrix(
             @Query("units") String units,
