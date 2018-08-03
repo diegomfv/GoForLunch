@@ -125,7 +125,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiver();
+        this.connectBroadcastReceiver();
 
     }
 
@@ -134,7 +134,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -143,12 +143,12 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
-        buttonSignIn.setOnClickListener(null);
-        buttonSignUp.setOnClickListener(null);
-        tvForgotPassword.setOnClickListener(null);
-        fab.setOnClickListener(null);
+        this.buttonSignIn.setOnClickListener(null);
+        this.buttonSignUp.setOnClickListener(null);
+        this.tvForgotPassword.setOnClickListener(null);
+        this.fab.setOnClickListener(null);
 
     }
 

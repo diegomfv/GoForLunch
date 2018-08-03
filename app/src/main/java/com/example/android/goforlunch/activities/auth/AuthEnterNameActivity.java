@@ -196,7 +196,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiver();
+        this.connectBroadcastReceiver();
 
     }
 
@@ -205,7 +205,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -214,13 +214,13 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
-        fab.setOnClickListener(null);
-        iv_userImage.setOnClickListener(null);
-        buttonStart.setOnClickListener(null);
+        this.fab.setOnClickListener(null);
+        this.iv_userImage.setOnClickListener(null);
+        this.buttonStart.setOnClickListener(null);
 
-        unbinder.unbind();
+        this.unbinder.unbind();
 
     }
 

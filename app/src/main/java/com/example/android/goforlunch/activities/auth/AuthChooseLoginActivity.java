@@ -181,7 +181,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        connectBroadcastReceiver();
+        this.connectBroadcastReceiver();
 
     }
 
@@ -190,7 +190,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         super.onStop();
         Log.d(TAG, "onStop: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -199,13 +199,13 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
 
-        disconnectBroadcastReceiver();
+        this.disconnectBroadcastReceiver();
 
-        buttonPassword.setOnClickListener(null);
-        tvRegister.setOnClickListener(null);
-        buttonGoogle.setOnClickListener(null);
+        this.buttonPassword.setOnClickListener(null);
+        this.tvRegister.setOnClickListener(null);
+        this.buttonGoogle.setOnClickListener(null);
 
-        unbinder.unbind();
+        this.unbinder.unbind();
 
     }
 
