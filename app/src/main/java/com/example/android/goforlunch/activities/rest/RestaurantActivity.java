@@ -291,7 +291,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void onBackPressed() {
-        NavUtils.navigateUpFromSameTask(this);
+        Log.d(TAG, "onBackPressed: called!");
+        startActivity(new Intent(RestaurantActivity.this, MainActivity.class));
     }
 
     /*****************
@@ -319,7 +320,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                         /* We delete the restaurant from the database (user's)
                          **/
-                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
+                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS).child(userKey).child(Repo.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.deleteRestaurantInfoOfUserInFirebase(dbRefUsers);
 
                         ToastHelper.toastShort(context, getResources().getString(R.string.restaurantNotGoing));
@@ -337,7 +338,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                         /* We add the restaurant to the database (user's)
                          * */
-                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey + "/" + Repo.FirebaseReference.USER_RESTAURANT_INFO);
+                        dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS).child(userKey).child(Repo.FirebaseReference.USER_RESTAURANT_INFO);
                         UtilsFirebase.updateRestaurantsUserInfoInFirebase(dbRefUsers,
                                 UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.ADDRESS)),
                                 UtilsGeneral.checkIfIsNull(getIntent().getStringExtra(Repo.SentIntent.IMAGE_URL)),

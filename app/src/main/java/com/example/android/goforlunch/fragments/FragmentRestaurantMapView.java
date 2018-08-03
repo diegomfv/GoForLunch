@@ -15,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.example.android.goforlunch.R;
@@ -35,7 +33,6 @@ import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
-import com.example.android.goforlunch.network.service.FetchingService;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.UtilsGeneral;
@@ -278,6 +275,9 @@ public class FragmentRestaurantMapView extends Fragment {
                                         accessInternalStorageGranted = true;
                                         mLocationPermissionGranted = true;
                                         initMap();
+
+                                        //if database is empty
+                                        //send toast, please use the navigation drawer to start a search
                                     }
                                 }
 
@@ -504,7 +504,6 @@ public class FragmentRestaurantMapView extends Fragment {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
                 Log.d(TAG, "onMapReady: map is ready");
-                ToastHelper.toastShort(getActivity(), "Map is ready");
                 mMap = googleMap;
 
                 if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
@@ -610,17 +609,13 @@ public class FragmentRestaurantMapView extends Fragment {
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                 DEFAULT_ZOOM);
 
-                        /* We check if we have permissions.
-                        * If we have, we can start fetching process if the
-                        * database is empty
-                         */
                         if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
                             /* We check if the database is empty. If it is, we start the fetching process
                             * */
                             MaybeObserver<List<RestaurantEntry>> restaurantsObserver = getRestaurantsByType(0)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribeWith(maybeObserverStartFetchProcessIfNecessary());
+                                    .subscribeWith(maybeObserverCheckIfDatabaseIsEmpty());
 
                         } else {
                             //do nothing, permissions are not granted
@@ -781,7 +776,7 @@ public class FragmentRestaurantMapView extends Fragment {
         }
     }
 
-    private MaybeObserver<List<RestaurantEntry>> maybeObserverStartFetchProcessIfNecessary() {
+    private MaybeObserver<List<RestaurantEntry>> maybeObserverCheckIfDatabaseIsEmpty() {
         Log.d(TAG, "maybeObserverUpdateUI: called1");
 
         return new MaybeObserver<List<RestaurantEntry>>() {
@@ -797,37 +792,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
                 if (restaurantEntries.size() == 0) {
                     Log.i(TAG, "onSuccess: the database is EMPTY ++++++++++++");
-
-                    UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
-                        @Override
-                        public void onNext(Boolean aBoolean) {
-                            Log.d(TAG, "onNext: called!");
-
-                            if (!aBoolean) {
-                                ToastHelper.toastNoInternet(getActivity());
-
-                            } else {
-
-                                Intent intent = new Intent(getActivity(), FetchingService.class);
-                                intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
-                                intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
-                                intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
-                                Objects.requireNonNull(getActivity()).startService(intent);
-                            }
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.e(TAG, "onError: " + e.getMessage());
-
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            Log.d(TAG, "onComplete: called!");
-
-                        }
-                    });
+                    ToastHelper.toastLong(getActivity(), getActivity().getResources().getString(R.string.startFetchingService));
 
                 } else {
                     Log.i(TAG, "onSuccess: the database is FULL ++++++++++++");

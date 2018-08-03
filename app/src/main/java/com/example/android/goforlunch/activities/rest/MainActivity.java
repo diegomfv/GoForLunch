@@ -325,7 +325,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                                 * == 0 means this permission is granted */
                                 UtilsGeneral.createImageDirectory(storage, imageDirPath);
                             }
-
                         }
                     }
 

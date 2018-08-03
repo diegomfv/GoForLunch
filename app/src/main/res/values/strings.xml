@@ -59,6 +59,7 @@
     <string name="autoCompleteSearchText">Search</string>
     <string name="toolbarImHungry">I\'m hungry</string>
     <string name="toolbarAvailableWorkmates">Available Workmates</string>
+    <string name="startFetchingService">You can start searching restaurants clicking "START SEARCH" on the Navigation Drawer (Click on the top left button)</string>
 
     <!-- FRAGMENTS: Coworkers -->
     <string name="avCowHasNotDecided">%1$s %2$s has not decided yet&#8230;</string>
