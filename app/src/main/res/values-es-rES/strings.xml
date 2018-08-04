@@ -65,6 +65,8 @@
     <string name="toolbarAvailableWorkmates">Compañeros disponibles</string>
     <string name="startFetchingService">Inicia la búsqueda de restaurantes haciendo click en "INICIAR BÚSQUEDA" en el navegador (Botón de arriba a la izquierda)</string>
 
+    <string name="notAvailableLong">No disponible</string>
+    <string name="notAvailableShort">NA</string>
 
     <!-- FRAGMENTS: Coworkers -->
     <string name="avCowHasNotDecided">%1$s %2$s aán no se ha decidido&#8230;</string>

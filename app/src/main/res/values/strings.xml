@@ -66,12 +66,14 @@
     <string name="toolbarAvailableWorkmates">Available Workmates</string>
     <string name="startFetchingService">You can start searching restaurants clicking "START SEARCH" on the Navigation Drawer (Click on the top left button)</string>
 
+    <string name="notAvailableLong">Not available</string>
+    <string name="notAvailableShort">NA</string>
+
 
     <!-- FRAGMENTS: Coworkers -->
     <string name="avCowHasNotDecided">%1$s %2$s has not decided yet&#8230;</string>
     <string name="avCowHasDecided">%1$s %2$sis eating \"%3$s\" (%4$s)</string>
     <string name="noInfoAvailable">No information available</string>
-
 
     <!-- PREFERENCES FRAGMENT -->
     <string name="pref_summaryOff">Notifications are disabled</string>
