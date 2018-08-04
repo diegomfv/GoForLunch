@@ -24,6 +24,7 @@
     <string name="permissionDialogMessagePermissionIsNecessary">Se necesitan permisos</string>
     <string name="loading_please_wait">Cargando&#8230;por favor, espera&#8230;</string>
 
+
     <!-- COMMON -->
     <string name="commonToastEnterFirstName">Introduce un nombre</string>
     <string name="commonToastEnterLastName">Introduce un apellido</string>
@@ -41,6 +42,7 @@
     <string name="snackbarNoInternetText">No hay conexión a internet</string>
     <string name="snackbarNoInternetButton">OCULTAR</string>
 
+
     <!-- MAIN ACTIVITY -->
     <string name="mainBottomMapView">Mapa</string>
     <string name="mainBottomListView">Lista</string>
@@ -49,14 +51,20 @@
     <string name="mainDialogLoggingOut">Cerrando sesion</string>
     <string name="mainDialogLoggingOutYes">SÍ</string>
     <string name="mainDialogLoggingOutNo">NO</string>
+    <string name="mainCurrentPositionNotAvailable">Posición actual no disponible</string>
+    <string name="mainStartRequestProcess">Iniciando búsqueda&#8230;</string>
+
 
     <!-- EVERNOTE JOB -->
     <string name="key_alarmAddRestaurantIsOn" translatable="false">alarmAddRestaurantOn</string>
+
 
     <!-- FRAGMENTS -->
     <string name="autoCompleteSearchText">Busqueda</string>
     <string name="toolbarImHungry">¡Tengo hambre!</string>
     <string name="toolbarAvailableWorkmates">Compañeros disponibles</string>
+    <string name="startFetchingService">Inicia la búsqueda de restaurantes haciendo click en "INICIAR BÚSQUEDA" en el navegador (Botón de arriba a la izquierda)</string>
+
 
     <!-- FRAGMENTS: Coworkers -->
     <string name="avCowHasNotDecided">%1$s %2$s aán no se ha decidido&#8230;</string>
@@ -83,6 +91,7 @@
     <!-- FACEBOOK SIGN IN -->
     <string name="facebook_app_id">622449801446185</string>
     <string name="fb_login_protocol_scheme">fb622449801446185</string>
+
 
     <!-- RESTAURANT TYPES -->
     <string name="typeAll">Todos</string>
@@ -117,6 +126,7 @@
         <item>@string/typeOther</item>       <!-- 13  -->
     </string-array>
 
+
     <!-- NAVIGATION DRAWER -->
     <string name="navDrawerYourLunch">TU COMIDA</string>
     <string name="navDrawerJoinGroup">ÚNETE A UN GRUPO</string>
@@ -129,9 +139,11 @@
 
     <string name="navDrawerToastNotRestaurantYet">¡Aun no has elegido un restaurante!</string>
 
+
     <!-- CHOOSE LOGIN ACTIVITY -->
     <string name="choose_register">Registrarse</string>
     <string name="choose_signInWithEmail">Inicia sesión con email</string>
+
 
     <!-- AUTH SIGN IN ACTIVITY -->
     <string name="signInEmail">Email</string>
@@ -140,13 +152,16 @@
     <string name="signInTextViewForgotPassword">¿Has olvidado tu password_</string>
     <string name="signInButtonSignUp">Registrarse</string>
 
+
     <!-- AUTH ENTER NAME ACTIVITY -->
     <string name="enterNameStart">¡Empezar!</string>
     <string name="enterNameThisEmailAlreadyExists">Ya existe un usuario con este email&#8230;</string>
 
+
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupJoinGroup">Unirse</string>
     <string name="joinGroupCreateNewGroup">Crear nuevo grupo</string>
+
 
     <!-- RESTAURANT ACTIVITY -->
     <string name="restaurantBottomCall">LLAMAR</string>
@@ -165,6 +180,7 @@
     <string name="restaurantNameNotAvailable">Nombre no disponible</string>
     <string name="restaurantAddressNotAvailable">Dirección no disponible</string>
 
+
     <!-- PERS INFO ACTIVITY -->
     <string name="persSaveChanges">Guardar</string>
     <string name="persChangePassword">Cambiar password</string>
@@ -176,6 +192,7 @@
     <string name="persInfoSomethingWrongImage">Algo ha ido mal subiendo la imagen&#8230;</string>
     <string name="persInfoNotUpdated">Perfil no actualizado</string>
 
+
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupDoesNotExist">Ese grupo no existe</string>
     <string name="joinWouldYouLikeJoin">Quieres unirte a este grupo</string>
@@ -185,9 +202,14 @@
     <string name="joinThisCurrentlyYourGroup">¡Éste es ya tu grupo!</string>
     <string name="joinNotChosenGroup">Aún no tienes grupo&#8230;!</string>
     <string name="joinNewGroupIs">Tu nuevo grupo es</string>
-    <string name="mainCurrentPositionNotAvailable">Posición actual no disponible</string>
-    <string name="mainStartRequestProcess">Iniciando búsqueda&#8230;</string>
+
+
+    <!-- FETCHING SERVICE -->
     <string name="overQueryLimit">¡Límite sobrepasado!</string>
+    <string name="serviceProblemServer">Hay un problema con el servidor, pruebe otra vez</string>
+    <string name="locationNotGranted">Permisos de localización no concedidos</string>
+    <string name="necessaryPermissionsNotGranted">Permisos no concedidos</string>
+    <string name="cantMakeMapRequests">No puedes utilizar el mapa</string>
 
 </resources>
 

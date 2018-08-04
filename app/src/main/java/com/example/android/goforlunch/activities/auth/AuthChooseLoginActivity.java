@@ -130,8 +130,11 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         * logging in directly
         * WE LEAVE THIS. THE APP DOES NOT WORK WELL WITHOUT THIS
         * */
-        //auth.signOut();
-        //LoginManager.getInstance().logOut();
+        // TODO: 04/08/2018 I have to uncomment these two lines (that are currently commented)
+        // TODO: 04/08/2018 Otherwise, the app does strange things when I leave it without
+        // TODO: 04/08/2018 logging out and then launch it again
+        auth.signOut();
+        LoginManager.getInstance().logOut();
 
         /* internetAvailable is false till the update() callback changes it
         * */

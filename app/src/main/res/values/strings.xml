@@ -13,6 +13,7 @@
 
     <string name="action_settings">Settings</string>
 
+
     <!-- GENERAL MESSAGES -->
     <string name="noInternet">Internet NOT available</string>
     <string name="noInternetFeaturesNotWork">Internet not available. Some features might not work</string>
@@ -23,6 +24,7 @@
     <string name="permissionDialogTitlePermissionNecessary">Permission necessary</string>
     <string name="permissionDialogMessagePermissionIsNecessary">Permission is necessary</string>
     <string name="loading_please_wait">Loading&#8230; please wait&#8230;</string>
+
 
     <!-- COMMON -->
     <string name="commonToastEnterFirstName">Please, enter First name</string>
@@ -41,6 +43,7 @@
     <string name="snackbarNoInternetText">There is no internet connection</string>
     <string name="snackbarNoInternetButton">HIDE</string>
 
+
     <!-- MAIN ACTIVITY -->
     <string name="mainBottomMapView">Map View</string>
     <string name="mainBottomListView">List View</string>
@@ -52,14 +55,17 @@
     <string name="mainCurrentPositionNotAvailable">Current Position not available</string>
     <string name="mainStartRequestProcess">Searching Restaurants&#8230;</string>
 
+
     <!-- EVERNOTE JOB -->
     <string name="key_alarmAddRestaurantIsOn" translatable="false">alarmAddRestaurantOn</string>
+
 
     <!-- FRAGMENTS -->
     <string name="autoCompleteSearchText">Search</string>
     <string name="toolbarImHungry">I\'m hungry</string>
     <string name="toolbarAvailableWorkmates">Available Workmates</string>
     <string name="startFetchingService">You can start searching restaurants clicking "START SEARCH" on the Navigation Drawer (Click on the top left button)</string>
+
 
     <!-- FRAGMENTS: Coworkers -->
     <string name="avCowHasNotDecided">%1$s %2$s has not decided yet&#8230;</string>
@@ -86,6 +92,7 @@
     <!-- FACEBOOK SIGN IN -->
     <string name="facebook_app_id">622449801446185</string>
     <string name="fb_login_protocol_scheme">fb622449801446185</string>
+
 
     <!-- RESTAURANT TYPES -->
     <string name="typeAll">All</string>
@@ -120,6 +127,7 @@
         <item>@string/typeOther</item>       <!-- 13  -->
     </string-array>
 
+
     <!-- NAVIGATION DRAWER -->
     <string name="navDrawerYourLunch">YOUR LUNCH</string>
     <string name="navDrawerJoinGroup">JOIN GROUP</string>
@@ -132,9 +140,11 @@
 
     <string name="navDrawerToastNotRestaurantYet">You haven\'t chosen a restaurant yet!</string>
 
+
     <!-- CHOOSE LOGIN ACTIVITY -->
     <string name="choose_register">Register</string>
     <string name="choose_signInWithEmail">Sign In with Email</string>
+
 
     <!-- AUTH SIGN IN ACTIVITY -->
     <string name="signInEmail">Email</string>
@@ -143,13 +153,16 @@
     <string name="signInTextViewForgotPassword">Forgot your password?</string>
     <string name="signInButtonSignUp">Sign Up</string>
 
+
     <!-- AUTH ENTER NAME ACTIVITY -->
     <string name="enterNameStart">Start</string>
     <string name="enterNameThisEmailAlreadyExists">A user with this email already exists</string>
 
+
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupJoinGroup">Join Group</string>
     <string name="joinGroupCreateNewGroup">Create New Group</string>
+
 
     <!-- RESTAURANT ACTIVITY -->
     <string name="restaurantBottomCall">CALL</string>
@@ -168,6 +181,7 @@
     <string name="restaurantNameNotAvailable">Restaurant name not available</string>
     <string name="restaurantAddressNotAvailable">Restaurant address not available</string>
 
+
     <!-- PERS INFO ACTIVITY -->
     <string name="persSaveChanges">Save Changes</string>
     <string name="persChangePassword">Change password</string>
@@ -179,6 +193,7 @@
     <string name="persInfoSomethingWrongImage">Something went wrong uploading the image</string>
     <string name="persInfoNotUpdated">The information has not been updated</string>
 
+
     <!-- JOIN GROUP ACTIVITY -->
     <string name="joinGroupDoesNotExist">That group does not exist</string>
     <string name="joinWouldYouLikeJoin">Would you like to join this group</string>
@@ -188,6 +203,7 @@
     <string name="joinThisCurrentlyYourGroup">This is currently your group!</string>
     <string name="joinNotChosenGroup">You have not chosen a group yet&#8230;</string>
     <string name="joinNewGroupIs">Your new group is</string>
+
 
     <!-- FETCHING SERVICE -->
     <string name="overQueryLimit">Over Query Limit!</string>
