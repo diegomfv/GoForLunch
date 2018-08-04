@@ -26,6 +26,7 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -127,18 +128,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         /* Leave this two lines of code uncommented to do trials without
         * logging in directly
+        * WE LEAVE THIS. THE APP DOES NOT WORK WELL WITHOUT THIS
         * */
-//        auth.signOut();
-//        LoginManager.getInstance().logOut();
-
-        /* We check if the user is logged in in a background thread.
-         * */
-        if (!UtilsGeneral.hasPermissions(AuthChooseLoginActivity.this, Repo.PERMISSIONS)) {
-            UtilsGeneral.getPermissionsInActivity(AuthChooseLoginActivity.this);
-        }
-
-        checkIfUserIsLoggedInInBackgroundThread();
-
+        //auth.signOut();
+        //LoginManager.getInstance().logOut();
 
         /* internetAvailable is false till the update() callback changes it
         * */
@@ -149,6 +142,16 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         * */
         setContentView(R.layout.activity_auth_choose_login);
         unbinder = ButterKnife.bind(this);
+
+        /* We ask for permissions.
+         * */
+        if (!UtilsGeneral.hasPermissions(AuthChooseLoginActivity.this, Repo.PERMISSIONS)) {
+            UtilsGeneral.getPermissionsInActivity(AuthChooseLoginActivity.this);
+        }
+
+        /* We check if the user is logged in in a background thread.
+         * */
+        //checkIfUserIsLoggedInInBackgroundThread();
 
         /* We set the listeners
         * */
@@ -239,7 +242,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
             /* We get the user info. If the user is already registered and we have his/her name
             and last name,
-            we launch MainActivity
+            We launch MainActivity
             * */
             getUserAndLaunchSpecificActivity();
 
