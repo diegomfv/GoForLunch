@@ -35,7 +35,7 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
@@ -259,7 +259,7 @@ public class FragmentRestaurantMapView extends Fragment {
                                 userGroup = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString();
                                 userGroupKey = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
 
-                                UtilsGeneral.updateSharedPreferences(sharedPref, Repo.SharedPreferences.USER_ID_KEY, userIdKey);
+                                Utils.updateSharedPreferences(sharedPref, Repo.SharedPreferences.USER_ID_KEY, userIdKey);
 
                                 /* STARTING THE MAP:
                                  * First, we check that the user has the correct Google Play Services Version.
@@ -267,9 +267,9 @@ public class FragmentRestaurantMapView extends Fragment {
                                  * */
                                 if (isGooglePlayServicesOK()) {
 
-                                    if (!UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
+                                    if (!Utils.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
                                         Log.i(TAG, "onDataChange: asking for permissions");
-                                        UtilsGeneral.getPermissionsInFragment(FragmentRestaurantMapView.this);
+                                        Utils.getPermissionsInFragment(FragmentRestaurantMapView.this);
 
                                     } else {
                                         accessInternalStorageGranted = true;
@@ -376,7 +376,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
     private void disposeWhenDestroy () {
         Log.d(TAG, "disposeWhenDestroy: called!");
-        UtilsGeneral.dispose(this.autocompleteTextViewDisposable);
+        Utils.dispose(this.autocompleteTextViewDisposable);
 
     }
 
@@ -413,7 +413,7 @@ public class FragmentRestaurantMapView extends Fragment {
                             if (grantResults[0] == 0) {
                                 /* This grantResults ([0]) has to do with WRITE_EXTERNAL_STORAGE permission.
                                  * == 0 means this permission is granted */
-                                UtilsGeneral.createImageDirectory(storage, imageDirPath);
+                                Utils.createImageDirectory(storage, imageDirPath);
                             }
 
                         }
@@ -496,7 +496,7 @@ public class FragmentRestaurantMapView extends Fragment {
 
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             //This SuppressLint removes the compiler request asking for a explicit permission for mMap.setMyLocationEnabled(true)
-            // which is not needed because "if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS))" already checks
+            // which is not needed because "if (Utils.hasPermissions(getActivity(), Repo.PERMISSIONS))" already checks
             // the permission
             @SuppressLint("MissingPermission")
             @Override
@@ -504,7 +504,7 @@ public class FragmentRestaurantMapView extends Fragment {
                 Log.d(TAG, "onMapReady: map is ready");
                 mMap = googleMap;
 
-                if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
+                if (Utils.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
                     Log.i(TAG, "onDataChange: have permissions to getDeviceLocation()");
 
                     /* We get the device's location
@@ -542,7 +542,7 @@ public class FragmentRestaurantMapView extends Fragment {
                                         map.put(Repo.SentIntent.WEBSITE_URL, listOfAllRestaurantsInDatabase.get(i).getWebsiteUrl());
                                         map.put(Repo.SentIntent.IMAGE_URL, listOfAllRestaurantsInDatabase.get(i).getImageUrl());
 
-                                        UtilsGeneral.fillIntentUsingMapInfo(intent, map);
+                                        Utils.fillIntentUsingMapInfo(intent, map);
 
                                         startActivity(intent);
                                         break;
@@ -607,7 +607,7 @@ public class FragmentRestaurantMapView extends Fragment {
                                 new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                 DEFAULT_ZOOM);
 
-                        if (UtilsGeneral.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
+                        if (Utils.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
                             /* We check if the database is empty. If it is, we start the fetching process
                             * */
                             getRestaurantsAndDisplayToastIfNeeded();
@@ -724,7 +724,7 @@ public class FragmentRestaurantMapView extends Fragment {
                         * */
                         updateMapWithPins();
 
-                        UtilsGeneral.hideKeyboard(getActivity());
+                        Utils.hideKeyboard(getActivity());
 
                     }
 
@@ -867,10 +867,10 @@ public class FragmentRestaurantMapView extends Fragment {
             if (mMap != null) {
                 Log.d(TAG, "updateMapWithPins: the map is not null");
 
-                String typeInEnglish = UtilsGeneral.getTypeInSpecificLanguage(getActivity(), autocompleteTextView.getText().toString().trim());
+                String typeInEnglish = Utils.getTypeInSpecificLanguage(getActivity(), autocompleteTextView.getText().toString().trim());
                 //Returns "" if there is no type or type is null
 
-                int typeAsInt = UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(typeInEnglish);
+                int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(typeInEnglish);
 
                 restaurantsObserver = getRestaurantsByType(typeAsInt)
                         .subscribeOn(Schedulers.io())

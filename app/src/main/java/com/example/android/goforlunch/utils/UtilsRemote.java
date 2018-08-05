@@ -27,7 +27,7 @@ public class UtilsRemote {
                         if (result.getOpeningHours().getPeriods().get(i).getClose().getDay() != null
                                 && result.getOpeningHours().getPeriods().get(i).getClose().getDay().toString().equalsIgnoreCase(String.valueOf(day))) {
 
-                            return UtilsGeneral.formatTime(result.getOpeningHours().getPeriods().get(i).getClose().getTime());
+                            return Utils.formatTime(result.getOpeningHours().getPeriods().get(i).getClose().getTime());
                         }
 
                     }

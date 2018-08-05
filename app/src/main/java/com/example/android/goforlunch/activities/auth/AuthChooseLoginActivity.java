@@ -19,7 +19,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.constants.Repo;
 import com.facebook.AccessToken;
@@ -148,8 +148,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         /* We ask for permissions.
          * */
-        if (!UtilsGeneral.hasPermissions(AuthChooseLoginActivity.this, Repo.PERMISSIONS)) {
-            UtilsGeneral.getPermissionsInActivity(AuthChooseLoginActivity.this);
+        if (!Utils.hasPermissions(AuthChooseLoginActivity.this, Repo.PERMISSIONS)) {
+            Utils.getPermissionsInActivity(AuthChooseLoginActivity.this);
         }
 
         /* We check if the user is logged in in a background thread.
@@ -225,7 +225,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = UtilsGeneral.createSnackbar(
+                snackbar = Utils.createSnackbar(
                         AuthChooseLoginActivity.this,
                         mainContent,
                         getResources().getString(R.string.noInternet));
@@ -292,7 +292,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(AuthChooseLoginActivity.this, receiver, intentFilter, this);
+        Utils.connectReceiver(AuthChooseLoginActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -302,7 +302,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
+            Utils.disconnectReceiver(
                     AuthChooseLoginActivity.this,
                     receiver,
                     AuthChooseLoginActivity.this);
@@ -401,14 +401,14 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         * in onCreate() and internetAvailable would be false in both cases (with
         * and without internet available)
         * */
-        UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
             @Override
             public void onNext(Boolean internetAvailableBackgroundThread) {
                 Log.d(TAG, "onNext: called!");
 
                 if (!internetAvailableBackgroundThread) {
                     ToastHelper.toastNoInternetFeaturesNotWorking(AuthChooseLoginActivity.this);
-                    UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                    Utils.showMainContent(progressBarContent, mainContent);
 
                 } else {
                     /* Internet is available
@@ -441,12 +441,12 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         if (user == null) {
             Log.d(TAG, "onCreate: user is null");
             //We delete Shared preferences info
-            UtilsGeneral.deleteSharedPreferencesInfo(sharedPref);
+            Utils.deleteSharedPreferencesInfo(sharedPref);
 
             /* If the user is null, we won't launch a new activity,
              so we show the main layout
             * */
-            UtilsGeneral.showMainContent(progressBarContent, mainContent);
+            Utils.showMainContent(progressBarContent, mainContent);
 
 
         } else {
@@ -492,7 +492,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         if (internetAvailable) {
             /* We hide the main screen while the process runs
              * */
-            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
+            Utils.hideMainContent(progressBarContent, mainContent);
 
             AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
             auth.signInWithCredential(credential)
@@ -513,7 +513,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                                 /* Something went wrong during sign in */
                                 Log.d(TAG, "GOOGLE signInWithCredential: failure");
                                 ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
-                                UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                                Utils.showMainContent(progressBarContent, mainContent);
 
                             }
                         }
@@ -533,7 +533,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         if (internetAvailable) {
 
-            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
+            Utils.hideMainContent(progressBarContent, mainContent);
 
             AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
             auth.signInWithCredential(credential)
@@ -556,7 +556,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                                  * */
                                 Log.w(TAG, "FACEBOOK signInWithCredential: failure", task.getException());
                                 ToastHelper.toastShort(AuthChooseLoginActivity.this, getResources().getString(R.string.somethingWentWrong));
-                                UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                                Utils.showMainContent(progressBarContent, mainContent);
 
                             }
 
@@ -637,7 +637,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                         dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                         String userKey = dbRefUsers.push().getKey();
 
-                        String[] names = UtilsGeneral.getFirstNameAndLastName(user.getDisplayName());
+                        String[] names = Utils.getFirstNameAndLastName(user.getDisplayName());
 
                         dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                         UtilsFirebase.updateUserInfoInFirebase(dbRefUsers,
@@ -669,7 +669,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                          * the variations in the preference fragment will affect firebase (and not
                          * the other way around).
                          * */
-                        UtilsGeneral.updateSharedPreferences(sharedPref,
+                        Utils.updateSharedPreferences(sharedPref,
                                 getResources().getString(R.string.pref_key_notifications),
                                 userNotifInfo);
 
@@ -695,7 +695,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                          * the variations in the preference fragment will affect firebase (and not
                          * the other way around).
                          * */
-                        UtilsGeneral.updateSharedPreferences(sharedPref,
+                        Utils.updateSharedPreferences(sharedPref,
                                 getResources().getString(R.string.pref_key_notifications),
                                 userNotifInfo);
 
@@ -720,7 +720,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
                     ToastHelper.toastSomethingWentWrong(AuthChooseLoginActivity.this);
 
-                    UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                    Utils.showMainContent(progressBarContent, mainContent);
 
                     /* We remove the listener
                      * */

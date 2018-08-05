@@ -1,7 +1,7 @@
 package com.example.android.goforlunch;
 
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.constants.Repo;
 
 import org.junit.Assert;
@@ -483,7 +483,7 @@ public class UnitTests {
     public void capitalize() {
 
         String str = "goforlunch";
-        assertTrue(UtilsGeneral.capitalize(str).equals("Goforlunch"));
+        assertTrue(Utils.capitalize(str).equals("Goforlunch"));
 
     }
 

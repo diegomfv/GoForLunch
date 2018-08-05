@@ -19,10 +19,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.utils.TextInputAutoCompleteTextView;
@@ -113,7 +112,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         setContentView(R.layout.activity_join_group);
         ButterKnife.bind(this);
 
-        UtilsGeneral.showMainContent(progressBarContent, mainContent);
+        Utils.showMainContent(progressBarContent, mainContent);
 
         listOfGroups = new ArrayList<>();
 
@@ -172,7 +171,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = UtilsGeneral.createSnackbar(
+                snackbar = Utils.createSnackbar(
                         JoinGroupActivity.this,
                         mainContent,
                         getResources().getString(R.string.noInternet));
@@ -232,10 +231,10 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                 } else {
                     Log.i(TAG, "onClick: listOfGroups = " + listOfGroups.toString());
 
-                    if (listOfGroups.contains(UtilsGeneral.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()))) {
+                    if (listOfGroups.contains(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()))) {
                         /* The group exists and we create a dialog to join group
                          * */
-                        alertDialogJoinGroup(UtilsGeneral.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()));
+                        alertDialogJoinGroup(Utils.capitalize(textInputAutoCompleteTextView.getText().toString().toLowerCase().trim()));
 
                     } else {
                         /* The group does not exist*/
@@ -324,7 +323,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
+        Utils.connectReceiver(JoinGroupActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -334,7 +333,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
+            Utils.disconnectReceiver(
                     JoinGroupActivity.this,
                     receiver,
                     JoinGroupActivity.this);
@@ -378,7 +377,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                         /* We only hide the keyboard if the group length (inputted) is long enough
                         * */
                         if (group.length() > 3) {
-                            UtilsGeneral.hideKeyboard(JoinGroupActivity.this);
+                            Utils.hideKeyboard(JoinGroupActivity.this);
                         }
                     }
 
@@ -416,7 +415,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
                         } else {
 
-                            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
+                            Utils.hideMainContent(progressBarContent, mainContent);
 
                             dbRefGroups = fireDb.getReference(Repo.FirebaseReference.GROUPS);
                             dbRefGroups.addListenerForSingleValueEvent(new ValueEventListener() {

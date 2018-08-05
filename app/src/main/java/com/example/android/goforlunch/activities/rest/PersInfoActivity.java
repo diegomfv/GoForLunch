@@ -34,10 +34,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -224,18 +223,18 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = UtilsGeneral.createSnackbar(
+                snackbar = Utils.createSnackbar(
                         PersInfoActivity.this,
                         mainContent,
                         "Internet not available");
 
                 ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
-                UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                Utils.showMainContent(progressBarContent, mainContent);
 
             } else {
                 snackbar.show();
                 ToastHelper.toastNoInternetFeaturesNotWorking(PersInfoActivity.this);
-                UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                Utils.showMainContent(progressBarContent, mainContent);
             }
 
         } else {
@@ -250,7 +249,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
             /* We get the user information
             when internet comes back
             */
-            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
+            Utils.hideMainContent(progressBarContent, mainContent);
 
             currentUser = auth.getCurrentUser();
             Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
@@ -367,7 +366,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 glide.load(userProfilePictureUri).into(ivUserImage);
             }
 
-            UtilsGeneral.showMainContent (progressBarContent, mainContent);
+            Utils.showMainContent (progressBarContent, mainContent);
 
             /* We remove the listener (probably not needed because it's a SingleValueEvent Listener)
             * */
@@ -394,7 +393,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(PersInfoActivity.this, receiver, intentFilter, this);
+        Utils.connectReceiver(PersInfoActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -404,7 +403,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
+            Utils.disconnectReceiver(
                     PersInfoActivity.this,
                     receiver,
                     PersInfoActivity.this);
@@ -532,13 +531,13 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                         * */
                         if (internetAvailable) {
 
-                            UtilsGeneral.hideMainContent(progressBarContent, mainContent);
+                            Utils.hideMainContent(progressBarContent, mainContent);
 
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(
-                                            UtilsGeneral.capitalize(inputFirstName.getText().toString().trim())
+                                            Utils.capitalize(inputFirstName.getText().toString().trim())
                                                     + " "
-                                                    + UtilsGeneral.capitalize(inputLastName.getText().toString().trim()))
+                                                    + Utils.capitalize(inputLastName.getText().toString().trim()))
                                     .setPhotoUri(userProfilePictureUri)
                                     .build();
 
@@ -558,7 +557,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
                                                 ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
 
-                                                UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                                                Utils.showMainContent(progressBarContent, mainContent);
 
 
                                             } else {

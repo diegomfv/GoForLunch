@@ -39,7 +39,7 @@ import com.example.android.goforlunch.data.viewmodel.MainViewModel;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.adapters.RVAdapterList;
@@ -238,7 +238,7 @@ public class FragmentRestaurantListView extends Fragment {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
-        UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
             @Override
             public void onNext(Boolean aBoolean) {
                 Log.d(TAG, "onNext: ");
@@ -463,19 +463,19 @@ public class FragmentRestaurantListView extends Fragment {
                     @Override
                     public void onNext(String type) {
                         Log.d(TAG, "onNext: type = " + type);
-                        Log.d(TAG, "onNext: typeAsInt = " + UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type));
+                        Log.d(TAG, "onNext: typeAsInt = " + Utils.getTypeAsStringAndReturnTypeAsInt(type));
 
-                        if (Arrays.asList(arrayOfTypes).contains(UtilsGeneral.getTypeInSpecificLanguage(getActivity(), type))
-                                && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
+                        if (Arrays.asList(arrayOfTypes).contains(Utils.getTypeInSpecificLanguage(getActivity(), type))
+                                && Utils.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
                             Log.d(TAG, "onNext: getting restaurant by type");
-                            getRestaurantsByTypeAndDisplayThemInRecyclerView(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type));
+                            getRestaurantsByTypeAndDisplayThemInRecyclerView(Utils.getTypeAsStringAndReturnTypeAsInt(type));
 
                         } else {
                             Log.d(TAG, "onNext: getting all restaurants");
                             getAllRestaurantsAndDisplayThemInRecyclerView();
                         }
 
-                        UtilsGeneral.hideKeyboard(getActivity());
+                        Utils.hideKeyboard(getActivity());
 
                     }
 
@@ -716,9 +716,9 @@ public class FragmentRestaurantListView extends Fragment {
         Log.d(TAG, "updateRecyclerViewWithNewListOfRestaurantsByCoworker: called!");
 
         if (Arrays.asList(arrayOfTypes).contains(type)
-                && UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
+                && Utils.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
             Log.d(TAG, "onNext: getting restaurant by type");
-            getRestaurantsByTypeAndDisplayThemInRecyclerView(UtilsGeneral.getTypeAsStringAndReturnTypeAsInt(type));
+            getRestaurantsByTypeAndDisplayThemInRecyclerView(Utils.getTypeAsStringAndReturnTypeAsInt(type));
 
         } else {
             Log.d(TAG, "onNext: getting all restaurants");

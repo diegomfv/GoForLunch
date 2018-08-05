@@ -18,7 +18,7 @@ import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.utils.Anim;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.constants.Repo;
 import com.snatik.storage.Storage;
 
@@ -194,7 +194,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
          */
         private String getTypeAndAdress (int position) {
 
-            return UtilsGeneral.transformTypeAsIntToString(listOfRestaurants.get(position).getType())
+            return Utils.transformTypeAsIntToString(listOfRestaurants.get(position).getType())
                     + " - "
                     +  listOfRestaurants.get(position).getAddress().substring(0, listOfRestaurants.get(position).getAddress().indexOf(","));
 
@@ -206,7 +206,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
             if (listOfRestaurants.get(position).getRating() != null
                     && !listOfRestaurants.get(position).getRating().equals(Repo.NOT_AVAILABLE_FOR_STRINGS)) {
-                return UtilsGeneral.adaptRating(Float.parseFloat(listOfRestaurants.get(position).getRating()));
+                return Utils.adaptRating(Float.parseFloat(listOfRestaurants.get(position).getRating()));
 
             } else {
                 return 0f;
@@ -313,9 +313,9 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
             CardView.LayoutParams params = new CardView.LayoutParams(
                     CardView.LayoutParams.MATCH_PARENT,
-                    (int) UtilsGeneral.convertDpToPixel(90, mContext));
+                    (int) Utils.convertDpToPixel(90, mContext));
 
-            int margin10 = (int) UtilsGeneral.convertDpToPixel(10, mContext);
+            int margin10 = (int) Utils.convertDpToPixel(10, mContext);
 
             params.setMargins(margin10, margin10, margin10, margin10);
             cardView.setLayoutParams(params);

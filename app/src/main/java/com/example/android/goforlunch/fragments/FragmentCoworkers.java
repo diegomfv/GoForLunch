@@ -30,9 +30,9 @@ import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ItemClickSupport;
 import com.example.android.goforlunch.utils.ToastHelper;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.utils.UtilsGeneral;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -346,7 +346,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
 
         if (getActivity() != null) {
-            UtilsGeneral.connectReceiver(getActivity(), receiver, intentFilter, this);
+            Utils.connectReceiver(getActivity(), receiver, intentFilter, this);
         }
 
     }
@@ -357,7 +357,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null && getActivity() != null) {
-            UtilsGeneral.disconnectReceiver(
+            Utils.disconnectReceiver(
                     getActivity(),
                     receiver,
                     this);

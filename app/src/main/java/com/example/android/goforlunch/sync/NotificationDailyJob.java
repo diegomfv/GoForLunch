@@ -17,7 +17,7 @@ import com.evernote.android.job.DailyJob;
 import com.evernote.android.job.JobRequest;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.constants.Repo;
 import com.google.firebase.auth.FirebaseAuth;
@@ -73,7 +73,7 @@ public class NotificationDailyJob extends DailyJob {
             /* We check if internet is available.
             * If it is available, we continue with the process (creating the notification)
             * If it is not, we stop the process */
-            UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
                 @Override
                 public void onNext(Boolean aBoolean) {
                     Log.d(TAG, "onNext: ");
@@ -208,7 +208,7 @@ public class NotificationDailyJob extends DailyJob {
                         /* We fill the intent with the restaurant information
                          * */
                         Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
-                        UtilsGeneral.fillIntentUsingMapInfo(intent, map);
+                        Utils.fillIntentUsingMapInfo(intent, map);
 
                         //Pending intent creation
                         PendingIntent pendingIntent = PendingIntent.getActivity(

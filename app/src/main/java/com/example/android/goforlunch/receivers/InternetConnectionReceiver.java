@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.example.android.goforlunch.rx.ObservableObject;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 
 import io.reactivex.observers.DisposableObserver;
 
@@ -24,7 +24,7 @@ public class InternetConnectionReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, final Intent intent) {
         Log.d(TAG, "onReceive: called!");
 
-        UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+        Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
             @Override
             public void onNext(Boolean aBoolean) {
                 Log.d(TAG, "onNext: called!");

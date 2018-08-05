@@ -37,7 +37,7 @@ import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.network.service.FetchingService;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
 import com.example.android.goforlunch.sync.AddRestaurantToGroupDailyJob;
 import com.example.android.goforlunch.sync.AlertJobCreator;
@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = UtilsGeneral.createSnackbar(
+                snackbar = Utils.createSnackbar(
                         MainActivity.this,
                         mainDrawerLayout,
                         getResources().getString(R.string.noInternet));
@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                             if (grantResults[0] == 0) {
                                 /* This grantResults ([0]) has to do with WRITE_EXTERNAL_STORAGE permission.
                                 * == 0 means this permission is granted */
-                                UtilsGeneral.createImageDirectory(storage, imageDirPath);
+                                Utils.createImageDirectory(storage, imageDirPath);
                             }
                         }
                     }
@@ -485,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     userKey = item.getKey();
                     userGroup = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString();
                     userGroupKey = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue()).toString();
-                    UtilsGeneral.updateSharedPreferences(sharedPref, Repo.SharedPreferences.USER_ID_KEY, userKey);
+                    Utils.updateSharedPreferences(sharedPref, Repo.SharedPreferences.USER_ID_KEY, userKey);
 
                     /* We update Firebase according to the preference fragment
                      * (remember that the shared pref "notifications"
@@ -533,7 +533,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                      * */
                     Map<String, Object> map = UtilsFirebase.fillMapWithRestaurantInfoUsingDataSnapshot(dataSnapshot);
                     Intent intent = new Intent(MainActivity.this, RestaurantActivity.class);
-                    startActivity(UtilsGeneral.fillIntentUsingMapInfo(intent, map));
+                    startActivity(Utils.fillIntentUsingMapInfo(intent, map));
                     fireDbRefUsers.removeEventListener(this);
                 }
             }
@@ -650,8 +650,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         case R.id.nav_start_search: {
                             Log.d(TAG, "onNavigationItemSelected: start search clicked!");
 
-                            if (!UtilsGeneral.hasPermissions(MainActivity.this, Repo.PERMISSIONS)) {
-                                UtilsGeneral.getPermissionsInActivity(MainActivity.this);
+                            if (!Utils.hasPermissions(MainActivity.this, Repo.PERMISSIONS)) {
+                                Utils.getPermissionsInActivity(MainActivity.this);
 
                             } else {
                                 startFetchingProcess();
@@ -705,7 +705,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     };
 
     /** Method for showing the main content.
-     * We cannot use UtilsGeneral because
+     * We cannot use Utils because
      * the mainContent Layout is not a Linear Layout
      * */
     private void showMainContent (LinearLayout progressBarContent, DrawerLayout mainContent) {
@@ -836,7 +836,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(MainActivity.this, receiver, intentFilter, this);
+        Utils.connectReceiver(MainActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -846,7 +846,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
+            Utils.disconnectReceiver(
                     MainActivity.this,
                     receiver,
                     MainActivity.this);
@@ -914,7 +914,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
             /* We change sharedPref in the Database. The alarm is set so, from now on, we won't do anything
              *  */
-            UtilsGeneral.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmAddRestaurantIsOn), true);
+            Utils.updateSharedPreferences(sharedPref, getResources().getString(R.string.key_alarmAddRestaurantIsOn), true);
 
             Log.i(TAG, "checkAddRestaurantsAt4pmDailyJob: ALARM IS ON!");
         }

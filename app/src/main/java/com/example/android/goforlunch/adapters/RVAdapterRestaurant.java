@@ -18,7 +18,7 @@ import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.utils.Anim;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -199,9 +199,9 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
             CardView.LayoutParams params = new CardView.LayoutParams(
                     CardView.LayoutParams.MATCH_PARENT,
-                    (int) UtilsGeneral.convertDpToPixel(90, mContext));
+                    (int) Utils.convertDpToPixel(90, mContext));
 
-            int margin10 = (int) UtilsGeneral.convertDpToPixel(10, mContext);
+            int margin10 = (int) Utils.convertDpToPixel(10, mContext);
 
             params.setMargins(margin10, margin10, margin10, margin10);
             cardView.setLayoutParams(params);

@@ -16,21 +16,17 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.rx.ObservableObject;
 import com.example.android.goforlunch.data.AppExecutors;
 import com.example.android.goforlunch.constants.Repo;
@@ -59,9 +55,9 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Diego Fajardo on 27/04/2018.
  */
 
-public class UtilsGeneral {
+public class Utils {
 
-    private static final String TAG = "UtilsGeneral";
+    private static final String TAG = "Utils";
 
     public static void checkInternetInBackgroundThread (final DisposableObserver disposableObserver) {
         Log.d(TAG, "checkInternetInBackgroundThread: called! ");
@@ -71,7 +67,7 @@ public class UtilsGeneral {
             public void run() {
                 Log.d(TAG, "run: checking internet connection...");
 
-                Observable.just(UtilsGeneral.isInternetAvailable())
+                Observable.just(Utils.isInternetAvailable())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(disposableObserver);
@@ -395,7 +391,7 @@ public class UtilsGeneral {
                     Log.d(TAG, "onNext: text = " + text);
 
                   if (text.length() > 3) {
-                      UtilsGeneral.hideKeyboard(activity);
+                      Utils.hideKeyboard(activity);
                   }
                 }
 

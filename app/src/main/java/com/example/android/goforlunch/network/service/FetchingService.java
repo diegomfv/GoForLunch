@@ -24,7 +24,7 @@ import com.example.android.goforlunch.network.remote.AllGoogleServices;
 import com.example.android.goforlunch.network.remote.GoogleService;
 import com.example.android.goforlunch.network.remote.GoogleServiceStreams;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsRemote;
 import com.snatik.storage.Storage;
 
@@ -139,7 +139,7 @@ public class FetchingService extends Service {
 
             myPosition = new LatLngForRetrofit(latitude,longitude);
 
-            UtilsGeneral.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
+            Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
                 @Override
                 public void onNext(Boolean aBoolean) {
                     Log.d(TAG, "onNext: " + aBoolean);
@@ -240,22 +240,22 @@ public class FetchingService extends Service {
 
                                     for (int i = 0; i < listOfResults.size(); i++) {
 
-                                        listOfPlacesIdsOfRestaurants.add(UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getPlaceId()));
+                                        listOfPlacesIdsOfRestaurants.add(Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()));
 
                                         listOfRestaurantsEntries.add(
                                                 new RestaurantEntry(
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getName()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getName()),
                                                         13,
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getVicinity()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getVicinity()),
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getRating()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
                                         );
 
                                     }
@@ -339,18 +339,18 @@ public class FetchingService extends Service {
 
                                         listOfRestaurantsEntries.add(
                                                 new RestaurantEntry(
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getName()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getName()),
                                                         type,
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getFormattedAddress()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getFormattedAddress()),
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getRating()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
                                                         Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
-                                                        UtilsGeneral.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
+                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
                                         );
                                     }
                                 }
@@ -463,8 +463,8 @@ public class FetchingService extends Service {
                             String closingTime = UtilsRemote.checkClosingTime(result);
 
                             restaurantEntry.setOpenUntil(closingTime);
-                            restaurantEntry.setPhone(UtilsGeneral.checkToAvoidNull(result.getInternationalPhoneNumber()));
-                            restaurantEntry.setWebsiteUrl(UtilsGeneral.checkToAvoidNull(result.getWebsite()));
+                            restaurantEntry.setPhone(Utils.checkToAvoidNull(result.getInternationalPhoneNumber()));
+                            restaurantEntry.setWebsiteUrl(Utils.checkToAvoidNull(result.getWebsite()));
 
                             if (result.getPhotos() != null) {
 

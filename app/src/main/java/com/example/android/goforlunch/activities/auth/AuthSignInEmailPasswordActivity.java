@@ -23,7 +23,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
-import com.example.android.goforlunch.utils.UtilsGeneral;
+import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -103,15 +103,15 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         setContentView(R.layout.activity_auth_signin_email_password);
         ButterKnife.bind(this);
 
-        UtilsGeneral.showMainContent(progressBarContent, mainContent);
+        Utils.showMainContent(progressBarContent, mainContent);
 
         inputEmail.setText("diego.fajardo@hotmail.com");
         inputPassword.setText("123456");
 
         /* Configuring textInputEditTexts: hide keyboard
          * */
-        //UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputEmail);
-        //UtilsGeneral.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputPassword);
+        //Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputEmail);
+        //Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputPassword);
 
         fab.setOnClickListener(fabOnClickOnClickListener);
         buttonSignIn.setOnClickListener(buttonSignInOnClickListener);
@@ -164,7 +164,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
             internetAvailable = false;
 
             if (snackbar == null) {
-                snackbar = UtilsGeneral.createSnackbar(
+                snackbar = Utils.createSnackbar(
                         AuthSignInEmailPasswordActivity.this,
                         mainContent,
                         getResources().getString(R.string.noInternet));
@@ -196,7 +196,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
         receiver = new InternetConnectionReceiver();
         intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        UtilsGeneral.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
+        Utils.connectReceiver(AuthSignInEmailPasswordActivity.this, receiver, intentFilter, this);
 
     }
 
@@ -206,7 +206,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
-            UtilsGeneral.disconnectReceiver(
+            Utils.disconnectReceiver(
                     AuthSignInEmailPasswordActivity.this,
                     receiver,
                     AuthSignInEmailPasswordActivity.this);
@@ -277,7 +277,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
                 }
 
-                UtilsGeneral.hideMainContent(progressBarContent, mainContent);
+                Utils.hideMainContent(progressBarContent, mainContent);
 
                 //authenticate user
                 FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -303,7 +303,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                         ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.somethingWentWrong));
                                     }
 
-                                    UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                                    Utils.showMainContent(progressBarContent, mainContent);
 
                                 } else {
                                     /* Sign in was successful
@@ -340,7 +340,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                                         /* If notifications user information is "" or "false",
                                                         * we set the notifications in shared Preferences as false
                                                         * */
-                                                        UtilsGeneral.updateSharedPreferences(
+                                                        Utils.updateSharedPreferences(
                                                                 sharedPref,
                                                                 getResources().getString(R.string.pref_key_notifications),
                                                                 false);
@@ -349,7 +349,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                                         /* If notifications user information is not "" or "false" then it's true.
                                                          * We set the notifications in shared Preferences as true
                                                          * */
-                                                        UtilsGeneral.updateSharedPreferences(
+                                                        Utils.updateSharedPreferences(
                                                                 sharedPref,
                                                                 getResources().getString(R.string.pref_key_notifications),
                                                                 true);
@@ -372,7 +372,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                             Log.d(TAG, "onCancelled: called!");
 
                                             ToastHelper.toastSomethingWentWrong(AuthSignInEmailPasswordActivity.this);
-                                            UtilsGeneral.showMainContent(progressBarContent, mainContent);
+                                            Utils.showMainContent(progressBarContent, mainContent);
                                         }
                                     });
                                 }

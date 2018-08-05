@@ -306,7 +306,7 @@ public class UtilsFirebase {
                 dataSnapshot.getChildren()) {
 
             if (item.child(Repo.FirebaseReference.GROUP_NAME).getValue() != null) {
-                listOfGroups.add(UtilsGeneral.capitalize(item.child(Repo.FirebaseReference.GROUP_NAME).getValue().toString().toLowerCase().trim()));
+                listOfGroups.add(Utils.capitalize(item.child(Repo.FirebaseReference.GROUP_NAME).getValue().toString().toLowerCase().trim()));
 
             }
 
@@ -339,7 +339,7 @@ public class UtilsFirebase {
         Log.d(TAG, "setTypeIfPossible: called!");
         Log.d(TAG, "setTypeIfPossible: " + typeAsString);
 
-        if (UtilsGeneral.isInteger(typeAsString)) {
+        if (Utils.isInteger(typeAsString)) {
             Log.d(TAG, "setTypeIfPossible: isInteger -> " + typeAsString);
             return Integer.valueOf(typeAsString);
 
