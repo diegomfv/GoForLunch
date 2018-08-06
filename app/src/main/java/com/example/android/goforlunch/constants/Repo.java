@@ -91,6 +91,12 @@ public interface Repo {
         String LONGITUDE = "longitude";
         String ACCESS_INTERNAL_STORAGE_GRANTED = "access_internal_storage";
 
+        ////////////////
+        //Receiver
+
+        String LOAD_DATA_IN_VIEWMODEL = "load_data_in_viewmodel";
+
+        String FETCHING_PROCESS_STAGE = "fetching_process_stage";
     }
 
     interface FirebaseReference {

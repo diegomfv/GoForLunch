@@ -1,79 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/map_main_toolbar_id"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:elevation="3dp"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:title="I'm Hungry"
-        app:titleTextColor="@android:color/white"
-        app:layout_collapseMode="pin" />
+    <include layout="@layout/progress_bar_content"
+        android:visibility="gone"/>
 
-    <RelativeLayout
-        android:id="@+id/map_toolbar_search_id"
+    <LinearLayout
+        android:id="@+id/main_layout_id"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:elevation="4dp"
-        android:visibility="gone">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/map_cv_search_id"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/map_main_toolbar_id"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="3dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="I'm Hungry"
+            app:titleTextColor="@android:color/white"
+            app:layout_collapseMode="pin" />
+
+        <RelativeLayout
+            android:id="@+id/map_toolbar_search_id"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
+            android:visibility="gone">
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/map_cv_search_id"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:cardBackgroundColor="@color/cardview_light_background"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="5dp">
+
+                <ImageView
+                    android:id="@+id/map_search_icon_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_search"
+                    android:layout_marginLeft="8dp"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="Search icon"/>
+
+                <AutoCompleteTextView
+                    android:id="@+id/map_autocomplete_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="50dp"
+                    android:layout_gravity="center_vertical"
+                    android:hint="Search Restaurants by Type"
+                    android:textSize="14sp"
+                    android:maxLength="40"
+                    android:ellipsize="end"
+                    android:background="@android:color/transparent"
+                    android:dropDownWidth="250dp"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:completionThreshold="1"
+                    android:dropDownAnchor="@id/map_cv_search_id"
+                    />
+
+            </android.support.v7.widget.CardView>
+
+        </RelativeLayout>
+
+        <fragment
+            android:id="@+id/map"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:cardBackgroundColor="@color/cardview_light_background"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="5dp">
+            tools:context=".MapsActivity"
+            android:name="com.google.android.gms.maps.SupportMapFragment">
 
-            <ImageView
-                android:id="@+id/map_search_icon_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_search"
-                android:layout_marginLeft="8dp"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="Search icon"/>
+        </fragment>
 
-            <AutoCompleteTextView
-                android:id="@+id/map_autocomplete_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
-                android:layout_gravity="center_vertical"
-                android:hint="Search Restaurants by Type"
-                android:textSize="14sp"
-                android:maxLength="40"
-                android:ellipsize="end"
-                android:background="@android:color/transparent"
-                android:dropDownWidth="250dp"
-                android:maxLines="1"
-                android:inputType="text"
-                android:imeOptions="actionSearch"
-                android:completionThreshold="1"
-                android:dropDownAnchor="@id/map_cv_search_id"
-                />
+    </LinearLayout>
 
-        </android.support.v7.widget.CardView>
-
-    </RelativeLayout>
-
-    <fragment
-        android:id="@+id/map"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment">
-
-    </fragment>
-
-</LinearLayout>
+</FrameLayout>

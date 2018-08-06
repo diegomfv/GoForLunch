@@ -6,6 +6,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.example.android.goforlunch.R;
@@ -32,6 +34,7 @@ import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.receivers.DataUpdateReceiver;
 import com.example.android.goforlunch.viewmodel.MainViewModel;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
@@ -71,6 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -90,7 +94,7 @@ import io.reactivex.schedulers.Schedulers;
 
 /** Fragment that displays the Google Map
  * */
-public class FragmentRestaurantMapView extends Fragment {
+public class FragmentRestaurantMapView extends Fragment implements java.util.Observer {
 
     /* Interface to communicate with Main Activity
      * */
@@ -101,6 +105,12 @@ public class FragmentRestaurantMapView extends Fragment {
     //////////////////////////////
 
     private static final String TAG = FragmentRestaurantMapView.class.getSimpleName();
+
+    //DataUpdateReceiver variables
+    private DataUpdateReceiver receiver;
+    private IntentFilter intentFilter;
+
+    private boolean allowUIUpdatesViaViewmodel;
 
     //ERROR that we are going to handle if the user doesn't have the correct version of the
     //Google Play Services
@@ -166,6 +176,12 @@ public class FragmentRestaurantMapView extends Fragment {
 
     @BindView(R.id.map_toolbar_search_id)
     RelativeLayout toolbar2;
+
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarContent;
+
+    @BindView(R.id.main_layout_id)
+    LinearLayout mainContent;
 
     private ActionBar actionBar;
 
@@ -292,26 +308,35 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         }
 
+        //We allow UI updates via the viewmodel. This variable will become false
+        //when the service starts fetching restaurants
+        allowUIUpdatesViaViewmodel = true;
+
         mainViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
         mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
             @Override
             public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
                 Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
 
-                if (restaurantEntries != null && restaurantEntries.size() != 0) {
-                    Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+                if (allowUIUpdatesViaViewmodel) {
 
-                    /* We fill the list with the Restaurants in the database
-                     * */
-                    listOfAllRestaurantsInDatabase = restaurantEntries;
+                    if (restaurantEntries != null && restaurantEntries.size() != 0) {
+                        Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
 
-                    /* We update the UI
-                     * */
-                    updateMapWithPins();
+                        /* We fill the list with the Restaurants in the database
+                         * */
+                        listOfAllRestaurantsInDatabase = restaurantEntries;
 
-                } else {
-                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                        /* We update the UI
+                         * */
+                        updateMapWithPins();
+
+                    } else {
+                        Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                    }
+
                 }
+
             }
         });
 
@@ -326,12 +351,16 @@ public class FragmentRestaurantMapView extends Fragment {
         super.onStart();
         Log.d(TAG, "onStart: called!");
 
+        this.connectBroadcastReceiver();
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
+
+        this.disconnectBroadcastReceiver();
 
     }
 
@@ -372,11 +401,42 @@ public class FragmentRestaurantMapView extends Fragment {
         Log.d(TAG, "onDestroy: called!");
         this.disposeWhenDestroy();
 
+        this.disconnectBroadcastReceiver();
+
     }
 
     private void disposeWhenDestroy () {
         Log.d(TAG, "disposeWhenDestroy: called!");
         Utils.dispose(this.autocompleteTextViewDisposable);
+
+    }
+
+    @Override
+    public void update(Observable o, Object data) {
+        Log.d(TAG, "update: called!");
+
+        //2: fetching process has started
+        //3: fetching process has finished
+
+        if ((int) data == 2) {
+            Log.i(TAG, "update: received 2");
+
+            //block UI
+            //block UI updates via viewModel
+            allowUIUpdatesViaViewmodel = false;
+            Utils.hideMainContent(progressBarContent, mainContent);
+
+
+        } else {
+            Log.i(TAG, "update: received 3");
+
+            //show UI
+            //allow UI updates via viewModel
+            allowUIUpdatesViaViewmodel = true;
+            Utils.showMainContent(progressBarContent, mainContent);
+
+        }
+
 
     }
 
@@ -966,5 +1026,30 @@ public class FragmentRestaurantMapView extends Fragment {
             }
         };
     }
+
+    private void connectBroadcastReceiver () {
+        Log.d(TAG, "connectBroadcastReceiver: called!");
+
+        receiver = new DataUpdateReceiver();
+        intentFilter = new IntentFilter(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
+        Utils.connectReceiver(getActivity(), receiver, intentFilter, this);
+
+    }
+
+    private void disconnectBroadcastReceiver () {
+        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+
+        if (receiver != null) {
+            Utils.disconnectReceiver(
+                    getActivity(),
+                    receiver,
+                    this);
+        }
+
+        receiver = null;
+        intentFilter = null;
+
+    }
+
 
 }

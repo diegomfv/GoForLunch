@@ -31,6 +31,7 @@ import com.snatik.storage.Storage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
@@ -67,11 +68,27 @@ public class FetchingService extends Service {
 
     private boolean accessInternalStorageGranted;
 
+    //Counter to count how many objects we create and notify the service
+    //when the fetching process has finished. This is necessary to avoid
+    //the UI to get blocked. The counter will increment
+    //when we add an object to the database and will decrement when
+    //a thread reaches the end of the service code. When the counter < 20
+    //(a number close to 0 to avoid any issues)
+    //the broadcast to update the UI will be called.
+    private AtomicInteger counter;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate: called!");
+
+        //We send a Broadcast that will update FragmentRestaurantMapView
+        //Progress bar will be shown and the ViewModel will be temporarily blocked
+        //2 as an extra means "process has started"
+        Intent intent = new Intent();
+        intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
+        intent.putExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, 2);
+        sendBroadcast(intent);
 
         localDatabase = AppDatabase.getInstance(getApplicationContext());
 
@@ -98,6 +115,8 @@ public class FetchingService extends Service {
         * if there is no internet
         * */
         mHandler = new Handler();
+
+        counter = new AtomicInteger(0);
 
     }
 
@@ -128,6 +147,11 @@ public class FetchingService extends Service {
 
             //position is incorrect, do nothing
             ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.mainCurrentPositionNotAvailable));
+
+//            Intent intent2 = new Intent();
+//            intent2.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
+//            intent2.putExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, 3);
+//            sendBroadcast(intent2);
 
         } else if (!accessInternalStorageGranted){
             Log.d(TAG, "onStartCommand: internalStorageAccess not granted");
@@ -257,6 +281,8 @@ public class FetchingService extends Service {
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
                                         );
+                                        counter.getAndIncrement();
+                                        Log.i(TAG, "onNext: counter = " + counter.get());
 
                                     }
 
@@ -352,6 +378,8 @@ public class FetchingService extends Service {
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
                                                         Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
                                         );
+                                        counter.getAndIncrement();
+                                        Log.i(TAG, "onNext: counter = " + counter.get());
                                     }
                                 }
 
@@ -616,6 +644,18 @@ public class FetchingService extends Service {
 
             }
         });
+
+        counter.getAndDecrement();
+        Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
+        if (counter.get() < 20) {
+            //We send a Broadcast that will update FragmentRestaurantMapView
+            //Progress bar will be hidden and the ViewModel will be activated again
+            //3 as an extra means "process has finished"
+            Intent intent = new Intent();
+            intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
+            intent.getIntExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, 3);
+            sendBroadcast(intent);
+        }
     }
 
     /** This method saves the fetched image in the internal storage
@@ -680,5 +720,6 @@ public class FetchingService extends Service {
         localDatabase.restaurantDao().insertRestaurant(restaurantEntry);
 
     }
+
 }
 

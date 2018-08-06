@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 snackbar.show();
             }
 
-        } else {
+        } else if ((int) internetAvailableUpdate == 1) {
             Log.d(TAG, "update: Internet available");
 
             internetAvailable = true;
@@ -280,6 +280,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     fireDbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetUserInfo);
                 }
             }
+
+        } else {
+            //do nothing...
+            //we add this in MainActivity because this update() method is
+            //also triggered when is triggered in FragmentRestaurantMapView
 
         }
     }
