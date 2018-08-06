@@ -1,4 +1,4 @@
-package com.example.android.goforlunch.data.viewmodel;
+package com.example.android.goforlunch.viewmodel;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
