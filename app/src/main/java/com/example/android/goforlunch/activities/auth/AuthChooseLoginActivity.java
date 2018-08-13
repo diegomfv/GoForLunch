@@ -145,6 +145,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         * */
         setContentView(R.layout.activity_auth_choose_login);
         unbinder = ButterKnife.bind(this);
+        Utils.showMainContent(progressBarContent, mainContent);
 
         /* We ask for permissions.
          * */
