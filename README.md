@@ -30,7 +30,6 @@ The app uses Firebase to keep the data synchronized and allows Google and Facebo
 * [RxJava - Room](https://medium.com/google-developers/room-rxjava-acb0cd4f3757)
 * [RxBinding](https://github.com/JakeWharton/RxBinding)
 * [Gson](https://github.com/google/gson/)
-* [CircleImageView](https://github.com/hdodenhof/CircleImageView/)
 * [RxJava](https://github.com/ReactiveX/RxJava)
 * [RxAndroid](https://github.com/ReactiveX/RxAndroid)
 * [Room](https://developer.android.com/topic/libraries/architecture/room)
