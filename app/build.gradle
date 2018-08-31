@@ -92,9 +92,6 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.1.7'
 
-    //Library to combine Retrofit with RxJava
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
-
     //Room
     implementation "android.arch.persistence.room:runtime:1.1.0"
     annotationProcessor "android.arch.persistence.room:compiler:1.1.0"
@@ -111,6 +108,7 @@ dependencies {
 
     // RxJava support for Room
     implementation "android.arch.persistence.room:rxjava2:1.1.1-rc1"
+
     // Testing support
     androidTestImplementation "android.arch.core:core-testing:1.1.1"
 

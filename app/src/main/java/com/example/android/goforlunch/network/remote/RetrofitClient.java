@@ -108,10 +108,4 @@ public class RetrofitClient {
 
         return retrofitMatrixDistance;
     }
-
-
-
-
-
-
 }

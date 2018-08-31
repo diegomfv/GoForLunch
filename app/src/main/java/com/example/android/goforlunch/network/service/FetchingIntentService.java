@@ -1,11 +1,10 @@
 package com.example.android.goforlunch.network.service;
 
-import android.app.Service;
+import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -44,11 +43,11 @@ import retrofit2.Response;
 import static com.example.android.goforlunch.constants.Repo.Keys.NEARBY_KEY;
 
 /**
- * Created by Diego Fajardo on 11/07/2018.
+ * Created by Diego Fajardo on 31/08/2018.
  */
-public class FetchingService extends Service {
+public class FetchingIntentService extends IntentService {
 
-    private static final String TAG = FetchingService.class.getSimpleName();
+    private static final String TAG = FetchingIntentService.class.getSimpleName();
 
     private ArrayList<RestaurantEntry> listOfRestaurantsEntries;
     private ArrayList<String> listOfPlacesIdsOfRestaurants;
@@ -77,6 +76,10 @@ public class FetchingService extends Service {
     //the broadcast to update the UI will be called.
     private AtomicInteger counter;
 
+    public FetchingIntentService() {
+        super("FetchingIntentService");
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -84,23 +87,14 @@ public class FetchingService extends Service {
 
         //We send a Broadcast that will update FragmentRestaurantMapView
         //Progress bar will be shown and the ViewModel will be temporarily blocked
-        //2 as an extra means "process has started"
-        Intent intent = new Intent();
-        intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
-        intent.putExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, 2);
-        sendBroadcast(intent);
+        //2 as an extra means "process has started" (see "updateMapFragmentAccordingToProcessState" method)
+        hideMap();
 
         localDatabase = AppDatabase.getInstance(getApplicationContext());
 
-        /* We delete the database
-        * */
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run: called!");
-                localDatabase.clearAllTables();
-            }
-        });
+        /* We delete the database (could be done without app executors because we are in a
+        * background thread */
+        clearDatabase();
 
         configuringInternalStorage();
 
@@ -108,12 +102,12 @@ public class FetchingService extends Service {
         listOfPlacesIdsOfRestaurants = new ArrayList<>();
 
         /* We pass the NON TRANSLATABLE ARRAY!
-        * */
+         * */
         arrayOfTypes = Repo.RESTAURANT_TYPES;
 
         /* We will use this to show a Toast in Map Fragment
-        * if there is no internet
-        * */
+         * if there is no internet
+         * */
         mHandler = new Handler();
 
         counter = new AtomicInteger(0);
@@ -121,8 +115,8 @@ public class FetchingService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand: called!");
+    protected void onHandleIntent(@Nullable Intent intent) {
+        Log.d(TAG, "onHandleIntent: called!");
 
         double latitude;
         double longitude;
@@ -147,17 +141,14 @@ public class FetchingService extends Service {
 
             //position is incorrect, do nothing
             ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.mainCurrentPositionNotAvailable));
-
-//            Intent intent2 = new Intent();
-//            intent2.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
-//            intent2.putExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, 3);
-//            sendBroadcast(intent2);
+            showMap();
 
         } else if (!accessInternalStorageGranted){
             Log.d(TAG, "onStartCommand: internalStorageAccess not granted");
 
             //storage access not granted, do nothing
             ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.storageNotGranted));
+            showMap();
 
         } else {
 
@@ -175,16 +166,15 @@ public class FetchingService extends Service {
                             @Override
                             public void run() {
                                 Log.d(TAG, "run: handler running!");
-                                ToastHelper.toastShort(FetchingService.this, getResources().getString(R.string.noInternet));
+                                ToastHelper.toastShort(FetchingIntentService.this, getResources().getString(R.string.noInternet));
+                                showMap();
                             }
                         });
-
-                        stopSelf();
 
                     } else {
 
                         /* We start the fetching process
-                        * */
+                         * */
                         startNearbyPlacesProcess();
 
                     }
@@ -204,24 +194,6 @@ public class FetchingService extends Service {
             });
 
         }
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind: called!");
-        return null;
-    }
-
-
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: called!");
-        super.onDestroy();
-        disposable.dispose();
     }
 
     /** This method starts the process for fetching restaurants using
@@ -253,11 +225,10 @@ public class FetchingService extends Service {
                                         @Override
                                         public void run() {
                                             Log.d(TAG, "run: handler running!");
-                                            ToastHelper.toastShort(FetchingService.this, getResources().getString(R.string.serviceProblemServer));
+                                            ToastHelper.toastShort(FetchingIntentService.this, getResources().getString(R.string.serviceProblemServer));
+                                            showMap();
                                         }
                                     });
-
-                                    stopSelf();
 
                                 } else {
                                     Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
@@ -289,13 +260,11 @@ public class FetchingService extends Service {
                                     /* Fetching nearby places has ended,
                                     we start Text Search Process
                                     */
-
                                     Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED!");
                                     Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED! Restaurants.size() = " + listOfRestaurantsEntries.size());
 
                                     for (int i = 1; i < arrayOfTypes.length - 1; i++) {
                                         //-1 because we don't want to fetch "type OTHER" restaurants
-
                                         startTextSearchProcess(i);
 
                                     }
@@ -391,7 +360,6 @@ public class FetchingService extends Service {
                                     Log.i(TAG, "onNext: TEXT SEARCH PROCESS ENDED!");
 
                                     startPlaceIdProcess();
-
                                 }
 
                             }
@@ -420,7 +388,7 @@ public class FetchingService extends Service {
         Log.d(TAG, "startPlaceIdProcess: called!");
 
         /* We iterate thorough the list to start Place Id requests
-        * */
+         * */
         Log.i(TAG, "startPlaceIdProcess: PLACE ID PROCESS STARTED");
 
         for (int i = 0; i < listOfRestaurantsEntries.size(); i++) {
@@ -449,15 +417,15 @@ public class FetchingService extends Service {
                 if (!listOfRestaurantsEntries.get(i).getImageUrl().equalsIgnoreCase("")) {
 
                     /* If we have a valid photo reference, we start fetching photo process and
-                    * we will insert the restaurant in the database at the end of this process
-                    * */
+                     * we will insert the restaurant in the database at the end of this process
+                     * */
                     updateMapAndInternalStorageWithPhotos(listOfRestaurantsEntries.get(i));
                 }
             } else {
 
                 /* If we do not have a valid photo reference, we insert the restaurant
-                * directly in the database
-                * */
+                 * directly in the database
+                 * */
                 insertRestaurantEntryInDatabase(listOfRestaurantsEntries.get(i));
             }
         }
@@ -651,10 +619,7 @@ public class FetchingService extends Service {
             //We send a Broadcast that will update FragmentRestaurantMapView
             //Progress bar will be hidden and the ViewModel will be activated again
             //3 as an extra means "process has finished"
-            Intent intent = new Intent();
-            intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
-            intent.getIntExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, 3);
-            sendBroadcast(intent);
+            showMap();
         }
     }
 
@@ -700,12 +665,12 @@ public class FetchingService extends Service {
         imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR + File.separator;
 
         /* We delete the directory to delete all the information
-        * */
+         * */
         boolean isDeleted = internalStorage.deleteDirectory(imageDirPath);
         Log.i(TAG, "configuringInternalStorage: isDeleted = " + isDeleted);
 
         /* We create it again
-        * */
+         * */
         String newDirectory = imageDirPath;
         boolean isCreated = internalStorage.createDirectory(newDirectory);
         Log.d(TAG, "onClick: isCreated = " + isCreated);
@@ -721,5 +686,36 @@ public class FetchingService extends Service {
 
     }
 
-}
+    private void updateMapFragmentAccordingToProcessState (int value) {
+        Log.d(TAG, "updateMapFragmentAccordingToProcessState: called!");
 
+        Intent intent = new Intent();
+        intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
+        intent.putExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, value);
+        sendBroadcast(intent);
+    }
+
+    private void showMap () {
+        Log.d(TAG, "showMap: called!");
+        updateMapFragmentAccordingToProcessState(3);
+    }
+
+    private void hideMap() {
+        Log.d(TAG, "hideMap: called!");
+        updateMapFragmentAccordingToProcessState(2);
+    }
+
+
+    private void clearDatabase () {
+        Log.d(TAG, "clearDatabase: called!");
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: called!");
+                localDatabase.clearAllTables();
+            }
+        });
+    }
+
+
+}

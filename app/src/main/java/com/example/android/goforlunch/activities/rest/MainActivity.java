@@ -34,8 +34,8 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.network.service.FetchingIntentService;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.network.service.FetchingService;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
@@ -145,8 +145,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     private Storage storage;
     private String mainPath;
     private String imageDirPath;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -437,11 +435,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                     if (internetAvailable) {
 
-                        Intent intent = new Intent(MainActivity.this, FetchingService.class);
-                        intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
-                        intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
-                        intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
-                        startService(intent);
+                        startFetchingProcess();
 
                     } else {
                         //do nothing, there is no internet
@@ -989,18 +983,25 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
             Log.d(TAG, "onNavigationItemSelected: myPosition = " + myPosition.toString());
 
             ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainStartRequestProcess));
-
-            Intent intent = new Intent(MainActivity.this, FetchingService.class);
-            intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
-            intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
-            intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
-            startService(intent);
+            startIntentService();
 
         } else {
             ToastHelper.toastShort(MainActivity.this, getResources().getString(R.string.mainCurrentPositionNotAvailable));
         }
 
     }
+
+    private void startIntentService () {
+        Log.d(TAG, "startIntentService: called!");
+
+        Intent intent = new Intent(MainActivity.this, FetchingIntentService.class);
+        intent.putExtra(Repo.SentIntent.LATITUDE, myPosition.getLat());
+        intent.putExtra(Repo.SentIntent.LONGITUDE, myPosition.getLng());
+        intent.putExtra(Repo.SentIntent.ACCESS_INTERNAL_STORAGE_GRANTED, accessInternalStorageGranted);
+        startService(intent);
+
+    }
+
 
     /** Method that configures storage to persist images
      * to disk

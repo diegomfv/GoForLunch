@@ -105,14 +105,6 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
         Utils.showMainContent(progressBarContent, mainContent);
 
-        inputEmail.setText("diego.fajardo@hotmail.com");
-        inputPassword.setText("123456");
-
-        /* Configuring textInputEditTexts: hide keyboard
-         * */
-        //Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputEmail);
-        //Utils.configureTextInputEditTextWithHideKeyboard(AuthSignInEmailPasswordActivity.this, inputPassword);
-
         fab.setOnClickListener(fabOnClickOnClickListener);
         buttonSignIn.setOnClickListener(buttonSignInOnClickListener);
         tvForgotPassword.setOnClickListener(tvForgotPasswordOnClickListener);
