@@ -628,7 +628,7 @@ public class FetchingIntentService extends IntentService {
         counter.getAndDecrement();
         Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
         if (counter.get() < 20) {
-            //We send a Broadcast that will update FragmentRestaurantMapView
+            //We send a Broadcast that will update FragmentRestaurantMap
             //Progress bar will be hidden and the ViewModel will be activated again
             //3 as an extra means "process has finished"
             notifyMainActivityProcessEnded();

@@ -15,7 +15,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -74,7 +73,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -95,7 +93,7 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Fragment that displays the Google Map
  */
-public class FragmentRestaurantMapView extends Fragment implements java.util.Observer {
+public class FragmentRestaurantMap extends Fragment {
 
     /* Interface to communicate with Main Activity
      * */
@@ -105,15 +103,13 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static final String TAG = FragmentRestaurantMapView.class.getSimpleName();
+    private static final String TAG = FragmentRestaurantMap.class.getSimpleName();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //DataUpdateReceiver variables
     private DataUpdateReceiver receiver;
     private IntentFilter intentFilter;
-
-    private boolean allowUIUpdatesViaViewmodel;
 
     //ERROR that we are going to handle if the user doesn't have the correct version of the
     //Google Play Services
@@ -213,9 +209,9 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     /**
      * Method for instantiating the fragment
      */
-    public static FragmentRestaurantMapView newInstance() {
+    public static FragmentRestaurantMap newInstance() {
         Log.d(TAG, "newInstance: called!");
-        FragmentRestaurantMapView fragment = new FragmentRestaurantMapView();
+        FragmentRestaurantMap fragment = new FragmentRestaurantMap();
         return fragment;
     }
 
@@ -290,7 +286,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
                                     if (!Utils.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
                                         Log.i(TAG, "onDataChange: asking for permissions");
-                                        Utils.getPermissionsInFragment(FragmentRestaurantMapView.this);
+                                        Utils.getPermissionsInFragment(FragmentRestaurantMap.this);
 
                                     } else {
                                         accessInternalStorageGranted = true;
@@ -313,10 +309,6 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
             }
         }
 
-        //We allow UI updates via the viewmodel. This variable will become false
-        //when the service starts fetching restaurants
-        allowUIUpdatesViaViewmodel = true;
-
         /* Creation and subscription to model
         * */
         this.createModel();
@@ -325,20 +317,6 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         this.configureAutocompleteTextView(autocompleteTextView);
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart: called!");
-        this.connectBroadcastReceiver();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop: called!");
-        this.disconnectBroadcastReceiver();
     }
 
     @Override
@@ -372,43 +350,6 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         mCallback = null;
     }
 
-    /**
-     * disposeWhenDestroy() avoids memory leaks
-     */
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy: called!");
-        this.disconnectBroadcastReceiver();
-
-    }
-
-    // TODO: 09/09/2018 Has to be deleted!
-    @Override
-    public void update(Observable o, Object data) {
-        Log.d(TAG, "update: called!");
-
-        //2: fetching process has started
-        //3: fetching process has finished
-
-        if ((int) data == 2) {
-            Log.i(TAG, "update: received 2");
-
-            //block UI
-            //block UI updates via viewModel
-            allowUIUpdatesViaViewmodel = false;
-
-
-        } else {
-            Log.i(TAG, "update: received 3");
-
-            //show UI
-            //allow UI updates via viewModel
-            allowUIUpdatesViaViewmodel = true;
-
-        }
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /*******************************
@@ -432,32 +373,43 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
             public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
                 Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
 
-                if (allowUIUpdatesViaViewmodel) {
+                /* The viewModel callback can be called in two situations.
+                * 1st) The fragment is loaded. There is a subscription to the viewModel and the
+                * data is loaded (not a special case)
+                * 3nd) The fetching process in MainActivity started and it loaded the FragmentProgressBar.
+                * The fetching process started and, close to the end, the IntentService sent a Broadcast and
+                * MainActivity callback was triggered. MainActivity then loaded FragmentRestaurantMap BUT
+                * the fetching process is not finished yet! (special case) */
 
-                    if (restaurantEntries != null && restaurantEntries.size() != 0) {
-                        Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+                if (restaurantEntries != null
+                        && restaurantEntries.size() != 0) {
+                    /* If restaurant entries is != 0, we can proceed to load the map information
+                    * */
+
+                    if (listOfAllRestaurantsInDatabase != null &&
+                            listOfAllRestaurantsInDatabase.size() == 0) {
+                        /* If listOfAllRestaurantsInDatabase is not filled yet, we proceed
+                        * to update the map. If it is already filled, we don't do it to avoid
+                        * excessive use of resources (see 2nd case: we do not want the viewModel to load
+                        * all the pins in the map, then update the database, trigger the callback again, delete
+                        * the pins again and load them again).
+                        * */
 
                         /* We fill the list with the Restaurants in the database
                          * */
                         listOfAllRestaurantsInDatabase = restaurantEntries;
 
-                        /* We only update the map once.
-                         * We use 60 for the first time the pins in the map are loaded (using "start search").
-                         * After that, the map will be uploaded with all the restaurants in the database
-                         * each time the user comes back here.
-                         * */
                         if (listOfMarkers != null) {
-                            if (listOfMarkers.size() < 60) {
-                                /* We update the UI
-                                 * */
-                                updateMapWithPins();
-                            }
+                            updateMapWithPins();
                         }
 
                     } else {
-                        Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                        //do nothing, the list of restaurants is already filled
+
                     }
 
+                } else {
+                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
                 }
             }
         });
@@ -1058,29 +1010,5 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
             }
         };
-    }
-
-    private void connectBroadcastReceiver() {
-        Log.d(TAG, "connectBroadcastReceiver: called!");
-
-        receiver = new DataUpdateReceiver();
-        intentFilter = new IntentFilter(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
-        Utils.connectReceiver(getActivity(), receiver, intentFilter, this);
-
-    }
-
-    private void disconnectBroadcastReceiver() {
-        Log.d(TAG, "disconnectBroadcastReceiver: called!");
-
-        if (receiver != null) {
-            Utils.disconnectReceiver(
-                    getActivity(),
-                    receiver,
-                    this);
-        }
-
-        receiver = null;
-        intentFilter = null;
-
     }
 }

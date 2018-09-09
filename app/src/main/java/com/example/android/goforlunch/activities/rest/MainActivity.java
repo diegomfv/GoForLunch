@@ -25,7 +25,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amitshekhar.DebugDB;
 import com.bumptech.glide.Glide;
@@ -34,6 +33,7 @@ import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.fragments.FragmentProgressBar;
+import com.example.android.goforlunch.fragments.FragmentRestaurantList;
 import com.example.android.goforlunch.network.service.FetchingIntentService;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
@@ -43,8 +43,7 @@ import com.example.android.goforlunch.sync.AddRestaurantToGroupDailyJob;
 import com.example.android.goforlunch.sync.AlertJobCreator;
 import com.example.android.goforlunch.sync.NotificationDailyJob;
 import com.example.android.goforlunch.fragments.FragmentCoworkers;
-import com.example.android.goforlunch.fragments.FragmentRestaurantListView;
-import com.example.android.goforlunch.fragments.FragmentRestaurantMapView;
+import com.example.android.goforlunch.fragments.FragmentRestaurantMap;
 import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.constants.Repo;
 import com.facebook.login.LoginManager;
@@ -67,7 +66,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMapView.OnCurrentPositionObtainedListener {
+public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMap.OnCurrentPositionObtainedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -767,7 +766,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
+                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMap.newInstance())
                         .commit();
                 flagToSpecifyCurrentFragment = 0;
 
@@ -778,7 +777,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.main_fragment_container_id, FragmentRestaurantListView.newInstance())
+                        .replace(R.id.main_fragment_container_id, FragmentRestaurantList.newInstance())
                         .commit();
                 flagToSpecifyCurrentFragment = 1;
 
@@ -801,7 +800,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
+                        .replace(R.id.main_fragment_container_id, FragmentRestaurantMap.newInstance())
                         .commit();
                 flagToSpecifyCurrentFragment = 0;
 

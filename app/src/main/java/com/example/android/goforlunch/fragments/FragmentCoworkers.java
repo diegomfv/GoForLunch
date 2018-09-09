@@ -203,7 +203,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
             internetAvailable = false;
 
 
-        } else {
+        } else if ((int) internetAvailableUpdate == 1) {
             Log.d(TAG, "update: Internet available");
 
             internetAvailable = true;

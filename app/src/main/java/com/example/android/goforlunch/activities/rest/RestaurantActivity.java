@@ -261,7 +261,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                 snackbar.show();
             }
 
-        } else {
+        } else if ((int) internetAvailableUpdate == 1) {
             Log.d(TAG, "update: Internet available");
 
             internetAvailable = true;

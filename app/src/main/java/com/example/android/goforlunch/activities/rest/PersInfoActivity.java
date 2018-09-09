@@ -253,7 +253,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 Utils.showMainContent(progressBarContent, mainContent);
             }
 
-        } else {
+        } else if ((int) internetAvailableUpdate == 1) {
             Log.d(TAG, "update: Internet available");
 
             internetAvailable = true;

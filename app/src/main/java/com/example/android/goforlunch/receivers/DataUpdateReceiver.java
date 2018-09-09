@@ -22,7 +22,7 @@ public class DataUpdateReceiver extends BroadcastReceiver {
         if (intent != null && intent.getAction() != null) {
             if (intent.getAction().equals(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL)) {
 
-                //2: started; 3: finished
+                //Data 2 means the
                 ObservableObject.getInstance().update(2);
             }
         }

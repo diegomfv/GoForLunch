@@ -5,7 +5,6 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -37,7 +35,6 @@ import com.example.android.goforlunch.activities.rest.RestaurantActivity;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.viewmodel.MainViewModel;
-import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
@@ -80,9 +77,9 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Fragment that displays the list of restaurants in a recyclerView
  */
-public class FragmentRestaurantListView extends Fragment {
+public class FragmentRestaurantList extends Fragment {
 
-    private static final String TAG = FragmentRestaurantListView.class.getSimpleName();
+    private static final String TAG = FragmentRestaurantList.class.getSimpleName();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -159,8 +156,8 @@ public class FragmentRestaurantListView extends Fragment {
     /**
      * Method for instantiating the fragment
      */
-    public static FragmentRestaurantListView newInstance() {
-        FragmentRestaurantListView fragment = new FragmentRestaurantListView();
+    public static FragmentRestaurantList newInstance() {
+        FragmentRestaurantList fragment = new FragmentRestaurantList();
         return fragment;
     }
 

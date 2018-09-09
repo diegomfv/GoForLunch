@@ -177,7 +177,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                 snackbar.show();
             }
 
-        } else {
+        } else if ((int) internetAvailableUpdate == 1) {
             Log.d(TAG, "update: Internet available");
 
             internetAvailable = true;

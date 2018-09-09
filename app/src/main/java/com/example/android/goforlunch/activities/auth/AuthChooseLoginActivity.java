@@ -247,7 +247,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
                 snackbar.show();
             }
 
-        } else {
+        } else if ((int) internetAvailableUpdate == 1) {
             Log.d(TAG, "update: Internet available");
 
             internetAvailable = true;
