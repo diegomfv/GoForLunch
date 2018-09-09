@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amitshekhar.DebugDB;
 import com.bumptech.glide.Glide;
@@ -297,6 +298,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         } else if ((int) data == 2) {
             /* The fetching process has finished, we load map fragment and enable user interaction
             * */
+            ToastHelper.toastLong(this, getResources().getString(R.string.end_fetching_process));
             showMapFragment();
             enableUIInteraction();
         }
@@ -1061,7 +1063,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         @Override
         public void onClick(View v) {
             Log.d(TAG, "onClick: profilePictureListener Clicked");
-
             DebugDB.getAddressLog();
 
         }

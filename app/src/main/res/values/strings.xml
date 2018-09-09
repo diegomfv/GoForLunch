@@ -213,6 +213,7 @@
     <string name="locationNotGranted">Location Permission NOT granted</string>
     <string name="necessaryPermissionsNotGranted">Necessary permissions NOT granted</string>
     <string name="cantMakeMapRequests">You can\'t make map requests</string>
+    <string name="end_fetching_process">Fetching Process Finished</string>
 
 </resources>
 

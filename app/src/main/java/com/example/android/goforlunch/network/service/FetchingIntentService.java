@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
@@ -99,18 +98,13 @@ public class FetchingIntentService extends IntentService {
         super.onCreate();
         Log.d(TAG, "onCreate: called!");
 
-        //We send a Broadcast that will update FragmentRestaurantMapView
-        //Progress bar will be shown and the ViewModel will be temporarily blocked
-        //2 as an extra means "process has started" (see "updateMapFragmentAccordingToProcessState" method)
-        hideMap();
-
         localDatabase = AppDatabase.getInstance(getApplicationContext());
 
         /* We delete the database (could be done without app executors because we are in a
          * background thread */
-        clearDatabase();
+        this.clearDatabase();
 
-        configuringInternalStorage();
+        this.configureInternalStorage();
 
         listOfRestaurantsEntries = new ArrayList<>();
         listOfPlacesIdsOfRestaurants = new ArrayList<>();
@@ -119,8 +113,7 @@ public class FetchingIntentService extends IntentService {
          * */
         arrayOfTypes = Repo.RESTAURANT_TYPES;
 
-        /* We will use this to show a Toast in Map Fragment
-         * if there is no internet
+        /* We will use the Handler to communicate with Main Thread
          * */
         mHandler = new Handler();
 
@@ -155,14 +148,14 @@ public class FetchingIntentService extends IntentService {
 
             //position is incorrect, do nothing
             ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.mainCurrentPositionNotAvailable));
-            showMap();
+            notifyMainActivityProcessEnded();
 
         } else if (!accessInternalStorageGranted) {
             Log.d(TAG, "onStartCommand: internalStorageAccess not granted");
 
             //storage access not granted, do nothing
             ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.storageNotGranted));
-            showMap();
+            notifyMainActivityProcessEnded();
 
         } else {
 
@@ -181,7 +174,7 @@ public class FetchingIntentService extends IntentService {
                             public void run() {
                                 Log.d(TAG, "run: handler running!");
                                 ToastHelper.toastShort(FetchingIntentService.this, getResources().getString(R.string.noInternet));
-                                showMap();
+                                notifyMainActivityProcessEnded();
                             }
                         });
 
@@ -241,7 +234,7 @@ public class FetchingIntentService extends IntentService {
                                 public void run() {
                                     Log.d(TAG, "run: handler running!");
                                     ToastHelper.toastShort(FetchingIntentService.this, getResources().getString(R.string.serviceProblemServer));
-                                    showMap();
+                                    notifyMainActivityProcessEnded();
                                 }
                             });
 
@@ -638,7 +631,7 @@ public class FetchingIntentService extends IntentService {
             //We send a Broadcast that will update FragmentRestaurantMapView
             //Progress bar will be hidden and the ViewModel will be activated again
             //3 as an extra means "process has finished"
-            showMap();
+            notifyMainActivityProcessEnded();
         }
     }
 
@@ -678,8 +671,8 @@ public class FetchingIntentService extends IntentService {
      * This method destroys and recreates the internal directory where all the images are stored.
      * The objective of this process is to delete all old images to free memory space
      */
-    private void configuringInternalStorage() {
-        Log.d(TAG, "configuringInternalStorage: called!");
+    private void configureInternalStorage() {
+        Log.d(TAG, "configureInternalStorage: called!");
 
         internalStorage = new Storage(getApplicationContext());
         mainPath = internalStorage.getInternalFilesDirectory() + File.separator;
@@ -688,7 +681,7 @@ public class FetchingIntentService extends IntentService {
         /* We delete the directory to delete all the information
          * */
         boolean isDeleted = internalStorage.deleteDirectory(imageDirPath);
-        Log.i(TAG, "configuringInternalStorage: isDeleted = " + isDeleted);
+        Log.i(TAG, "configureInternalStorage: isDeleted = " + isDeleted);
 
         /* We create it again
          * */
@@ -708,25 +701,12 @@ public class FetchingIntentService extends IntentService {
 
     }
 
-    private void updateMapFragmentAccordingToProcessState(int value) {
-        Log.d(TAG, "updateMapFragmentAccordingToProcessState: called!");
-
+    private void notifyMainActivityProcessEnded () {
+        Log.d(TAG, "sendBroadcast: called!");
         Intent intent = new Intent();
         intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
-        intent.putExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, value);
         sendBroadcast(intent);
     }
-
-    private void showMap() {
-        Log.d(TAG, "showMap: called!");
-        updateMapFragmentAccordingToProcessState(3);
-    }
-
-    private void hideMap() {
-        Log.d(TAG, "hideMap: called!");
-        updateMapFragmentAccordingToProcessState(2);
-    }
-
 
     private void clearDatabase() {
         Log.d(TAG, "clearDatabase: called!");

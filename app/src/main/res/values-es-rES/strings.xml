@@ -212,6 +212,7 @@
     <string name="locationNotGranted">Permisos de localización no concedidos</string>
     <string name="necessaryPermissionsNotGranted">Permisos no concedidos</string>
     <string name="cantMakeMapRequests">No puedes utilizar el mapa</string>
+    <string name="end_fetching_process">Proceso de recogidad de datos finalizado</string>
 
 </resources>
 

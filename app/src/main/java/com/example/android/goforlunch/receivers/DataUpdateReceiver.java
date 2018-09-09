@@ -23,8 +23,7 @@ public class DataUpdateReceiver extends BroadcastReceiver {
             if (intent.getAction().equals(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL)) {
 
                 //2: started; 3: finished
-                int fetchingProcessStage = intent.getIntExtra(Repo.SentIntent.FETCHING_PROCESS_STAGE, 3);
-                ObservableObject.getInstance().update(fetchingProcessStage);
+                ObservableObject.getInstance().update(2);
             }
         }
     }
