@@ -167,6 +167,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     private boolean internetAvailable;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,7 +182,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
         glide = Glide.with(context);
 
-        ////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_restaurant);
         unbinder = ButterKnife.bind(this);
 
@@ -299,6 +300,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onBackPressed: called!");
         startActivity(new Intent(RestaurantActivity.this, MainActivity.class));
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /*****************
      * LISTENERS *****

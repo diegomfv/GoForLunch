@@ -42,6 +42,8 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
 
     private static final String TAG = RVAdapterList.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Context mContext;
     private List<RestaurantEntry> listOfRestaurants;
     private List<String> listOfRestaurantsByCoworkers;
@@ -53,6 +55,8 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
     private Disposable getImageFromInternalStorageDisposable;
 
     private int mShortAnimationDuration;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public RVAdapterList(
             Context context,
@@ -74,6 +78,8 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         Log.d(TAG, "RVAdapterList: " + listOfRestaurantsByCoworkers.toString());
 
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @NonNull
     @Override
@@ -107,102 +113,108 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
         return listOfRestaurants.size();
     }
 
-    /** Method that retrieves a user in FragmentCoworkers when clicked
-     * */
-    public RestaurantEntry getRestaurant (int position) {
+    /**
+     * Method that retrieves a user in FragmentCoworkers when clicked
+     */
+    public RestaurantEntry getRestaurant(int position) {
         return this.listOfRestaurants.get(position);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /* Take care!!!!!
-    * If "ViewHolder class is static", you cannot access listOfRestaurants
-    * */
+     * If "ViewHolder class is static", you cannot access listOfRestaurants
+     * */
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-       @BindView(R.id.list_cardview_id)
-       CardView cardView;
+        @BindView(R.id.list_cardview_id)
+        CardView cardView;
 
-       @BindView(R.id.cv_title_id)
-       TextView title;
+        @BindView(R.id.cv_title_id)
+        TextView title;
 
-       @BindView(R.id.cv_addressandtype_id)
-       TextView address;
+        @BindView(R.id.cv_addressandtype_id)
+        TextView address;
 
-       @BindView(R.id.cv_timetable_id)
-       TextView openUntil;
+        @BindView(R.id.cv_timetable_id)
+        TextView openUntil;
 
-       @BindView(R.id.cv_distance_id)
-       TextView distance;
+        @BindView(R.id.cv_distance_id)
+        TextView distance;
 
-       @BindView(R.id.cv_coworkersjoining_id)
-       TextView coworkersJoining;
+        @BindView(R.id.cv_coworkersjoining_id)
+        TextView coworkersJoining;
 
-       @BindView(R.id.cv_rating_id)
-       RatingBar ratingBar;
+        @BindView(R.id.cv_rating_id)
+        RatingBar ratingBar;
 
-       @BindView(R.id.cv_image_restaurant_id)
-       ImageView photo;
+        @BindView(R.id.cv_image_restaurant_id)
+        ImageView photo;
 
 
-       public ViewHolder(View itemView) {
-           super(itemView);
-           ButterKnife.bind(this, itemView);
-       }
+        public ViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
 
-       /** Method that updates the info displayed in an item of the recyclerView
-        * */
-       public void updateItem(int position) {
-           Log.d(TAG, "updateItem: called!");
-           title.setText(getTitle(position));
-           address.setText(getTypeAndAdress(position));
-           openUntil.setText(listOfRestaurants.get(position).getOpenUntil());
-           distance.setText(listOfRestaurants.get(position).getDistance());
-           coworkersJoining.setText(getCoworkersJoining(position));
-           ratingBar.setRating(getRating(position));
-           loadImage(position, photo);
+        /**
+         * Method that updates the info displayed in an item of the recyclerView
+         */
+        public void updateItem(int position) {
+            Log.d(TAG, "updateItem: called!");
+            title.setText(getTitle(position));
+            address.setText(getTypeAndAdress(position));
+            openUntil.setText(listOfRestaurants.get(position).getOpenUntil());
+            distance.setText(listOfRestaurants.get(position).getDistance());
+            coworkersJoining.setText(getCoworkersJoining(position));
+            ratingBar.setRating(getRating(position));
+            loadImage(position, photo);
 
-           if (listOfRestaurants.size() - 1 == position) {
-               addBelowMarginToLastItem();
-           }
+            if (listOfRestaurants.size() - 1 == position) {
+                addBelowMarginToLastItem();
+            }
 
-       }
+        }
 
-       /** Method that gets the title of the Restaurant
-        * */
-       private String getTitle (int position) {
+        /**
+         * Method that gets the title of the Restaurant
+         */
+        private String getTitle(int position) {
 
-           StringBuilder displayedName = new StringBuilder();
-           String tokens[] = listOfRestaurants.get(position).getName().split(" ");
+            StringBuilder displayedName = new StringBuilder();
+            String tokens[] = listOfRestaurants.get(position).getName().split(" ");
 
-           for (int i = 0; i < tokens.length; i++) {
-               if (displayedName.length() < 27) {
+            for (int i = 0; i < tokens.length; i++) {
+                if (displayedName.length() < 27) {
 
-                   /* 1 is the space between words*/
-                   if ((displayedName.length() + tokens[i].length()) + 1 < 27) {
-                       displayedName.append(" ").append(tokens[i]);
+                    /* 1 is the space between words*/
+                    if ((displayedName.length() + tokens[i].length()) + 1 < 27) {
+                        displayedName.append(" ").append(tokens[i]);
 
-                   } else {
-                       break;
-                   }
-               }
-           }
+                    } else {
+                        break;
+                    }
+                }
+            }
 
             return displayedName.toString().trim();
         }
 
-        /** Method that gets the type and address of the restaurant
+        /**
+         * Method that gets the type and address of the restaurant
          */
-        private String getTypeAndAdress (int position) {
+        private String getTypeAndAdress(int position) {
 
             return Utils.transformTypeAsIntToString(listOfRestaurants.get(position).getType())
                     + " - "
-                    +  listOfRestaurants.get(position).getAddress().substring(0, listOfRestaurants.get(position).getAddress().indexOf(","));
+                    + listOfRestaurants.get(position).getAddress().substring(0, listOfRestaurants.get(position).getAddress().indexOf(","));
 
         }
 
-        /** Method that gets the rating of the restaurant
-         * */
-        private Float getRating (int position) {
+        /**
+         * Method that gets the rating of the restaurant
+         */
+        private Float getRating(int position) {
 
             if (listOfRestaurants.get(position).getRating() != null
                     && !listOfRestaurants.get(position).getRating().equals(Repo.NOT_AVAILABLE_FOR_STRINGS)) {
@@ -213,11 +225,12 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
             }
         }
 
-        /** Method that tries to load an image using the storage.
+        /**
+         * Method that tries to load an image using the storage.
          * If there is no file, it tries to load
          * the image with the url
-         * */
-        private void loadImage (int position, ImageView imageView) {
+         */
+        private void loadImage(int position, ImageView imageView) {
             Log.d(TAG, "loadImage: called!");
 
             //if file exists in the directory -> load with storage
@@ -234,11 +247,12 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
             }
         }
 
-        /** Method that tries to load an image with a url.
+        /**
+         * Method that tries to load an image with a url.
          * If it is null or equal to "", it loads
          * an standard picture
-         * */
-        private void loadImageWithUrl (String imageUrl, ImageView imageView) {
+         */
+        private void loadImageWithUrl(String imageUrl, ImageView imageView) {
             Log.d(TAG, "loadImageWithUrl: called!");
 
             if (imageUrl == null || imageUrl.equals("")) {
@@ -251,17 +265,19 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
             }
         }
 
-        /** Used to read an image from the internal storage and convert it to bitmap so that
+        /**
+         * Used to read an image from the internal storage and convert it to bitmap so that
          * it the image can be stored in a RestaurantEntry and be displayed later using glide
          * in the recyclerView
-         * */
-        private Observable<byte[]> getObservableImageFromInternalStorage (String filePath) {
+         */
+        private Observable<byte[]> getObservableImageFromInternalStorage(String filePath) {
             return Observable.just(storage.readFile(filePath));
         }
 
-        /** Loads an image using glide. The observable emits the image in a background thread
+        /**
+         * Loads an image using glide. The observable emits the image in a background thread
          * and the image is loaded using glide in the main thread
-         * */
+         */
         private void getAndDisplayImageFromInternalStorage(String placeId, final ImageView imageView) {
             Log.d(TAG, "getAndDisplayImageFromInternalStorage: called!");
 
@@ -273,7 +289,7 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
                         public void onNext(byte[] bytes) {
                             Log.d(TAG, "onNext: loading image from storage!");
 
-                            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
+                            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                             glide.load(bm).into(imageView);
 
                         }
@@ -292,9 +308,10 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
                     });
         }
 
-        /** Method that retrieves the coworkers joining a restaurant for lunch
-         * */
-        private String getCoworkersJoining (int position) {
+        /**
+         * Method that retrieves the coworkers joining a restaurant for lunch
+         */
+        private String getCoworkersJoining(int position) {
             Log.d(TAG, "getCoworkersJoining: called!");
 
             if (listOfRestaurantsByCoworkers != null) {
@@ -306,9 +323,10 @@ public class RVAdapterList extends RecyclerView.Adapter<RVAdapterList.ViewHolder
             }
         }
 
-        /** Method that adds below margin to the last cardView
-         * */
-        private void addBelowMarginToLastItem () {
+        /**
+         * Method that adds below margin to the last cardView
+         */
+        private void addBelowMarginToLastItem() {
             Log.d(TAG, "addBelowMarginToLastItem: called!");
 
             CardView.LayoutParams params = new CardView.LayoutParams(

@@ -183,12 +183,12 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         /* We set the content view
-        * */
+         * */
         setContentView(R.layout.activity_pers_info);
         unbinder = ButterKnife.bind(this);
 
         /* We set the listeners
-        * */
+         * */
         fab.setOnClickListener(fabOnClickListener);
         buttonSaveChanges.setOnClickListener(buttonSaveChangesOnClickListener);
         ivUserImage.setOnClickListener(ivOnClickListener);
@@ -350,14 +350,15 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
-                startActivityForResult(intent,0);
+                startActivityForResult(intent, 0);
 
             }
         }
     };
 
-    /** Value Event Listener: gets all user's info from Firebase and fills all the widgets
-     *  */
+    /**
+     * Value Event Listener: gets all user's info from Firebase and fills all the widgets
+     */
     private ValueEventListener valueEventListenerGetInfoAndFillWidgets = new ValueEventListener() {
 
         @Override
@@ -384,10 +385,10 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 glide.load(userProfilePictureUri).into(ivUserImage);
             }
 
-            Utils.showMainContent (progressBarContent, mainContent);
+            Utils.showMainContent(progressBarContent, mainContent);
 
             /* We remove the listener (probably not needed because it's a SingleValueEvent Listener)
-            * */
+             * */
             dbRefUsers.removeEventListener(this);
 
         }
@@ -403,10 +404,11 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method that connects a broadcastReceiver to the activity.
+    /**
+     * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiver () {
+     */
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -415,9 +417,10 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the activity.
-     * */
-    private void disconnectBroadcastReceiver () {
+    /**
+     * Method that disconnects the broadcastReceiver from the activity.
+     */
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
@@ -437,9 +440,10 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
      * METHODS *******
      * ***************/
 
-    /** Method that checks if we have permission to read external storage
-     * **/
-    public boolean checkPermissionREAD_EXTERNAL_STORAGE (
+    /**
+     * Method that checks if we have permission to read external storage
+     **/
+    public boolean checkPermissionREAD_EXTERNAL_STORAGE(
             final Context context) {
         Log.d(TAG, "checkPermissionREAD_EXTERNAL_STORAGE: called!");
 
@@ -457,7 +461,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                     ActivityCompat
                             .requestPermissions(
                                     (Activity) context,
-                                    new String[] { Manifest.permission.READ_EXTERNAL_STORAGE },
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                                     MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
                 }
                 return false;
@@ -503,8 +507,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 Log.d(TAG, "onActivityResult: data.getData() = " + data.getData());
 
                 /* We get the image data and update inputStreamSelectedImage variable which will be
-                * used later if the user decides to save this image in his/her profile
-                * */
+                 * used later if the user decides to save this image in his/her profile
+                 * */
                 final Uri imageUri = data.getData();
                 inputStreamSelectedImage = getContentResolver().openInputStream(imageUri);
 
@@ -532,9 +536,10 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
      * DIALOGS *******
      * ***************/
 
-    /** Method that creates an alert dialog that
+    /**
+     * Method that creates an alert dialog that
      * can be used save the personal info changes in the data
-     * */
+     */
     private void alertDialogChangeData() {
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(PersInfoActivity.this);
@@ -546,7 +551,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                         Log.d(TAG, "onClick: yes button clicked!");
 
                         /* If the snackbar is not visible, it means internet is available
-                        * */
+                         * */
                         if (internetAvailable) {
 
                             Utils.hideMainContent(progressBarContent, mainContent);
@@ -619,9 +624,10 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         dialog.show();
     }
 
-    /** Method used to display
+    /**
+     * Method used to display
      * a dialog for permissions request
-     * */
+     */
     public void showRequestPermissionsDialog(final String msg, final Context context,
                                              final String permission) {
         Log.d(TAG, "showRequestPermissionsDialog: called!");
@@ -634,7 +640,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         ActivityCompat.requestPermissions((Activity) context,
-                                new String[] { permission },
+                                new String[]{permission},
                                 MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
                     }
                 });
@@ -642,10 +648,11 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         alert.show();
     }
 
-    /** Method for saving images
+    /**
+     * Method for saving images
      * in Firebase Storage
-     * */
-    private void startStorageProcessWithByteArray (ImageView imageView) {
+     */
+    private void startStorageProcessWithByteArray(ImageView imageView) {
         Log.d(TAG, "startStorageProcessWithByteArray: called!");
 
         imageView.setDrawingCacheEnabled(true);
@@ -677,7 +684,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 Log.d(TAG, "onSuccess: file uploaded!");
 
                 /* This toast does not appear in "AuthEnterNameActivity"!
-                * */
+                 * */
                 ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
 
                 startActivity(new Intent(PersInfoActivity.this, MainActivity.class));

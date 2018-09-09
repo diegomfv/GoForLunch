@@ -37,6 +37,8 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
     private static final String TAG = "RVAdapterRestaurant";
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Context mContext;
 
     private List<User> listOfCoworkers;
@@ -52,6 +54,8 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
     //Glide
     private RequestManager glide;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     public RVAdapterRestaurant(Context context, List<User> listOfCoworkers) {
         this.mContext = context;
         this.listOfCoworkers = listOfCoworkers;
@@ -66,6 +70,8 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
                 android.R.integer.config_shortAnimTime);
 
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @NonNull
     @Override
@@ -96,13 +102,14 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
     @Override
     public int getItemCount() {
 
-        if (listOfCoworkers.size() == 0){
+        if (listOfCoworkers.size() == 0) {
             return 1;
         } else {
             return listOfCoworkers.size();
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -121,8 +128,9 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
         }
 
-        /** Method that updates the info displayed in an item of the recyclerView
-         * */
+        /**
+         * Method that updates the info displayed in an item of the recyclerView
+         */
         private void updateItem(int position) {
             Log.d(TAG, "updateItem: called!");
 
@@ -140,11 +148,10 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
         }
 
-        //////////////////////
-
-        /** Method to fill the textView
-         * */
-        private void setInfo (int position) {
+        /**
+         * Method to fill the textView
+         */
+        private void setInfo(int position) {
             Log.d(TAG, "setText: called!");
 
             if (listOfCoworkers.size() == 0) {
@@ -160,9 +167,10 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
         }
 
-        /** Method that loads the user image into the imageView
-         * */
-        private void getUserImage (int position) {
+        /**
+         * Method that loads the user image into the imageView
+         */
+        private void getUserImage(int position) {
             Log.d(TAG, "getUserImage: called!");
 
             stRefUserImage = stRefImages.child(listOfCoworkers.get(position).getEmail()).child("image");
@@ -192,9 +200,10 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
             });
         }
 
-        /** Method that adds below margin to the last cardView
-         * */
-        private void addBelowMarginToLastItem () {
+        /**
+         * Method that adds below margin to the last cardView
+         */
+        private void addBelowMarginToLastItem() {
             Log.d(TAG, "addBelowMarginToLastItem: called!");
 
             CardView.LayoutParams params = new CardView.LayoutParams(

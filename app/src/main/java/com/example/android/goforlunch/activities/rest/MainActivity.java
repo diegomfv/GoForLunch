@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
 
         /* When we start main Activity, we always load map fragment
-        * */
+         * */
         Log.i(TAG, "onCreate: flagToSpecifyCurrentFragment = " + flagToSpecifyCurrentFragment);
         loadFragment();
 
@@ -256,8 +256,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     }
 
-    /** Callback: listening to broadcast receiver
-     * */
+    /**
+     * Callback: listening to broadcast receiver
+     */
     @Override
     public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
@@ -311,8 +312,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     }
 
-    /** Callback: gets the current position obtained in Map Fragment
-     * */
+    /**
+     * Callback: gets the current position obtained in Map Fragment
+     */
     @Override
     public void onCurrentPositionObtained(LatLngForRetrofit myPosition, boolean locationPermission, boolean storageAccessPermission) {
         Log.d(TAG, "onCurrentPositionObtained: called!");
@@ -327,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.d(TAG, "onRequestPermissionsResult: called!");
-        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
 
@@ -336,9 +338,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 if (grantResults.length > 0) {
 
                     /* We initialize and assign 0 to a counter to see if any permission is not
-                    * granted (value = -1). If counter is higher than 0, then not all permissions
-                    * are granted and we don't proceed with the fetching process
-                    * */
+                     * granted (value = -1). If counter is higher than 0, then not all permissions
+                     * are granted and we don't proceed with the fetching process
+                     * */
                     int counter = 0;
 
                     for (int i = 0; i < grantResults.length; i++) {
@@ -349,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                             if (grantResults[0] == 0) {
                                 /* This grantResults ([0]) has to do with WRITE_EXTERNAL_STORAGE permission.
-                                * == 0 means this permission is granted */
+                                 * == 0 means this permission is granted */
                                 Utils.createImageDirectory(storage, imageDirPath);
                             }
                         }
@@ -376,8 +378,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /** Method used to update the NavDrawer info
-     * */
+    /**
+     * Method used to update the NavDrawer info
+     */
     private boolean updateNavDrawerViews() {
         Log.d(TAG, "updateNavDrawerViews: called!");
 
@@ -413,8 +416,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         return true;
     }
 
-    /** Method used to remind the user to choose a group
-     * */
+    /**
+     * Method used to remind the user to choose a group
+     */
     private boolean chooseGroupReminder() {
         Log.d(TAG, "chooseGroupReminder: called!");
 
@@ -424,8 +428,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         return true;
     }
 
-    /** Method used in fragments to get the DrawerLayout
-     * */
+    /**
+     * Method used in fragments to get the DrawerLayout
+     */
     public DrawerLayout getMDrawerLayout() {
         return mainDrawerLayout;
     }
@@ -435,8 +440,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * LISTENERS *****
      * **************/
 
-    /** Listener to get all the user's information from the database
-     * */
+    /**
+     * Listener to get all the user's information from the database
+     */
     private ValueEventListener valueEventListenerGetUserInfo = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -448,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 if (Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
                     /* We get the user information
-                    * */
+                     * */
                     userFirstName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_FIRST_NAME).getValue()).toString();
                     userLastName = Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_LAST_NAME).getValue()).toString();
                     userKey = item.getKey();
@@ -464,7 +470,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     fireDbRefUserNotif.setValue(sharedPref.getBoolean(getResources().getString(R.string.pref_key_notifications), false));
 
                     /* We check that alarms are running
-                    * */
+                     * */
                     checkAddRestaurantsAt4pmDailyJob(sharedPref);
                     checkNotifications(sharedPref);
 
@@ -482,9 +488,10 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     };
 
-    /** Listener for when the user clicks
+    /**
+     * Listener for when the user clicks
      * the Lunch button in nav drawer
-     * */
+     */
     private ValueEventListener valueEventListenerNavLunch = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -515,8 +522,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     };
 
-    /** Listener for bottom navigation view
-     * */
+    /**
+     * Listener for bottom navigation view
+     */
     private BottomNavigationView.OnNavigationItemSelectedListener botNavListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -575,14 +583,15 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 }
             };
 
-    /** Listener for the navigation drawer
-     * */
+    /**
+     * Listener for the navigation drawer
+     */
     private NavigationView.OnNavigationItemSelectedListener navViewListener =
             new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-                    switch (item.getItemId()){
+                    switch (item.getItemId()) {
 
                         case R.id.nav_lunch: {
                             Log.d(TAG, "onNavigationItemSelected: lunch pressed");
@@ -633,7 +642,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                             Log.d(TAG, "onNavigationItemSelected: settings pressed");
 
                             /* Navigating to Settings
-                            * */
+                             * */
                             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
 
                             return true;
@@ -643,7 +652,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                             Log.d(TAG, "onNavigationItemSelected: log out pressed");
 
                             /* We display a dialog for logging out
-                            * */
+                             * */
                             alertDialogLogOut();
 
                             return true;
@@ -658,11 +667,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
             };
 
 
-    /** Listener that prints in the
+    /**
+     * Listener that prints in the
      * logcat a link to the database
-     * */
+     */
     /* This listener can be deleted
-    * */
+     * */
     private View.OnClickListener profilePictureListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -673,11 +683,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     };
 
-    /** Method for showing the main content.
+    /**
+     * Method for showing the main content.
      * We cannot use Utils because
      * the mainContent Layout is not a Linear Layout
-     * */
-    private void showMainContent (LinearLayout progressBarContent, DrawerLayout mainContent) {
+     */
+    private void showMainContent(LinearLayout progressBarContent, DrawerLayout mainContent) {
         Log.d(TAG, "showMainContent: called!");
 
         progressBarContent.setVisibility(View.GONE);
@@ -685,12 +696,13 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     }
 
 
-    /** Method that loads the fragment that is selected (the first time,
+    /**
+     * Method that loads the fragment that is selected (the first time,
      * the fragment will be the map fragment).
      * This method is necessary
      * for configuration changes.
-     * */
-    private void loadFragment () {
+     */
+    private void loadFragment() {
         Log.i(TAG, "loadFragment: called!");
 
         switch (flagToSpecifyCurrentFragment) {
@@ -748,10 +760,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     }
 
-    /** Method that creates an alert dialog that
+    /**
+     * Method that creates an alert dialog that
      * can be used to log out
-     * */
-    private void alertDialogLogOut () {
+     */
+    private void alertDialogLogOut() {
         Log.d(TAG, "alertDialogLogOut: called!");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -774,7 +787,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                             LoginManager.getInstance().logOut();
 
                             Intent intent = new Intent(MainActivity.this, AuthChooseLoginActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                             finish();
 
@@ -797,10 +810,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method that connects a broadcastReceiver to the activity.
+    /**
+     * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiver () {
+     */
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -809,9 +823,10 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the activity.
-     * */
-    private void disconnectBroadcastReceiver () {
+    /**
+     * Method that disconnects the broadcastReceiver from the activity.
+     */
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
@@ -831,10 +846,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * INTERNAL STORAGE
      *****************************************************/
 
-    /** Method that launches a dialog asking for storage permissions if they have not been
+    /**
+     * Method that launches a dialog asking for storage permissions if they have not been
      * granted before
-     * */
-    private void getInternalStorageAccessPermission () {
+     */
+    private void getInternalStorageAccessPermission() {
         Log.d(TAG, "getInternalStorageAccessPermission: called!");
 
         if (ContextCompat.checkSelfPermission(MainActivity.this.getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -856,7 +872,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     /**
      * This method creates a new job to add restaurants to the database every day at 4pm if it
      * has not been created yet
-     * */
+     */
     private void checkAddRestaurantsAt4pmDailyJob(SharedPreferences sharedPreferences) {
         Log.d(TAG, "checkAddRestaurantsAt4pmDailyJob: called!");
 
@@ -867,7 +883,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
          * and from that moment on it will do nothing because the alarm will already be set and this
          * alarm will be "true" in SharedPreferences
          * */
-        if (addRestaurantAlarmIsTrue){
+        if (addRestaurantAlarmIsTrue) {
             Log.d(TAG, "checkAddRestaurantsAt4pmDailyJob: do nothing!");
             //do nothing since alarm is currently running
 
@@ -892,18 +908,18 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     /**
      * This method creates a new job that will create notifications to tell
      * the user where he/she is going to have lunch
-     * **/
-    private void checkNotifications (SharedPreferences sharedPreferences) {
+     **/
+    private void checkNotifications(SharedPreferences sharedPreferences) {
         Log.d(TAG, "checkNotifications: called!");
 
         /* We have to do the conversion to boolean this time because it comes from
          * the preference fragment
-          * */
+         * */
         boolean notificationsAlarmIsTrue = sharedPreferences.getBoolean(getResources().getString(R.string.pref_key_notifications), false);
 
         Log.i(TAG, "checkNotifications: notificationsAlarmIsTrue = " + notificationsAlarmIsTrue);
 
-            if (notificationsAlarmIsTrue) {
+        if (notificationsAlarmIsTrue) {
             Log.d(TAG, "checkNotifications: notificationsAlarmIsTrue = true");
 
             /* The notifications are on.
@@ -937,16 +953,18 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     }
 
-    /** Method used to cancel notifications
-     * */
+    /**
+     * Method used to cancel notifications
+     */
     private void cancelJob(int JobId) {
         Log.d(TAG, "cancelJob: called!");
         JobManager.instance().cancel(JobId);
     }
 
-    /** Method to start fetching process from MainActivity when button is clicked
-     * */
-    private void startFetchingProcess () {
+    /**
+     * Method to start fetching process from MainActivity when button is clicked
+     */
+    private void startFetchingProcess() {
         Log.i(TAG, "startFetchingProcess: called!");
 
         if (myPosition != null && myPosition.getLat() != 0.0 && myPosition.getLng() != 0.0) {
@@ -961,7 +979,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     }
 
-    private void startIntentService () {
+    private void startIntentService() {
         Log.d(TAG, "startIntentService: called!");
 
         Intent intent = new Intent(MainActivity.this, FetchingIntentService.class);
@@ -973,10 +991,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     }
 
 
-    /** Method that configures storage to persist images
+    /**
+     * Method that configures storage to persist images
      * to disk
-     * */
-    private void configureStorage () {
+     */
+    private void configureStorage() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         storage = new Storage(MainActivity.this);

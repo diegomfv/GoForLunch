@@ -37,6 +37,8 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
 
     private static final String TAG = RVAdapterCoworkers.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Context mContext;
 
     private List<User> listOfCoworkers;
@@ -52,6 +54,8 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
     //Glide
     private RequestManager glide;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     public RVAdapterCoworkers(Context context, List<User> listOfCoworkers) {
         this.mContext = context;
         this.listOfCoworkers = listOfCoworkers;
@@ -66,6 +70,8 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
                 android.R.integer.config_shortAnimTime);
 
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @NonNull
     @Override
@@ -106,11 +112,14 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
     }
 
 
-    /** Method that retrieves a user in FragmentCoworkers when clicked
-     * */
-    public User getUser (int position) {
+    /**
+     * Method that retrieves a user in FragmentCoworkers when clicked
+     */
+    public User getUser(int position) {
         return this.listOfCoworkers.get(position);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -129,8 +138,9 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
 
         }
 
-        /** Method that updates the info displayed in an item of the recyclerView
-         * */
+        /**
+         * Method that updates the info displayed in an item of the recyclerView
+         */
         private void updateItem(int position) {
             Log.d(TAG, "updateItem: called!");
 
@@ -144,10 +154,9 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
 
         }
 
-        //////////////////////
-
-        /** Method to fill the textView
-         * */
+        /**
+         * Method to fill the textView
+         */
         private String setInfo(int position) {
             Log.d(TAG, "setInfo: called!");
 
@@ -172,10 +181,11 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             }
         }
 
-        /** Method that changes the color of the textView depending on
+        /**
+         * Method that changes the color of the textView depending on
          * if the user has chosen a restaurant or not
-         * */
-        private int setColor (int position) {
+         */
+        private int setColor(int position) {
             Log.d(TAG, "setColor: called!");
 
             if (listOfCoworkers.get(position).getRestaurantName() == null
@@ -188,9 +198,10 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             }
         }
 
-        /** Method that loads the user image into the imageView
-         * */
-        private void getUserImage (int position) {
+        /**
+         * Method that loads the user image into the imageView
+         */
+        private void getUserImage(int position) {
             Log.d(TAG, "getUserImage: called!");
 
             stRefUserImage = stRefImages.child(listOfCoworkers.get(position).getEmail()).child("image");
@@ -220,9 +231,10 @@ public class RVAdapterCoworkers extends RecyclerView.Adapter<RVAdapterCoworkers.
             });
         }
 
-        /** Method that adds below margin to the last cardView
-         * */
-        private void addBelowMarginToLastItem () {
+        /**
+         * Method that adds below margin to the last cardView
+         */
+        private void addBelowMarginToLastItem() {
             Log.d(TAG, "addBelowMarginToLastItem: called!");
 
             CardView.LayoutParams params = new CardView.LayoutParams(

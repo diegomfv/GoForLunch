@@ -17,9 +17,13 @@ public class SettingsActivity extends AppCompatActivity {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     private Toolbar toolbar;
     private ActionBar actionBar;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
