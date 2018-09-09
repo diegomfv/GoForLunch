@@ -1,67 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_drawer_layout_id"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/progress_bar_content"/>
-
-    <android.support.v4.widget.DrawerLayout
-        android:id="@+id/main_drawer_layout_id"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        android:visibility="gone">
+        android:orientation="vertical">
 
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
+        <FrameLayout
+            android:id="@+id/choose_status_bar_id"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.example.android.goforlunch.activities.rest.MainActivity">
+            android:layout_height="25dp"
+            android:background="@color/colorPrimaryDark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <ProgressBar
-                android:id="@+id/main_progress_bar_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:visibility="gone"
-                />
+        <FrameLayout
+            android:id="@+id/main_fragment_container_id"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_above="@id/main_bottom_navigation_id"
+            android:layout_alignParentTop="true"
+            app:layout_constraintBottom_toTopOf="@+id/main_bottom_navigation_id"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/choose_status_bar_id" />
 
-            <FrameLayout
-                android:id="@+id/main_fragment_container_id"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@id/main_bottom_navigation_id"
-                android:layout_alignParentTop="true">
-            </FrameLayout>
+        <!-- By default, the background color of the Navigation View is transparent -->
+        <android.support.design.widget.BottomNavigationView
+            android:id="@+id/main_bottom_navigation_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="?android:attr/windowBackground"
+            android:elevation="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:menu="@menu/navigation_bottom_menu" />
 
-            <!-- By default, the background color of the Navigation View is transparent -->
-            <android.support.design.widget.BottomNavigationView
-                android:id="@+id/main_bottom_navigation_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:elevation="8dp"
-                app:menu="@menu/navigation_bottom_menu"
-                android:background="?android:attr/windowBackground"
-                />
+    </android.support.constraint.ConstraintLayout>
 
-        </RelativeLayout>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/main_nav_view_id"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/drawer_view_menu"
+        app:headerLayout="@layout/nav_drawer_header"
+        app:itemTextColor="@android:color/black"
+        app:itemIconTint="@color/colorPrimary"/>
 
-        <android.support.design.widget.NavigationView
-            android:id="@+id/main_nav_view_id"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:fitsSystemWindows="true"
-            app:menu="@menu/drawer_view_menu"
-            app:headerLayout="@layout/nav_drawer_header"
-            app:itemTextColor="@android:color/black"
-            app:itemIconTint="@color/colorPrimary"/>
+</android.support.v4.widget.DrawerLayout>
 
-    </android.support.v4.widget.DrawerLayout>
-
-</FrameLayout>

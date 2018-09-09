@@ -24,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.amitshekhar.DebugDB;
@@ -33,7 +32,7 @@ import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
 import com.example.android.goforlunch.data.AppDatabase;
-import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.fragments.FragmentProgressBar;
 import com.example.android.goforlunch.network.service.FetchingIntentService;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
@@ -58,7 +57,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.snatik.storage.Storage;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Observable;
@@ -67,9 +65,6 @@ import java.util.Observer;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import io.reactivex.Maybe;
-import io.reactivex.MaybeObserver;
-import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMapView.OnCurrentPositionObtainedListener {
 
@@ -82,16 +77,13 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     DrawerLayout mainDrawerLayout;
 
     @BindView(R.id.main_nav_view_id)
-    NavigationView mNavigationView;
+    NavigationView navigationView;
 
     @BindView(R.id.main_bottom_navigation_id)
     BottomNavigationView bottomNavigationView;
 
     @BindView(R.id.main_fragment_container_id)
     FrameLayout container;
-
-    @BindView(R.id.progressBar_content)
-    LinearLayout progressBarContent;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -180,29 +172,30 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         localDatabase = AppDatabase.getInstance(MainActivity.this);
 
+        flagToSpecifyCurrentFragment = 0;
+
         this.configureStorage();
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
 
-        View headerView = mNavigationView.getHeaderView(0);
-        navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
-        navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
-        navUserProfilePicture = (ImageView) headerView.findViewById(R.id.nav_drawer_image_id);
+        /* While everything is loaded, we show a progress bar and disable user interaction
+        * */
+        this.showProgressBarFragment();
+        this.disableUIInteraction();
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
-        mNavigationView.setNavigationItemSelectedListener(navViewListener);
-        navUserProfilePicture.setOnClickListener(profilePictureListener);
+        this.configureNavDrawer();
+        this.configureBottomNavigationView();
 
         if (savedInstanceState != null) {
             flagToSpecifyCurrentFragment = savedInstanceState.getInt(Repo.FLAG_SPECIFY_FRAGMENT, 0);
         }
 
-        /* When we start main Activity, we always load map fragment
-         * */
-        Log.i(TAG, "onCreate: flagToSpecifyCurrentFragment = " + flagToSpecifyCurrentFragment);
-        loadFragment();
+        /* We show the fragment and enable user interaction
+        * */
+        this.loadFragment();
+        this.enableUIInteraction();
 
     }
 
@@ -210,7 +203,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: called!");
-
         this.connectBroadcastReceiver();
 
     }
@@ -219,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-
         this.disconnectBroadcastReceiver();
 
     }
@@ -228,12 +219,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
-
         this.disconnectBroadcastReceiver();
-
         this.bottomNavigationView.setOnNavigationItemSelectedListener(null);
-        this.mNavigationView.setNavigationItemSelectedListener(null);
-
+        this.navigationView.setNavigationItemSelectedListener(null);
         this.unbinder.unbind();
     }
 
@@ -253,17 +241,19 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         Log.d(TAG, "onSaveInstanceState: called!");
         outState.putInt(Repo.FLAG_SPECIFY_FRAGMENT, flagToSpecifyCurrentFragment);
         super.onSaveInstanceState(outState);
-
     }
 
     /**
      * Callback: listening to broadcast receiver
-     */
+     * 0: No internet
+     * 1: Internet available
+     * 2: Map can be loaded (restaurant's fetching process finished or failed)
+     * */
     @Override
-    public void update(Observable o, Object internetAvailableUpdate) {
+    public void update(Observable o, Object data) {
         Log.d(TAG, "update: called!");
 
-        if ((int) internetAvailableUpdate == 0) {
+        if ((int) data == 0) {
             Log.d(TAG, "update: Internet Not Available");
 
             internetAvailable = false;
@@ -278,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 snackbar.show();
             }
 
-        } else if ((int) internetAvailableUpdate == 1) {
+        } else if ((int) data == 1) {
             Log.d(TAG, "update: Internet available");
 
             internetAvailable = true;
@@ -304,11 +294,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 }
             }
 
-        } else {
-            //do nothing...
-            //we add this in MainActivity because this update() method is
-            //also triggered when is triggered in FragmentRestaurantMapView
-
+        } else if ((int) data == 2) {
+            /* The fetching process has finished, we load map fragment and enable user interaction
+            * */
+            showMapFragment();
+            enableUIInteraction();
         }
     }
 
@@ -377,6 +367,30 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /*******************************
+     * CONFIGURATION ***************
+     ******************************/
+
+    /** Method to configure nav drawer
+     * */
+    private void configureNavDrawer () {
+        Log.d(TAG, "configureNavDrawer: called!");
+        View headerView = navigationView.getHeaderView(0);
+        navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
+        navUserEmail = (TextView) headerView.findViewById(R.id.nav_drawer_email_id);
+        navUserProfilePicture = (ImageView) headerView.findViewById(R.id.nav_drawer_image_id);
+
+    }
+
+    /** Method to configure bottom navigation view
+     * */
+    private void configureBottomNavigationView () {
+        Log.d(TAG, "configureBottomNavigationView: called!");
+        bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
+        navigationView.setNavigationItemSelectedListener(navViewListener);
+        navUserProfilePicture.setOnClickListener(profilePictureListener);
+    }
 
     /**
      * Method used to update the NavDrawer info
@@ -541,8 +555,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentRestaurantMapView.newInstance();
                                 flagToSpecifyCurrentFragment = 0;
+                                loadFragment();
 
                             }
                             break;
@@ -553,8 +567,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentRestaurantListView.newInstance();
                                 flagToSpecifyCurrentFragment = 1;
+                                loadFragment();
 
                             }
                             break;
@@ -564,17 +578,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                                 return true;
 
                             } else {
-                                selectedFragment = FragmentCoworkers.newInstance();
                                 flagToSpecifyCurrentFragment = 2;
+                                loadFragment();
 
                             }
                             break;
                     }
-
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.main_fragment_container_id, selectedFragment)
-                            .commit();
 
                     //true means that we want to select the clicked item
                     //if we choose false, the fragment will be shown but the item
@@ -632,6 +641,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                                 Utils.getPermissionsInActivity(MainActivity.this);
 
                             } else {
+                                showProgressBarFragment();
+                                disableUIInteraction();
                                 startFetchingProcess();
 
                             }
@@ -666,35 +677,78 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 }
             };
 
-
-    /**
-     * Listener that prints in the
-     * logcat a link to the database
-     */
-    /* This listener can be deleted
+    /** Method that replaces the current fragment for the show Progress Bar fragment
      * */
-    private View.OnClickListener profilePictureListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Log.d(TAG, "onClick: profilePictureListener Clicked");
-
-            DebugDB.getAddressLog();
-
-        }
-    };
-
-    /**
-     * Method for showing the main content.
-     * We cannot use Utils because
-     * the mainContent Layout is not a Linear Layout
-     */
-    private void showMainContent(LinearLayout progressBarContent, DrawerLayout mainContent) {
-        Log.d(TAG, "showMainContent: called!");
-
-        progressBarContent.setVisibility(View.GONE);
-        mainContent.setVisibility(View.VISIBLE);
+    private void showProgressBarFragment () {
+        Log.d(TAG, "showProgressBarFragment: called!");
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container_id, FragmentProgressBar.newInstance())
+                .commit();
+        flagToSpecifyCurrentFragment = 3;
     }
 
+    /** Method that replaces the current fragment for the map fragment
+     * */
+    private void showMapFragment () {
+        Log.d(TAG, "showMapFragment: called!");
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment_container_id, FragmentProgressBar.newInstance())
+                .commit();
+        flagToSpecifyCurrentFragment = 0;
+    }
+
+    /** Disables user interaction
+     * */
+    private void disableUIInteraction () {
+        Log.d(TAG, "disableUIInteraction: called!");
+        disableNavigationDrawer();
+        disableBottomNavigationView();
+    }
+
+    /** Enables user interaction
+     * */
+    private void enableUIInteraction () {
+        Log.d(TAG, "enableUIInteraction: called!");
+        enableNavigationDrawer();
+        enableBottomNavigationView();
+    }
+
+    /** Disables the navigation drawer (swipe)
+     * */
+    private void disableNavigationDrawer () {
+        Log.d(TAG, "disableNavigationDrawer: called!");
+        mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+    }
+
+    /** Enables the navigation drawer (swipe)
+     * */
+    private void enableNavigationDrawer () {
+        Log.d(TAG, "enableNavigationDrawer: called!");
+        mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+
+    }
+
+    /** Disables the bottom navigation view
+     * */
+    private void disableBottomNavigationView () {
+        Log.d(TAG, "disableBottomNavigationView: called!");
+        bottomNavigationView.getMenu().findItem(R.id.nav_view_map_id).setEnabled(false);
+        bottomNavigationView.getMenu().findItem(R.id.nav_view_list_id).setEnabled(false);
+        bottomNavigationView.getMenu().findItem(R.id.nav_view_coworkers_id).setEnabled(false);
+
+    }
+
+    /** Enables the bottom navigation view
+     * */
+    private void enableBottomNavigationView () {
+        Log.d(TAG, "enableBottomNavigationView: called!");
+        bottomNavigationView.getMenu().findItem(R.id.nav_view_map_id).setEnabled(true);
+        bottomNavigationView.getMenu().findItem(R.id.nav_view_list_id).setEnabled(true);
+        bottomNavigationView.getMenu().findItem(R.id.nav_view_coworkers_id).setEnabled(true);
+
+    }
 
     /**
      * Method that loads the fragment that is selected (the first time,
@@ -715,8 +769,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .commit();
                 flagToSpecifyCurrentFragment = 0;
 
-                showMainContent(progressBarContent, mainDrawerLayout);
-
             }
             break;
 
@@ -728,7 +780,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .commit();
                 flagToSpecifyCurrentFragment = 1;
 
-                showMainContent(progressBarContent, mainDrawerLayout);
 
             }
             break;
@@ -741,8 +792,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .commit();
                 flagToSpecifyCurrentFragment = 2;
 
-                showMainContent(progressBarContent, mainDrawerLayout);
-
             }
             break;
 
@@ -753,8 +802,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .replace(R.id.main_fragment_container_id, FragmentRestaurantMapView.newInstance())
                         .commit();
                 flagToSpecifyCurrentFragment = 0;
-
-                showMainContent(progressBarContent, mainDrawerLayout);
 
             }
         }
@@ -1003,6 +1050,22 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         imageDirPath = mainPath + File.separator + Repo.Directories.IMAGE_DIR;
 
     }
+
+    /**
+     * Listener that prints in the
+     * logcat a link to the database
+     */
+    /* This listener can be deleted
+     * */
+    private View.OnClickListener profilePictureListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "onClick: profilePictureListener Clicked");
+
+            DebugDB.getAddressLog();
+
+        }
+    };
 
 
 }

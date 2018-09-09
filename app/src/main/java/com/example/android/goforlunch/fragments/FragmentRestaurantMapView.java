@@ -191,9 +191,6 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     @BindView(R.id.map_toolbar_search_id)
     RelativeLayout toolbar2;
 
-    @BindView(R.id.progressBar_content)
-    LinearLayout progressBarContent;
-
     @BindView(R.id.main_layout_id)
     LinearLayout mainContent;
 
@@ -386,6 +383,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
     }
 
+    // TODO: 09/09/2018 Has to be deleted!
     @Override
     public void update(Observable o, Object data) {
         Log.d(TAG, "update: called!");
@@ -399,7 +397,6 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
             //block UI
             //block UI updates via viewModel
             allowUIUpdatesViaViewmodel = false;
-            Utils.hideMainContent(progressBarContent, mainContent);
 
 
         } else {
@@ -408,7 +405,6 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
             //show UI
             //allow UI updates via viewModel
             allowUIUpdatesViaViewmodel = true;
-            Utils.showMainContent(progressBarContent, mainContent);
 
         }
     }
@@ -1087,6 +1083,4 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         intentFilter = null;
 
     }
-
-
 }
