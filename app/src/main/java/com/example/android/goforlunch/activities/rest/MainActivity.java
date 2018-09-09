@@ -301,8 +301,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         } else if ((int) data == 2) {
             /* The fetching process has finished, we load map fragment and enable user interaction
              * */
-            Log.w(TAG, "update: called!!!!!! +++++++++++++++++++++++++++++++++++++++++++ ");
-            ToastHelper.toastLong(this, getResources().getString(R.string.end_fetching_process));
             showMapFragment();
             enableUIInteraction();
         }
