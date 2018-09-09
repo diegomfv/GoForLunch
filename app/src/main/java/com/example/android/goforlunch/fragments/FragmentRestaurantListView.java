@@ -83,10 +83,7 @@ public class FragmentRestaurantListView extends Fragment {
 
     private static final String TAG = FragmentRestaurantListView.class.getSimpleName();
 
-    //Array of restaurant types (got from Resources, strings)
-    private String[] arrayOfTypes;
-
-    private Unbinder unbinder;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Widgets
     @BindView(R.id.list_autocomplete_id)
@@ -101,12 +98,7 @@ public class FragmentRestaurantListView extends Fragment {
     @BindView(R.id.progressBar_content)
     LinearLayout progressBarFragmentContent;
 
-    //List of elements
-    private List<RestaurantEntry> listOfRestaurants;
-    private List<RestaurantEntry> listOfRestaurantsByType;
-
-    //This list will have as many elements repeated as coworkers going to the restaurant
-    private List<String> listOfRestaurantsByCoworker;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //RecyclerView
     @BindView(R.id.list_recycler_view_id)
@@ -114,12 +106,18 @@ public class FragmentRestaurantListView extends Fragment {
 
     private RVAdapterList adapter;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Database
     private AppDatabase localDatabase;
     private MainViewModel mainViewModel;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //SharedPreferences
     private SharedPreferences sharedPref;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Firebase
     private FirebaseAuth auth;
@@ -127,6 +125,8 @@ public class FragmentRestaurantListView extends Fragment {
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsersGetUserInfo;
     private DatabaseReference dbRefUsersGetListOfRestaurantsByCoworkers;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Variables
     private String userFirstName;
@@ -136,10 +136,24 @@ public class FragmentRestaurantListView extends Fragment {
     private String userGroup;
     private String userGroupKey;
 
+    //Array of restaurant types (got from Resources, strings)
+    private String[] arrayOfTypes;
+
+    //List of elements
+    private List<RestaurantEntry> listOfRestaurants;
+    private List<RestaurantEntry> listOfRestaurantsByType;
+
+    //This list will have as many elements repeated as coworkers going to the restaurant
+    private List<String> listOfRestaurantsByCoworker;
+
+    private Unbinder unbinder;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Glide
     private RequestManager glide;
 
-    /** ------------------------------------------------ */
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /** Method for instantiating the fragment
      * */
@@ -334,6 +348,8 @@ public class FragmentRestaurantListView extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /*****************
      * LISTENERS *****

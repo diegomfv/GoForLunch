@@ -92,8 +92,9 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Diego Fajardo on 27/04/2018.
  */
 
-/** Fragment that displays the Google Map
- * */
+/**
+ * Fragment that displays the Google Map
+ */
 public class FragmentRestaurantMapView extends Fragment implements java.util.Observer {
 
     /* Interface to communicate with Main Activity
@@ -102,9 +103,11 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         void onCurrentPositionObtained(LatLngForRetrofit myPosition, boolean locationPermission, boolean storageAccessPermission);
     }
 
-    //////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static final String TAG = FragmentRestaurantMapView.class.getSimpleName();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //DataUpdateReceiver variables
     private DataUpdateReceiver receiver;
@@ -116,14 +119,17 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     //Google Play Services
     private static final int ERROR_DIALOG_REQUEST = 9001;
 
-    private static final String FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final float DEFAULT_ZOOM = 17f;
 
     //Map variables
     private boolean mLocationPermissionGranted = false; //used in permissions
     private GoogleMap mMap; //used to create the map
     private FusedLocationProviderClient mFusedLocationProviderClient; //used to get the location of the current user
+
+    //Used for Retrofit
+    private LatLngForRetrofit myPosition;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //List with all the restaurants in the database
     private List<RestaurantEntry> listOfAllRestaurantsInDatabase;
@@ -137,11 +143,12 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     //the map has already markers and, if so, not call a function
     private List<Marker> listOfMarkers;
 
-    //Used for Retrofit
-    private LatLngForRetrofit myPosition;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //SharedPreferences
     private SharedPreferences sharedPref;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Firebase Database
     private FirebaseAuth auth;
@@ -150,8 +157,11 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     private DatabaseReference dbRefUsers;
     private DatabaseReference dbRefGroups;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Local Database
     private AppDatabase localDatabase;
+    private MainViewModel mainViewModel;
 
     //Variables
     private String userFirstName;
@@ -164,8 +174,12 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     //Array of restaurant types
     private String[] arrayOfTypes;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Butter knife
     private Unbinder unbinder;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Widgets
     @BindView(R.id.map_autocomplete_id)
@@ -183,7 +197,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     @BindView(R.id.main_layout_id)
     LinearLayout mainContent;
 
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Internal Storage
     private Storage storage;
@@ -191,17 +205,17 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     private String imageDirPath;
     private boolean accessInternalStorageGranted;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Listener: communicates from Main Activity (it passes the position to MainActivity
     // so it can start the service. Then, the service communicates with Map Fragment)
     private OnCurrentPositionObtainedListener mCallback;
 
-    //ViewModel
-    private MainViewModel mainViewModel;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /** ------------------------------------------------ */
-
-    /** Method for instantiating the fragment
-     * */
+    /**
+     * Method for instantiating the fragment
+     */
     public static FragmentRestaurantMapView newInstance() {
         Log.d(TAG, "newInstance: called!");
         FragmentRestaurantMapView fragment = new FragmentRestaurantMapView();
@@ -322,7 +336,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                         listOfAllRestaurantsInDatabase = restaurantEntries;
 
                         /* We only update the map once
-                        * */
+                         * */
                         if (listOfMarkers != null) {
                             if (listOfMarkers.size() < 60) {
                                 /* We update the UI
@@ -371,8 +385,9 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         unbinder.unbind();
     }
 
-    /** We prepare the callback for listening to changes in Position
-     * */
+    /**
+     * We prepare the callback for listening to changes in Position
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -385,16 +400,18 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         }
     }
 
-    /** When the fragment is detached from the activity, we nullify the callback
-     * */
+    /**
+     * When the fragment is detached from the activity, we nullify the callback
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mCallback = null;
     }
 
-    /** disposeWhenDestroy() avoids memory leaks
-     * */
+    /**
+     * disposeWhenDestroy() avoids memory leaks
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -428,9 +445,9 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
             Utils.showMainContent(progressBarContent, mainContent);
 
         }
-
-
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**************************
      * REQUEST PERMISSIONS ****
@@ -486,7 +503,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                         accessInternalStorageGranted = true;
 
                         /* We init the map
-                        * */
+                         * */
                         initMap();
                         Log.i(TAG, "onDataChange: mapFragment, initiating map from onRequestPermissionResult");
                     }
@@ -495,7 +512,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                     ToastHelper.toastNotNecessaryPermissionsAvailable(getActivity());
 
                     /* We init the map anyway, but it will display no information
-                    * */
+                     * */
                     initMap();
 
                 }
@@ -560,7 +577,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                     Log.i(TAG, "onDataChange: have permissions to getDeviceLocation()");
 
                     /* We get the device's location
-                    * */
+                     * */
                     getDeviceLocation();
 
                     //mMap.setMyLocationEnabled(true); //displays the blue marker at your location
@@ -584,7 +601,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
                                         Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
-                                        Map <String,Object> map = new HashMap<>();
+                                        Map<String, Object> map = new HashMap<>();
                                         map.put(Repo.SentIntent.RESTAURANT_NAME, listOfAllRestaurantsInDatabase.get(i).getName());
                                         map.put(Repo.SentIntent.RESTAURANT_TYPE, listOfAllRestaurantsInDatabase.get(i).getType());
                                         map.put(Repo.SentIntent.PLACE_ID, listOfAllRestaurantsInDatabase.get(i).getPlaceId());
@@ -642,7 +659,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                         myPosition = new LatLngForRetrofit(currentLocation.getLatitude(), currentLocation.getLongitude());
 
                         /* We share myPosition with MainActivity
-                        * */
+                         * */
                         Log.d(TAG, "onComplete: Sending position to MainActivity");
                         mCallback.onCurrentPositionObtained(myPosition, mLocationPermissionGranted, accessInternalStorageGranted);
 
@@ -650,7 +667,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                         //mMap.getUiSettings().setMyLocationButtonEnabled(false); this would remove the button that allows you to center your position
 
                         /* We update the map
-                        * if possible*/
+                         * if possible*/
                         updateMapWithPins();
 
                         Log.i(TAG, "onDataChange: myPosition = " + myPosition);
@@ -661,7 +678,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
                         if (Utils.hasPermissions(getActivity(), Repo.PERMISSIONS)) {
                             /* We check if the database is empty. If it is, we start the fetching process
-                            * */
+                             * */
                             getRestaurantsAndDisplayToastIfNeeded();
 
                         } else {
@@ -734,9 +751,10 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
      * CONFIGURATION
      * *****************/
 
-    /** Method that instantiates databases
-     * */
-    public void configureDatabases (Context context) {
+    /**
+     * Method that instantiates databases
+     */
+    public void configureDatabases(Context context) {
 
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -745,10 +763,11 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
     }
 
-    /** Method that configures the autocompleteTextView
-     * */
+    /**
+     * Method that configures the autocompleteTextView
+     */
     @SuppressLint("CheckResult")
-    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView) {
+    private void configureAutocompleteTextView(AutoCompleteTextView autoCompleteTextView) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
         ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
@@ -773,7 +792,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                     public void onNext(String type) {
 
                         /* We update the map
-                        * */
+                         * */
                         updateMapWithPins();
 
                         Utils.hideKeyboard(getActivity());
@@ -796,10 +815,11 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
     }
 
-    /** Method that configures storage to persist images
+    /**
+     * Method that configures storage to persist images
      * to disk
-     * */
-    private void configureStorage () {
+     */
+    private void configureStorage() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         storage = new Storage(getActivity());
@@ -812,9 +832,10 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
      * RX JAVA
      *****************************************************/
 
-    /** Method that fetches all the restaurants from the database and displays a Toast
+    /**
+     * Method that fetches all the restaurants from the database and displays a Toast
      * if needed
-     * */
+     */
     @SuppressLint("CheckResult")
     private void getRestaurantsAndDisplayToastIfNeeded() {
         Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
@@ -826,8 +847,9 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
     }
 
-    /** Method that returns all restaurants in database of a specific type
-     * */
+    /**
+     * Method that returns all restaurants in database of a specific type
+     */
     private Maybe<List<RestaurantEntry>> getRestaurantsByType(int type) {
         Log.d(TAG, "getRestaurantsByType: called!");
         if (type == 0) {
@@ -882,10 +904,11 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
      * UPDATE UI
      * *****************/
 
-    /** Method that updates the map with pins.
+    /**
+     * Method that updates the map with pins.
      * It firstly fills gets the restaurants visited by the group and
      * afterwards all the restaurants in the database
-     * */
+     */
     public void updateMapWithPins() {
         Log.d(TAG, "updateMapWithPins: called!");
 
@@ -904,10 +927,11 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         }
     }
 
-    /** Listener for getting the restaurants visited by a group,
+    /**
+     * Listener for getting the restaurants visited by a group,
      * get all the restaurants in the database and start
      * filling the map
-     * */
+     */
     private ValueEventListener singleValueEventListenerGetRestaurantsVisited = new ValueEventListener() {
         @SuppressLint("CheckResult")
         @Override
@@ -944,9 +968,10 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         }
     };
 
-    /** This Observer is used
+    /**
+     * This Observer is used
      * to get all the restaurants in the database
-     * */
+     */
     private MaybeObserver<List<RestaurantEntry>> maybeObserverUpdateUI() {
         Log.d(TAG, "getMaybeObserverThatStartsRequestProcessIfNecessary: called!");
 
@@ -1021,7 +1046,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         };
     }
 
-    private void connectBroadcastReceiver () {
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new DataUpdateReceiver();
@@ -1030,7 +1055,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
     }
 
-    private void disconnectBroadcastReceiver () {
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {

@@ -59,22 +59,30 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
     private static final String TAG = FragmentCoworkers.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Unbinder unbinder;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @BindView(R.id.coworkers_toolbar_id)
     Toolbar toolbar;
 
-    private ActionBar actionBar;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @BindView(R.id.progressBar_content)
+    LinearLayout progressBarFragmentContent;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //RecyclerView
     @BindView(R.id.coworkers_recycler_view_id)
     RecyclerView recyclerView;
 
-    @BindView(R.id.progressBar_content)
-    LinearLayout progressBarFragmentContent;
-
     private RVAdapterCoworkers adapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Firebase
     private FirebaseAuth auth;
@@ -85,6 +93,8 @@ public class FragmentCoworkers extends Fragment implements Observer {
     private DatabaseReference dbRefUsersGetUserInfo;
     private DatabaseReference dbRefUsersGetCoworkers;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private String userFirstName;
     private String userLastName;
     private String userKey;
@@ -92,10 +102,14 @@ public class FragmentCoworkers extends Fragment implements Observer {
     private String userEmail;
     private String userGroup;
 
-    private SharedPreferences sharedPref;
-
     //List of Coworkers
     private List<User> listOfCoworkers;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private SharedPreferences sharedPref;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
@@ -103,11 +117,10 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
     private boolean internetAvailable;
 
-    /******************************
-     * STATIC METHOD FOR **********
-     * INSTANTIATING THE FRAGMENT *
-     *****************************/
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /** Method for instantiating the fragment
+     * */
     public static FragmentCoworkers newInstance() {
         FragmentCoworkers fragment = new FragmentCoworkers();
         return fragment;
@@ -221,8 +234,8 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
             case android.R.id.home: {
                 Log.d(TAG, "onOptionsItemSelected: home clicked");
-                if (((MainActivity)getActivity()) != null) {
-                    ((MainActivity)getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
+                if (((MainActivity) getActivity()) != null) {
+                    ((MainActivity) getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
                 }
                 return true;
             }
@@ -230,13 +243,16 @@ public class FragmentCoworkers extends Fragment implements Observer {
         return super.onOptionsItemSelected(item);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     /*********************
      * LISTENERS *********
      * ******************/
 
-    /** Listener to get user's info
-     * */
-    private ValueEventListener valueEventListenerGetUserInfo = new ValueEventListener(){
+    /**
+     * Listener to get user's info
+     */
+    private ValueEventListener valueEventListenerGetUserInfo = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
@@ -260,9 +276,10 @@ public class FragmentCoworkers extends Fragment implements Observer {
         }
     };
 
-    /** Listener to get a list of coworkers
-     * */
-    private ValueEventListener valueEventListenerGetCoworkers = new ValueEventListener(){
+    /**
+     * Listener to get a list of coworkers
+     */
+    private ValueEventListener valueEventListenerGetCoworkers = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
@@ -295,7 +312,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
      * CONFIGURATION
      *****************************************************/
 
-    private void configureRecyclerView () {
+    private void configureRecyclerView() {
         Log.d(TAG, "configureRecyclerView: called!");
 
         if (getActivity() != null) {
@@ -307,9 +324,10 @@ public class FragmentCoworkers extends Fragment implements Observer {
         }
     }
 
-    /** Method that configures onClick for recyclerView items
-     * */
-    private void configureOnClickRecyclerView () {
+    /**
+     * Method that configures onClick for recyclerView items
+     */
+    private void configureOnClickRecyclerView() {
         Log.d(TAG, "configureOnClickRecyclerView: called!");
 
         ItemClickSupport.addTo(recyclerView)
@@ -336,10 +354,11 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
     }
 
-    /** Method that connects a broadcastReceiver to the fragment.
+    /**
+     * Method that connects a broadcastReceiver to the fragment.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiverFragment () {
+     */
+    private void connectBroadcastReceiverFragment() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -351,9 +370,10 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the fragment.
-     * */
-    private void disconnectBroadcastReceiverFragment () {
+    /**
+     * Method that disconnects the broadcastReceiver from the fragment.
+     */
+    private void disconnectBroadcastReceiverFragment() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null && getActivity() != null) {
@@ -368,19 +388,12 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
     }
 
-    /** Method that creates an intent and fills it with all the necessary info to be displayed
+    /**
+     * Method that creates an intent and fills it with all the necessary info to be displayed
      * in Restaurant Activity
-     * */
+     */
+    // TODO: 09/09/2018 Could be done as a Utils method
     private Intent createAndFillIntentWithUserInfo(RVAdapterCoworkers adapter, int position) {
-
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getPlaceId());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getImageUrl());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getRestaurantName());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getRestaurantType());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getAddress());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getRating());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getPhone());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getUser(position).getWebsiteUrl());
 
         Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
