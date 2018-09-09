@@ -12,14 +12,14 @@ import com.example.android.goforlunch.R;
  */
 public class UtilsConfiguration {
 
-    public static void configureActionBar (Context context, Toolbar toolbar, ActionBar actionBar) {
+    public static void configureActionBar (Context context, Toolbar toolbar) {
 
         if (((AppCompatActivity) context) != null) {
             ((AppCompatActivity) context).setSupportActionBar(toolbar);
         }
 
         if (((AppCompatActivity) context) != null) {
-            actionBar = ((AppCompatActivity) context).getSupportActionBar();
+            ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
                 actionBar.setDisplayHomeAsUpEnabled(true);

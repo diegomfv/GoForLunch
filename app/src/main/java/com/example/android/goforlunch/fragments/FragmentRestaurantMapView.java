@@ -164,7 +164,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     //Array of restaurant types
     private String[] arrayOfTypes;
 
-    //Butterknife
+    //Butter knife
     private Unbinder unbinder;
 
     //Widgets
@@ -183,13 +183,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     @BindView(R.id.main_layout_id)
     LinearLayout mainContent;
 
-    private ActionBar actionBar;
 
-    //Disposables
-    private Disposable autocompleteTextViewDisposable;
-
-    //Observers
-    private MaybeObserver restaurantsObserver;
 
     //Internal Storage
     private Storage storage;
@@ -236,7 +230,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
         /* Configure toolbar
          * */
-        UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
+        UtilsConfiguration.configureActionBar(getActivity(), toolbar);
 
         /* We get an array of restaurant types from RESOURCES
          * */
@@ -347,7 +341,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         });
 
         /* Configuration process */
-        this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
+        this.configureAutocompleteTextView(autocompleteTextView);
 
         return view;
     }
@@ -405,15 +399,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
-        this.disposeWhenDestroy();
-
         this.disconnectBroadcastReceiver();
-
-    }
-
-    private void disposeWhenDestroy () {
-        Log.d(TAG, "disposeWhenDestroy: called!");
-        Utils.dispose(this.autocompleteTextViewDisposable);
 
     }
 
@@ -761,8 +747,8 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
     /** Method that configures the autocompleteTextView
      * */
-    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView,
-                                                Disposable disposable) {
+    @SuppressLint("CheckResult")
+    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
         ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
@@ -772,7 +758,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         );
 
         autoCompleteTextView.setAdapter(autocompleteAdapter);
-        disposable = RxTextView.textChangeEvents(autoCompleteTextView)
+        RxTextView.textChangeEvents(autoCompleteTextView)
                 .skip(2)
                 .debounce(600, TimeUnit.MILLISECONDS)
                 .map(new Function<TextViewTextChangeEvent, String>() {
@@ -829,10 +815,11 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     /** Method that fetches all the restaurants from the database and displays a Toast
      * if needed
      * */
+    @SuppressLint("CheckResult")
     private void getRestaurantsAndDisplayToastIfNeeded() {
         Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
 
-        restaurantsObserver = getRestaurantsByType(0)
+        getRestaurantsByType(0)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(maybeObserverCheckIfDatabaseIsEmpty());
@@ -922,6 +909,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
      * filling the map
      * */
     private ValueEventListener singleValueEventListenerGetRestaurantsVisited = new ValueEventListener() {
+        @SuppressLint("CheckResult")
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
@@ -938,7 +926,7 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
 
                 int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(typeInEnglish);
 
-                restaurantsObserver = getRestaurantsByType(typeAsInt)
+                getRestaurantsByType(typeAsInt)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(maybeObserverUpdateUI());

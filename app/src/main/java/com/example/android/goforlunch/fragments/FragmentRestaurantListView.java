@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.fragments;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -100,8 +101,6 @@ public class FragmentRestaurantListView extends Fragment {
     @BindView(R.id.progressBar_content)
     LinearLayout progressBarFragmentContent;
 
-    private ActionBar actionBar;
-
     //List of elements
     private List<RestaurantEntry> listOfRestaurants;
     private List<RestaurantEntry> listOfRestaurantsByType;
@@ -114,7 +113,6 @@ public class FragmentRestaurantListView extends Fragment {
     RecyclerView recyclerView;
 
     private RVAdapterList adapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     //Database
     private AppDatabase localDatabase;
@@ -138,21 +136,8 @@ public class FragmentRestaurantListView extends Fragment {
     private String userGroup;
     private String userGroupKey;
 
-    //Observers
-    private MaybeObserver restaurantsObserver;
-
-    //Disposables
-    private Disposable autocompleteTextViewDisposable;
-
     //Glide
     private RequestManager glide;
-
-    //InternetConnectionReceiver variables
-    private InternetConnectionReceiver receiver;
-    private IntentFilter intentFilter;
-
-    private boolean internetAvailable;
-
 
     /** ------------------------------------------------ */
 
@@ -190,7 +175,7 @@ public class FragmentRestaurantListView extends Fragment {
         listOfRestaurantsByCoworker = new ArrayList<>();
 
         /* Configure toolbar */
-        UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
+        UtilsConfiguration.configureActionBar(getActivity(), toolbar);
 
         /* We get an array of restaurant types from RESOURCES
          * */
@@ -204,7 +189,7 @@ public class FragmentRestaurantListView extends Fragment {
         this.configureOnClickRecyclerView();
 
         /* Configuring autocompleteTextView */
-        this.configureAutocompleteTextView(autocompleteTextView, autocompleteTextViewDisposable);
+        this.configureAutocompleteTextView(autocompleteTextView);
 
         mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
@@ -437,8 +422,8 @@ public class FragmentRestaurantListView extends Fragment {
 
     }
 
-    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView,
-                                                Disposable disposable) {
+    @SuppressLint("CheckResult")
+    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
         ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
@@ -449,7 +434,7 @@ public class FragmentRestaurantListView extends Fragment {
 
         autoCompleteTextView.setAdapter(autocompleteAdapter);
 
-        disposable = RxTextView.textChangeEvents(autoCompleteTextView)
+        RxTextView.textChangeEvents(autoCompleteTextView)
                 .skip(2)
                 .debounce(600, TimeUnit.MILLISECONDS)
                 .map(new Function<TextViewTextChangeEvent, String>() {
@@ -576,10 +561,11 @@ public class FragmentRestaurantListView extends Fragment {
     /** Method that fetches all the restaurants from the database
      * and displays them in the recyclerView
      * */
+    @SuppressLint("CheckResult")
     private void getAllRestaurantsAndDisplayThemInRecyclerView () {
         Log.d(TAG, "getAllRestaurantsAndDisplayThemInRecyclerView: called!");
 
-        restaurantsObserver = getAllRestaurantsInDatabase()
+        getAllRestaurantsInDatabase()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(getMaybeObserverToUpdateRecyclerView());
@@ -589,10 +575,11 @@ public class FragmentRestaurantListView extends Fragment {
     /** Method that fetches the restaurants from the database according to the type inputted
      * and displays them in the recyclerView
      * */
+    @SuppressLint("CheckResult")
     private void getRestaurantsByTypeAndDisplayThemInRecyclerView(final int type) {
         Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
 
-        restaurantsObserver = getRestaurantsByType(type)
+        getRestaurantsByType(type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(getMaybeObserverToUpdateRecyclerView());
@@ -602,10 +589,11 @@ public class FragmentRestaurantListView extends Fragment {
     /** Method that fetches all the restaurants from the database and displays a Toast
      * if needed
      * */
+    @SuppressLint("CheckResult")
     private void getRestaurantsAndDisplayToastIfNeeded() {
         Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
 
-        restaurantsObserver = getAllRestaurantsInDatabase()
+        getAllRestaurantsInDatabase()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(getMaybeObserverToUpdateRecyclerView());

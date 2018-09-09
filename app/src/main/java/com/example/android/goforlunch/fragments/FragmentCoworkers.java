@@ -131,7 +131,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         /* Configure toolbar */
-        UtilsConfiguration.configureActionBar(getActivity(), toolbar, actionBar);
+        UtilsConfiguration.configureActionBar(getActivity(), toolbar);
 
         userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
