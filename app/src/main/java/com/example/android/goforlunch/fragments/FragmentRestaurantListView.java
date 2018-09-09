@@ -77,8 +77,9 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Diego Fajardo on 27/04/2018.
  */
 
-/** Fragment that displays the list of restaurants in a recyclerView
- * */
+/**
+ * Fragment that displays the list of restaurants in a recyclerView
+ */
 public class FragmentRestaurantListView extends Fragment {
 
     private static final String TAG = FragmentRestaurantListView.class.getSimpleName();
@@ -155,15 +156,17 @@ public class FragmentRestaurantListView extends Fragment {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /** Method for instantiating the fragment
-     * */
+    /**
+     * Method for instantiating the fragment
+     */
     public static FragmentRestaurantListView newInstance() {
         FragmentRestaurantListView fragment = new FragmentRestaurantListView();
         return fragment;
     }
 
-    /** onCreate()...
-     * */
+    /**
+     * onCreate()...
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -202,31 +205,12 @@ public class FragmentRestaurantListView extends Fragment {
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
 
+        /* Creation and subscription to model
+         * */
+        this.createModel();
+
         /* Configuring autocompleteTextView */
         this.configureAutocompleteTextView(autocompleteTextView);
-
-        mainViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
-        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
-            @Override
-            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
-                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
-
-                if (restaurantEntries != null && restaurantEntries.size() != 0) {
-                    Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
-
-                    /* We fill the list with the Restaurants in the database
-                     * */
-                    listOfRestaurants = restaurantEntries;
-
-                    /* We update the recyclerView with the new list
-                     * */
-                    updateRecyclerViewWithNewRestaurantsList(restaurantEntries);
-
-                } else {
-                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
-                }
-            }
-        });
 
         return view;
 
@@ -332,8 +316,8 @@ public class FragmentRestaurantListView extends Fragment {
 
             case android.R.id.home: {
                 Log.d(TAG, "onOptionsItemSelected: home clicked");
-                if (((MainActivity)getActivity()) != null) {
-                    ((MainActivity)getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
+                if (((MainActivity) getActivity()) != null) {
+                    ((MainActivity) getActivity()).getMDrawerLayout().openDrawer(GravityCompat.START);
                 }
                 return true;
             }
@@ -350,6 +334,45 @@ public class FragmentRestaurantListView extends Fragment {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /*******************************
+     * CONFIGURATION: VIEWMODEL ****
+     * ****************************/
+
+    private void createModel() {
+        Log.d(TAG, "createViewModel: called!");
+
+        mainViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
+        subscribeToModel();
+
+    }
+
+    private void subscribeToModel() {
+        Log.d(TAG, "subscribeToModel: called!");
+
+        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
+
+                if (restaurantEntries != null && restaurantEntries.size() != 0) {
+                    Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+
+                    /* We fill the list with the Restaurants in the database
+                     * */
+                    listOfRestaurants = restaurantEntries;
+
+                    /* We update the recyclerView with the new list
+                     * */
+                    updateRecyclerViewWithNewRestaurantsList(restaurantEntries);
+
+                } else {
+                    Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                }
+            }
+        });
+    }
+
 
     /*****************
      * LISTENERS *****
@@ -426,9 +449,10 @@ public class FragmentRestaurantListView extends Fragment {
      * CONFIGURATION *
      * **************/
 
-    /** Method that instantiates databases
-     * */
-    public void configureDatabases (Context context) {
+    /**
+     * Method that instantiates databases
+     */
+    public void configureDatabases(Context context) {
         Log.d(TAG, "configureDatabases: called!");
 
         fireDb = FirebaseDatabase.getInstance();
@@ -439,7 +463,7 @@ public class FragmentRestaurantListView extends Fragment {
     }
 
     @SuppressLint("CheckResult")
-    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView) {
+    private void configureAutocompleteTextView(AutoCompleteTextView autoCompleteTextView) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
         ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
@@ -496,7 +520,7 @@ public class FragmentRestaurantListView extends Fragment {
 
     }
 
-    private void configureRecyclerView () {
+    private void configureRecyclerView() {
         Log.d(TAG, "configureRecyclerView: called!");
 
         if (getActivity() != null) {
@@ -514,9 +538,10 @@ public class FragmentRestaurantListView extends Fragment {
         }
     }
 
-    /** Method that configures onClick for recyclerView items
-     * */
-    private void configureOnClickRecyclerView () {
+    /**
+     * Method that configures onClick for recyclerView items
+     */
+    private void configureOnClickRecyclerView() {
         Log.d(TAG, "configureOnClickRecyclerView: called!");
 
         ItemClickSupport.addTo(recyclerView)
@@ -551,15 +576,17 @@ public class FragmentRestaurantListView extends Fragment {
     // FETCH DATA, MODIFY DATA from LOCAL DATABASE
     //****************************************************
 
-    /** Method that returns all restaurants in the database
-     * */
-    private Maybe<List<RestaurantEntry>> getAllRestaurantsInDatabase () {
+    /**
+     * Method that returns all restaurants in the database
+     */
+    private Maybe<List<RestaurantEntry>> getAllRestaurantsInDatabase() {
         Log.d(TAG, "getAllRestaurantsInDatabase: called!");
         return localDatabase.restaurantDao().getAllRestaurantsRxJava();
     }
 
-    /** Method that returns all restaurants in database of a specific type
-     * */
+    /**
+     * Method that returns all restaurants in database of a specific type
+     */
     private Maybe<List<RestaurantEntry>> getRestaurantsByType(int type) {
         Log.d(TAG, "getRestaurantsByType: called!");
         if (type == 0) {
@@ -574,11 +601,12 @@ public class FragmentRestaurantListView extends Fragment {
     // INTERACT WITH DATA
     //********************************
 
-    /** Method that fetches all the restaurants from the database
+    /**
+     * Method that fetches all the restaurants from the database
      * and displays them in the recyclerView
-     * */
+     */
     @SuppressLint("CheckResult")
-    private void getAllRestaurantsAndDisplayThemInRecyclerView () {
+    private void getAllRestaurantsAndDisplayThemInRecyclerView() {
         Log.d(TAG, "getAllRestaurantsAndDisplayThemInRecyclerView: called!");
 
         getAllRestaurantsInDatabase()
@@ -588,9 +616,10 @@ public class FragmentRestaurantListView extends Fragment {
 
     }
 
-    /** Method that fetches the restaurants from the database according to the type inputted
+    /**
+     * Method that fetches the restaurants from the database according to the type inputted
      * and displays them in the recyclerView
-     * */
+     */
     @SuppressLint("CheckResult")
     private void getRestaurantsByTypeAndDisplayThemInRecyclerView(final int type) {
         Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
@@ -602,9 +631,10 @@ public class FragmentRestaurantListView extends Fragment {
 
     }
 
-    /** Method that fetches all the restaurants from the database and displays a Toast
+    /**
+     * Method that fetches all the restaurants from the database and displays a Toast
      * if needed
-     * */
+     */
     @SuppressLint("CheckResult")
     private void getRestaurantsAndDisplayToastIfNeeded() {
         Log.d(TAG, "getRestaurantsByTypeAndDisplayThemInRecyclerView: called!");
@@ -620,9 +650,10 @@ public class FragmentRestaurantListView extends Fragment {
     // OBSERVERS
     //********************************
 
-    /** This observer returns all the restaurants in the database
+    /**
+     * This observer returns all the restaurants in the database
      * and allows updating the UI with the info.
-     * */
+     */
     private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToUpdateRecyclerView() {
         Log.d(TAG, "getMaybeObserverToUpdateMap: ");
 
@@ -654,9 +685,10 @@ public class FragmentRestaurantListView extends Fragment {
         };
     }
 
-    /** This observer returns all the restaurants in the database
+    /**
+     * This observer returns all the restaurants in the database
      * and allows sending a toast to the user telling him to user the StartSearch Button
-     * */
+     */
     private MaybeObserver<List<RestaurantEntry>> getMaybeObserverToSendAToastToTheUserIfNeeded() {
         Log.d(TAG, "getMaybeObserverToSendAToastToTheUserIfNeeded: called!");
 
@@ -735,9 +767,10 @@ public class FragmentRestaurantListView extends Fragment {
      * OTHER METHODS
      *****************************************************/
 
-    /** Method that creates an intent and fills it with all the necessary info to be displayed
+    /**
+     * Method that creates an intent and fills it with all the necessary info to be displayed
      * in Restaurant Activity
-     * */
+     */
     /* Could be done with a Parcelable */
     private Intent createAndFillIntentWithUserInfo(RVAdapterList adapter, int position) {
         Log.d(TAG, "createAndFillIntentWithUserInfo: called!");
@@ -765,7 +798,6 @@ public class FragmentRestaurantListView extends Fragment {
         return intent;
 
     }
-
 
 
 }

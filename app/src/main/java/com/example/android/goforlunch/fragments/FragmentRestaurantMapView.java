@@ -320,39 +320,9 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
         //when the service starts fetching restaurants
         allowUIUpdatesViaViewmodel = true;
 
-        mainViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
-        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
-            @Override
-            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
-                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
-
-                if (allowUIUpdatesViaViewmodel) {
-
-                    if (restaurantEntries != null && restaurantEntries.size() != 0) {
-                        Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
-
-                        /* We fill the list with the Restaurants in the database
-                         * */
-                        listOfAllRestaurantsInDatabase = restaurantEntries;
-
-                        /* We only update the map once
-                         * */
-                        if (listOfMarkers != null) {
-                            if (listOfMarkers.size() < 60) {
-                                /* We update the UI
-                                 * */
-                                updateMapWithPins();
-                            }
-                        }
-
-                    } else {
-                        Log.d(TAG, "onChanged: restaurantEntries is NULL");
-                    }
-
-                }
-
-            }
-        });
+        /* Creation and subscription to model
+        * */
+        this.createModel();
 
         /* Configuration process */
         this.configureAutocompleteTextView(autocompleteTextView);
@@ -364,18 +334,14 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: called!");
-
         this.connectBroadcastReceiver();
-
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-
         this.disconnectBroadcastReceiver();
-
     }
 
     @Override
@@ -448,6 +414,58 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /*******************************
+     * CONFIGURATION: VIEWMODEL ****
+     * ****************************/
+
+    private void createModel () {
+        Log.d(TAG, "createViewModel: called!");
+
+        mainViewModel = ViewModelProviders.of(
+                Objects.requireNonNull(getActivity())).get(MainViewModel.class);
+        subscribeToModel();
+
+    }
+
+    private void subscribeToModel () {
+        Log.d(TAG, "subscribeToModel: called!");
+
+        mainViewModel.getRestaurants().observe(this, new Observer<List<RestaurantEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
+                Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
+
+                if (allowUIUpdatesViaViewmodel) {
+
+                    if (restaurantEntries != null && restaurantEntries.size() != 0) {
+                        Log.d(TAG, "onChanged: restaurantEntries.size() = " + restaurantEntries.size());
+
+                        /* We fill the list with the Restaurants in the database
+                         * */
+                        listOfAllRestaurantsInDatabase = restaurantEntries;
+
+                        /* We only update the map once.
+                         * We use 60 for the first time the pins in the map are loaded (using "start search").
+                         * After that, the map will be uploaded with all the restaurants in the database
+                         * each time the user comes back here.
+                         * */
+                        if (listOfMarkers != null) {
+                            if (listOfMarkers.size() < 60) {
+                                /* We update the UI
+                                 * */
+                                updateMapWithPins();
+                            }
+                        }
+
+                    } else {
+                        Log.d(TAG, "onChanged: restaurantEntries is NULL");
+                    }
+
+                }
+            }
+        });
+    }
 
     /**************************
      * REQUEST PERMISSIONS ****
