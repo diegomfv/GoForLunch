@@ -702,7 +702,7 @@ public class FetchingIntentService extends IntentService {
     }
 
     private void notifyMainActivityProcessEnded () {
-        Log.d(TAG, "sendBroadcast: called!");
+        Log.d(TAG, "notifyMainActivityProcessEnded: called!");
         Intent intent = new Intent();
         intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
         sendBroadcast(intent);

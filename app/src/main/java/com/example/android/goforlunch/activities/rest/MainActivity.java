@@ -35,6 +35,7 @@ import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.fragments.FragmentProgressBar;
 import com.example.android.goforlunch.fragments.FragmentRestaurantList;
 import com.example.android.goforlunch.network.service.FetchingIntentService;
+import com.example.android.goforlunch.receivers.DataUpdateReceiver;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
@@ -137,11 +138,14 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //InternetConnectionReceiver variables
-    private InternetConnectionReceiver receiver;
-    private IntentFilter intentFilter;
+    private InternetConnectionReceiver internetConnectionReceiver;
+    private IntentFilter internetIntentFilter;
     private Snackbar snackbar;
 
     private boolean internetAvailable;
+
+    private DataUpdateReceiver dataUpdateReceiver;
+    private IntentFilter dataUpdateIntentFilter;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -181,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         unbinder = ButterKnife.bind(this);
 
         /* While everything is loaded, we show a progress bar and disable user interaction
-        * */
+         * */
         this.showProgressBarFragment();
         this.disableUIInteraction();
 
@@ -193,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
 
         /* We show the fragment and enable user interaction
-        * */
+         * */
         this.loadFragment();
         this.enableUIInteraction();
 
@@ -203,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: called!");
-        this.connectBroadcastReceiver();
+        this.connectInternetBroadcastReceiver();
 
     }
 
@@ -211,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-        this.disconnectBroadcastReceiver();
+        this.disconnectInternetBroadcastReceiver();
 
     }
 
@@ -219,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
-        this.disconnectBroadcastReceiver();
+        this.disconnectInternetBroadcastReceiver();
         this.bottomNavigationView.setOnNavigationItemSelectedListener(null);
         this.navigationView.setNavigationItemSelectedListener(null);
         this.unbinder.unbind();
@@ -244,11 +248,11 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     }
 
     /**
-     * Callback: listening to broadcast receiver
+     * Callback: listening to broadcast internetConnectionReceiver
      * 0: No internet
      * 1: Internet available
      * 2: Map can be loaded (restaurant's fetching process finished or failed)
-     * */
+     */
     @Override
     public void update(Observable o, Object data) {
         Log.d(TAG, "update: called!");
@@ -296,7 +300,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         } else if ((int) data == 2) {
             /* The fetching process has finished, we load map fragment and enable user interaction
-            * */
+             * */
+            Log.w(TAG, "update: called!!!!!! +++++++++++++++++++++++++++++++++++++++++++ ");
             ToastHelper.toastLong(this, getResources().getString(R.string.end_fetching_process));
             showMapFragment();
             enableUIInteraction();
@@ -373,9 +378,10 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method to configure nav drawer
-     * */
-    private void configureNavDrawer () {
+    /**
+     * Method to configure nav drawer
+     */
+    private void configureNavDrawer() {
         Log.d(TAG, "configureNavDrawer: called!");
         View headerView = navigationView.getHeaderView(0);
         navUserName = (TextView) headerView.findViewById(R.id.nav_drawer_name_id);
@@ -384,9 +390,10 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     }
 
-    /** Method to configure bottom navigation view
-     * */
-    private void configureBottomNavigationView () {
+    /**
+     * Method to configure bottom navigation view
+     */
+    private void configureBottomNavigationView() {
         Log.d(TAG, "configureBottomNavigationView: called!");
         bottomNavigationView.setOnNavigationItemSelectedListener(botNavListener);
         navigationView.setNavigationItemSelectedListener(navViewListener);
@@ -678,62 +685,63 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 }
             };
 
-    /** Method that replaces the current fragment for the show Progress Bar fragment
-     * */
-    private void showProgressBarFragment () {
-        Log.d(TAG, "showProgressBarFragment: called!");
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container_id, FragmentProgressBar.newInstance())
-                .commit();
-        flagToSpecifyCurrentFragment = 3;
-    }
-
-    /** Method that replaces the current fragment for the map fragment
-     * */
-    private void showMapFragment () {
+    /**
+     * Method that replaces the current fragment for the map fragment
+     */
+    private void showMapFragment() {
         Log.d(TAG, "showMapFragment: called!");
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_fragment_container_id, FragmentProgressBar.newInstance())
-                .commit();
         flagToSpecifyCurrentFragment = 0;
+        loadFragment();
     }
 
-    /** Disables user interaction
-     * */
-    private void disableUIInteraction () {
+    /**
+     * Method that replaces the current fragment for the show Progress Bar fragment
+     */
+    private void showProgressBarFragment() {
+        Log.d(TAG, "showProgressBarFragment: called!");
+        flagToSpecifyCurrentFragment = 3;
+        loadFragment();
+    }
+
+    /**
+     * Disables user interaction
+     */
+    private void disableUIInteraction() {
         Log.d(TAG, "disableUIInteraction: called!");
         disableNavigationDrawer();
         disableBottomNavigationView();
     }
 
-    /** Enables user interaction
-     * */
-    private void enableUIInteraction () {
+    /**
+     * Enables user interaction
+     */
+    private void enableUIInteraction() {
         Log.d(TAG, "enableUIInteraction: called!");
         enableNavigationDrawer();
         enableBottomNavigationView();
     }
 
-    /** Disables the navigation drawer (swipe)
-     * */
-    private void disableNavigationDrawer () {
+    /**
+     * Disables the navigation drawer (swipe)
+     */
+    private void disableNavigationDrawer() {
         Log.d(TAG, "disableNavigationDrawer: called!");
         mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
-    /** Enables the navigation drawer (swipe)
-     * */
-    private void enableNavigationDrawer () {
+    /**
+     * Enables the navigation drawer (swipe)
+     */
+    private void enableNavigationDrawer() {
         Log.d(TAG, "enableNavigationDrawer: called!");
         mainDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
     }
 
-    /** Disables the bottom navigation view
-     * */
-    private void disableBottomNavigationView () {
+    /**
+     * Disables the bottom navigation view
+     */
+    private void disableBottomNavigationView() {
         Log.d(TAG, "disableBottomNavigationView: called!");
         bottomNavigationView.getMenu().findItem(R.id.nav_view_map_id).setEnabled(false);
         bottomNavigationView.getMenu().findItem(R.id.nav_view_list_id).setEnabled(false);
@@ -741,9 +749,10 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     }
 
-    /** Enables the bottom navigation view
-     * */
-    private void enableBottomNavigationView () {
+    /**
+     * Enables the bottom navigation view
+     */
+    private void enableBottomNavigationView() {
         Log.d(TAG, "enableBottomNavigationView: called!");
         bottomNavigationView.getMenu().findItem(R.id.nav_view_map_id).setEnabled(true);
         bottomNavigationView.getMenu().findItem(R.id.nav_view_list_id).setEnabled(true);
@@ -792,6 +801,17 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .replace(R.id.main_fragment_container_id, FragmentCoworkers.newInstance())
                         .commit();
                 flagToSpecifyCurrentFragment = 2;
+
+            }
+            break;
+
+            case 3: {
+
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_fragment_container_id, FragmentProgressBar.newInstance())
+                        .commit();
+                flagToSpecifyCurrentFragment = 3;
 
             }
             break;
@@ -862,30 +882,30 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
      */
-    private void connectBroadcastReceiver() {
-        Log.d(TAG, "connectBroadcastReceiver: called!");
+    private void connectInternetBroadcastReceiver() {
+        Log.d(TAG, "connectInternetBroadcastReceiver: called!");
 
-        receiver = new InternetConnectionReceiver();
-        intentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
-        Utils.connectReceiver(MainActivity.this, receiver, intentFilter, this);
+        internetConnectionReceiver = new InternetConnectionReceiver();
+        internetIntentFilter = new IntentFilter(Repo.CONNECTIVITY_CHANGE_STATUS);
+        Utils.connectReceiver(MainActivity.this, internetConnectionReceiver, internetIntentFilter, this);
 
     }
 
     /**
      * Method that disconnects the broadcastReceiver from the activity.
      */
-    private void disconnectBroadcastReceiver() {
-        Log.d(TAG, "disconnectBroadcastReceiver: called!");
+    private void disconnectInternetBroadcastReceiver() {
+        Log.d(TAG, "disconnectInternetBroadcastReceiver: called!");
 
-        if (receiver != null) {
+        if (internetConnectionReceiver != null) {
             Utils.disconnectReceiver(
                     MainActivity.this,
-                    receiver,
+                    internetConnectionReceiver,
                     MainActivity.this);
         }
 
-        receiver = null;
-        intentFilter = null;
+        internetConnectionReceiver = null;
+        internetIntentFilter = null;
         snackbar = null;
 
     }
@@ -1044,7 +1064,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
      * to disk
      */
     private void configureStorage() {
-        Log.d(TAG, "connectBroadcastReceiver: called!");
+        Log.d(TAG, "connectInternetBroadcastReceiver: called!");
 
         storage = new Storage(MainActivity.this);
         mainPath = storage.getInternalFilesDirectory() + File.separator;
