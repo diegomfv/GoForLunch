@@ -107,7 +107,7 @@ public class FetchingIntentService extends IntentService {
         localDatabase = AppDatabase.getInstance(getApplicationContext());
 
         /* We delete the database (could be done without app executors because we are in a
-        * background thread */
+         * background thread */
         clearDatabase();
 
         configuringInternalStorage();
@@ -157,7 +157,7 @@ public class FetchingIntentService extends IntentService {
             ToastHelper.toastShort(getApplicationContext(), getResources().getString(R.string.mainCurrentPositionNotAvailable));
             showMap();
 
-        } else if (!accessInternalStorageGranted){
+        } else if (!accessInternalStorageGranted) {
             Log.d(TAG, "onStartCommand: internalStorageAccess not granted");
 
             //storage access not granted, do nothing
@@ -166,7 +166,7 @@ public class FetchingIntentService extends IntentService {
 
         } else {
 
-            myPosition = new LatLngForRetrofit(latitude,longitude);
+            myPosition = new LatLngForRetrofit(latitude, longitude);
 
             Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
                 @Override
@@ -190,9 +190,7 @@ public class FetchingIntentService extends IntentService {
                         /* We start the fetching process
                          * */
                         startNearbyPlacesProcess();
-
                     }
-
                 }
 
                 @Override
@@ -212,11 +210,12 @@ public class FetchingIntentService extends IntentService {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /** This method starts the process for fetching restaurants using
+    /**
+     * This method starts the process for fetching restaurants using
      * nearby places service
-     * */
+     */
     @SuppressLint("CheckResult")
-    private void startNearbyPlacesProcess () {
+    private void startNearbyPlacesProcess() {
         Log.d(TAG, "startNearbyPlacesProcess: called!");
 
         /*1. We start fetching nearby places. */
@@ -302,9 +301,10 @@ public class FetchingIntentService extends IntentService {
 
     }
 
-    /** This method starts the process for fetching restaurants using
+    /**
+     * This method starts the process for fetching restaurants using
      * text search service
-     * */
+     */
     @SuppressLint("CheckResult")
     private void startTextSearchProcess(final int type) {
         Log.d(TAG, "startTextSearchProcess: called!");
@@ -343,8 +343,8 @@ public class FetchingIntentService extends IntentService {
 
                             } else {
 
-                                        /* If the place is not already in the lists,
-                                        we add the restaurant to them */
+                                /* If the place is not already in the lists,
+                                 * we add the restaurant to them */
 
                                 listOfPlacesIdsOfRestaurants.add(listOfResults.get(i).getPlaceId());
 
@@ -395,12 +395,13 @@ public class FetchingIntentService extends IntentService {
 
     }
 
-    /** This methods starts several loops for doing 3 types of calls:
+    /**
+     * This methods starts several loops for doing 3 types of calls:
      * place Id call,
      * distance matrix call,
      * photo call
-     * */
-    private void startPlaceIdProcess () {
+     */
+    private void startPlaceIdProcess() {
         Log.d(TAG, "startPlaceIdProcess: called!");
 
         /* We iterate thorough the list to start Place Id requests
@@ -451,9 +452,10 @@ public class FetchingIntentService extends IntentService {
 
     }
 
-    /** This methods updates the map of
+    /**
+     * This methods updates the map of
      * restaurant entries with Place Id information
-     * */
+     */
     @SuppressLint("CheckResult")
     private void updateMapWithPlaceIdInfo(final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapWithPlaceIdInfo: called!");
@@ -509,11 +511,12 @@ public class FetchingIntentService extends IntentService {
                 });
     }
 
-    /** This methods updates the map of
+    /**
+     * This methods updates the map of
      * restaurant entries with DistanceMatrix information
-     * */
+     */
     @SuppressLint("CheckResult")
-    private void updateMapWithDistanceMatrix (final RestaurantEntry restaurantEntry) {
+    private void updateMapWithDistanceMatrix(final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapWithDistanceMatrix: called!");
 
         GoogleServiceStreams.streamFetchDistanceMatrix(
@@ -545,8 +548,7 @@ public class FetchingIntentService extends IntentService {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(TAG, "onError: " + e.getMessage() );
-
+                        Log.e(TAG, "onError: " + e.getMessage());
 
 
                     }
@@ -640,9 +642,10 @@ public class FetchingIntentService extends IntentService {
         }
     }
 
-    /** This method saves the fetched image in the internal storage
-     * */
-    private void saveImageInInternalStorage (String placeId, final Bitmap bitmap) {
+    /**
+     * This method saves the fetched image in the internal storage
+     */
+    private void saveImageInInternalStorage(String placeId, final Bitmap bitmap) {
         Log.d(TAG, "saveImageInInternalStorage: called!");
 
         if (accessInternalStorageGranted) {
@@ -671,10 +674,11 @@ public class FetchingIntentService extends IntentService {
     }
 
 
-    /** This method destroys and recreates the internal directory where all the images are stored.
+    /**
+     * This method destroys and recreates the internal directory where all the images are stored.
      * The objective of this process is to delete all old images to free memory space
-     * */
-    private void configuringInternalStorage () {
+     */
+    private void configuringInternalStorage() {
         Log.d(TAG, "configuringInternalStorage: called!");
 
         internalStorage = new Storage(getApplicationContext());
@@ -694,16 +698,17 @@ public class FetchingIntentService extends IntentService {
 
     }
 
-    /** This method inserts a restaurant in the database
-     * */
-    private void insertRestaurantEntryInDatabase (RestaurantEntry restaurantEntry) {
+    /**
+     * This method inserts a restaurant in the database
+     */
+    private void insertRestaurantEntryInDatabase(RestaurantEntry restaurantEntry) {
         Log.d(TAG, "insertRestaurantEntryInDatabase: called!");
 
         localDatabase.restaurantDao().insertRestaurant(restaurantEntry);
 
     }
 
-    private void updateMapFragmentAccordingToProcessState (int value) {
+    private void updateMapFragmentAccordingToProcessState(int value) {
         Log.d(TAG, "updateMapFragmentAccordingToProcessState: called!");
 
         Intent intent = new Intent();
@@ -712,7 +717,7 @@ public class FetchingIntentService extends IntentService {
         sendBroadcast(intent);
     }
 
-    private void showMap () {
+    private void showMap() {
         Log.d(TAG, "showMap: called!");
         updateMapFragmentAccordingToProcessState(3);
     }
@@ -723,7 +728,7 @@ public class FetchingIntentService extends IntentService {
     }
 
 
-    private void clearDatabase () {
+    private void clearDatabase() {
         Log.d(TAG, "clearDatabase: called!");
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
@@ -733,6 +738,4 @@ public class FetchingIntentService extends IntentService {
             }
         });
     }
-
-
 }
