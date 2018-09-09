@@ -57,6 +57,8 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
     private static final String TAG = JoinGroupActivity.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     @BindView(R.id.join_fab_id)
     FloatingActionButton fab;
@@ -76,6 +78,8 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
     @BindView(R.id.progressBar_content)
     LinearLayout progressBarContent;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Unbinder unbinder;
 
     private String userKey;
@@ -84,11 +88,15 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
     private List<String> listOfGroups;
     private String[] arrayOfGroups;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Firebase Database
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
     private DatabaseReference dbRefGroups;
     private SharedPreferences sharedPref;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
@@ -96,6 +104,8 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
     private Snackbar snackbar;
 
     private boolean internetAvailable;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -106,7 +116,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
         Log.d(TAG, "onCreate: userKey = " + userKey);
 
-        /////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_join_group);
         unbinder = ButterKnife.bind(this);
 
@@ -192,6 +202,8 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /***************************
      * LISTENERS ***************

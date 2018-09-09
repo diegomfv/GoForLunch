@@ -293,6 +293,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     /*******************************
      * CONFIGURATION ***************
      ******************************/

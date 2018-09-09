@@ -318,6 +318,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     /*******************************
      * CONFIGURATION ***************
      ******************************/

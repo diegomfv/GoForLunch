@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     @BindView(R.id.main_drawer_layout_id)
     DrawerLayout mainDrawerLayout;
@@ -91,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     @BindView(R.id.progressBar_content)
     LinearLayout progressBarContent;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Unbinder unbinder;
 
     private TextView navUserName;
@@ -103,14 +107,17 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     //------------------------------------------------
 
-    //Flag to know which fragment we are in avoiding relaunching it
-    private int flagToSpecifyCurrentFragment;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Shared Preferences
     private SharedPreferences sharedPref;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Local database
     private AppDatabase localDatabase;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Firebase
     private FirebaseAuth auth;
@@ -120,6 +127,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     private DatabaseReference fireDbRefGroups;
     private DatabaseReference fireDbRefUserNotif;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Variables
     private String userFirstName;
     private String userLastName;
@@ -128,8 +137,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     private String userGroup;
     private String userGroupKey;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Current Position
     private LatLngForRetrofit myPosition;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
@@ -138,13 +151,24 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     private boolean internetAvailable;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private boolean accessInternalStorageGranted = false;
     private boolean mLocationPermissionGranted = false;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Internal Storage
     private Storage storage;
     private String mainPath;
     private String imageDirPath;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //Flag to know which fragment we are in avoiding relaunching it
+    private int flagToSpecifyCurrentFragment;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         this.configureStorage();
 
-        //////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
 
@@ -350,6 +374,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     /** Method used to update the NavDrawer info
      * */
     private boolean updateNavDrawerViews() {
@@ -404,62 +430,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         return mainDrawerLayout;
     }
 
-    /**************************
-     * Rx JAVA ****************
-     *************************/
-
-    /** Method that returns all restaurants in database of a specific type
-     * */
-    private Maybe<List<RestaurantEntry>> getAllRestaurantsInDatabase() {
-        Log.d(TAG, "getRestaurantsByType: called!");
-        return localDatabase.restaurantDao().getAllRestaurantsRxJava();
-
-    }
-
-    private MaybeObserver<List<RestaurantEntry>> maybeObserverStartFetchProcessIfNecessary() {
-        Log.d(TAG, "maybeObserverUpdateUI: called1");
-
-        return new MaybeObserver<List<RestaurantEntry>>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.d(TAG, "onSubscribe: called!");
-
-            }
-
-            @Override
-            public void onSuccess(List<RestaurantEntry> restaurantEntries) {
-                Log.d(TAG, "onSuccess: called!");
-
-                if (restaurantEntries.size() == 0) {
-                    Log.i(TAG, "onSuccess: the database is EMPTY ++++++++++++");
-
-                    if (internetAvailable) {
-
-                        startFetchingProcess();
-
-                    } else {
-                        //do nothing, there is no internet
-                    }
-
-                } else {
-                    Log.i(TAG, "onSuccess: the database is FULL ++++++++++++");
-                    //do nothing, the database is already full
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.d(TAG, "onError: called!");
-
-            }
-
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: called!");
-
-            }
-        };
-    }
 
     /*****************
      * LISTENERS *****
