@@ -77,6 +77,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     @BindView(R.id.pers_enter_fab_id)
     FloatingActionButton fab;
@@ -111,6 +113,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     @BindView(R.id.pers_main_content)
     LinearLayout mainContent;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Unbinder unbinder;
 
     //Variables
@@ -124,11 +128,15 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     private Uri userProfilePictureUri;
     private InputStream inputStreamSelectedImage;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Firebase Database
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Firebase Storage
     private FirebaseStorage fireStorage;
@@ -136,11 +144,17 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     private StorageReference stRefImageDir;
     private StorageReference stRefUser;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Shared Preferences
     private SharedPreferences sharedPref;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Glide
     private RequestManager glide;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
@@ -148,6 +162,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     private Snackbar snackbar;
 
     private boolean internetAvailable;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -165,7 +181,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         glide = Glide.with(PersInfoActivity.this);
 
-        /////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
         /* We set the content view
         * */
         setContentView(R.layout.activity_pers_info);
@@ -282,6 +298,8 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         }
 
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /***************
      * LISTENERS ***

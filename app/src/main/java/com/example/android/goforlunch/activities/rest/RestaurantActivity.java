@@ -1,6 +1,7 @@
 package com.example.android.goforlunch.activities.rest;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -73,6 +74,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     private Context context;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     @BindView(R.id.restaurant_fab_id)
     FloatingActionButton fab;
@@ -98,6 +101,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     @BindView(R.id.main_layout_id)
     CoordinatorLayout mainContent;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Unbinder unbinder;
 
     //Variables
@@ -117,12 +122,16 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     private List<User> listOfCoworkers;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //RecyclerView
     @BindView(R.id.restaurant_recycler_view_id)
     RecyclerView recyclerView;
 
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Firebase Database
     private FirebaseAuth auth;
@@ -131,19 +140,22 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     private DatabaseReference dbRefUsers;
     private DatabaseReference dbRefUsersGetList;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private SharedPreferences sharedPref;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Glide
     private RequestManager glide;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Internal Storage
     private Storage storage;
     private String mainPath;
     private String imageDirPath;
     private boolean accessToInternalStorageGranted = false;
-
-    // Disposable
-    private Disposable getImageFromInternalStorageDisposable;
 
     //Intent
     private Intent intent;
@@ -223,15 +235,9 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         this.navigationView.setOnNavigationItemSelectedListener(null);
         this.dbRefUsersGetList.removeEventListener(valueEventListenerGetListOfCoworkers);
 
-        this.disposeWhenDestroy();
-
         this.unbinder.unbind();
     }
 
-    private void disposeWhenDestroy () {
-        Utils.dispose(this.getImageFromInternalStorageDisposable);
-
-    }
 
     /** Callback: listening to broadcast receiver
      * */
@@ -711,10 +717,11 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     /** Loads an image using glide. The observable emits the image in a background thread
      * and the image is loaded using glide in the main thread
      * */
+    @SuppressLint("CheckResult")
     public void getAndDisplayImageFromInternalStorage(String filePath) {
         Log.d(TAG, "loadImageFromInternalStorage: called!");
 
-        getImageFromInternalStorageDisposable = getObservableImageFromInternalStorage(filePath)
+        getObservableImageFromInternalStorage(filePath)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<byte[]>() {
