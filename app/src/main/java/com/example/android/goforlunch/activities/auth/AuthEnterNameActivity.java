@@ -75,6 +75,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     @BindView(R.id.enter_fab_id)
     FloatingActionButton fab;
@@ -103,6 +105,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     @BindView(R.id.enter_main_content)
     LinearLayout mainContent;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Unbinder unbinder;
 
     private String email;
@@ -112,6 +116,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     //List of Emails to store all the emails and check if an user already exists in the database
     private List<String> listOfEmails;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Firebase User
     private FirebaseAuth auth;
@@ -128,12 +134,16 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     private StorageReference stRefMain;
     private StorageReference stRefImageDir;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
     private IntentFilter intentFilter;
     private Snackbar snackbar;
 
     private boolean internetAvailable;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -147,18 +157,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         stRefMain = fireStorage.getReference();
         stRefImageDir = stRefMain.child(Repo.Directories.IMAGE_DIR);
 
-        /////////////////////////////////////////////
-        /* We set the content view
-        * */
+        ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_auth_enter_name);
         unbinder = ButterKnife.bind(this);
-
-        /* Configuring textInputEditTexts: hide keyboard
-         * */
-        //Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputFirstName);
-        //Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputLastName);
-        //Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputEmail);
-        //Utils.configureTextInputEditTextWithHideKeyboard(AuthEnterNameActivity.this, inputPassword);
 
         /* If we come from SignUp Activity (email and password login) then the intent won't be null.
          * Otherwise, it will.
@@ -184,7 +185,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         Utils.showMainContent(progressBarContent, mainContent);
 
         /* We set the listeners
-        * */
+         * */
         fab.setOnClickListener(fabOnClickListener);
         iv_userImage.setOnClickListener(ivOnClickListener);
         buttonStart.setOnClickListener(buttonStartOnClickListener);
@@ -224,8 +225,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     }
 
-    /** Callback: listening to broadcast receiver
-     * */
+    /**
+     * Callback: listening to broadcast receiver
+     */
     @Override
     public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
@@ -264,8 +266,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         }
     }
 
-    /** External Storage permission request
-     * */
+    /**
+     * External Storage permission request
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
@@ -285,8 +288,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         }
     }
 
-    /** Getting the image
-     * */
+    /**
+     * Getting the image
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -318,10 +322,11 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method that connects a broadcastReceiver to the activity.
+    /**
+     * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiver () {
+     */
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -330,9 +335,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the activity.
-     * */
-    private void disconnectBroadcastReceiver () {
+    /**
+     * Method that disconnects the broadcastReceiver from the activity.
+     */
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
@@ -373,7 +379,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
-                startActivityForResult(intent,0);
+                startActivityForResult(intent, 0);
 
             }
         }
@@ -390,11 +396,11 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
                 if (checkMinimumRequisites()) {
                     /* Minimum requisites are fulfilled
-                    * */
+                     * */
 
                     if (userAlreadyExists(listOfEmails, inputEmail.getText().toString().toLowerCase().trim())) {
                         /* The listOfEmails will only be not empty if there is internet, but we can only access this part
-                        * of the code is internet is available, so listOfEmails will always be not empty */
+                         * of the code is internet is available, so listOfEmails will always be not empty */
 
                         /* A user with this email already exists, so we don't let the user to continue with the process
                          * (we cannot create two users with the same email) */
@@ -402,8 +408,8 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
                     } else {
                         /* Minimum requisites are fulfilled and the user does not exist so
-                        * we proceed to create the user in the database
-                        * */
+                         * we proceed to create the user in the database
+                         * */
                         createUser();
 
                     }
@@ -446,10 +452,11 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
      * METHODS ********
      *****************/
 
-    /** This method is used to check that the minimum requisites for creating an user
+    /**
+     * This method is used to check that the minimum requisites for creating an user
      * are fulfilled
-     * */
-    public boolean checkMinimumRequisites () {
+     */
+    public boolean checkMinimumRequisites() {
         Log.d(TAG, "checkMinimumRequisites: called!");
 
         if (!internetAvailable) {
@@ -481,9 +488,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         }
     }
 
-    /** Checks if a value is in a list. It is used to
+    /**
+     * Checks if a value is in a list. It is used to
      * check if the user email is already in the database.
-     * */
+     */
     public boolean userAlreadyExists(List<String> listOfEmails, String inputString) {
         Log.d(TAG, "userAlreadyExists: called!");
 
@@ -493,8 +501,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         return listOfEmails.contains(inputString);
     }
 
-    /** Method that creates a user in firebase
-     * */
+    /**
+     * Method that creates a user in firebase
+     */
     private void createUser() {
         Log.d(TAG, "createUser: called!");
 
@@ -505,7 +514,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
         } else {
             /* Internet is available
-            * */
+             * */
             Utils.hideMainContent(progressBarContent, mainContent);
 
             //We create the user
@@ -531,7 +540,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                                 /* We hide the progress bar
                                  * and enable interaction
                                  * */
-                                Utils.showMainContent(progressBarContent,mainContent);
+                                Utils.showMainContent(progressBarContent, mainContent);
 
                             } else {
                                 /* Task was successful
@@ -614,9 +623,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     }
 
-    /** Method that checks if we have permission to read external storage
-     * **/
-    public boolean checkPermissionREAD_EXTERNAL_STORAGE (
+    /**
+     * Method that checks if we have permission to read external storage
+     **/
+    public boolean checkPermissionREAD_EXTERNAL_STORAGE(
             final Context context) {
         Log.d(TAG, "checkPermissionREAD_EXTERNAL_STORAGE: called!");
 
@@ -634,7 +644,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                     ActivityCompat
                             .requestPermissions(
                                     (Activity) context,
-                                    new String[] { Manifest.permission.READ_EXTERNAL_STORAGE },
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                                     MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
                 }
                 return false;
@@ -647,9 +657,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         }
     }
 
-    /** Method used to display a dialog
+    /**
+     * Method used to display a dialog
      * for permissions request
-     * */
+     */
     public void showDialog(final String msg, final Context context,
                            final String permission) {
         Log.d(TAG, "showDialog: called!");
@@ -662,7 +673,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         ActivityCompat.requestPermissions((Activity) context,
-                                new String[] { permission },
+                                new String[]{permission},
                                 MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
                     }
                 });
@@ -671,11 +682,11 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     }
 
 
-
-    /** Method for saving images
+    /**
+     * Method for saving images
      * in Firebase Storage
-     * */
-    private void startStorageProcessWithByteArray (ImageView imageView) {
+     */
+    private void startStorageProcessWithByteArray(ImageView imageView) {
         Log.d(TAG, "startStorageProcessWithByteArray: called!");
 
         stRefUser = stRefImageDir.child(inputEmail.getText().toString());

@@ -49,6 +49,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
     private static final String TAG = AuthSignInEmailPasswordActivity.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     @BindView(R.id.signin_fab_id)
     FloatingActionButton fab;
@@ -74,12 +76,18 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     @BindView(R.id.signin_main_content)
     LinearLayout mainContent;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Firebase
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Shared Preferences
     private SharedPreferences sharedPref;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
@@ -87,6 +95,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
     private Snackbar snackbar;
 
     private boolean internetAvailable;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,7 +109,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         * */
         fireDb = FirebaseDatabase.getInstance();
 
-        /////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_auth_signin_email_password);
         ButterKnife.bind(this);
 
@@ -175,6 +185,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /*******************************
      * CONFIGURATION ***************

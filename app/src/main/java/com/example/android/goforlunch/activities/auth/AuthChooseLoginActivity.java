@@ -67,6 +67,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     //Google Sign In Request Code
     private static int RC_GOOGLE_SIGN_IN = 101;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Widgets
     @BindView(R.id.choose_sign_in_password_button_id)
     Button buttonPassword;
@@ -86,6 +88,8 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     @BindView(R.id.main_layout_id)
     LinearLayout mainContent;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private Unbinder unbinder;
 
     private GoogleSignInClient mGoogleSignInClient;
@@ -93,14 +97,20 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     //For facebook login
     private CallbackManager mCallbackManager;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Firebase
     private FirebaseAuth auth;
     private FirebaseUser user;
     private FirebaseDatabase fireDb;
     private DatabaseReference dbRefUsers;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     //Shared Preferences
     private SharedPreferences sharedPref;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
@@ -109,13 +119,15 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     private boolean internetAvailable;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate: called!");
 
         /* We delete all info from shared preferences
-        * */
+         * */
         sharedPref = PreferenceManager.getDefaultSharedPreferences(AuthChooseLoginActivity.this);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear().apply();
@@ -127,9 +139,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         auth = FirebaseAuth.getInstance();
 
         /* Leave this two lines of code uncommented to do trials without
-        * logging in directly
-        * WE LEAVE THIS. THE APP DOES NOT WORK WELL WITHOUT THIS
-        * */
+         * logging in directly
+         * WE LEAVE THIS. THE APP DOES NOT WORK WELL WITHOUT THIS
+         * */
         // TODO: 04/08/2018 I have to uncomment these two lines (that are currently commented)
         // TODO: 04/08/2018 Otherwise, the app does strange things when I leave it without
         // TODO: 04/08/2018 logging out and then launch it again
@@ -137,12 +149,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         LoginManager.getInstance().logOut();
 
         /* internetAvailable is false till the update() callback changes it
-        * */
+         * */
         internetAvailable = false;
 
-        /////////////////////////////////////////////
-        /* We set the content view
-        * */
+        ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_auth_choose_login);
         unbinder = ButterKnife.bind(this);
         Utils.showMainContent(progressBarContent, mainContent);
@@ -155,10 +165,11 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         /* We check if the user is logged in in a background thread.
          * */
+        // TODO: 09/09/2018 Trial purposes
         //checkIfUserIsLoggedInInBackgroundThread();
 
         /* We set the listeners
-        * */
+         * */
         buttonPassword.setOnClickListener(buttonPasswordOnClickListener);
 
         tvRegister.setOnClickListener(tvRegisterOnClickListener);
@@ -172,7 +183,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        buttonGoogle.setStyle(SignInButton.SIZE_WIDE,SignInButton.COLOR_DARK);
+        buttonGoogle.setStyle(SignInButton.SIZE_WIDE, SignInButton.COLOR_DARK);
         buttonGoogle.setOnClickListener(buttonGoogleOnClickListener);
 
         mCallbackManager = CallbackManager.Factory.create();
@@ -214,8 +225,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     }
 
-    /** Callback: listening to broadcast receiver
-     * */
+    /**
+     * Callback: listening to broadcast receiver
+     */
     @Override
     public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
@@ -276,7 +288,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         } else {
             // Result returned from launching the Intent from Facebook Login
             Log.d(TAG, "onActivityResult: facebook process...!");
-            mCallbackManager.onActivityResult(requestCode,resultCode,data);
+            mCallbackManager.onActivityResult(requestCode, resultCode, data);
 
         }
     }
@@ -285,10 +297,11 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method that connects a broadcastReceiver to the activity.
+    /**
+     * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiver () {
+     */
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -297,9 +310,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the activity.
-     * */
-    private void disconnectBroadcastReceiver () {
+    /**
+     * Method that disconnects the broadcastReceiver from the activity.
+     */
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
@@ -383,7 +397,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         @Override
         public void onError(FacebookException error) {
-            Log.e(TAG, "onError: " + error.toString() );
+            Log.e(TAG, "onError: " + error.toString());
 
         }
     };
@@ -392,16 +406,18 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
      * METHODS *********************
      ******************************/
     // TODO: 09/09/2018 Left here for trial purposes
-    /** Method that checks if the user is currently
+
+    /**
+     * Method that checks if the user is currently
      * logged in in a background thread
-     * */
+     */
     private void checkIfUserIsLoggedInInBackgroundThread() {
         Log.d(TAG, "checkIfUserIsLoggedInInBackgroundThread: called!");
 
         /* We use this method instead of internetAvailable because we are still
-        * in onCreate() and internetAvailable would be false in both cases (with
-        * and without internet available)
-        * */
+         * in onCreate() and internetAvailable would be false in both cases (with
+         * and without internet available)
+         * */
         Utils.checkInternetInBackgroundThread(new DisposableObserver<Boolean>() {
             @Override
             public void onNext(Boolean internetAvailableBackgroundThread) {
@@ -413,7 +429,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
                 } else {
                     /* Internet is available
-                    * */
+                     * */
                     getUserAndLaunchSpecificActivity();
                 }
             }
@@ -432,9 +448,10 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         });
     }
 
-    /** Method that gets the user and launches an specific activity if needed
-     * */
-    private void getUserAndLaunchSpecificActivity () {
+    /**
+     * Method that gets the user and launches an specific activity if needed
+     */
+    private void getUserAndLaunchSpecificActivity() {
         Log.d(TAG, "getUserAndLaunchSpecificActivity: called!");
 
         user = auth.getCurrentUser();
@@ -452,7 +469,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         } else {
 
-            if (user.getDisplayName() != null){
+            if (user.getDisplayName() != null) {
                 Log.d(TAG, "onCreate: user is not null");
 
                 //go directly to MainActivity
@@ -469,8 +486,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
         }
     }
 
-    /** Method for google sign in
-     * */
+    /**
+     * Method for google sign in
+     */
     public void googleSignIn() {
         Log.d(TAG, "googleSignIn: called!");
 
@@ -484,8 +502,9 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
      * and facebook *****
      * *****************/
 
-    /** Method that handles google sign in
-     * */
+    /**
+     * Method that handles google sign in
+     */
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle: called!");
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
@@ -522,13 +541,14 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
         } else {
             /* There is no internet
-            * */
+             * */
             ToastHelper.toastNoInternet(AuthChooseLoginActivity.this);
         }
     }
 
-    /** Method that handles facebook sign in
-     * */
+    /**
+     * Method that handles facebook sign in
+     */
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken: called!");
 
@@ -571,11 +591,12 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
 
     }
 
-    /** Method that checks if a user exists in the database.
+    /**
+     * Method that checks if a user exists in the database.
      * If the user does, MainActivity is launched. If the user doesn't,
      * the user is created in the database and afterwards MainActivity is launched
-     * */
-    private void checkIfUserExistsInDatabase (final FirebaseUser user) {
+     */
+    private void checkIfUserExistsInDatabase(final FirebaseUser user) {
         Log.d(TAG, "checkIfUserExistsInDatabase: called!");
 
         if (!internetAvailable) {

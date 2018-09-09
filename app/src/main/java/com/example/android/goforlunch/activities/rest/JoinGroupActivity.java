@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.activities.rest;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -89,9 +90,6 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
     private DatabaseReference dbRefGroups;
     private SharedPreferences sharedPref;
 
-    //Disposable
-    private Disposable disposable;
-
     //InternetConnectionReceiver variables
     private InternetConnectionReceiver receiver;
     private IntentFilter intentFilter;
@@ -147,10 +145,6 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
         this.disconnectBroadcastReceiver();
 
-        if (null != disposable) {
-            this.disposable.dispose();
-        }
-
         this.fab.setOnClickListener(null);
         this.buttonJoinGroup.setOnClickListener(null);
         this.buttonCreateGroup.setOnClickListener(null);
@@ -159,8 +153,9 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Callback: listening to broadcast receiver
-     * */
+    /**
+     * Callback: listening to broadcast receiver
+     */
     @Override
     public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
@@ -255,8 +250,9 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         }
     };
 
-    /** Value Event Listener: get User Group and All Groups
-     * */
+    /**
+     * Value Event Listener: get User Group and All Groups
+     */
     private ValueEventListener valueEventListenerGetUserGroupAndRestOfGroups = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -283,8 +279,9 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
     };
 
-    /** Value Event Listener: get All Groups
-     * */
+    /**
+     * Value Event Listener: get All Groups
+     */
     private ValueEventListener valueEventListenerGetAllGroups = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -298,7 +295,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
             arrayOfGroups = new String[listOfGroups.size()];
             arrayOfGroups = listOfGroups.toArray(arrayOfGroups);
 
-            configureAutocompleteTextView(textInputAutoCompleteTextView, disposable, arrayOfGroups);
+            configureAutocompleteTextView(textInputAutoCompleteTextView, arrayOfGroups);
 
             dbRefGroups.removeEventListener(this);
 
@@ -315,10 +312,11 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method that connects a broadcastReceiver to the activity.
+    /**
+     * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiver () {
+     */
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -327,9 +325,10 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the activity.
-     * */
-    private void disconnectBroadcastReceiver () {
+    /**
+     * Method that disconnects the broadcastReceiver from the activity.
+     */
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
@@ -345,11 +344,12 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method that configures the autocompleteTextView
-     * */
-    private void configureAutocompleteTextView (AutoCompleteTextView autoCompleteTextView,
-                                                Disposable disposable,
-                                                String[] arrayOfGroups) {
+    /**
+     * Method that configures the autocompleteTextView
+     */
+    @SuppressLint("CheckResult")
+    private void configureAutocompleteTextView(AutoCompleteTextView autoCompleteTextView,
+                                               String[] arrayOfGroups) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
         ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
@@ -359,7 +359,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
         );
 
         autoCompleteTextView.setAdapter(autocompleteAdapter);
-        disposable = RxTextView.textChangeEvents(autoCompleteTextView)
+        RxTextView.textChangeEvents(autoCompleteTextView)
                 .skip(2)
                 .debounce(600, TimeUnit.MILLISECONDS)
                 .map(new Function<TextViewTextChangeEvent, String>() {
@@ -375,7 +375,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                         Log.d(TAG, "onNext: group = " + group);
 
                         /* We only hide the keyboard if the group length (inputted) is long enough
-                        * */
+                         * */
                         if (group.length() > 3) {
                             Utils.hideKeyboard(JoinGroupActivity.this);
                         }
@@ -396,10 +396,11 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                 });
     }
 
-    /** Method that creates an alert dialog that
+    /**
+     * Method that creates an alert dialog that
      * can be used to delete the Read Articles History
-     * */
-    private void alertDialogJoinGroup (final String group) {
+     */
+    private void alertDialogJoinGroup(final String group) {
         Log.d(TAG, "alertDialogJoinGroup: called!");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(JoinGroupActivity.this);
@@ -425,7 +426,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
                                     String groupKey = UtilsFirebase.getGroupKeyFromDataSnapshot(dataSnapshot, group);
 
-                                    Map<String,Object> map = new HashMap<>();
+                                    Map<String, Object> map = new HashMap<>();
                                     map.put(Repo.FirebaseReference.USER_GROUP, group);
                                     map.put(Repo.FirebaseReference.USER_GROUP_KEY, groupKey);
 
