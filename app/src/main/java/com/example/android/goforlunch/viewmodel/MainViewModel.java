@@ -41,7 +41,4 @@ public class MainViewModel extends AndroidViewModel {
         return restaurants;
     }
 
-
-
-
 }
