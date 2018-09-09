@@ -257,6 +257,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
             /* We get the emails
             when internet comes back
             */
+
             dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
             dbRefUsers.addValueEventListener(valueEventListenerGetEmails);
 
@@ -363,6 +364,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         @Override
         public void onClick(View view) {
             Log.d(TAG, "onClick: imageView clicked!");
+
+            // TODO: 09/09/2018 Delete
+            Log.w(TAG, "onClick: " + listOfEmails);
+
 
             if (checkPermissionREAD_EXTERNAL_STORAGE(AuthEnterNameActivity.this)) {
 

@@ -226,14 +226,23 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         @Override
         public void onClick(View view) {
 
-            Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, AuthEnterNameActivity.class);
-            intent.putExtra(Repo.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
-            intent.putExtra(Repo.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
+            if (inputEmail.getText().toString().trim().length() == 0
+                    || inputPassword.getText().toString().trim().length() == 0) {
 
-            //We include a FLAG intent extra (boolean) to notify the next activity we launched the intent from this Activity
-            intent.putExtra(Repo.SentIntent.FLAG, true);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
+                Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, AuthEnterNameActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+
+            } else {
+                Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, AuthEnterNameActivity.class);
+                intent.putExtra(Repo.SentIntent.EMAIL, inputEmail.getText().toString().toLowerCase());
+                intent.putExtra(Repo.SentIntent.PASSWORD, inputPassword.getText().toString().toLowerCase());
+
+                //We include a boolean intent extra to notify the next activity we launched the intent from this Activity
+                intent.putExtra(Repo.SentIntent.FLAG, true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
         }
     };
 

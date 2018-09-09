@@ -327,9 +327,15 @@ public class FragmentRestaurantMapView extends Fragment implements java.util.Obs
                          * */
                         listOfAllRestaurantsInDatabase = restaurantEntries;
 
-                        /* We update the UI
-                         * */
-                        updateMapWithPins();
+                        /* We only update the map once
+                        * */
+                        if (listOfMarkers != null) {
+                            if (listOfMarkers.size() < 60) {
+                                /* We update the UI
+                                 * */
+                                updateMapWithPins();
+                            }
+                        }
 
                     } else {
                         Log.d(TAG, "onChanged: restaurantEntries is NULL");

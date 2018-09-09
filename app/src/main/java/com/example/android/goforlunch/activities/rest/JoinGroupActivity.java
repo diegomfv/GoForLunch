@@ -110,7 +110,7 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
 
         /////////////////////////////////////////////
         setContentView(R.layout.activity_join_group);
-        ButterKnife.bind(this);
+        unbinder = ButterKnife.bind(this);
 
         Utils.showMainContent(progressBarContent, mainContent);
 
