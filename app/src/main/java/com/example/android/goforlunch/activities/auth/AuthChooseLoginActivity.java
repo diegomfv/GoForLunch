@@ -391,7 +391,7 @@ public class AuthChooseLoginActivity extends AppCompatActivity implements Observ
     /*******************************
      * METHODS *********************
      ******************************/
-
+    // TODO: 09/09/2018 Left here for trial purposes
     /** Method that checks if the user is currently
      * logged in in a background thread
      * */
