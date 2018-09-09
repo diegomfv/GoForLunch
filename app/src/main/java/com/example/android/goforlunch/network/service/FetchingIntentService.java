@@ -1,5 +1,6 @@
 package com.example.android.goforlunch.network.service;
 
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -49,21 +50,32 @@ public class FetchingIntentService extends IntentService {
 
     private static final String TAG = FetchingIntentService.class.getSimpleName();
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private ArrayList<RestaurantEntry> listOfRestaurantsEntries;
     private ArrayList<String> listOfPlacesIdsOfRestaurants;
 
     private String[] arrayOfTypes;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private LatLngForRetrofit myPosition;
-    private Disposable disposable;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private Handler mHandler;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private AppDatabase localDatabase;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private Storage internalStorage;
     private String mainPath;
     private String imageDirPath;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private boolean accessInternalStorageGranted;
 
@@ -75,6 +87,8 @@ public class FetchingIntentService extends IntentService {
     //(a number close to 0 to avoid any issues)
     //the broadcast to update the UI will be called.
     private AtomicInteger counter;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public FetchingIntentService() {
         super("FetchingIntentService");
@@ -196,186 +210,188 @@ public class FetchingIntentService extends IntentService {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     /** This method starts the process for fetching restaurants using
      * nearby places service
      * */
+    @SuppressLint("CheckResult")
     private void startNearbyPlacesProcess () {
         Log.d(TAG, "startNearbyPlacesProcess: called!");
 
         /*1. We start fetching nearby places. */
-        disposable =
-                GoogleServiceStreams.streamFetchPlacesNearby(
-                        myPosition,
-                        "distance",
-                        "restaurant",
-                        NEARBY_KEY)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(Schedulers.io())
-                        .subscribeWith(new DisposableObserver<PlacesByNearby>() {
-                            @Override
-                            public void onNext(PlacesByNearby placesByNearby) {
-                                Log.d(TAG, "onNext: called!");
+        GoogleServiceStreams.streamFetchPlacesNearby(
+                myPosition,
+                "distance",
+                "restaurant",
+                NEARBY_KEY)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribeWith(new DisposableObserver<PlacesByNearby>() {
+                    @Override
+                    public void onNext(PlacesByNearby placesByNearby) {
+                        Log.d(TAG, "onNext: called!");
 
-                                List<Result> listOfResults = placesByNearby.getResults();
+                        List<Result> listOfResults = placesByNearby.getResults();
 
-                                if (listOfResults.size() == 0) {
-                                    Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
+                        if (listOfResults.size() == 0) {
+                            Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
 
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Log.d(TAG, "run: handler running!");
-                                            ToastHelper.toastShort(FetchingIntentService.this, getResources().getString(R.string.serviceProblemServer));
-                                            showMap();
-                                        }
-                                    });
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.d(TAG, "run: handler running!");
+                                    ToastHelper.toastShort(FetchingIntentService.this, getResources().getString(R.string.serviceProblemServer));
+                                    showMap();
+                                }
+                            });
 
-                                } else {
-                                    Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
+                        } else {
+                            Log.i(TAG, "onNext: listOfResults.size() = " + listOfResults.size());
 
-                                    for (int i = 0; i < listOfResults.size(); i++) {
+                            for (int i = 0; i < listOfResults.size(); i++) {
 
-                                        listOfPlacesIdsOfRestaurants.add(Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()));
+                                listOfPlacesIdsOfRestaurants.add(Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()));
 
-                                        listOfRestaurantsEntries.add(
-                                                new RestaurantEntry(
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getName()),
-                                                        13,
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getVicinity()),
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
-                                        );
-                                        counter.getAndIncrement();
-                                        Log.i(TAG, "onNext: counter = " + counter.get());
+                                listOfRestaurantsEntries.add(
+                                        new RestaurantEntry(
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getName()),
+                                                13,
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getVicinity()),
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
+                                );
+                                counter.getAndIncrement();
+                                Log.i(TAG, "onNext: counter = " + counter.get());
 
-                                    }
+                            }
 
                                     /* Fetching nearby places has ended,
                                     we start Text Search Process
                                     */
-                                    Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED!");
-                                    Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED! Restaurants.size() = " + listOfRestaurantsEntries.size());
+                            Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED!");
+                            Log.i(TAG, "onNext: NEARBY PLACES PROCESS ENDED! Restaurants.size() = " + listOfRestaurantsEntries.size());
 
-                                    for (int i = 1; i < arrayOfTypes.length - 1; i++) {
-                                        //-1 because we don't want to fetch "type OTHER" restaurants
-                                        startTextSearchProcess(i);
-
-                                    }
-                                }
+                            for (int i = 1; i < arrayOfTypes.length - 1; i++) {
+                                //-1 because we don't want to fetch "type OTHER" restaurants
+                                startTextSearchProcess(i);
 
                             }
+                        }
 
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.e(TAG, "onError: " + e.getMessage());
-                            }
+                    }
 
-                            @Override
-                            public void onComplete() {
-                                Log.d(TAG, "onComplete: called!");
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + e.getMessage());
+                    }
 
-                            }
-                        });
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: called!");
+
+                    }
+                });
 
     }
 
     /** This method starts the process for fetching restaurants using
      * text search service
      * */
+    @SuppressLint("CheckResult")
     private void startTextSearchProcess(final int type) {
         Log.d(TAG, "startTextSearchProcess: called!");
 
-        disposable =
-                GoogleServiceStreams.streamFetchPlacesTextSearch(
-                        arrayOfTypes[type] + "+" + "Restaurant",
-                        myPosition,
-                        20,
-                        Repo.Keys.TEXTSEARCH_KEY)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(Schedulers.io())
-                        .subscribeWith(new DisposableObserver<PlacesByTextSearch>() {
-                            @Override
-                            public void onNext(PlacesByTextSearch placesByTextSearch) {
-                                Log.d(TAG, "onNext: ");
+        GoogleServiceStreams.streamFetchPlacesTextSearch(
+                arrayOfTypes[type] + "+" + "Restaurant",
+                myPosition,
+                20,
+                Repo.Keys.TEXTSEARCH_KEY)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribeWith(new DisposableObserver<PlacesByTextSearch>() {
+                    @Override
+                    public void onNext(PlacesByTextSearch placesByTextSearch) {
+                        Log.d(TAG, "onNext: ");
 
-                                List<com.example.android.goforlunch.network.models.placetextsearch.Result> listOfResults = placesByTextSearch.getResults();
+                        List<com.example.android.goforlunch.network.models.placetextsearch.Result> listOfResults = placesByTextSearch.getResults();
 
-                                for (int i = 0; i < listOfResults.size(); i++) {
+                        for (int i = 0; i < listOfResults.size(); i++) {
 
                                     /* If the place is already in the lists and the type is equal to 13,
                                     we only update the type */
 
-                                    if (listOfPlacesIdsOfRestaurants.contains(listOfResults.get(i).getPlaceId())) {
+                            if (listOfPlacesIdsOfRestaurants.contains(listOfResults.get(i).getPlaceId())) {
 
-                                        for (int j = 0; j < listOfRestaurantsEntries.size(); j++) {
+                                for (int j = 0; j < listOfRestaurantsEntries.size(); j++) {
 
-                                            if (listOfRestaurantsEntries.get(j).getPlaceId().equalsIgnoreCase(listOfResults.get(i).getPlaceId())) {
-                                                if (listOfRestaurantsEntries.get(j).getType() == 13) {
-                                                    listOfRestaurantsEntries.get(j).setType(type);
-                                                }
-                                            }
-                                            break;
-
+                                    if (listOfRestaurantsEntries.get(j).getPlaceId().equalsIgnoreCase(listOfResults.get(i).getPlaceId())) {
+                                        if (listOfRestaurantsEntries.get(j).getType() == 13) {
+                                            listOfRestaurantsEntries.get(j).setType(type);
                                         }
+                                    }
+                                    break;
 
-                                    } else {
+                                }
+
+                            } else {
 
                                         /* If the place is not already in the lists,
                                         we add the restaurant to them */
 
-                                        listOfPlacesIdsOfRestaurants.add(listOfResults.get(i).getPlaceId());
+                                listOfPlacesIdsOfRestaurants.add(listOfResults.get(i).getPlaceId());
 
-                                        listOfRestaurantsEntries.add(
-                                                new RestaurantEntry(
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getName()),
-                                                        type,
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getFormattedAddress()),
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Repo.NOT_AVAILABLE_FOR_STRINGS,
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
-                                                        Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
-                                        );
-                                        counter.getAndIncrement();
-                                        Log.i(TAG, "onNext: counter = " + counter.get());
-                                    }
-                                }
+                                listOfRestaurantsEntries.add(
+                                        new RestaurantEntry(
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getPlaceId()),
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getName()),
+                                                type,
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getFormattedAddress()),
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getRating()),
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Repo.NOT_AVAILABLE_FOR_STRINGS,
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLat().toString()),
+                                                Utils.checkToAvoidNull(listOfResults.get(i).getGeometry().getLocation().getLng().toString()))
+                                );
+                                counter.getAndIncrement();
+                                Log.i(TAG, "onNext: counter = " + counter.get());
+                            }
+                        }
 
-                                if (type == 12) {
+                        if (type == 12) {
                                     /* if type is 12, then is type = Vietnamese which is the last one (before Other)
                                     This guarantees all restaurants are already in the map. We can proceed with getting placeId information
                                     to update Distance and Photos */
 
-                                    Log.i(TAG, "onNext: TEXT SEARCH PROCESS ENDED!");
+                            Log.i(TAG, "onNext: TEXT SEARCH PROCESS ENDED!");
 
-                                    startPlaceIdProcess();
-                                }
+                            startPlaceIdProcess();
+                        }
 
-                            }
+                    }
 
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.e(TAG, "onError: " + e.getMessage());
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + e.getMessage());
 
-                            }
+                    }
 
-                            @Override
-                            public void onComplete() {
-                                Log.d(TAG, "onComplete: ");
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
 
-                            }
-                        });
+                    }
+                });
 
     }
 
@@ -438,10 +454,11 @@ public class FetchingIntentService extends IntentService {
     /** This methods updates the map of
      * restaurant entries with Place Id information
      * */
+    @SuppressLint("CheckResult")
     private void updateMapWithPlaceIdInfo(final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapWithPlaceIdInfo: called!");
 
-        disposable = GoogleServiceStreams.streamFetchPlaceById(
+        GoogleServiceStreams.streamFetchPlaceById(
                 restaurantEntry.getPlaceId(),
                 Repo.Keys.PLACEID_KEY)
                 .subscribeOn(Schedulers.io())
@@ -495,51 +512,51 @@ public class FetchingIntentService extends IntentService {
     /** This methods updates the map of
      * restaurant entries with DistanceMatrix information
      * */
+    @SuppressLint("CheckResult")
     private void updateMapWithDistanceMatrix (final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapWithDistanceMatrix: called!");
 
-        disposable =
-                GoogleServiceStreams.streamFetchDistanceMatrix(
-                        "imperial",
-                        "place_id:" + restaurantEntry.getPlaceId(),
-                        myPosition,
-                        Repo.Keys.MATRIX_DISTANCE_KEY)
-                        .subscribeWith(new DisposableObserver<DistanceMatrix>() {
-                            @Override
-                            public void onNext(DistanceMatrix distanceMatrix) {
-                                Log.d(TAG, "onNext: ");
+        GoogleServiceStreams.streamFetchDistanceMatrix(
+                "imperial",
+                "place_id:" + restaurantEntry.getPlaceId(),
+                myPosition,
+                Repo.Keys.MATRIX_DISTANCE_KEY)
+                .subscribeWith(new DisposableObserver<DistanceMatrix>() {
+                    @Override
+                    public void onNext(DistanceMatrix distanceMatrix) {
+                        Log.d(TAG, "onNext: ");
 
-                                if (distanceMatrix != null) {
-                                    if (distanceMatrix.getRows() != null) {
-                                        if (distanceMatrix.getRows().get(0) != null) {
-                                            if (distanceMatrix.getRows().get(0).getElements() != null) {
-                                                if (distanceMatrix.getRows().get(0).getElements().get(0) != null) {
-                                                    if (distanceMatrix.getRows().get(0).getElements().get(0).getDistance() != null) {
-                                                        if (distanceMatrix.getRows().get(0).getElements().get(0).getDistance().getText() != null) {
-                                                            restaurantEntry.setDistance(distanceMatrix.getRows().get(0).getElements().get(0).getDistance().getText());
-                                                        }
-                                                    }
+                        if (distanceMatrix != null) {
+                            if (distanceMatrix.getRows() != null) {
+                                if (distanceMatrix.getRows().get(0) != null) {
+                                    if (distanceMatrix.getRows().get(0).getElements() != null) {
+                                        if (distanceMatrix.getRows().get(0).getElements().get(0) != null) {
+                                            if (distanceMatrix.getRows().get(0).getElements().get(0).getDistance() != null) {
+                                                if (distanceMatrix.getRows().get(0).getElements().get(0).getDistance().getText() != null) {
+                                                    restaurantEntry.setDistance(distanceMatrix.getRows().get(0).getElements().get(0).getDistance().getText());
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
+                        }
+                    }
 
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.e(TAG, "onError: " + e.getMessage() );
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + e.getMessage() );
 
 
 
-                            }
+                    }
 
-                            @Override
-                            public void onComplete() {
-                                Log.d(TAG, "onComplete: ");
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete: ");
 
-                            }
-                        });
+                    }
+                });
 
     }
 
