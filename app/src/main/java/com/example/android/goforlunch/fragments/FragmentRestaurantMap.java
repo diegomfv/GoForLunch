@@ -736,49 +736,51 @@ public class FragmentRestaurantMap extends Fragment {
     private void configureAutocompleteTextView(AutoCompleteTextView autoCompleteTextView) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
-        ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
-                getActivity(),
-                android.R.layout.simple_list_item_1, //This layout has to be a textview
-                arrayOfTypes
-        );
+        if (getActivity() != null) {
 
-        autoCompleteTextView.setAdapter(autocompleteAdapter);
-        RxTextView.textChangeEvents(autoCompleteTextView)
-                .skip(2)
-                .debounce(600, TimeUnit.MILLISECONDS)
-                .map(new Function<TextViewTextChangeEvent, String>() {
-                    @Override
-                    public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
-                        return textViewTextChangeEvent.text().toString();
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<String>() {
-                    @Override
-                    public void onNext(String type) {
+            ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
+                    getActivity(),
+                    android.R.layout.simple_list_item_1, //This layout has to be a textview
+                    arrayOfTypes
+            );
 
-                        /* We update the map
-                         * */
-                        updateMapWithPins();
+            autoCompleteTextView.setAdapter(autocompleteAdapter);
+            RxTextView.textChangeEvents(autoCompleteTextView)
+                    .skip(2)
+                    .debounce(600, TimeUnit.MILLISECONDS)
+                    .map(new Function<TextViewTextChangeEvent, String>() {
+                        @Override
+                        public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
+                            return textViewTextChangeEvent.text().toString();
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableObserver<String>() {
+                        @Override
+                        public void onNext(String type) {
 
-                        Utils.hideKeyboard(getActivity());
+                            /* We update the map
+                             * */
+                            updateMapWithPins();
 
-                    }
+                            Utils.hideKeyboard(getActivity());
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+                        }
 
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "onError: " + Log.getStackTraceString(e));
 
-                    @Override
-                    public void onComplete() {
-                        Log.d(TAG, "onComplete: ");
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            Log.d(TAG, "onComplete: ");
 
 
-                    }
-                });
-
+                        }
+                    });
+        }
     }
 
     /**
