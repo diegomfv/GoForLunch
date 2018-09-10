@@ -551,8 +551,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Log.d(TAG, "onNavigationItemSelected: called!");
 
-                    Fragment selectedFragment = null;
-
                     switch (item.getItemId()) {
 
                         case R.id.nav_view_map_id:
