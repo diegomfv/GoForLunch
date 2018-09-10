@@ -2,7 +2,11 @@ package com.example.android.goforlunch.network.service;
 
 import android.annotation.SuppressLint;
 import android.app.IntentService;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.CountDownTimer;
@@ -722,7 +726,7 @@ public class FetchingIntentService extends IntentService {
         Log.d(TAG, "notifyMainActivityProcessEnded: called!");
         Intent intent = new Intent();
         intent.setAction(Repo.SentIntent.LOAD_DATA_IN_VIEWMODEL);
-        sendBroadcast(intent);
+        sendImplicitBroadcast(getApplicationContext(), intent);
     }
 
     private void clearDatabase() {
@@ -734,5 +738,22 @@ public class FetchingIntentService extends IntentService {
                 localDatabase.clearAllTables();
             }
         });
+    }
+
+    private void sendImplicitBroadcast(Context ctxt, Intent i) {
+        Log.d(TAG, "sendImplicitBroadcast: called!");
+        PackageManager pm = ctxt.getPackageManager();
+        List<ResolveInfo> matches = pm.queryBroadcastReceivers(i, 0);
+
+        for (ResolveInfo resolveInfo : matches) {
+            Intent explicit = new Intent(i);
+            ComponentName cn =
+                    new ComponentName(resolveInfo.activityInfo.applicationInfo.packageName,
+                            resolveInfo.activityInfo.name);
+
+            explicit.setComponent(cn);
+            ctxt.sendBroadcast(explicit);
+        }
+
     }
 }

@@ -180,7 +180,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
         userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
-        glide = Glide.with(context);
+        glide = Glide.with(getApplicationContext());
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_restaurant);
@@ -454,7 +454,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
             /* We use the list in the adapter
              * */
-            mAdapter = new RVAdapterRestaurant(context, listOfCoworkers);
+            mAdapter = new RVAdapterRestaurant(context, listOfCoworkers, glide);
             recyclerView.setAdapter(mAdapter);
 
         }

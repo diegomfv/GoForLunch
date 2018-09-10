@@ -56,7 +56,7 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public RVAdapterRestaurant(Context context, List<User> listOfCoworkers) {
+    public RVAdapterRestaurant(Context context, List<User> listOfCoworkers, RequestManager glide) {
         this.mContext = context;
         this.listOfCoworkers = listOfCoworkers;
 
@@ -64,7 +64,7 @@ public class RVAdapterRestaurant extends RecyclerView.Adapter<RVAdapterRestauran
         this.stRef = fireStorage.getReference();
         this.stRefImages = stRef.child("imageDir");
 
-        this.glide = Glide.with(context);
+        this.glide = glide;
 
         this.mShortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);

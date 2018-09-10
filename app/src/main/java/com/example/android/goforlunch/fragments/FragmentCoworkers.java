@@ -20,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
@@ -119,6 +121,10 @@ public class FragmentCoworkers extends Fragment implements Observer {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private RequestManager glide;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     /** Method for instantiating the fragment
      * */
     public static FragmentCoworkers newInstance() {
@@ -138,6 +144,10 @@ public class FragmentCoworkers extends Fragment implements Observer {
         /* Activates the toolbar menu for the fragment
          * */
         setHasOptionsMenu(true);
+
+        if (getActivity() != null) {
+            glide = Glide.with(getActivity().getApplicationContext());
+        }
 
         fireDb = FirebaseDatabase.getInstance();
         fireStorage = FirebaseStorage.getInstance();
@@ -282,7 +292,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
                 listOfCoworkers = UtilsFirebase.fillListWithUsersOfSameGroupFromDataSnapshot(dataSnapshot, userEmail, userGroup);
 
                 if (getActivity() != null) {
-                    adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers);
+                    adapter = new RVAdapterCoworkers(getActivity(), listOfCoworkers, glide);
                     recyclerView.setAdapter(adapter);
 
                     Anim.hideCrossFadeShortAnimation(progressBarFragmentContent);

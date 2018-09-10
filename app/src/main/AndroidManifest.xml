@@ -80,7 +80,8 @@
         <!-- ////////////////////////////////////////////////////////////////// -->
 
         <receiver android:name=".receivers.InternetConnectionReceiver"/>
-        <receiver android:name=".receivers.DataUpdateReceiver">
+        <receiver android:name=".receivers.DataUpdateReceiver"
+            android:exported="true">
                 <intent-filter>
                     <action android:name="load_data_in_viewmodel"/>
                 </intent-filter>

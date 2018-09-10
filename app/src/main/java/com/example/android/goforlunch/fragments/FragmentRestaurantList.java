@@ -197,7 +197,7 @@ public class FragmentRestaurantList extends Fragment {
 
         /* Glide configuration*/
         if (getActivity() != null) {
-            glide = Glide.with(getActivity());
+            glide = Glide.with(getActivity().getApplicationContext());
         }
 
         /* Configure RecyclerView*/
@@ -425,10 +425,8 @@ public class FragmentRestaurantList extends Fragment {
 
             /* We update the recyclerView with the new list
              * */
-            if (autocompleteTextView == null && getActivity() != null) {
-                autocompleteTextView = Objects.requireNonNull(getView()).findViewById(R.id.list_autocomplete_id);
-                updateRecyclerViewWithNewListOfRestaurantsByCoworker(
-                        autocompleteTextView.getText().toString().trim());
+            if (autocompleteTextView == null) {
+                //do nothing
 
             } else {
                 updateRecyclerViewWithNewListOfRestaurantsByCoworker(
