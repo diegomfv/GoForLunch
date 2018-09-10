@@ -773,7 +773,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .beginTransaction()
                         .replace(R.id.main_fragment_container_id, FragmentRestaurantMap.newInstance())
                         .commit();
-                flagToSpecifyCurrentFragment = 0;
 
             }
             break;
@@ -784,7 +783,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .beginTransaction()
                         .replace(R.id.main_fragment_container_id, FragmentRestaurantList.newInstance())
                         .commit();
-                flagToSpecifyCurrentFragment = 1;
 
 
             }
@@ -796,7 +794,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .beginTransaction()
                         .replace(R.id.main_fragment_container_id, FragmentCoworkers.newInstance())
                         .commit();
-                flagToSpecifyCurrentFragment = 2;
 
             }
             break;
@@ -807,8 +804,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .beginTransaction()
                         .replace(R.id.main_fragment_container_id, FragmentProgressBar.newInstance())
                         .commit();
-                flagToSpecifyCurrentFragment = 3;
-
             }
             break;
 
@@ -819,7 +814,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .replace(R.id.main_fragment_container_id, FragmentRestaurantMap.newInstance())
                         .commit();
                 flagToSpecifyCurrentFragment = 0;
-
             }
         }
     }
