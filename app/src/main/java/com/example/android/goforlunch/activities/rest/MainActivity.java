@@ -62,6 +62,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -292,12 +294,38 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
             }
 
         } else if ((int) data == 2) {
-            /* The fetching process has finished, we load map fragment and enable user interaction
+            /* The fetching process has finished, we restart the activity
              * */
-            showMapFragment();
-            enableUIInteraction();
+            recreateActivity();
         }
     }
+
+    private void recreateActivity() {
+        Log.d(TAG, "recreateActivity: called!");
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.w(TAG, "run: STARTED ++++++++++++++++++++++++++++++++++++++++++ ");
+                timerMethod();
+
+            }
+        }, 3000);
+    }
+
+    private void timerMethod() {
+        Log.d(TAG, "timerMethod: called!");
+        this.runOnUiThread(timer_tick);
+    }
+
+    private Runnable timer_tick = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "run: called!");
+            recreate();
+        }
+    };
+
 
     /**
      * Callback: gets the current position obtained in Map Fragment
@@ -776,8 +804,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .beginTransaction()
                         .replace(R.id.main_fragment_container_id, FragmentRestaurantList.newInstance())
                         .commit();
-
-
             }
             break;
 
@@ -787,7 +813,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                         .beginTransaction()
                         .replace(R.id.main_fragment_container_id, FragmentCoworkers.newInstance())
                         .commit();
-
             }
             break;
 

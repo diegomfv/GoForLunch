@@ -160,7 +160,6 @@ public class FragmentCoworkers extends Fragment implements Observer {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: called!");
-
         connectBroadcastReceiverFragment();
 
     }
@@ -169,13 +168,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-
         disconnectBroadcastReceiverFragment();
-
-//        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
-//        dbRefUsersGetCoworkers.removeEventListener(valueEventListenerGetCoworkers);
-
-
     }
 
     @Override
@@ -189,7 +182,6 @@ public class FragmentCoworkers extends Fragment implements Observer {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
-
         disconnectBroadcastReceiverFragment();
     }
 

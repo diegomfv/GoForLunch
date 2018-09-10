@@ -1,6 +1,7 @@
 package com.example.android.goforlunch.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -373,39 +374,13 @@ public class FragmentRestaurantMap extends Fragment {
             public void onChanged(@Nullable List<RestaurantEntry> restaurantEntries) {
                 Log.d(TAG, "onChanged: Retrieving data from LiveData inside ViewModel");
 
-                /* The viewModel callback can be called in two situations.
-                * 1st) The fragment is loaded. There is a subscription to the viewModel and the
-                * data is loaded (not a special case)
-                * 3nd) The fetching process in MainActivity started and it loaded the FragmentProgressBar.
-                * The fetching process started and, close to the end, the IntentService sent a Broadcast and
-                * MainActivity callback was triggered. MainActivity then loaded FragmentRestaurantMap BUT
-                * the fetching process is not finished yet! (special case) */
-
                 if (restaurantEntries != null
                         && restaurantEntries.size() != 0) {
-                    /* If restaurant entries is != 0, we can proceed to load the map information
-                    * */
 
-                    if (listOfAllRestaurantsInDatabase != null &&
-                            listOfAllRestaurantsInDatabase.size() == 0) {
-                        /* If listOfAllRestaurantsInDatabase is not filled yet, we proceed
-                        * to update the map. If it is already filled, we don't do it to avoid
-                        * excessive use of resources (see 2nd case: we do not want the viewModel to load
-                        * all the pins in the map, then update the database, trigger the callback again, delete
-                        * the pins again and load them again).
-                        * */
+                    listOfAllRestaurantsInDatabase = restaurantEntries;
 
-                        /* We fill the list with the Restaurants in the database
-                         * */
-                        listOfAllRestaurantsInDatabase = restaurantEntries;
-
-                        if (listOfMarkers != null) {
-                            updateMapWithPins();
-                        }
-
-                    } else {
-                        //do nothing, the list of restaurants is already filled
-
+                    if (listOfMarkers != null) {
+                        updateMapWithPins();
                     }
 
                 } else {
@@ -518,6 +493,7 @@ public class FragmentRestaurantMap extends Fragment {
 
         }
         return false;
+
     }
 
     /**

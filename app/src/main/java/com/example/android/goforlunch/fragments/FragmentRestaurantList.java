@@ -196,7 +196,9 @@ public class FragmentRestaurantList extends Fragment {
         this.arrayOfTypes = Repo.RESTAURANT_TYPES;
 
         /* Glide configuration*/
-        glide = Glide.with(getActivity());
+        if (getActivity() != null) {
+            glide = Glide.with(getActivity());
+        }
 
         /* Configure RecyclerView*/
         this.configureRecyclerView();
@@ -281,16 +283,12 @@ public class FragmentRestaurantList extends Fragment {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView: called!");
         unbinder.unbind();
-        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
-
-//        dbRefUsersGetUserInfo.removeEventListener(valueEventListenerGetUserInfo);
-//        dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
 
     }
 
@@ -427,12 +425,17 @@ public class FragmentRestaurantList extends Fragment {
                 }
             }
 
-            // TODO: 30/07/2018 Error!!
             /* We update the recyclerView with the new list
              * */
-            updateRecyclerViewWithNewListOfRestaurantsByCoworker(
-                    autocompleteTextView.getText().toString().trim());
+            if (autocompleteTextView == null && getActivity() != null) {
+                autocompleteTextView = getView().findViewById(R.id.list_autocomplete_id);
+                updateRecyclerViewWithNewListOfRestaurantsByCoworker(
+                        autocompleteTextView.getText().toString().trim());
 
+            } else {
+                updateRecyclerViewWithNewListOfRestaurantsByCoworker(
+                        autocompleteTextView.getText().toString().trim());
+            }
         }
 
         @Override
@@ -463,58 +466,60 @@ public class FragmentRestaurantList extends Fragment {
     private void configureAutocompleteTextView(AutoCompleteTextView autoCompleteTextView) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
-        ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
-                getActivity(),
-                android.R.layout.simple_list_item_1, //This layout has to be a textview
-                arrayOfTypes
-        );
+        if (getActivity() != null) {
 
-        autoCompleteTextView.setAdapter(autocompleteAdapter);
+            ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
+                    getActivity(),
+                    android.R.layout.simple_list_item_1, //This layout has to be a textview
+                    arrayOfTypes
+            );
 
-        RxTextView.textChangeEvents(autoCompleteTextView)
-                .skip(2)
-                .debounce(600, TimeUnit.MILLISECONDS)
-                .map(new Function<TextViewTextChangeEvent, String>() {
-                    @Override
-                    public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
-                        return textViewTextChangeEvent.text().toString();
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<String>() {
-                    @Override
-                    public void onNext(String type) {
-                        Log.d(TAG, "onNext: type = " + type);
-                        Log.d(TAG, "onNext: typeAsInt = " + Utils.getTypeAsStringAndReturnTypeAsInt(type));
+            autoCompleteTextView.setAdapter(autocompleteAdapter);
 
-                        if (Arrays.asList(arrayOfTypes).contains(Utils.getTypeInSpecificLanguage(getActivity(), type))
-                                && Utils.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
-                            Log.d(TAG, "onNext: getting restaurant by type");
-                            getRestaurantsByTypeAndDisplayThemInRecyclerView(Utils.getTypeAsStringAndReturnTypeAsInt(type));
+            RxTextView.textChangeEvents(autoCompleteTextView)
+                    .skip(2)
+                    .debounce(600, TimeUnit.MILLISECONDS)
+                    .map(new Function<TextViewTextChangeEvent, String>() {
+                        @Override
+                        public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
+                            return textViewTextChangeEvent.text().toString();
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableObserver<String>() {
+                        @Override
+                        public void onNext(String type) {
+                            Log.d(TAG, "onNext: type = " + type);
+                            Log.d(TAG, "onNext: typeAsInt = " + Utils.getTypeAsStringAndReturnTypeAsInt(type));
 
-                        } else {
-                            Log.d(TAG, "onNext: getting all restaurants");
-                            getAllRestaurantsAndDisplayThemInRecyclerView();
+                            if (Arrays.asList(arrayOfTypes).contains(Utils.getTypeInSpecificLanguage(getActivity(), type))
+                                    && Utils.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
+                                Log.d(TAG, "onNext: getting restaurant by type");
+                                getRestaurantsByTypeAndDisplayThemInRecyclerView(Utils.getTypeAsStringAndReturnTypeAsInt(type));
+
+                            } else {
+                                Log.d(TAG, "onNext: getting all restaurants");
+                                getAllRestaurantsAndDisplayThemInRecyclerView();
+                            }
+
+                            Utils.hideKeyboard(getActivity());
+
                         }
 
-                        Utils.hideKeyboard(getActivity());
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "onError: " + Log.getStackTraceString(e));
 
-                    }
+                        }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: " + Log.getStackTraceString(e));
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.d(TAG, "onComplete: ");
+                        @Override
+                        public void onComplete() {
+                            Log.d(TAG, "onComplete: ");
 
 
-                    }
-                });
-
+                        }
+                    });
+        }
     }
 
     private void configureRecyclerView() {

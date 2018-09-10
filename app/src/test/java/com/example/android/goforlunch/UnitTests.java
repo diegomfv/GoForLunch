@@ -1,5 +1,7 @@
 package com.example.android.goforlunch;
 
+import android.widget.TextView;
+
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.constants.Repo;
@@ -15,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -605,8 +609,6 @@ public class UnitTests {
 
             }
         }
-
-
     }
 
 }

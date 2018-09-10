@@ -5,6 +5,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -86,6 +87,9 @@ public class FetchingIntentService extends IntentService {
     //(a number close to 0 to avoid any issues)
     //the broadcast to update the UI will be called.
     private AtomicInteger counter;
+
+    //CountDownTimer used to update the UI when the fetching process is finished
+    private CountDownTimer countDownTimer;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -453,55 +457,59 @@ public class FetchingIntentService extends IntentService {
     private void updateMapWithPlaceIdInfo(final RestaurantEntry restaurantEntry) {
         Log.d(TAG, "updateMapWithPlaceIdInfo: called!");
 
-        GoogleServiceStreams.streamFetchPlaceById(
-                restaurantEntry.getPlaceId(),
-                Repo.Keys.PLACEID_KEY)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribeWith(new DisposableObserver<PlaceById>() {
-                    @Override
-                    public void onNext(PlaceById placeById) {
-                        Log.d(TAG, "onNext: ");
+        if (restaurantEntry.getPlaceId() != null) {
 
-                        com.example.android.goforlunch.network.models.placebyid.Result result =
-                                placeById.getResult();
+            GoogleServiceStreams.streamFetchPlaceById(
+                    restaurantEntry.getPlaceId(),
+                    Repo.Keys.PLACEID_KEY)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribeWith(new DisposableObserver<PlaceById>() {
+                        @Override
+                        public void onNext(PlaceById placeById) {
+                            Log.d(TAG, "onNext: ");
 
-                        if (result != null) {
+                            com.example.android.goforlunch.network.models.placebyid.Result result =
+                                    placeById.getResult();
 
-                            String closingTime = UtilsRemote.checkClosingTime(result);
+                            if (result != null) {
 
-                            restaurantEntry.setOpenUntil(closingTime);
-                            restaurantEntry.setPhone(Utils.checkToAvoidNull(result.getInternationalPhoneNumber()));
-                            restaurantEntry.setWebsiteUrl(Utils.checkToAvoidNull(result.getWebsite()));
+                                String closingTime = UtilsRemote.checkClosingTime(result);
 
-                            if (result.getPhotos() != null) {
+                                restaurantEntry.setOpenUntil(closingTime);
+                                restaurantEntry.setPhone(Utils.checkToAvoidNull(result.getInternationalPhoneNumber()));
+                                restaurantEntry.setWebsiteUrl(Utils.checkToAvoidNull(result.getWebsite()));
 
-                                for (int i = 0; i < result.getPhotos().size(); i++) {
-                                    if (result.getPhotos().get(i) != null) {
-                                        if (result.getPhotos().get(i).getPhotoReference() != null
-                                                && !result.getPhotos().get(i).getPhotoReference().equalsIgnoreCase("")) {
-                                            restaurantEntry.setImageUrl(result.getPhotos().get(i).getPhotoReference());
-                                            break;
+                                if (result.getPhotos() != null) {
+
+                                    for (int i = 0; i < result.getPhotos().size(); i++) {
+                                        if (result.getPhotos().get(i) != null) {
+                                            if (result.getPhotos().get(i).getPhotoReference() != null
+                                                    && !result.getPhotos().get(i).getPhotoReference().equalsIgnoreCase("")) {
+                                                restaurantEntry.setImageUrl(result.getPhotos().get(i).getPhotoReference());
+                                                break;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: " + e.getMessage());
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "onError: " + e.getMessage());
 
-                    }
+                        }
 
-                    @Override
-                    public void onComplete() {
-                        Log.d(TAG, "onComplete: ");
+                        @Override
+                        public void onComplete() {
+                            Log.d(TAG, "onComplete: ");
 
-                    }
+                        }
 
-                });
+                    });
+
+        }
     }
 
     /**
@@ -600,6 +608,14 @@ public class FetchingIntentService extends IntentService {
 
                 } else {
                     Log.d(TAG, "onResponse: response.body() is null");
+                    counter.getAndDecrement();
+                    Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
+                    if (counter.get() == 20) {
+                        /* When the counter reaches 20, the activity will be notified that the process
+                         * has finished and it will be recreated
+                         * */
+                        notifyMainActivityProcessEnded();
+                    }
                 }
 
             }
@@ -624,15 +640,6 @@ public class FetchingIntentService extends IntentService {
 
             }
         });
-
-        counter.getAndDecrement();
-        Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
-        if (counter.get() < 20) {
-            //We send a Broadcast that will update FragmentRestaurantMap
-            //Progress bar will be hidden and the ViewModel will be activated again
-            //3 as an extra means "process has finished"
-            notifyMainActivityProcessEnded();
-        }
     }
 
     /**
@@ -663,6 +670,15 @@ public class FetchingIntentService extends IntentService {
 
         } else {
             Log.i(TAG, "saveImageInInternalStorage: accessInternalStorageGrantes = false");
+        }
+
+        counter.getAndDecrement();
+        Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
+        if (counter.get() == 20) {
+            /* When the counter reaches 20, the activity will be notified that the process
+             * has finished and it will be recreated
+             * */
+            notifyMainActivityProcessEnded();
         }
     }
 
