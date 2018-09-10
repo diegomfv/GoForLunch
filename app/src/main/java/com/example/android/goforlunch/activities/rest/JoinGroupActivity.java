@@ -364,48 +364,52 @@ public class JoinGroupActivity extends AppCompatActivity implements Observer {
                                                String[] arrayOfGroups) {
         Log.d(TAG, "configureAutocompleteTextView: called!");
 
-        ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
-                JoinGroupActivity.this,
-                android.R.layout.simple_list_item_1, //This layout has to be a textview
-                arrayOfGroups
-        );
+        if (autoCompleteTextView != null) {
 
-        autoCompleteTextView.setAdapter(autocompleteAdapter);
-        RxTextView.textChangeEvents(autoCompleteTextView)
-                .skip(2)
-                .debounce(600, TimeUnit.MILLISECONDS)
-                .map(new Function<TextViewTextChangeEvent, String>() {
-                    @Override
-                    public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
-                        return textViewTextChangeEvent.text().toString();
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<String>() {
-                    @Override
-                    public void onNext(String group) {
-                        Log.d(TAG, "onNext: group = " + group);
+            ArrayAdapter<String> autocompleteAdapter = new ArrayAdapter<String>(
+                    JoinGroupActivity.this,
+                    android.R.layout.simple_list_item_1, //This layout has to be a textview
+                    arrayOfGroups
+            );
 
-                        /* We only hide the keyboard if the group length (inputted) is long enough
-                         * */
-                        if (group.length() > 3) {
-                            Utils.hideKeyboard(JoinGroupActivity.this);
+            autoCompleteTextView.setAdapter(autocompleteAdapter);
+            RxTextView.textChangeEvents(autoCompleteTextView)
+                    .skip(2)
+                    .debounce(600, TimeUnit.MILLISECONDS)
+                    .map(new Function<TextViewTextChangeEvent, String>() {
+                        @Override
+                        public String apply(TextViewTextChangeEvent textViewTextChangeEvent) throws Exception {
+                            return textViewTextChangeEvent.text().toString();
                         }
-                    }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new DisposableObserver<String>() {
+                        @Override
+                        public void onNext(String group) {
+                            Log.d(TAG, "onNext: group = " + group);
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: " + Log.getStackTraceString(e));
+                            /* We only hide the keyboard if the group length (inputted) is long enough
+                             * */
+                            if (group.length() > 3) {
+                                Utils.hideKeyboard(JoinGroupActivity.this);
+                            }
+                        }
 
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(TAG, "onError: " + Log.getStackTraceString(e));
 
-                    @Override
-                    public void onComplete() {
-                        Log.d(TAG, "onComplete: ");
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            Log.d(TAG, "onComplete: ");
 
 
-                    }
-                });
+                        }
+                    });
+        }
+
     }
 
     /**

@@ -299,7 +299,6 @@ public class FragmentRestaurantList extends Fragment {
         if (getActivity() != null) {
             getActivity().getMenuInflater().inflate(R.menu.list_menu, menu);
         }
-
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -324,7 +323,6 @@ public class FragmentRestaurantList extends Fragment {
                 return true;
             }
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -428,7 +426,7 @@ public class FragmentRestaurantList extends Fragment {
             /* We update the recyclerView with the new list
              * */
             if (autocompleteTextView == null && getActivity() != null) {
-                autocompleteTextView = getView().findViewById(R.id.list_autocomplete_id);
+                autocompleteTextView = Objects.requireNonNull(getView()).findViewById(R.id.list_autocomplete_id);
                 updateRecyclerViewWithNewListOfRestaurantsByCoworker(
                         autocompleteTextView.getText().toString().trim());
 

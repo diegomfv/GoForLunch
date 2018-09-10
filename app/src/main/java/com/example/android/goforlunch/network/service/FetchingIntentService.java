@@ -320,11 +320,12 @@ public class FetchingIntentService extends IntentService {
 
                         List<com.example.android.goforlunch.network.models.placetextsearch.Result> listOfResults = placesByTextSearch.getResults();
 
-                        for (int i = 0; i < listOfResults.size(); i++) {
+                        /* We only add 5 restaurants of each type
+                        * */
+                        for (int i = 0; i < 5; i++) {
 
-                                    /* If the place is already in the lists and the type is equal to 13,
-                                    we only update the type */
-
+                            /* If the place is already in the lists and the type is equal to 13
+                             * we only update the type */
                             if (listOfPlacesIdsOfRestaurants.contains(listOfResults.get(i).getPlaceId())) {
 
                                 for (int j = 0; j < listOfRestaurantsEntries.size(); j++) {
@@ -341,7 +342,7 @@ public class FetchingIntentService extends IntentService {
                             } else {
 
                                 /* If the place is not already in the lists,
-                                 * we add the restaurant to them */
+                                 * we add the restaurant to it */
 
                                 listOfPlacesIdsOfRestaurants.add(listOfResults.get(i).getPlaceId());
 
@@ -366,9 +367,9 @@ public class FetchingIntentService extends IntentService {
                         }
 
                         if (type == 12) {
-                                    /* if type is 12, then is type = Vietnamese which is the last one (before Other)
-                                    This guarantees all restaurants are already in the map. We can proceed with getting placeId information
-                                    to update Distance and Photos */
+                            /* if type is 12, then is type = Vietnamese which is the last one (before Other)
+                            This guarantees all restaurants are already in the map. We can proceed with getting placeId information
+                            to update Distance and Photos */
 
                             Log.i(TAG, "onNext: TEXT SEARCH PROCESS ENDED!");
 
