@@ -107,11 +107,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //Local database
-    private AppDatabase localDatabase;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
     //Firebase
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
@@ -173,8 +168,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         fireDb = FirebaseDatabase.getInstance();
-
-        localDatabase = AppDatabase.getInstance(MainActivity.this);
 
         flagToSpecifyCurrentFragment = 0;
 
