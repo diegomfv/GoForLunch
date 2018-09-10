@@ -2,6 +2,7 @@ package com.example.android.goforlunch.activities.rest;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,7 +35,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.activities.auth.AuthEnterNameActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.rx.ObservableObject;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
@@ -165,6 +168,10 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private Bitmap temporaryBitmap;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -179,7 +186,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
         userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
 
-        glide = Glide.with(PersInfoActivity.this);
+        glide = Glide.with(getApplicationContext());
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         /* We set the content view
@@ -199,7 +206,6 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: called!");
-
         this.connectBroadcastReceiver();
 
     }
@@ -208,7 +214,6 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-
         this.disconnectBroadcastReceiver();
 
     }
@@ -217,7 +222,6 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: called!");
-
         this.disconnectBroadcastReceiver();
 
         this.fab.setOnClickListener(null);
@@ -232,6 +236,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     @Override
     public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
+        Log.w(TAG, "update: triggered when there is an internet connectivity change" );
 
         if ((int) internetAvailableUpdate == 0) {
             Log.d(TAG, "update: Internet not Available");
@@ -268,7 +273,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
             Utils.hideMainContent(progressBarContent, mainContent);
 
             currentUser = auth.getCurrentUser();
-            Log.d(TAG, "onDataChange... auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
+            Log.d(TAG, "update: auth.getCurrentUser() = " + (auth.getCurrentUser() != null));
 
             if (currentUser != null) {
 
@@ -291,8 +296,11 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
                 if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
 
+                    Log.w(TAG, "update: We are here again!");
+
                     dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                     dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
+
                 }
             }
         }
@@ -387,10 +395,6 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
             Utils.showMainContent(progressBarContent, mainContent);
 
-            /* We remove the listener (probably not needed because it's a SingleValueEvent Listener)
-             * */
-            dbRefUsers.removeEventListener(this);
-
         }
 
         @Override
@@ -422,7 +426,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
      */
     private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
-
+        Log.w(TAG, "disconnectBroadcastReceiver: disconnecting receiver");
         if (receiver != null) {
             Utils.disconnectReceiver(
                     PersInfoActivity.this,
@@ -503,29 +507,26 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         Log.d(TAG, "onActivityResult: called!");
 
         if (resultCode == RESULT_OK) {
+
             try {
-                Log.d(TAG, "onActivityResult: data.getData() = " + data.getData());
-
-                /* We get the image data and update inputStreamSelectedImage variable which will be
-                 * used later if the user decides to save this image in his/her profile
-                 * */
                 final Uri imageUri = data.getData();
-                inputStreamSelectedImage = getContentResolver().openInputStream(imageUri);
+                if (imageUri != null) {
 
-                final Bitmap selectedBitmap = BitmapFactory.decodeStream(inputStreamSelectedImage);
+                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                    final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                    temporaryBitmap = Utils.getResizedBitmap(selectedImage, 400);
+                    glide.load(temporaryBitmap).into(ivUserImage);
 
-                glide.load(selectedBitmap).into(ivUserImage);
-                Log.d(TAG, "onActivityResult: image loaded!");
+                    /* We store the Uri value.
+                     * We will use it if the user saves changes
+                     * */
+                    userProfilePictureUri = imageUri;
 
-                /** We store the Uri value. We will use it if the user saves changes
-                 * */
-                userProfilePictureUri = imageUri;
-
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.somethingWentWrong));
             }
-
         } else {
             ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.commonYouNotPickedImage));
         }
@@ -586,7 +587,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                                             } else {
                                                 Log.d(TAG, "onComplete: task was successful");
 
-                                                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
+                                                dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS).child(userKey);
 
                                                 /* Updating the database
                                                  * */
@@ -597,7 +598,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
                                                 /* We save the image in the image view in the storage
                                                  * */
-                                                startStorageProcessWithByteArray(ivUserImage);
+                                                startStorageProcessWithBitmap(temporaryBitmap);
 
                                             }
                                         }
@@ -652,45 +653,47 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
      * Method for saving images
      * in Firebase Storage
      */
-    private void startStorageProcessWithByteArray(ImageView imageView) {
-        Log.d(TAG, "startStorageProcessWithByteArray: called!");
+    private void startStorageProcessWithBitmap(Bitmap bitmap) {
+        Log.d(TAG, "startStorageProcessWithBitmap: called!");
 
-        imageView.setDrawingCacheEnabled(true);
-        imageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        imageView.layout(0, 0, imageView.getMeasuredWidth(), imageView.getMeasuredHeight());
-        imageView.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(imageView.getDrawingCache());
+        if (bitmap == null) {
+            /* Means the user did not change the profile image, therefore we save nothing
+            * */
+            Log.w(TAG, "We start an activity with intent and call finish()");
+            startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+            finish();
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-        byte[] data = outputStream.toByteArray();
+        } else {
+            /* Means the user changed the image, therefore we update the user profile image
+             * */
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            byte[] data = outputStream.toByteArray();
 
-        UploadTask uploadTask = stRefUser.child("image").putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "onFailure: something went wrong!");
+            UploadTask uploadTask = stRefUser.child("image").putBytes(data);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d(TAG, "onFailure: something went wrong!");
+                    Log.w(TAG, "onFailure: we start an activity with intent and call finish()");
 
-                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoSomethingWrongImage));
+                    ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoSomethingWrongImage));
 
-                startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
-                finish();
+                    startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                    finish();
 
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Log.d(TAG, "onSuccess: file uploaded!");
+                    Log.w(TAG, "onSuccess: we start an activity with intent and call finish()");
 
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.d(TAG, "onSuccess: file uploaded!");
+                    startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
+                    finish();
 
-                /* This toast does not appear in "AuthEnterNameActivity"!
-                 * */
-                ToastHelper.toastShort(PersInfoActivity.this, getResources().getString(R.string.persInfoToastYourInfoUpdated));
-
-                startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
-                finish();
-
-            }
-        });
+                }
+            });
+        }
     }
 }

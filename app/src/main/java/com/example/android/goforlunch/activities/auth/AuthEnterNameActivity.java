@@ -28,6 +28,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
@@ -145,6 +147,14 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private RequestManager glide;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private Bitmap profileBitmap;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,6 +166,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         fireStorage = FirebaseStorage.getInstance();
         stRefMain = fireStorage.getReference();
         stRefImageDir = stRefMain.child(Repo.Directories.IMAGE_DIR);
+
+        profileBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.picture_not_available);
+
+        glide = Glide.with(getApplicationContext());
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_auth_enter_name);
@@ -297,16 +311,22 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
         Log.d(TAG, "onActivityResult: called!");
 
         if (resultCode == RESULT_OK) {
+
             try {
                 final Uri imageUri = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                iv_userImage.setImageBitmap(selectedImage);
+                if (imageUri != null) {
 
-                /** We store the Uri value. We will use it if the user saves changes
-                 * */
-                userProfilePictureUri = imageUri;
+                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                    final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                    profileBitmap = Utils.getResizedBitmap(selectedImage, 400);
+                    glide.load(profileBitmap).into(iv_userImage);
 
+                    /* We store the Uri value.
+                    * We will use it if the user saves changes
+                     * */
+                    userProfilePictureUri = imageUri;
+
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 ToastHelper.toastShort(AuthEnterNameActivity.this, getResources().getString(R.string.somethingWentWrong));
@@ -610,7 +630,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                                                                 0,
                                                                 "");
 
-                                                        startStorageProcessWithByteArray(iv_userImage);
+                                                        startStorageProcessWithBitmap(profileBitmap);
 
                                                     }
                                                 }
@@ -688,16 +708,10 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
      * Method for saving images
      * in Firebase Storage
      */
-    private void startStorageProcessWithByteArray(ImageView imageView) {
-        Log.d(TAG, "startStorageProcessWithByteArray: called!");
+    private void startStorageProcessWithBitmap(Bitmap bitmap) {
+        Log.d(TAG, "startStorageProcessWithBitmap: called!");
 
         stRefUser = stRefImageDir.child(inputEmail.getText().toString());
-
-        imageView.setDrawingCacheEnabled(true);
-        imageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        imageView.layout(0, 0, imageView.getMeasuredWidth(), imageView.getMeasuredHeight());
-        imageView.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(imageView.getDrawingCache());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
