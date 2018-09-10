@@ -772,15 +772,6 @@ public class FragmentRestaurantList extends Fragment {
     private Intent createAndFillIntentWithUserInfo(RVAdapterList adapter, int position) {
         Log.d(TAG, "createAndFillIntentWithUserInfo: called!");
 
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getPlaceId());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getImageUrl());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getName());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getType());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getAddress());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getRating());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getPhone());
-        Log.d(TAG, "createAndFillIntentWithUserInfo: " + adapter.getRestaurant(position).getWebsiteUrl());
-
         Intent intent = new Intent(getActivity(), RestaurantActivity.class);
 
         intent.putExtra(Repo.SentIntent.PLACE_ID, adapter.getRestaurant(position).getPlaceId());

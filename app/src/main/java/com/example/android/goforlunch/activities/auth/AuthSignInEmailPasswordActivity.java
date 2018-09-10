@@ -120,6 +120,9 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         tvForgotPassword.setOnClickListener(tvForgotPasswordOnClickListener);
         buttonSignUp.setOnClickListener(buttonSignUpOnClickListener);
 
+        inputEmail.setText("diego.trial@hotmail.com");
+        inputPassword.setText("123456");
+
     }
 
     @Override

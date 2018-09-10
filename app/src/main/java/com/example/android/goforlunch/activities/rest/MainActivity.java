@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         /* We show the fragment and enable user interaction
          * */
-        this.loadFragment();
+        this.showMapFragment();
         this.enableUIInteraction();
 
     }
