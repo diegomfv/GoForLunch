@@ -36,6 +36,7 @@ import com.snatik.storage.Storage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.observers.DisposableObserver;
@@ -600,16 +601,26 @@ public class FetchingIntentService extends IntentService {
                 if (response.body() != null) {
                     Log.d(TAG, "onResponse: PHOTO response.body() IS NOT NULL");
 
-                    Bitmap bm = BitmapFactory.decodeStream(response.body().byteStream());
+                    Bitmap bm = BitmapFactory.decodeStream(Objects.requireNonNull(response.body()).byteStream());
 
                     if (restaurantEntry.getPlaceId() != null && bm != null) {
                         saveImageInInternalStorage(restaurantEntry.getPlaceId(), bm);
+                    } else {
+                        if (notify) {
+                            notifyMainActivityProcessEnded();
+                            notify = false;
+                        }
                     }
 
                 } else {
                     Log.d(TAG, "onResponse: response.body() is null");
                     counter.getAndDecrement();
                     Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
+                    if (notify) {
+                        notifyMainActivityProcessEnded();
+                        notify = false;
+                    }
+
                 }
 
             }

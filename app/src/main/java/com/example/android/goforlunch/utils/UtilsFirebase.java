@@ -200,8 +200,8 @@ public class UtilsFirebase {
         for (DataSnapshot item :
                 dataSnapshot.getChildren()) {
 
-            if (item.child(Repo.FirebaseReference.USER_GROUP).getValue().toString().equalsIgnoreCase(group)
-                    && !item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(email)) {
+            if (Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_GROUP).getValue()).toString().equalsIgnoreCase(group)
+                    && !Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(email)) {
 
                 User.Builder builder = new User.Builder();
 

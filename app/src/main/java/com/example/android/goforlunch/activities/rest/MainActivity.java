@@ -460,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                     .into(navUserProfilePicture);
 
         } else {
-           getUserImage();
+            getUserImage();
 
         }
 
@@ -482,7 +482,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 Log.d(TAG, "onSuccess: called!");
 
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-
                 glide.load(bitmap)
                         .into(navUserProfilePicture);
 
@@ -494,8 +493,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
                 glide.load(getResources().getDrawable(R.drawable.picture_not_available))
                         .into(navUserProfilePicture);
-
-
             }
         });
     }

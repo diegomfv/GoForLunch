@@ -266,7 +266,7 @@ public class FragmentCoworkers extends Fragment implements Observer {
             userGroupKey = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue().toString();
 
             /* We fill the list of the coworkers using the group of the user
-             *  */
+                    *  */
             dbRefUsersGetUserInfo = fireDb.getReference(Repo.FirebaseReference.USERS);
             dbRefUsersGetUserInfo.addValueEventListener(valueEventListenerGetCoworkers);
 
