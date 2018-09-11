@@ -408,18 +408,18 @@ public class FragmentRestaurantList extends Fragment {
             for (DataSnapshot item :
                     dataSnapshot.getChildren()) {
 
-                if (item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString() != null
-                        && !item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
-                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString().equalsIgnoreCase("")
-                        && !item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString().equalsIgnoreCase(userEmail)) {
+                if (Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue()).toString() != null
+                        && !Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                        .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue()).toString().equalsIgnoreCase("")
+                        && !Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString().equalsIgnoreCase(userEmail)) {
 
                     /* We create a list with all the restaurants that the users are going to.
                      * If several coworkers are going to the same restaurant, it will appear in the UI
                      * */
-                    Log.d(TAG, "onDataChange: " + item.child(Repo.FirebaseReference.USER_EMAIL).getValue().toString());
-                    listOfRestaurantsByCoworker.add(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
-                            .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue().toString());
+                    Log.d(TAG, "onDataChange: " + Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_EMAIL).getValue()).toString());
+                    listOfRestaurantsByCoworker.add(Objects.requireNonNull(item.child(Repo.FirebaseReference.USER_RESTAURANT_INFO)
+                            .child(Repo.FirebaseReference.RESTAURANT_NAME).getValue()).toString());
 
                 }
             }

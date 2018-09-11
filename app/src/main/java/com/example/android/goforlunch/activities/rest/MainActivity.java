@@ -331,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
                 timerMethod();
 
             }
-        }, 3000);
+        }, 10000);
     }
 
     private void timerMethod() {

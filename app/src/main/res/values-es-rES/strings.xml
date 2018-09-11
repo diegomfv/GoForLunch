@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
     <string name="app_name">GoForLunch</string>
     <string name="title_home">Home</string>
@@ -12,6 +11,7 @@
     <string name="notif_notification_channel_name">Notification Channel Name</string>
 
     <string name="action_settings">Settings</string>
+
 
     <!-- GENERAL MESSAGES -->
     <string name="noInternet">Internet NO disponible</string>
@@ -215,4 +215,3 @@
     <string name="end_fetching_process">Proceso de recogidad de datos finalizado</string>
 
 </resources>
-

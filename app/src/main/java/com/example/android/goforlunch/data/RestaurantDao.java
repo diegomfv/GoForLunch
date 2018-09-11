@@ -122,15 +122,5 @@ public interface RestaurantDao {
 
     @Query("DELETE FROM restaurant")
     int deleteAllRowsInRestaurantTable();
-
-
-
-
-
-
-
-
-
-
-
+    
 }

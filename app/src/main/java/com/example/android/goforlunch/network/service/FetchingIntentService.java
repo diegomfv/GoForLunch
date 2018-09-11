@@ -83,17 +83,10 @@ public class FetchingIntentService extends IntentService {
 
     private boolean accessInternalStorageGranted;
 
-    //Counter to count how many objects we create and notify the service
-    //when the fetching process has finished. This is necessary to avoid
-    //the UI to get blocked. The counter will increment
-    //when we add an object to the database and will decrement when
-    //a thread reaches the end of the service code. When the counter < 20
-    //(a number close to 0 to avoid any issues)
-    //the broadcast to update the UI will be called.
+    //Counter to count how many objects we create and how the process is going
     private AtomicInteger counter;
 
-    //CountDownTimer used to update the UI when the fetching process is finished
-    private CountDownTimer countDownTimer;
+    private boolean notify;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -126,6 +119,8 @@ public class FetchingIntentService extends IntentService {
         mHandler = new Handler();
 
         counter = new AtomicInteger(0);
+
+        notify = true;
 
     }
 
@@ -679,10 +674,11 @@ public class FetchingIntentService extends IntentService {
 
         counter.getAndDecrement();
         Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
-        if (counter.get() == 20) {
-            /* When the counter reaches 20, the activity will be notified that the process
-             * has finished and it will be recreated
-             * */
+//        if (counter.get() == 20) {
+//            notifyMainActivityProcessEnded();
+//        }
+
+        if (notify) {
             notifyMainActivityProcessEnded();
         }
     }
