@@ -452,14 +452,14 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
+            if (listOfCoworkers != null && recyclerView != null && mAdapter != null) {
+                listOfCoworkers = UtilsFirebase.fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser(dataSnapshot, userEmail, userGroup, intentRestaurantName);
 
-            listOfCoworkers = UtilsFirebase.fillListWithCoworkersOfSameGroupAndSameRestaurantExceptIfItsTheUser(dataSnapshot, userEmail, userGroup, intentRestaurantName);
-
-            /* We use the list in the adapter
-             * */
-            mAdapter = new RVAdapterRestaurant(context, listOfCoworkers, glide);
-            recyclerView.setAdapter(mAdapter);
-
+                /* We use the list in the adapter
+                 * */
+                mAdapter = new RVAdapterRestaurant(context, listOfCoworkers, glide);
+                recyclerView.setAdapter(mAdapter);
+            }
         }
 
         @Override
