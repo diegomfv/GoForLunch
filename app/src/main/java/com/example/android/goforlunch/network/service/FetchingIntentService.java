@@ -629,6 +629,10 @@ public class FetchingIntentService extends IntentService {
                         restaurantEntry.setImageUrl(call.request().url().toString());
                         insertRestaurantEntryInDatabase(restaurantEntry);
 
+                        if (notify) {
+                            notifyMainActivityProcessEnded();
+                            notify = false;
+                        }
                     }
                 });
 
@@ -674,6 +678,7 @@ public class FetchingIntentService extends IntentService {
 
         if (notify) {
             notifyMainActivityProcessEnded();
+            notify = false;
         }
     }
 
