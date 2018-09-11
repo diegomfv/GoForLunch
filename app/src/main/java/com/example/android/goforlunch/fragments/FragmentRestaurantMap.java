@@ -893,9 +893,14 @@ public class FragmentRestaurantMap extends Fragment {
                 if (mMap != null && autocompleteTextView != null) {
                     Log.d(TAG, "updateMapWithPins: the map is not null");
 
+                    /* We try to convert the type inputted to a type available in english so we can
+                     * check if the type inputted allows as to find restaurants by type
+                     * */
                     String typeInEnglish = Utils.getTypeInSpecificLanguage(getActivity(), autocompleteTextView.getText().toString().trim());
                     //Returns "" if there is no type or type is null
 
+                    /* We get an integer using the type inputted representing a certain group.
+                     * */
                     int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(typeInEnglish);
 
                     getRestaurantsByType(typeAsInt)

@@ -489,13 +489,30 @@ public class FragmentRestaurantList extends Fragment {
                             Log.d(TAG, "onNext: type = " + type);
                             Log.d(TAG, "onNext: typeAsInt = " + Utils.getTypeAsStringAndReturnTypeAsInt(type));
 
-                            if (Arrays.asList(arrayOfTypes).contains(Utils.getTypeInSpecificLanguage(getActivity(), type))
+                            /* We try to convert the type inputted to a type available in english so we can
+                            * check if the type inputted allows as to find restaurants by type
+                            * */
+                            String typeInEnglish = Utils.getTypeInSpecificLanguage(getActivity(), type);
+                            //Returns "" if there is no type or type is null
+
+                            if (Arrays.asList(arrayOfTypes).contains(typeInEnglish)
                                     && Utils.getTypeAsStringAndReturnTypeAsInt(type) != 0) {
                                 Log.d(TAG, "onNext: getting restaurant by type");
-                                getRestaurantsByTypeAndDisplayThemInRecyclerView(Utils.getTypeAsStringAndReturnTypeAsInt(type));
+
+                                /* If the type is among all the available types,
+                                * we get an integer using the type inputted representing a certain group.
+                                * */
+                                int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(type);
+
+                                /* We use that type (int) to get all the restaurants according to that specific type
+                                * */
+                                getRestaurantsByTypeAndDisplayThemInRecyclerView(typeAsInt);
 
                             } else {
                                 Log.d(TAG, "onNext: getting all restaurants");
+
+                                /* If the type is not among the available types, we load all the restaurants.
+                                * */
                                 getAllRestaurantsAndDisplayThemInRecyclerView();
                             }
 
