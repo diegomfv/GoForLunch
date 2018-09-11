@@ -40,13 +40,6 @@ public interface GoogleService {
             @Query("key") String key
     );
 
-    // TODO: 30/07/2018 Delete
-    @GET("json")
-    Observable<Response<PlaceById>> fetchDataTrial(
-            @Query("placeid") String placeId,
-            @Query("key") String key
-    );
-
     @GET("json")
     Observable<DistanceMatrix> fetchDistanceMatrix(
             @Query("units") String units,

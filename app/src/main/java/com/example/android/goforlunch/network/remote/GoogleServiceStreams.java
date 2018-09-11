@@ -98,14 +98,4 @@ public class GoogleServiceStreams {
 
     }
 
-    public static Observable<Response<PlaceById>> streamTrial(String placeId,
-                                                              String key) {
-
-        GoogleService googleService = AllGoogleServices.getGooglePlaceIdService();
-
-        return googleService.fetchDataTrial(placeId, key)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .timeout(10, TimeUnit.SECONDS);
-    }
 }
