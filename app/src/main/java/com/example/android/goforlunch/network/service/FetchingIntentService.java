@@ -610,12 +610,6 @@ public class FetchingIntentService extends IntentService {
                     Log.d(TAG, "onResponse: response.body() is null");
                     counter.getAndDecrement();
                     Log.i(TAG, "updateMapAndInternalStorageWithPhotos: counter = " + counter.get());
-                    if (counter.get() == 20) {
-                        /* When the counter reaches 20, the activity will be notified that the process
-                         * has finished and it will be recreated
-                         * */
-                        notifyMainActivityProcessEnded();
-                    }
                 }
 
             }
