@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +31,7 @@ import android.widget.TextView;
 
 import com.amitshekhar.DebugDB;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.evernote.android.job.JobManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.auth.AuthChooseLoginActivity;
@@ -48,6 +52,8 @@ import com.example.android.goforlunch.fragments.FragmentRestaurantMap;
 import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.constants.Repo;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -55,6 +61,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.snatik.storage.Storage;
 
 import java.io.File;
@@ -68,6 +76,7 @@ import java.util.TimerTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements Observer, FragmentRestaurantMap.OnCurrentPositionObtainedListener {
 
@@ -100,8 +109,6 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     private int jobIdAddRestaurant;
     private int jobIdNotifications;
 
-    //------------------------------------------------
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     //Shared Preferences
@@ -114,8 +121,12 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
     private FirebaseUser currentUser;
     private FirebaseDatabase fireDb;
     private DatabaseReference fireDbRefUsers;
-    private DatabaseReference fireDbRefGroups;
     private DatabaseReference fireDbRefUserNotif;
+
+    private FirebaseStorage fireStorage;
+    private StorageReference stRef;
+    private StorageReference stRefImages;
+    private StorageReference stRefUserImage;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -163,6 +174,10 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private RequestManager glide;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -171,9 +186,15 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
         sharedPref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         fireDb = FirebaseDatabase.getInstance();
 
+        this.fireStorage = FirebaseStorage.getInstance();
+        this.stRef = fireStorage.getReference();
+        this.stRefImages = stRef.child(Repo.Directories.IMAGE_DIR);
+
         flagToSpecifyCurrentFragment = 0;
 
         this.configureStorage();
+
+        this.glide = Glide.with(getApplicationContext());
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
@@ -435,26 +456,48 @@ public class MainActivity extends AppCompatActivity implements Observer, Fragmen
 
         if (!internetAvailable) {
 
-            Glide.with(MainActivity.this)
-                    .load(getResources().getDrawable(R.drawable.picture_not_available))
+            glide.load(getResources().getDrawable(R.drawable.picture_not_available))
                     .into(navUserProfilePicture);
 
         } else {
+           getUserImage();
 
-            if (currentUser.getPhotoUrl() != null) {
-                Log.d(TAG, "updateNavDrawerViews: " + currentUser.getPhotoUrl());
-                Glide.with(MainActivity.this)
-                        .load(currentUser.getPhotoUrl())
-                        .into(navUserProfilePicture);
-            } else {
-                Log.d(TAG, "updateNavDrawerViews: currentUserPhoto = null");
-                Glide.with(MainActivity.this)
-                        .load(getResources().getDrawable(R.drawable.picture_not_available))
-                        .into(navUserProfilePicture);
-            }
         }
 
         return true;
+    }
+
+    /**
+     * Method that loads the user image into the imageView
+     */
+    private void getUserImage() {
+        Log.d(TAG, "getUserImage: called!");
+
+        stRefUserImage = stRefImages.child(userEmail).child("image");
+
+        final long ONE_MEGABYTE = 1024 * 1024;
+        stRefUserImage.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Log.d(TAG, "onSuccess: called!");
+
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+
+                glide.load(bitmap)
+                        .into(navUserProfilePicture);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e(TAG, "onFailure: " + exception);
+
+                glide.load(getResources().getDrawable(R.drawable.picture_not_available))
+                        .into(navUserProfilePicture);
+
+
+            }
+        });
     }
 
     /**

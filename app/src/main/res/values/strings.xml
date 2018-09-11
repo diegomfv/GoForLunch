@@ -13,7 +13,6 @@
 
     <string name="action_settings">Settings</string>
 
-
     <!-- GENERAL MESSAGES -->
     <string name="noInternet">Internet NOT available</string>
     <string name="noInternetFeaturesNotWork">Internet not available. Some features might not work</string>

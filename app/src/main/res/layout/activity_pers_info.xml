@@ -41,6 +41,7 @@
             app:civ_border_width="0.5dp"
             app:civ_border_color="@color/colorPrimary"
             android:layout_gravity="center_horizontal"
+            android:src="@drawable/picture_not_available"
             android:clickable="true"
             android:focusable="true">
         </de.hdodenhof.circleimageview.CircleImageView>

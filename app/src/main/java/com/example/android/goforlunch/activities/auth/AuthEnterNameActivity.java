@@ -132,9 +132,9 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
 
     //Firebase Storage
     private FirebaseStorage fireStorage;
-    private StorageReference stRefUser;
     private StorageReference stRefMain;
     private StorageReference stRefImageDir;
+    private StorageReference stRefUserImage;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -191,7 +191,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                 inputEmail.setText(email);
                 inputPassword.setText(password);
 
-                stRefUser = stRefImageDir.child(email);
+                stRefUserImage = stRefImageDir.child(email);
 
             }
         }
@@ -711,13 +711,13 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
     private void startStorageProcessWithBitmap(Bitmap bitmap) {
         Log.d(TAG, "startStorageProcessWithBitmap: called!");
 
-        stRefUser = stRefImageDir.child(inputEmail.getText().toString());
+        stRefUserImage = stRefImageDir.child(inputEmail.getText().toString());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
         byte[] data = outputStream.toByteArray();
 
-        UploadTask uploadTask = stRefUser.child("image").putBytes(data);
+        UploadTask uploadTask = stRefUserImage.child("image").putBytes(data);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {

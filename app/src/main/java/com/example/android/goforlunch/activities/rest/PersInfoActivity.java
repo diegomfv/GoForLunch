@@ -2,7 +2,6 @@ package com.example.android.goforlunch.activities.rest;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,9 +34,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
-import com.example.android.goforlunch.activities.auth.AuthEnterNameActivity;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
-import com.example.android.goforlunch.rx.ObservableObject;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
@@ -145,7 +142,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     private FirebaseStorage fireStorage;
     private StorageReference stRefMain;
     private StorageReference stRefImageDir;
-    private StorageReference stRefUser;
+    private StorageReference stRefUserImage;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -179,9 +176,9 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         fireDb = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        fireStorage = FirebaseStorage.getInstance();
-        stRefMain = fireStorage.getReference();
-        stRefImageDir = stRefMain.child(Repo.Directories.IMAGE_DIR);
+        this.fireStorage = FirebaseStorage.getInstance();
+        this.stRefMain = fireStorage.getReference();
+        this.stRefImageDir = stRefMain.child(Repo.Directories.IMAGE_DIR);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(PersInfoActivity.this);
         userKey = sharedPref.getString(Repo.SharedPreferences.USER_ID_KEY, "");
@@ -283,21 +280,15 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                 to user's firebase storage
                  * */
                 if (userEmail != null) {
-                    stRefUser = stRefImageDir.child(userEmail);
+                    stRefUserImage = stRefImageDir.child(userEmail);
+                    if (temporaryBitmap == null) {
+                        fillTemporaryBitmap();
+                    }
                 } else {
-                    stRefUser = null;
-                }
-
-                Log.d(TAG, "onNext: userProfilePictureUri = " + userProfilePictureUri);
-                if (userProfilePictureUri == null) {
-                    userProfilePictureUri = currentUser.getPhotoUrl();
-                    Log.d(TAG, "onCreate: userProfilePictureUri = " + userProfilePictureUri);
+                    stRefUserImage = null;
                 }
 
                 if (userEmail != null && !userEmail.equalsIgnoreCase("")) {
-
-                    Log.w(TAG, "update: We are here again!");
-
                     dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS + "/" + userKey);
                     dbRefUsers.addListenerForSingleValueEvent(valueEventListenerGetInfoAndFillWidgets);
 
@@ -368,7 +359,6 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
      * Value Event Listener: gets all user's info from Firebase and fills all the widgets
      */
     private ValueEventListener valueEventListenerGetInfoAndFillWidgets = new ValueEventListener() {
-
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
@@ -379,22 +369,24 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
             userGroup = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP).getValue().toString();
             userGroupKey = dataSnapshot.child(Repo.FirebaseReference.USER_GROUP_KEY).getValue().toString();
 
-            /* We fill the widgets with the user's info
-             * */
-            inputFirstName.setText(userFirstName);
-            inputLastName.setText(userLastName);
-            inputEmail.setText(userEmail);
-            inputGroup.setText(userGroup);
-            inputPassword.setText("******");
+            if (inputFirstName != null
+                    && inputLastName != null
+                    && inputEmail != null
+                    && inputGroup != null
+                    && inputPassword !=null
+                    && ivUserImage != null) {
 
-            if (userProfilePictureUri == null) {
-                glide.load(getResources().getDrawable(R.drawable.picture_not_available)).into(ivUserImage);
-            } else {
-                glide.load(userProfilePictureUri).into(ivUserImage);
+                /* We fill the widgets with the user's info
+                 * */
+                inputFirstName.setText(userFirstName);
+                inputLastName.setText(userLastName);
+                inputEmail.setText(userEmail);
+                inputGroup.setText(userGroup);
+                inputPassword.setText("******");
+
+                loadUserImage();
+
             }
-
-            Utils.showMainContent(progressBarContent, mainContent);
-
         }
 
         @Override
@@ -403,6 +395,51 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         }
     };
+
+    /** Method that fills temporary bitmap
+     * with user information in Firebase Storage
+     * */
+    private void fillTemporaryBitmap () {
+        Log.d(TAG, "fillTemporaryBitmap: called!");
+        stRefUserImage = stRefImageDir.child(userEmail).child("image");
+        final long ONE_MEGABYTE = 1024 * 1024;
+        stRefUserImage.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Log.d(TAG, "onSuccess: called!");
+                if (ivUserImage != null) {
+                    temporaryBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    loadUserImage();
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e(TAG, "onFailure: " + exception);
+                if (ivUserImage != null) {
+                    loadUserImage();
+                }
+            }
+        });
+    }
+
+    /**
+     * Method that loads the user image into the imageView
+     */
+    private void loadUserImage () {
+        Log.d(TAG, "loadUserImage: called!");
+
+        if (temporaryBitmap != null) {
+            glide.load(temporaryBitmap).into(ivUserImage);
+            Utils.showMainContent(progressBarContent, mainContent);
+
+        } else {
+            glide.load(getResources().getDrawable(R.drawable.picture_not_available)).into(ivUserImage);
+            Utils.showMainContent(progressBarContent, mainContent);
+        }
+    }
+
 
     /*******************************
      * CONFIGURATION ***************
@@ -515,7 +552,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                     final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                     final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
                     temporaryBitmap = Utils.getResizedBitmap(selectedImage, 400);
-                    glide.load(temporaryBitmap).into(ivUserImage);
+                    loadUserImage();
 
                     /* We store the Uri value.
                      * We will use it if the user saves changes
@@ -670,7 +707,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
             byte[] data = outputStream.toByteArray();
 
-            UploadTask uploadTask = stRefUser.child("image").putBytes(data);
+            UploadTask uploadTask = stRefUserImage.child("image").putBytes(data);
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
