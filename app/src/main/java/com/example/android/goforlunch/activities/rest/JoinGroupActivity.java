@@ -20,12 +20,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
+import com.example.android.goforlunch.utils.TextInputAutoCompleteTextView;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.Repo;
-import com.example.android.goforlunch.utils.TextInputAutoCompleteTextView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -46,7 +46,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableObserver;
 

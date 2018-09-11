@@ -13,12 +13,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.Utils;
-import com.example.android.goforlunch.network.models.pojo.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;

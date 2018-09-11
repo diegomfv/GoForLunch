@@ -32,17 +32,17 @@ import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
+import com.example.android.goforlunch.adapters.RVAdapterList;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
-import com.example.android.goforlunch.viewmodel.MainViewModel;
 import com.example.android.goforlunch.utils.Anim;
+import com.example.android.goforlunch.utils.ItemClickSupport;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.adapters.RVAdapterList;
-import com.example.android.goforlunch.constants.Repo;
-import com.example.android.goforlunch.utils.ItemClickSupport;
+import com.example.android.goforlunch.viewmodel.MainViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -490,8 +490,8 @@ public class FragmentRestaurantList extends Fragment {
                             Log.d(TAG, "onNext: typeAsInt = " + Utils.getTypeAsStringAndReturnTypeAsInt(type));
 
                             /* We try to convert the type inputted to a type available in english so we can
-                            * check if the type inputted allows as to find restaurants by type
-                            * */
+                             * check if the type inputted allows as to find restaurants by type
+                             * */
                             String typeInEnglish = Utils.getTypeInSpecificLanguage(getActivity(), type);
                             //Returns "" if there is no type or type is null
 
@@ -500,19 +500,19 @@ public class FragmentRestaurantList extends Fragment {
                                 Log.d(TAG, "onNext: getting restaurant by type");
 
                                 /* If the type is among all the available types,
-                                * we get an integer using the type inputted representing a certain group.
-                                * */
+                                 * we get an integer using the type inputted representing a certain group.
+                                 * */
                                 int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(type);
 
                                 /* We use that type (int) to get all the restaurants according to that specific type
-                                * */
+                                 * */
                                 getRestaurantsByTypeAndDisplayThemInRecyclerView(typeAsInt);
 
                             } else {
                                 Log.d(TAG, "onNext: getting all restaurants");
 
                                 /* If the type is not among the available types, we load all the restaurants.
-                                * */
+                                 * */
                                 getAllRestaurantsAndDisplayThemInRecyclerView();
                             }
 

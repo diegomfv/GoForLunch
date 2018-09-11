@@ -8,6 +8,9 @@ import android.util.Log;
 
 /**
  * Created by Diego Fajardo on 19/05/2018.
+ * Room database point of entry
+ * version -> should be updated when we updateItem our database
+ * exportSchema -> writes the database info to a folder
  */
 
 /** Room database point of entry

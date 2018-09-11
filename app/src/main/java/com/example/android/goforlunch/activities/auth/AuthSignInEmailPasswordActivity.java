@@ -21,10 +21,10 @@ import android.widget.TextView;
 
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
-import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -120,9 +120,6 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
         tvForgotPassword.setOnClickListener(tvForgotPasswordOnClickListener);
         buttonSignUp.setOnClickListener(buttonSignUpOnClickListener);
 
-        inputEmail.setText("diego.trial@hotmail.com");
-        inputPassword.setText("123456");
-
     }
 
     @Override
@@ -155,8 +152,9 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
     }
 
-    /** Callback: listening to broadcast receiver
-     * */
+    /**
+     * Callback: listening to broadcast receiver
+     */
     @Override
     public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
@@ -193,10 +191,11 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method that connects a broadcastReceiver to the activity.
+    /**
+     * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiver () {
+     */
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -205,9 +204,10 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the activity.
-     * */
-    private void disconnectBroadcastReceiver () {
+    /**
+     * Method that disconnects the broadcastReceiver from the activity.
+     */
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
@@ -280,12 +280,12 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                     ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastEnterEmail));
                     return;
 
-                } else  if (TextUtils.isEmpty(password)) {
-                    ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this,  getResources().getString(R.string.commonToastEnterPassword));
+                } else if (TextUtils.isEmpty(password)) {
+                    ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastEnterPassword));
                     return;
 
-                } else  if (password.length() < 6) {
-                    Log.d(TAG, "onClick: password too short, only " + password.length() + " characters" );
+                } else if (password.length() < 6) {
+                    Log.d(TAG, "onClick: password too short, only " + password.length() + " characters");
                     ToastHelper.toastShort(AuthSignInEmailPasswordActivity.this, getResources().getString(R.string.commonToastPasswordTooShort));
                     return;
 
@@ -295,7 +295,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
                 //authenticate user
                 FirebaseAuth auth = FirebaseAuth.getInstance();
-                auth.signInWithEmailAndPassword(email,password)
+                auth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(AuthSignInEmailPasswordActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -321,10 +321,10 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
 
                                 } else {
                                     /* Sign in was successful
-                                    * */
+                                     * */
 
                                     /* We get the user notifications state in firebase to update Shared Preferences
-                                    */
+                                     */
                                     dbRefUsers = fireDb.getReference(Repo.FirebaseReference.USERS);
                                     dbRefUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
@@ -352,8 +352,8 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                                             .equals("false")) {
 
                                                         /* If notifications user information is "" or "false",
-                                                        * we set the notifications in shared Preferences as false
-                                                        * */
+                                                         * we set the notifications in shared Preferences as false
+                                                         * */
                                                         Utils.updateSharedPreferences(
                                                                 sharedPref,
                                                                 getResources().getString(R.string.pref_key_notifications),
@@ -375,7 +375,7 @@ public class AuthSignInEmailPasswordActivity extends AppCompatActivity implement
                                             /* We launch Main Activity
                                              * */
                                             Intent intent = new Intent(AuthSignInEmailPasswordActivity.this, MainActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                             startActivity(intent);
                                             finish();
 

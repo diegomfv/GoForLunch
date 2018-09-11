@@ -4,15 +4,14 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import android.graphics.Bitmap;
 
 /**
  * Created by Diego Fajardo on 19/05/2018.
  */
-@Entity (tableName = "restaurant")
+@Entity(tableName = "restaurant")
 public class RestaurantEntry {
 
-    @PrimaryKey (autoGenerate = true) // Annotate the id as PrimaryKey. Set autoGenerate to true.
+    @PrimaryKey(autoGenerate = true) // Annotate the id as PrimaryKey. Set autoGenerate to true.
     private int id;
     private String placeId;
     private String name;
@@ -30,9 +29,11 @@ public class RestaurantEntry {
     private String latitude;
     private String longitude;
 
-    /** Used for when inserting info in the table
-     * */
-    @Ignore  // Use the Ignore annotation so Room knows that it has to use the other constructor instead
+    /**
+     * Used for when inserting info in the table
+     */
+    @Ignore
+    // Use the Ignore annotation so Room knows that it has to use the other constructor instead
     public RestaurantEntry(String placeId, String name, int type, String address, String openUntil, String distance, String rating,
                            String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.placeId = placeId;
@@ -49,8 +50,9 @@ public class RestaurantEntry {
         this.longitude = longitude;
     }
 
-    /** Used for when reading from the table
-     * */
+    /**
+     * Used for when reading from the table
+     */
     public RestaurantEntry(int id, String placeId, String name, int type, String address, String openUntil, String distance, String rating,
                            String imageUrl, String phone, String websiteUrl, String latitude, String longitude) {
         this.id = id;
@@ -136,7 +138,9 @@ public class RestaurantEntry {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public String getPhone() {
         return phone;

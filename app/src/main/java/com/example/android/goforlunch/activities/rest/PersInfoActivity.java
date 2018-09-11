@@ -34,11 +34,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -233,7 +233,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     @Override
     public void update(Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
-        Log.w(TAG, "update: triggered when there is an internet connectivity change" );
+        Log.w(TAG, "update: triggered when there is an internet connectivity change");
 
         if ((int) internetAvailableUpdate == 0) {
             Log.d(TAG, "update: Internet not Available");
@@ -373,7 +373,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
                     && inputLastName != null
                     && inputEmail != null
                     && inputGroup != null
-                    && inputPassword !=null
+                    && inputPassword != null
                     && ivUserImage != null) {
 
                 /* We fill the widgets with the user's info
@@ -396,10 +396,11 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
         }
     };
 
-    /** Method that fills temporary bitmap
+    /**
+     * Method that fills temporary bitmap
      * with user information in Firebase Storage
-     * */
-    private void fillTemporaryBitmap () {
+     */
+    private void fillTemporaryBitmap() {
         Log.d(TAG, "fillTemporaryBitmap: called!");
         stRefUserImage = stRefImageDir.child(userEmail).child("image");
         final long ONE_MEGABYTE = 1024 * 1024;
@@ -427,7 +428,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
     /**
      * Method that loads the user image into the imageView
      */
-    private void loadUserImage () {
+    private void loadUserImage() {
         Log.d(TAG, "loadUserImage: called!");
 
         if (temporaryBitmap != null) {
@@ -695,7 +696,7 @@ public class PersInfoActivity extends AppCompatActivity implements Observer {
 
         if (bitmap == null) {
             /* Means the user did not change the profile image, therefore we save nothing
-            * */
+             * */
             Log.w(TAG, "We start an activity with intent and call finish()");
             startActivity(new Intent(PersInfoActivity.this, MainActivity.class));
             finish();

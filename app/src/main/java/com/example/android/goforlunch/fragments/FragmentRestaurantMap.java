@@ -1,7 +1,6 @@
 package com.example.android.goforlunch.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -32,17 +31,17 @@ import android.widget.RelativeLayout;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
 import com.example.android.goforlunch.activities.rest.RestaurantActivity;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.data.AppDatabase;
 import com.example.android.goforlunch.data.RestaurantEntry;
+import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
 import com.example.android.goforlunch.receivers.DataUpdateReceiver;
-import com.example.android.goforlunch.viewmodel.MainViewModel;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsConfiguration;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.network.models.placebynearby.LatLngForRetrofit;
-import com.example.android.goforlunch.constants.Repo;
+import com.example.android.goforlunch.viewmodel.MainViewModel;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;

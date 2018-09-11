@@ -19,8 +19,9 @@ public interface Repo {
 
     String CONNECTIVITY_CHANGE_STATUS = "android.net.conn.CONNECTIVITY_CHANGE";
 
-    /** This array stores the different types of restaurants available for filtering
-     * */
+    /**
+     * This array stores the different types of restaurants available for filtering
+     */
     String[] RESTAURANT_TYPES = {
             "All", //0
             "American", //1
@@ -41,7 +42,7 @@ public interface Repo {
     String FLAG_SPECIFY_FRAGMENT = "flagToSpecifyFragment";
 
     /* Used to communicate between the fetching service and map fragment
-    * */
+     * */
     String INTENT_ACTION_UPDATE_MAP = "com.example.android.goforlunch.INTENT_ACTION_UPLOAD";
 
     interface Keys {

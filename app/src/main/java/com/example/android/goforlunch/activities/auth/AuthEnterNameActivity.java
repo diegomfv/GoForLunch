@@ -32,11 +32,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
 import com.example.android.goforlunch.activities.rest.MainActivity;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.constants.Repo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -322,7 +322,7 @@ public class AuthEnterNameActivity extends AppCompatActivity implements Observer
                     glide.load(profileBitmap).into(iv_userImage);
 
                     /* We store the Uri value.
-                    * We will use it if the user saves changes
+                     * We will use it if the user saves changes
                      * */
                     userProfilePictureUri = imageUri;
 

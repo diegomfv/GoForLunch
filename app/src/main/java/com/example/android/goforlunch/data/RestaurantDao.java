@@ -11,10 +11,18 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 import io.reactivex.Maybe;
-import io.reactivex.MaybeObserver;
 
 /**
  * Created by Diego Fajardo on 19/05/2018.
+ * Data Access Object
+ * LiveData runs, by default, outside of the main thread.
+ * We use LiveDate to observe changes in the Database; for other
+ * operations such as insert, updateItem or delete we do not need
+ * to observe changes in the database. For those operations,
+ * we will not use LiveData and therefore we will keep using the
+ * executors.
+ * With LiveDate, we will get notified when there are changes
+ * in the database.
  */
 
 /** Data Access Object
@@ -72,7 +80,7 @@ public interface RestaurantDao {
     List<RestaurantEntry> getAllRestaurantsNotLiveDataOrderPlaceId();
 
     @Query("SELECT * FROM restaurant WHERE placeId = :placeId")
-    LiveData<RestaurantEntry> getRestaurantByPlaceId (String placeId);
+    LiveData<RestaurantEntry> getRestaurantByPlaceId(String placeId);
 
     @Query("SELECT * FROM restaurant ORDER BY distance")
     Maybe<List<RestaurantEntry>> getAllRestaurantsRxJava();
@@ -86,17 +94,18 @@ public interface RestaurantDao {
     // -------------------
 
     @Insert
-    long insertRestaurant (RestaurantEntry restaurantEntry);
+    long insertRestaurant(RestaurantEntry restaurantEntry);
 
     // -------------------
     // UPDATE
     // -------------------
 
-    @Update (onConflict = OnConflictStrategy.REPLACE) //Replaces the element in case of conflict
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+        //Replaces the element in case of conflict
     int updateRestaurantGeneralInfo(RestaurantEntry restaurantEntry);
 
     @Query("UPDATE restaurant SET type = :type WHERE name = :name")
-    int updateRestaurantType (String name, int type);
+    int updateRestaurantType(String name, int type);
 
     @Query("UPDATE restaurant SET phone = :phone, website_url = :websiteUrl, open_until = :openUntil WHERE placeId = :placeId")
     int updateRestaurantGeneralInfo(String placeId, String phone, String websiteUrl, String openUntil);
@@ -108,19 +117,19 @@ public interface RestaurantDao {
     int updateRestaurantDistance(String place_id, String distanceValue);
 
     @Query("UPDATE restaurant SET image_url = :imageUrl WHERE placeId = :place_id")
-    int updateRestaurantImageUrl (String place_id, String imageUrl);
+    int updateRestaurantImageUrl(String place_id, String imageUrl);
 
     // -------------------
     // DELETE
     // -------------------
 
     @Delete
-    void deleteRestaurant (RestaurantEntry restaurantEntry);
+    void deleteRestaurant(RestaurantEntry restaurantEntry);
 
     @Delete
-    int deleteAll (RestaurantEntry[] restaurantEntries);
+    int deleteAll(RestaurantEntry[] restaurantEntries);
 
     @Query("DELETE FROM restaurant")
     int deleteAllRowsInRestaurantTable();
-    
+
 }

@@ -16,10 +16,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.data.RestaurantEntry;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.Utils;
-import com.example.android.goforlunch.constants.Repo;
 import com.snatik.storage.Storage;
 
 import java.io.File;

@@ -33,14 +33,14 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.example.android.goforlunch.R;
+import com.example.android.goforlunch.adapters.RVAdapterRestaurant;
+import com.example.android.goforlunch.constants.Repo;
 import com.example.android.goforlunch.network.models.pojo.User;
 import com.example.android.goforlunch.receivers.InternetConnectionReceiver;
 import com.example.android.goforlunch.utils.Anim;
 import com.example.android.goforlunch.utils.ToastHelper;
 import com.example.android.goforlunch.utils.Utils;
 import com.example.android.goforlunch.utils.UtilsFirebase;
-import com.example.android.goforlunch.adapters.RVAdapterRestaurant;
-import com.example.android.goforlunch.constants.Repo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -60,7 +60,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -193,7 +192,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         listOfCoworkers = new ArrayList<>();
 
         /* Listeners
-        * */
+         * */
         fab.setOnClickListener(mFabListener);
         navigationView.setOnNavigationItemSelectedListener(bottomViewListener);
 
@@ -240,8 +239,9 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
     }
 
 
-    /** Callback: listening to broadcast receiver
-     * */
+    /**
+     * Callback: listening to broadcast receiver
+     */
     @Override
     public void update(java.util.Observable o, Object internetAvailableUpdate) {
         Log.d(TAG, "update: called!");
@@ -383,7 +383,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                                 ToastHelper.toastShort(context, getResources().getString(R.string.restaurantCallingTo) + " " + phoneString);
                             }
 
-                        } break;
+                        }
+                        break;
 
                         case R.id.restaurant_view_like_id: {
                             Log.d(TAG, "onNavigationItemSelected: likeButton CLICKED!");
@@ -391,7 +392,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                             ToastHelper.toastShort(context, likeString);
 
 
-                        } break;
+                        }
+                        break;
 
                         case R.id.restaurant_view_website_id: {
                             Log.d(TAG, "onNavigationItemSelected: websiteButton CLICKED!");
@@ -412,7 +414,8 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
                             }
 
-                        } break;
+                        }
+                        break;
 
                     }
 
@@ -470,10 +473,11 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
      * CONFIGURATION ***************
      ******************************/
 
-    /** Method that sets the directory variables and creates the directory that will
+    /**
+     * Method that sets the directory variables and creates the directory that will
      * store images if needed
-     * */
-    private void configureInternalStorage (Context context) {
+     */
+    private void configureInternalStorage(Context context) {
         Log.d(TAG, "configureInternalStorage: ");
 
         //If we don't have storage permissions, we don't continue
@@ -497,8 +501,9 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    /** Method to configure strings
-     * */
+    /**
+     * Method to configure strings
+     */
     private void configureStrings() {
         Log.d(TAG, "configureStrings: called!");
 
@@ -511,9 +516,10 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method to configure the recycler view
-     * */
-    private void configureRecyclerView () {
+    /**
+     * Method to configure the recycler view
+     */
+    private void configureRecyclerView() {
 
         recyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(context);
@@ -521,10 +527,11 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method that connects a broadcastReceiver to the activity.
+    /**
+     * Method that connects a broadcastReceiver to the activity.
      * It allows to notify the user about the internet state
-     * */
-    private void connectBroadcastReceiver () {
+     */
+    private void connectBroadcastReceiver() {
         Log.d(TAG, "connectBroadcastReceiver: called!");
 
         receiver = new InternetConnectionReceiver();
@@ -533,9 +540,10 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method that disconnects the broadcastReceiver from the activity.
-     * */
-    private void disconnectBroadcastReceiver () {
+    /**
+     * Method that disconnects the broadcastReceiver from the activity.
+     */
+    private void disconnectBroadcastReceiver() {
         Log.d(TAG, "disconnectBroadcastReceiver: called!");
 
         if (receiver != null) {
@@ -555,9 +563,10 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
      * RX JAVA
      *****************************************************/
 
-    /** Method used to set the Fab button state
-     * */
-    private boolean setFabButtonState (String intentRestaurantName) {
+    /**
+     * Method used to set the Fab button state
+     */
+    private boolean setFabButtonState(String intentRestaurantName) {
 
         if (userRestaurant.equals(intentRestaurantName)) {
             fabShowsCheck = true;
@@ -576,8 +585,9 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
 
     }
 
-    /** Method used to fill the UI using the intent
-     * */
+    /**
+     * Method used to fill the UI using the intent
+     */
     private boolean fillUIUsingIntent(Intent intent) {
         Log.d(TAG, "fillUIUsingIntent: called!");
 
@@ -635,7 +645,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         webUrlString = intent.getStringExtra(Repo.SentIntent.WEBSITE_URL);
 
         /* We adapt the web url to be able to be launched with the intent
-        * */
+         * */
         transformWebUrlString();
 
         if (accessToInternalStorageGranted) {
@@ -649,9 +659,10 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         return true;
     }
 
-    /** Adds http:// to the beginning of the web url if it
+    /**
+     * Adds http:// to the beginning of the web url if it
      * did not start like that
-     * */
+     */
     private void transformWebUrlString() {
         Log.d(TAG, "transformWebUrlString: called!");
 
@@ -660,11 +671,12 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    /** Method that tries to load an image using the storage.
+    /**
+     * Method that tries to load an image using the storage.
      * If there is no file, it tries to load
      * the image with the url
-     * */
-    private void loadImage (Intent intent) {
+     */
+    private void loadImage(Intent intent) {
         Log.d(TAG, "loadImage: called!");
 
         //if file exists in the directory -> load with storage
@@ -682,11 +694,12 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    /** Method that tries to load an image with a url.
+    /**
+     * Method that tries to load an image with a url.
      * If it is null or equal to "", it loads
      * an standard picture
-     * */
-    private void loadImageWithUrl (Intent intent) {
+     */
+    private void loadImageWithUrl(Intent intent) {
         Log.d(TAG, "loadImageWithUrl: called!");
 
         Log.i(TAG, "loadImageWithUrl: " + intent.getStringExtra(Repo.SentIntent.IMAGE_URL));
@@ -709,17 +722,19 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    /** Used to read an image from the internal storage and convert it to bitmap so that
+    /**
+     * Used to read an image from the internal storage and convert it to bitmap so that
      * it the image can be stored in a RestaurantEntry and be displayed later using glide
      * in the recyclerView
-     * */
-    private Observable<byte[]> getObservableImageFromInternalStorage (String filePath) {
+     */
+    private Observable<byte[]> getObservableImageFromInternalStorage(String filePath) {
         return Observable.just(storage.readFile(filePath));
     }
 
-    /** Loads an image using glide. The observable emits the image in a background thread
+    /**
+     * Loads an image using glide. The observable emits the image in a background thread
      * and the image is loaded using glide in the main thread
-     * */
+     */
     @SuppressLint("CheckResult")
     public void getAndDisplayImageFromInternalStorage(String filePath) {
         Log.d(TAG, "loadImageFromInternalStorage: called!");
@@ -732,7 +747,7 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                     public void onNext(byte[] bytes) {
                         Log.d(TAG, "onNext: ");
 
-                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
+                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         glide.load(bm).into(ivRestPicture);
 
                     }
@@ -751,10 +766,11 @@ public class RestaurantActivity extends AppCompatActivity implements Observer {
                 });
     }
 
-    /** Method for showing the main content. We cannot use Utils because
+    /**
+     * Method for showing the main content. We cannot use Utils because
      * the mainContent Layout is not a Linear Layout
-     * */
-    private void showMainContent (LinearLayout progressBarContent, CoordinatorLayout mainContent) {
+     */
+    private void showMainContent(LinearLayout progressBarContent, CoordinatorLayout mainContent) {
         Log.d(TAG, "showMainContent: called!");
 
         progressBarContent.setVisibility(View.GONE);
