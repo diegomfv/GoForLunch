@@ -473,24 +473,26 @@ public class FragmentRestaurantMap extends Fragment {
     public boolean isGooglePlayServicesOK() {
         Log.d(TAG, "isGooglePlayServicesOK: checking google services version");
 
-        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity());
+        if (getActivity() != null) {
+            int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity());
 
-        if (available == ConnectionResult.SUCCESS) {
-            //Everything is fine and the user can make map requests
-            Log.d(TAG, "isGooglePlayServicesOK: Google Play Services is working");
-            return true;
+            if (available == ConnectionResult.SUCCESS) {
+                //Everything is fine and the user can make map requests
+                Log.d(TAG, "isGooglePlayServicesOK: Google Play Services is working");
+                return true;
 
-        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
-            //There is an error but we can resolve it
-            Log.d(TAG, "isGooglePlayServicesOK: an error occurred but we can fix it");
-            Dialog dialog = GoogleApiAvailability.getInstance()
-                    .getErrorDialog(getActivity(), available, ERROR_DIALOG_REQUEST);
-            dialog.show();
+            } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
+                //There is an error but we can resolve it
+                Log.d(TAG, "isGooglePlayServicesOK: an error occurred but we can fix it");
+                Dialog dialog = GoogleApiAvailability.getInstance()
+                        .getErrorDialog(getActivity(), available, ERROR_DIALOG_REQUEST);
+                dialog.show();
 
-        } else {
-            Log.d(TAG, "isGooglePlayServicesOK: an error occurred; you cannot make map requests");
-            ToastHelper.toastLong(getActivity(), getActivity().getResources().getString(R.string.cantMakeMapRequests));
+            } else {
+                Log.d(TAG, "isGooglePlayServicesOK: an error occurred; you cannot make map requests");
+                ToastHelper.toastLong(getActivity(), getActivity().getResources().getString(R.string.cantMakeMapRequests));
 
+            }
         }
         return false;
 
@@ -591,7 +593,7 @@ public class FragmentRestaurantMap extends Fragment {
                 @Override
                 public void onComplete(@NonNull Task task) {
 
-                    if (task.isSuccessful() && task.getResult() != null) {
+                    if (task.isSuccessful() && task.getResult() != null && getActivity() != null) {
                         //&& task.getResult() != null -- allows you to avoid crash if the app
                         // did not get the location from the device (= currentLocation = null)
                         Log.d(TAG, "onComplete: found location!");
@@ -882,26 +884,29 @@ public class FragmentRestaurantMap extends Fragment {
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
 
-            listOfVisitedRestaurantsByTheUsersGroup = UtilsFirebase.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
+            if (getActivity() != null) {
 
-            /* We updateItem the map's pins
-             * */
-            if (mMap != null) {
-                Log.d(TAG, "updateMapWithPins: the map is not null");
+                listOfVisitedRestaurantsByTheUsersGroup = UtilsFirebase.fillListWithGroupRestaurantsUsingDataSnapshot(dataSnapshot);
 
-                String typeInEnglish = Utils.getTypeInSpecificLanguage(getActivity(), autocompleteTextView.getText().toString().trim());
-                //Returns "" if there is no type or type is null
+                /* We updateItem the map's pins
+                 * */
+                if (mMap != null && autocompleteTextView != null) {
+                    Log.d(TAG, "updateMapWithPins: the map is not null");
 
-                int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(typeInEnglish);
+                    String typeInEnglish = Utils.getTypeInSpecificLanguage(getActivity(), autocompleteTextView.getText().toString().trim());
+                    //Returns "" if there is no type or type is null
 
-                getRestaurantsByType(typeAsInt)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(maybeObserverUpdateUI());
+                    int typeAsInt = Utils.getTypeAsStringAndReturnTypeAsInt(typeInEnglish);
 
-            } else {
-                Log.d(TAG, "updateMapWithPins: the map IS NULL!");
-                ToastHelper.toastShort(getActivity(), "The map is not ready...");
+                    getRestaurantsByType(typeAsInt)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeWith(maybeObserverUpdateUI());
+
+                } else {
+                    Log.d(TAG, "updateMapWithPins: the map IS NULL!");
+                    ToastHelper.toastShort(getActivity(), "The map is not ready...");
+                }
             }
         }
 
