@@ -754,6 +754,5 @@ public class FetchingIntentService extends IntentService {
             explicit.setComponent(cn);
             ctxt.sendBroadcast(explicit);
         }
-
     }
 }

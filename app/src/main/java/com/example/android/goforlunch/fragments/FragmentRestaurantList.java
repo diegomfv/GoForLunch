@@ -274,8 +274,9 @@ public class FragmentRestaurantList extends Fragment {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: called!");
-
-
+        if (dbRefUsersGetListOfRestaurantsByCoworkers != null) {
+            dbRefUsersGetListOfRestaurantsByCoworkers.removeEventListener(valueEventListenerGetListOfRestaurantsByCoworkers);
+        }
     }
 
     @Override
